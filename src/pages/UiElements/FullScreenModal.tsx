@@ -1,11 +1,12 @@
 import React, { PropsWithChildren, ReactNode } from 'react'
 
 interface FullScreenModalProps {
+    header:string;
     body?: ReactNode;
     onCloseModal?: () => void
 }
 
-const FullScreenModal: React.FC<PropsWithChildren<FullScreenModalProps>> = ({ body, onCloseModal }) => {
+const FullScreenModal: React.FC<PropsWithChildren<FullScreenModalProps>> = ({ header,body, onCloseModal }) => {
     return (
         <>
             <div className="fixed left-0 top-0 z-99999 flex h-screen w-full flex-col items-center justify-between overflow-y-auto overflow-x-hidden bg-white p-6 dark:bg-gray-900 lg:p-10">

@@ -5,6 +5,9 @@ import ActionElement from '../UiElements/ActionElement';
 import { Add } from '../../icons';
 import Button from '../../components/ui/button/Button';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
+import DangerModal from '../UiElements/DangerModal';
+import Modals from '../UiElements/Modals';
+import AddTimeZoneForm from '../../components/form/form-elements/AddTimeZoneForm';
 
 // Define Global Variable
 const server = import.meta.env.VITE_SERVER_IP;
@@ -46,8 +49,16 @@ const TimeZone = () => {
         setIsAddModalOpen(false);
         toggleRefresh();
     };
-    const handleClickAddCpModal = () => {
-        setIsAddModalOpen(true);
+
+    const handleClick = (e:React.MouseEvent<HTMLButtonElement>) => {
+        console.log(e.currentTarget.name);
+        switch(e.currentTarget.name){
+            case "add":
+                setIsAddModalOpen(true);
+                break;
+                default:
+                    break;
+        }
     }
 
     {/* handle Table Action */ }
@@ -140,16 +151,17 @@ const TimeZone = () => {
     }
     return (
         <>
-            {/* {isRemoveModal && <DangerModal header='Remove Control Point' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
-            {isAddModalOpen && <Modals header='Add Control Point' body={<AddCpForm onSubmitHandle={closeModalToggle} />} closeToggle={closeModalToggle} />} */}
+            {isRemoveModal && <DangerModal header='Remove Time Zone' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {isAddModalOpen && <Modals isWide={false} header='Add Time Zone' body={<AddTimeZoneForm onSubmitHandle={closeModalToggle} />} closeToggle={closeModalToggle} />}
             <PageBreadcrumb pageTitle="Time Zone" />
             <div className="space-y-6">
                 <div className="flex gap-4">
                     <Button
-                        // onClick={handleClickAddCpModal}
+                        name='add'
                         size="sm"
                         variant="primary"
                         startIcon={<Add className="size-5" />}
+                        onClickWithEvent={handleClick}
                     >
                         Create
                     </Button>

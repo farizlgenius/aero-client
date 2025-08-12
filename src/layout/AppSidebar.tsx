@@ -8,7 +8,6 @@ import {
   ChevronDownIcon,
   GridIcon,
   HorizontaLDots,
-  Host,
   ListIcon,
   Module,
   PageIcon,
@@ -17,11 +16,12 @@ import {
   TableIcon,
   UserCircleIcon,
   Event,
-  Control,
   Door,
   GroupIcon,
   Setting,
-  Report
+  Report,
+  Card,
+  Area
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -54,13 +54,17 @@ const navItems: NavItem[] = [
     name: "Doors",
     path: "/door",
   },  {
-    icon: <Door />,
+    icon: <Card />,
     name: "Credential",
     path: "/card",
   }, {
     icon: <GroupIcon />,
     name: "Access Group",
     path: "/group",
+  },{
+    icon: <Area />,
+    name: "Access Area",
+    path: "/area",
   },
   {
     icon: <CalenderIcon />,

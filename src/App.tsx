@@ -27,32 +27,92 @@ import Hardware from "./pages/Device/Hardware";
 import PopupExample from "./pages/UiElements/PopupExample";
 import AccessGroup from "./pages/AccessGroup/AccessGroup";
 import Door from "./pages/Door/Door";
+import Credential from "./pages/Credential/Credential";
 import TimeZone from "./pages/TimeZone/TimeZone";
-import FullScreenModal from "./pages/UiElements/FullScreenModal";
-import AddDoorForm from "./components/form/form-elements/AddDoorForm";
-import { Modal } from "./components/ui/modal";
-import Modals from "./pages/UiElements/Modals";
+import CardFormat from "./pages/CardFormat/CardFormat";
+import Alert from "./components/ui/alert/Alert";
+import { useEffect, useState } from "react";
+import * as signalR from "@microsoft/signalr";
 
 export default function App() {
+  const [isShow,setIsShow] = useState<boolean>(false);
+  const [isSuccess,setIsSuccess] = useState<boolean>(false);
+  let tag = "";
+  const [message,setMessage] = useState<string>("");
+  const handleClick = () => {
+    setIsShow(false);
+    setMessage("")
+  }
+  useEffect(() => {
+     const connection = new signalR.HubConnectionBuilder()
+                .withUrl("http://localhost:5031/cmndHub")
+                .withAutomaticReconnect()
+                .build();
+    
+            connection.start().then(() => {
+                console.log("Connected to SignalR event hub");
+            });
+            connection.on(
+                "CmndStatus",
+                (CmndStatus:number,TagNumber:number,NakReason:string,NakDescriptionCode:number) => {
+                  console.log(CmndStatus)
+                  console.log(TagNumber)
+                  console.log(NakReason)
+                  console.log(NakDescriptionCode)
+
+                  if(CmndStatus == 1){
+                    setIsSuccess(true);
+                  }else{
+                    setIsSuccess(false);
+                  }
+                  tag = TagNumber.toString();
+                  setIsShow(true);
+                  setMessage("tag ("+tag+")"+ " " + message);
+
+                }
+            );
+    
+            return () => {
+                connection.stop();
+            };
+  },[])
   return (
     <>
+
       <Router>
+        {isShow && 
+          <div onClick={handleClick} className="transition-opacity duration-500 opacity-100 hover:opacity-0">
+            <Alert
+              isFixed={true}
+              variant={isSuccess ? "success" : "error"}
+              title={isSuccess ? "Command Success" : "Command Error"}
+              message={message}
+              showLink={false}
+            />
+
+          </div>
+        }
+
+
         <ScrollToTop />
+
+
         <Routes>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
             <Route index path="/" element={<Home />} />
             {/* ACS */}
-            <Route path="/hardware" element={<Hardware/>}/>
-            <Route path="/module" element={<Module/>}/>
-            <Route path="/event" element={<Event/>}/>
-            <Route path="/control" element={<Control/>}/>
-            <Route path="/monitor" element={<Monitor/>}/>
-            <Route path="/popup" element={<PopupExample />}/>
-            <Route path="/door" element={<Door />}/>
-            <Route path="/group" element={<AccessGroup/>}/>
-            <Route path="/timezone" element={<TimeZone/>}/>
-            <Route path="/card" element={<Modals body={<AddDoorForm />}/>}/>
+            <Route path="/hardware" element={<Hardware />} />
+            <Route path="/module" element={<Module />} />
+            <Route path="/event" element={<Event />} />
+            <Route path="/control" element={<Control />} />
+            <Route path="/monitor" element={<Monitor />} />
+            <Route path="/popup" element={<PopupExample />} />
+            <Route path="/door" element={<Door />} />
+            <Route path="/group" element={<AccessGroup />} />
+            <Route path="/timezone" element={<TimeZone />} />
+            <Route path="/card" element={<Credential />} />
+            <Route path="/card-format" element={<CardFormat />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />

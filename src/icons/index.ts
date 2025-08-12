@@ -55,6 +55,7 @@ import { ReactComponent as MoreDotIcon } from "./moredot.svg?react";
 import { ReactComponent as AlertHexaIcon } from "./alert-hexa.svg?react";
 import { ReactComponent as ErrorHexaIcon } from "./info-hexa.svg?react";
 
+
 // ACS
 import { ReactComponent as Host } from "./host.svg?react";
 import {ReactComponent as Scan} from "./scan.svg?react";
@@ -66,6 +67,13 @@ import {ReactComponent as Add} from "./add.svg?react";
 import {ReactComponent as Door} from "./door.svg?react";
 import {ReactComponent as Setting} from "./setting.svg?react";
 import {ReactComponent as Report} from "./report.svg?react";
+import {ReactComponent as Card} from "./card.svg?react";
+import {ReactComponent as Locked} from "./locked.svg?react";
+import {ReactComponent as Unlock} from "./unlock.svg?react";
+import {ReactComponent as Moment} from "./moment.svg?react";
+import {ReactComponent as Area} from "./area.svg?react";
+import {ReactComponent as Disable} from "./disable.svg?react";
+import {ReactComponent as Spiner} from "./spiner.svg?react";
 
 export {
   ErrorHexaIcon,
@@ -134,5 +142,12 @@ export {
   Add,
   Door,
   Setting,
-  Report
+  Report,
+  Card,
+  Locked,
+  Unlock,
+  Moment,
+  Area,
+  Disable,
+  Spiner
 };

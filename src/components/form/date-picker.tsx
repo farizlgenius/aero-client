@@ -24,12 +24,24 @@ export default function DatePicker({
   placeholder,
 }: PropsType) {
   useEffect(() => {
+    // const flatPickr = flatpickr(`#${id}`, {
+    //   enableTime:true,
+    //   mode: mode || "single",
+    //   static: true,
+    //   monthSelectorType: "static",
+    //   dateFormat: "Y-m-d",
+    //   defaultDate,
+    //   onChange,
+    // });
+
     const flatPickr = flatpickr(`#${id}`, {
-      mode: mode || "single",
-      static: true,
-      monthSelectorType: "static",
-      dateFormat: "Y-m-d",
-      defaultDate,
+      enableTime: true,         // enable time selection
+      time_24hr: true,          // 24h format (false -> AM/PM)
+      enableSeconds: false,     // set true if you need seconds
+      minuteIncrement: 5,       // minute steps
+      altInput: true,           // show a human-friendly input
+      altFormat: "F j, Y H:i",  // human display format
+      dateFormat: "Y-m-d H:i",  // actual value format (but you usually read the Date object)
       onChange,
     });
 
@@ -39,6 +51,10 @@ export default function DatePicker({
       }
     };
   }, [mode, onChange, id, defaultDate]);
+
+
+  // const localIsoWithOffset = toLocalISOWithOffset(selectedDates[0]);
+  // console.log(localIsoWithOffset); // e.g. "2025-08-10T14:35:00+07:00"
 
   return (
     <div>

@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 
 interface AlertProps {
+  isFixed?:boolean
   variant: "success" | "error" | "warning" | "info"; // Alert type
   title: string; // Title of the alert
   message: string; // Message of the alert
@@ -10,6 +11,7 @@ interface AlertProps {
 }
 
 const Alert: React.FC<AlertProps> = ({
+  isFixed = false,
   variant,
   title,
   message,
@@ -21,12 +23,12 @@ const Alert: React.FC<AlertProps> = ({
   const variantClasses = {
     success: {
       container:
-        "border-success-500 bg-success-50 dark:border-success-500/30 dark:bg-success-500/15",
+        "border-success-500 bg-success-50 dark:border-success-500/50 dark:bg-success-600/50",
       icon: "text-success-500",
     },
     error: {
       container:
-        "border-error-500 bg-error-50 dark:border-error-500/30 dark:bg-error-500/15",
+        "border-error-500 bg-error-50 dark:border-error-500/50 dark:bg-error-600/50",
       icon: "text-error-500",
     },
     warning: {
@@ -113,7 +115,7 @@ const Alert: React.FC<AlertProps> = ({
 
   return (
     <div
-      className={`rounded-xl border p-4 ${variantClasses[variant].container}`}
+      className={`${isFixed ? "fixed w-100 z-200 top-[10%] right-[70%] left-[40%]" : ""} rounded-xl border p-4 ${variantClasses[variant].container}`}
     >
       <div className="flex items-start gap-3">
         <div className={`-mt-0.5 ${variantClasses[variant].icon}`}>

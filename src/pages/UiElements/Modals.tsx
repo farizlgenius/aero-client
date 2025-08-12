@@ -15,7 +15,7 @@ interface ModalContent {
 
 
 const Modals:React.FC<PropsWithChildren<ModalContent>> = ({header,body,closeToggle,isWide=false}) => {
-    const notWide = "relative h-full w-full max-w-[584px] rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10"
+    const notWide = "relative w-full max-w-[584px] rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10"
     const wide = "relative h-full w-full max-w-[1000px] rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10";
     return (
         <>

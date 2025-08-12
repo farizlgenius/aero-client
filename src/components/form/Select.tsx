@@ -1,17 +1,19 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 interface Option {
-  value: string;
+  value: string | number;
   label: string;
 }
+
 
 interface SelectProps {
   name:string;
   options: Option[];
   placeholder?: string;
-  onChange: (value: string) => void;
+  onChange?: (value: string) => void;
+  onChangeWithEvent?:(value:string,e:React.ChangeEvent<HTMLSelectElement>) => void
   className?: string;
-  defaultValue?: string;
+  defaultValue?: string | number;
 }
 
 const Select: React.FC<SelectProps> = ({
@@ -19,16 +21,23 @@ const Select: React.FC<SelectProps> = ({
   options,
   placeholder = "Select an option",
   onChange,
+  onChangeWithEvent,
   className = "",
   defaultValue = "",
 }) => {
   // Manage the selected value
-  const [selectedValue, setSelectedValue] = useState<string>(defaultValue);
+  const [selectedValue, setSelectedValue] = useState<string|number>(defaultValue);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     setSelectedValue(value);
-    onChange(value); // Trigger parent handler
+    if(onChange != undefined ){
+      onChange(value); 
+    }
+    if(onChangeWithEvent != undefined){
+      onChangeWithEvent(value,e); // Trigger parent handler
+    }
+    
   };
 
   return (
@@ -52,8 +61,9 @@ const Select: React.FC<SelectProps> = ({
       </option>
       {/* Map over options */}
       {options.map((option) => (
+        
         <option
-          key={option.value}
+          key={option.value + crypto.randomUUID()}
           value={option.value}
           className="text-gray-700 dark:bg-gray-900 dark:text-gray-400"
         >

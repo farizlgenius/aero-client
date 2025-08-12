@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import Button from '../../components/ui/button/Button';
-import { Add, CloseIcon, Control, Disable, Locked, Moment, Unlock } from '../../icons';
-import TableTemplate from '../../components/tables/Tables/TableTemplate';
-import ActionElement from '../UiElements/ActionElement';
-import axios from 'axios';
 import DangerModal from '../UiElements/DangerModal';
 import Modals from '../UiElements/Modals';
 import AddDoorForm from '../../components/form/form-elements/AddDoorForm';
+import PageBreadcrumb from '../../components/common/PageBreadCrumb';
+import { Add, Locked, Moment, Unlock } from '../../icons';
+import Button from '../../components/ui/button/Button';
+import TableTemplate from '../../components/tables/Tables/TableTemplate';
+import ActionElement from '../UiElements/ActionElement';
+import axios from 'axios';
 import * as signalR from '@microsoft/signalr';
-import Label from '../../components/form/Label';
+import AddCredentialForm from '../../components/form/form-elements/AddCredentialForm';
 
 // Define Global Variable
 const server = import.meta.env.VITE_SERVER_IP;
@@ -21,12 +21,17 @@ interface Object {
 }
 
 
-interface DoorDto {
-    name: string;
-    scpIp: string;
-    acrNumber: number;
-    mode: number;
-    acrModeDesc:string;
+interface CardHolderDto {
+    cardHolderId: number;
+    cardHolderReferenceNumber:string;
+    title:string;
+    name:string;
+    sex:string;
+    email:string;
+    phone:string;
+    description:string;
+    holderStatus:string;
+    issueCodeRunningNumber:number;
 }
 
 interface StatusDto {
@@ -42,15 +47,16 @@ interface StatusDto {
 // Define Headers 
 
 const headers: string[] = [
-    "Name", "Module", "Mode", "Status", "Action"
+    "Id","Title" ,"Card Holder Name", "Status", "Action"
 ]
 
 const keys: string[] = [
-    "name", "sioName",
+    "cardHolderId","title", "name","holderStatus"
 ];
 
-const Door = () => {
-    const [refresh, setRefresh] = useState(false);
+
+const Credential = () => {
+       const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     {/* Modal */ }
     const [isRemoveModal, setIsRemoveModal] = useState(false);
@@ -59,7 +65,7 @@ const Door = () => {
         setIsAddModalOpen(false);
         toggleRefresh();
     };
-    const handleClickAddDoor = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         console.log(e.currentTarget.name);
         console.log(e.currentTarget.value)
         switch (e.currentTarget.name) {
@@ -79,16 +85,6 @@ const Door = () => {
             case "moment":
                 selectedObjects.map(a => {
                     unlockDoor(a["scpIp"], a["acrNumber"]);
-                })
-                break;
-            case "secure":
-                selectedObjects.map(a => {
-                    changeDoorMode(a["scpIp"], a["acrNumber"], a["acrMode"]);
-                })
-                break;
-            case "disable":
-                selectedObjects.map(a => {
-                    changeDoorMode(a["scpIp"], a["acrNumber"], 1);
                 })
                 break;
             default:
@@ -115,48 +111,49 @@ const Door = () => {
     }
 
     {/* Door Data */ }
-    const [tableDatas, setTableDatas] = useState<DoorDto[]>([]);
+    const [tableDatas, setTableDatas] = useState<CardHolderDto[]>([]);
     const [status, setStatus] = useState<StatusDto[]>([]);
     const fetchData = async () => {
         try {
-            const res = await axios.get(`${server}/api/v1/acr/all`);
+            const res = await axios.get(`${server}/api/v1/credential/all`);
             console.log(res.data.content)
             setTableDatas(res.data.content);
 
-            // Batch set state
-            const newStatuses = res.data.content.map((a: DoorDto) => ({
-                scpIp: a.scpIp,
-                deviceNumber: a.acrNumber,
-                status: 0,
-                tamper: a.acrModeDesc,
-                ac: 0,
-                batt: 0
-            }));
+            // // Batch set state
+            // const newStatuses = res.data.content.map((a: CardHolderDto) => ({
+            //     scpIp: a.scpIp,
+            //     deviceNumber: a.acrNumber,
+            //     status: 0,
+            //     tamper: 0,
+            //     ac: 0,
+            //     batt: 0
+            // }));
 
-            console.log(newStatuses);
+            // console.log(newStatuses);
 
-            setStatus((prev) => [...prev, ...newStatuses]);
+            // setStatus((prev) => [...prev, ...newStatuses]);
 
-            // Fetch status for each
-            setTimeout(() => {
-                res.data.content.forEach((a: DoorDto) => {
-                    fetchStatus(a.scpIp, a.acrNumber);
-                });
-            }, 1000);
+            // // Fetch status for each
+            // setTimeout(() => {
+            //     res.data.content.forEach((a: DoorDto) => {
+            //         fetchStatus(a.scpIp, a.acrNumber);
+            //     });
+            // }, 1000);
 
 
         } catch (e) {
             console.log(e);
         }
     };
-    const fetchStatus = async (ScpIp: string, AcrNumber: number) => {
-        try {
-            const res = await axios.get(`${server}/api/v1/acr/status?ScpIp=${ScpIp}&AcrNo=${AcrNumber}`);
-            console.log(res);
-        } catch (e) {
-            console.log(e);
-        }
-    }
+
+    // const fetchStatus = async (ScpIp: string, AcrNumber: number) => {
+    //     try {
+    //         const res = await axios.get(`${server}/api/v1/acr/status?ScpIp=${ScpIp}&AcrNo=${AcrNumber}`);
+    //         console.log(res);
+    //     } catch (e) {
+    //         console.log(e);
+    //     }
+    // }
     const removeDoors = async () => {
         if (removeTarget != undefined) {
             try {
@@ -171,6 +168,7 @@ const Door = () => {
                 });
                 if (res.status == 200) {
                     setIsRemoveModal(false);
+                    console.log("Here");
                     toggleRefresh();
                 }
                 removeTarget = {};
@@ -186,11 +184,16 @@ const Door = () => {
     }
 
     const changeDoorMode = async (ScpIp: string, AcrNo: number, Mode: number) => {
-        const data = {
-            ScpIp, AcrNo, Mode
-        }
+        const data = new FormData();
+        data.append('ScpIp', ScpIp);
+        data.append('AcrNo', AcrNo.toString());
+        data.append('Mode', Mode.toString())
         try {
-            const res = await axios.post(`${server}/api/v1/acr/mode`, data)
+            const res = await axios.post(`${server}/api/v1/acr/mode`, data, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })
             console.log(res);
         } catch (e) {
             console.log(e);
@@ -226,17 +229,18 @@ const Door = () => {
         });
         connection.on(
             "AcrStatus",
-            (ScpIp: string, AcrNumber: number, AcrMode: string, AccessPointStatus: string) => {
+            (ScpIp: string, AcrNumber: number, RelayStatus: string, AcrMode: string, AccessPointStatus: string) => {
                 console.log(ScpIp)
                 console.log(AcrNumber)
+                console.log(RelayStatus)
                 console.log(AcrMode)
                 console.log(AccessPointStatus)
                 setStatus((prev) =>
                     prev.map((a) =>
                         a.scpIp == ScpIp && a.deviceNumber == AcrNumber ? {
                             ...a,
-                            status: AccessPointStatus == "" ? a.status : AccessPointStatus,
-                            tamper: AcrMode == "" ? a.tamper : AcrMode
+                            status: AccessPointStatus,
+                            tamper: RelayStatus == "" ? a.tamper : RelayStatus,
                         } : {
                             ...a
                         }
@@ -280,76 +284,28 @@ const Door = () => {
             }
         }
     }
-    return (
-        <>
-            {isRemoveModal && <DangerModal header='Remove Door' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
-            {isAddModalOpen && <Modals header='Add Door' body={<AddDoorForm onSubmitHandle={closeModalToggle} />} closeToggle={closeModalToggle} isWide={true} />}
-            <PageBreadcrumb pageTitle="Doors" />
+
+  return (
+      <>
+            {isRemoveModal && <DangerModal header='Remove Credentials' body='Please Click Confirm if you want to remove this users' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {isAddModalOpen && <Modals header='Add Credentials' body={<AddCredentialForm onSubmitHandle={closeModalToggle} />} closeToggle={closeModalToggle} isWide={true}/>}
+            <PageBreadcrumb pageTitle="Credentials" />
             <div className="space-y-6">
-                  <Label htmlFor='mode' >Action</Label>
-                    <div className="flex gap-4">
-                        <Button
-                            name='add'
-                            onClickWithEvent={handleClickAddDoor}
-                            size="sm"
-                            variant="primary"
-                            startIcon={<Add className="size-5" />}
-                        >
-                            Create
-                        </Button>
-                        <Button
-                            name='secure'
-                            onClickWithEvent={handleClickAddDoor}
-                            size="sm"
-                            variant="primary"
-                            startIcon={<Moment className="size-5" />}
-                        >
-                            Secure (Default Mode)
-                        </Button>
-                        <Button
-                            name='moment'
-                            onClickWithEvent={handleClickAddDoor}
-                            size="sm"
-                            variant="primary"
-                            startIcon={<Control className="size-5" />}
-                        >
-                            Toggle Door
-                        </Button>
-                         <Button
-                            name='unlock'
-                            onClickWithEvent={handleClickAddDoor}
-                            size="sm"
-                            variant="primary"
-                            startIcon={<Unlock className="size-5" />}
-                        >
-                            Unlock
-                        </Button>
-                        <Button
-                            name='lock'
-                            onClickWithEvent={handleClickAddDoor}
-                            size="sm"
-                            variant="primary"
-                            startIcon={<Locked className="size-5" />}
-                        >
-                            Locked
-                        </Button>
-                        <Button
-                            name='disable'
-                            onClickWithEvent={handleClickAddDoor}
-                            size="sm"
-                            variant="danger"
-                            startIcon={<Disable className="size-5" />}
-                        >
-                            Disable
-                        </Button>
+                <div className="flex gap-4">
+                    <Button
+                        name='add'
+                        onClickWithEvent={handleClick}
+                        size="sm"
+                        variant="primary"
+                        startIcon={<Add className="size-5" />}
+                    >
+                        Create
+                    </Button>
 
-
-                    </div>
-
-
+                </div>
                 <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                     <div className="max-w-full overflow-x-auto">
-                        <TableTemplate deviceIndicate={5} statusDto={status} checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={headers} tableDatas={tableDatas} tableKeys={keys} status={true} action={true} selectedObject={selectedObjects} actionElement={(row) => (
+                        <TableTemplate statusDto={status} checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={headers} tableDatas={tableDatas} tableKeys={keys} status={false} action={true} selectedObject={selectedObjects} actionElement={(row) => (
                             <ActionElement onEditClick={handleOnClickEdit} onRemoveClick={handleOnClickRemove} data={row} />
                         )} />
 
@@ -358,7 +314,7 @@ const Door = () => {
 
             </div>
         </>
-    )
+  )
 }
 
-export default Door
+export default Credential

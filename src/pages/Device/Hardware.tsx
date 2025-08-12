@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import TableTemplate from "../../components/tables/Tables/TableTemplate";
 import Button from "../../components/ui/button/Button";
-import { Scan } from "../../icons";
+import { Add, AlertIcon, Scan } from "../../icons";
 import Modals from "../UiElements/Modals";
 import axios from "axios";
 import * as signalR from "@microsoft/signalr";
@@ -16,6 +16,10 @@ const server = import.meta.env.VITE_SERVER_IP;
 // Interface
 interface Object {
   [key: string]: any
+}
+
+interface ResetScpDto {
+  ScpIp: string
 }
 
 interface IdReport {
@@ -34,18 +38,18 @@ interface ScpDto {
   name: string;
   model: string;
   mac: string;
-  ipAdress: string;
+  ipAddress: string;
   serialnumber: string;
   status: number; // 1 -> online , 0 -> offline
 }
 
 interface StatusDto {
-    scpIp: string;
-    deviceNumber: number;
-    status: number;
-    tamper:number;
-    ac:number;
-    batt:number;
+  scpIp: string;
+  deviceNumber: number;
+  status: number;
+  tamper: number;
+  ac: number;
+  batt: number;
 }
 
 // Define IdReport Parameter
@@ -67,7 +71,7 @@ const headers: string[] = [
 
 // Define Table Keys
 const keys: string[] = [
-  "name", "model", "mac", "ipAdress"
+  "name", "model", "mac", "ipAddress"
 ]
 
 
@@ -75,40 +79,16 @@ const keys: string[] = [
 export default function Hardware() {
 
   let ScanTableTemplate: ReactNode;
-  
 
-  {/* UseEffect */ }
-  useEffect(() => {
-    const connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5031/scpHub")
-      .withAutomaticReconnect()
-      .build();
-
-    connection.start().then(() => {
-      console.log("Connected to SignalR event hub");
-    });
-    connection.on("CommStatus", (status: number, id: number) => {
-      fetchStatus(id);
-    });
-    fetchData();
-    return () => {
-      connection.stop();
-    };
-  }, []);
-
-  useEffect(() => {
-
-  },[])
 
   {/* Modal Handler */ }
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [isModalAddOpen, setIsModalAddOpen] = useState<boolean>(false);
+  const [isModalSelectDeviceOpen, setIsModalSelectDeviceOpen] = useState<boolean>(false);
   const handleCloseModal = () => setIsModalOpen(false);
   const handleCloseAddModal = () => setIsModalAddOpen(false);
-  const handleOpenModal = () => {
-    fetchIdReport();
-    setIsModalOpen(true);
-  };
+  const handleCloseSelectDevice = () => setIsModalSelectDeviceOpen(false);
+
 
   {/* IdReport */ }
   const [idReportList, setIdReportList] = useState<IdReport[]>([]);
@@ -129,6 +109,7 @@ export default function Hardware() {
       console.log(e);
     }
   }
+
   ScanTableTemplate = <TableTemplate checkbox={false} tableDatas={idReportList} tableHeaders={IdReportHeaders} tableKeys={IdReportKeys} status={false} action={true} actionElement={(row) => (
     <Button onClick={() => handleAddIdReport(row)} size="sm" variant="primary">
       Add
@@ -148,7 +129,7 @@ export default function Hardware() {
 
       // Batch set state
       const newStatuses = res.data.content.map((a: ScpDto) => ({
-        scpIp: a.ipAdress,
+        scpIp: a.ipAddress,
         deviceNumber: a.scpId,
         status: 0
       }));
@@ -165,24 +146,40 @@ export default function Hardware() {
       console.log(e);
     }
   }
-  const fetchStatus = async (scpId:number) => {
+  const fetchStatus = async (scpId: number) => {
     try {
       const res = await axios.get(`${server}/api/v1/scp/status/${scpId}`);
       console.log(res.data.content);
       setStatus((prev) => prev.map((a) =>
-          a.scpIp == res.data.content["scpIp"] && a.deviceNumber == res.data.content["scpId"]
-            ? {
-              ...a,
-              status: res.data.content["status"],
-            }
-            : {
-              // scpIp:ScpIp,
-              // cpNumber:first,
-              // status:status[0]
-              ...a
-            }
-        )
+        a.scpIp == res.data.content["scpIp"] && a.deviceNumber == res.data.content["scpId"]
+          ? {
+            ...a,
+            status: res.data.content["status"],
+          }
+          : {
+            // scpIp:ScpIp,
+            // cpNumber:first,
+            // status:status[0]
+            ...a
+          }
+      )
       );
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  const resetDevice = async (ScpIp: string) => {
+    try {
+      const data: ResetScpDto = {
+        ScpIp: ScpIp
+      }
+      const res = await axios.post(`${server}/api/v1/scp/reset`, data, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      console.log(res);
     } catch (e) {
       console.log(e);
     }
@@ -194,9 +191,80 @@ export default function Hardware() {
   const handleOnRemoveClick = (data: Object) => {
 
   }
+  {/* Handle Click */ }
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    console.log(e.currentTarget.name);
+    switch (e.currentTarget.name) {
+      case "add":
+        setIsModalSelectDeviceOpen(true);
+        break;
+      case "scan":
+        fetchIdReport();
+        setIsModalOpen(true);
+        break;
+      case "reset":
+        selectedObjects.map((a: Object) => {
+          resetDevice(a["ScpIp"]);
+        })
+        break;
+      default:
+        break;
+    }
+  }
+
+  {/* checkBox */ }
+  const [selectedObjects, setSelectedObjects] = useState<Object[]>([]);
+  const handleCheckedAll = (data: Object[], e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(data)
+    console.log(e.target.checked)
+    if (setSelectedObjects) {
+      if (e.target.checked) {
+        setSelectedObjects(data);
+      } else {
+        setSelectedObjects([]);
+      }
+    }
+  }
+
+  const handleChecked = (data: Object, e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(data)
+    console.log(e.target.checked)
+    if (setSelectedObjects) {
+      if (e.target.checked) {
+        setSelectedObjects((prev) => [...prev, data]);
+      } else {
+        setSelectedObjects((prev) =>
+          prev.filter((item) => item.no !== data.no)
+        );
+      }
+    }
+  }
+
+  {/* UseEffect */ }
+  useEffect(() => {
+    const connection = new signalR.HubConnectionBuilder()
+      .withUrl("http://localhost:5031/scpHub")
+      .withAutomaticReconnect()
+      .build();
+
+    connection.start().then(() => {
+      console.log("Connected to SignalR event hub");
+    });
+    connection.on("CommStatus", (status: number, id: number) => {
+      fetchStatus(id);
+    });
+    fetchData();
+    return () => {
+      connection.stop();
+    };
+  }, []);
+
 
   return (
     <>
+      {isModalSelectDeviceOpen &&
+        <Modals header="Hardware Select" body={ScanTableTemplate} closeToggle={handleCloseSelectDevice} />
+      }
       {isModalOpen &&
         <Modals header="Host List" body={ScanTableTemplate} closeToggle={handleCloseModal} />
       }
@@ -208,7 +276,33 @@ export default function Hardware() {
       <div className="space-y-6">
         <div className="flex gap-4">
           <Button
-            onClick={handleOpenModal}
+            name="add"
+            onClickWithEvent={handleClick}
+            size="sm"
+            variant="primary"
+            startIcon={<Add className="size-5" />}
+          >
+
+            Add
+
+          </Button>
+          <div>
+            <Button
+              name="reset"
+              onClickWithEvent={handleClick}
+              size="sm"
+              variant="primary"
+              startIcon={<AlertIcon className="size-5" />}
+            >
+
+              Reset
+
+            </Button>
+          </div>
+
+          <Button
+            name="scan"
+            onClickWithEvent={handleClick}
             size="sm"
             variant="primary"
             startIcon={<Scan className="size-5" />}
@@ -228,7 +322,7 @@ export default function Hardware() {
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
           <div className="max-w-full overflow-x-auto">
 
-            <TableTemplate deviceIndicate={1} statusDto={status} checkbox={false} tableHeaders={headers} tableDatas={tableDatas} tableKeys={keys} status={true} action={true} actionElement={(data) => (
+            <TableTemplate deviceIndicate={1} statusDto={status} checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={headers} tableDatas={tableDatas} tableKeys={keys} status={true} action={true} actionElement={(data) => (
               <ActionElement onEditClick={handleOnEditClick} onRemoveClick={handleOnRemoveClick} data={data} />
 
             )} />
