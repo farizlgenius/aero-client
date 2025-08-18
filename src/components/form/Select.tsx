@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 interface Option {
-  value: string | number;
+  value: string | number ;
   label: string;
 }
 

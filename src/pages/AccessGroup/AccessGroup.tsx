@@ -4,8 +4,10 @@ import { Add } from '../../icons';
 import TableTemplate from '../../components/tables/Tables/TableTemplate';
 import ActionElement from '../UiElements/ActionElement';
 import { useEffect, useState } from 'react';
-import * as signalR from '@microsoft/signalr';
 import axios from 'axios';
+import Modals from '../UiElements/Modals';
+import AddAccessLevelForm from '../../components/form/form-elements/AddAccessLevelForm';
+import DangerModal from '../UiElements/DangerModal';
 
 // Define Global Variable
 const server = import.meta.env.VITE_SERVER_IP;
@@ -41,8 +43,18 @@ const AccessGroup = () => {
             setIsAddModalOpen(false);
             toggleRefresh();
         };
-        const handleClickAddCpModal = () => {
-            setIsAddModalOpen(true);
+        const handleClick = (e:React.MouseEvent<HTMLButtonElement>) => {
+            console.log(e.currentTarget.name);
+            switch(e.currentTarget.name){
+                case "add":
+                    setIsAddModalOpen(true);
+                    break;
+                    case "":
+                        break;
+                        default:
+                            break;
+            }
+            
         }
 
         {/* handle Table Action */ }
@@ -78,9 +90,11 @@ const AccessGroup = () => {
         const removeAccessGroup = async () => {
         if (removeTarget != undefined) {
             try {
-                console.log(removeTarget);
-
-                const res = await axios.post(`${server}/api/v1/cp/remove?ScpIp=${removeTarget["scpIp"]}&CpNo=${removeTarget["cpNumber"]}`);
+                const res = await axios.post(`${server}/api/v1/acslv/delete`,removeTarget,{
+                    headers:{
+                        "Content-Type":"application/json"
+                    }
+                });
                 if (res.status == 200) {
                     setIsRemoveModal(false);
                     console.log("Here");
@@ -104,7 +118,7 @@ const AccessGroup = () => {
     
             fetchData();
             
-        }, []);
+        }, [refresh]);
 
             {/* checkBox */ }
             const [selectedObjects, setSelectedObjects] = useState<Object[]>([]);
@@ -136,13 +150,14 @@ const AccessGroup = () => {
 
   return (
         <>
-            {/* {isRemoveModal && <DangerModal header='Remove Control Point' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
-            {isAddModalOpen && <Modals header='Add Control Point' body={<AddCpForm onSubmitHandle={closeModalToggle} />} closeToggle={closeModalToggle} />} */}
+            {isRemoveModal && <DangerModal header='Remove Control Point' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {isAddModalOpen && <Modals header='Add Control Point' body={<AddAccessLevelForm onSubmitHandle={closeModalToggle} />} closeToggle={closeModalToggle} />}
             <PageBreadcrumb pageTitle="Access Group" />
             <div className="space-y-6">
                 <div className="flex gap-4">
                     <Button
-                        // onClick={handleClickAddCpModal}
+                    name="add"
+                        onClickWithEvent={handleClick}
                         size="sm"
                         variant="primary"
                         startIcon={<Add className="size-5" />}

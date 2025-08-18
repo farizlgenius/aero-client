@@ -42,8 +42,8 @@ interface CreateCredentialDto {
   facilityCode: number;
   cardNumber: number;
   pin: string;
-  activeDate: number;
-  deactiveDate: number;
+  activeDate: string;
+  deactiveDate: string;
   accessLevel: number;
   image: string;
 }
@@ -83,8 +83,8 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
     facilityCode: 0,
     cardNumber: 0,
     pin: "",
-    activeDate: 0,
-    deactiveDate: 0,
+    activeDate: "",
+    deactiveDate: "",
     accessLevel: 0,
     image: ""
   });
@@ -126,8 +126,8 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
         facilityCode: FacilityCode,
         cardNumber: CardHolderId,
         pin: "",
-        activeDate: 0,
-        deactiveDate: 0,
+        activeDate: "",
+        deactiveDate: "",
         accessLevel: 0,
         image: ""
       })
@@ -241,6 +241,24 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
     } catch (e) {
       console.log(e);
     }
+  }
+
+    const toLocalISOWithOffset = (date: Date) => {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const tzOffset = -date.getTimezoneOffset();
+    const sign = tzOffset >= 0 ? "+" : "-";
+    const offsetHours = pad(Math.floor(Math.abs(tzOffset) / 60));
+    const offsetMinutes = pad(Math.abs(tzOffset) % 60);
+
+    return (
+      date.getFullYear() + "-" +
+      pad(date.getMonth() + 1) + "-" +
+      pad(date.getDate()) + "T" +
+      pad(date.getHours()) + ":" +
+      pad(date.getMinutes()) + ":" +
+      pad(date.getSeconds()) +
+      sign + offsetHours + ":" + offsetMinutes
+    );
   }
 
   return (
@@ -418,9 +436,12 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
                                   id="date-picker"
                                   label="Activate Date"
                                   placeholder="Select a date"
+                                  value={createCredentialDto.activeDate}
                                   onChange={(dates, currentDateString) => {
                                     // Handle your logic
                                     console.log({ dates, currentDateString });
+                                    setCreateCredentialDto((prev) => ({...prev,activeDate:toLocalISOWithOffset(dates[0])}));
+                                    
                                   }}
                                 />
                               </div>
@@ -429,9 +450,11 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
                                   id="date-picker"
                                   label="Deactivate Date"
                                   placeholder="Select a date"
+                                  value={createCredentialDto.deactiveDate}
                                   onChange={(dates, currentDateString) => {
                                     // Handle your logic
                                     console.log({ dates, currentDateString });
+                                    setCreateCredentialDto((prev) => ({...prev,deactiveDate:toLocalISOWithOffset(dates[0])}));
                                   }}
                                 />
                               </div>

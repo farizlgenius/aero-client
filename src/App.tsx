@@ -33,54 +33,69 @@ import CardFormat from "./pages/CardFormat/CardFormat";
 import Alert from "./components/ui/alert/Alert";
 import { useEffect, useState } from "react";
 import * as signalR from "@microsoft/signalr";
+import { HubEndPoint } from "./constants/constant";
+import { VerifyScpConfigDto } from "./constants/types";
+
+//
+
+const server = import.meta.env.VITE_SERVER_IP;
 
 export default function App() {
-  const [isShow,setIsShow] = useState<boolean>(false);
-  const [isSuccess,setIsSuccess] = useState<boolean>(false);
+  const [isShow, setIsShow] = useState<boolean>(false);
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
   let tag = "";
-  const [message,setMessage] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
   const handleClick = () => {
     setIsShow(false);
     setMessage("")
   }
   useEffect(() => {
-     const connection = new signalR.HubConnectionBuilder()
-                .withUrl("http://localhost:5031/cmndHub")
-                .withAutomaticReconnect()
-                .build();
-    
-            connection.start().then(() => {
-                console.log("Connected to SignalR event hub");
-            });
-            connection.on(
-                "CmndStatus",
-                (CmndStatus:number,TagNumber:number,NakReason:string,NakDescriptionCode:number) => {
-                  console.log(CmndStatus)
-                  console.log(TagNumber)
-                  console.log(NakReason)
-                  console.log(NakDescriptionCode)
+    const cmndConnection = new signalR.HubConnectionBuilder()
+      .withUrl(server + HubEndPoint.CMND_HUB)
+      .withAutomaticReconnect()
+      .build();
 
-                  if(CmndStatus == 1){
-                    setIsSuccess(true);
-                  }else{
-                    setIsSuccess(false);
-                  }
-                  tag = TagNumber.toString();
-                  setIsShow(true);
-                  setMessage("tag ("+tag+")"+ " " + message);
+    cmndConnection.start().then(() => {
+      console.log("Connected to SignalR event hub");
+    }).catch(e => {
+      console.log(e);
+    });
 
-                }
-            );
-    
-            return () => {
-                connection.stop();
-            };
-  },[])
+    cmndConnection.on(
+      "CmndStatus",
+      (CmndStatus: number, TagNumber: number, NakReason: string, NakDescriptionCode: number) => {
+        console.log(CmndStatus)
+        console.log(TagNumber)
+        console.log(NakReason)
+        console.log(NakDescriptionCode)
+
+        if (CmndStatus == 1) {
+          setIsSuccess(true);
+        } else {
+          setIsSuccess(false);
+        }
+        tag = TagNumber.toString();
+        setIsShow(true);
+        setMessage("tag (" + tag + ")" + " " + message);
+
+      }
+    );
+
+    cmndConnection.on(
+      "VerifyConfig", (data: VerifyScpConfigDto) => {
+        console.log(data);
+      }
+    )
+
+    return () => {
+      cmndConnection.stop();
+    };
+  }, [])
   return (
     <>
 
       <Router>
-        {isShow && 
+        {isShow &&
           <div onClick={handleClick} className="transition-opacity duration-500 opacity-100 hover:opacity-0">
             <Alert
               isFixed={true}

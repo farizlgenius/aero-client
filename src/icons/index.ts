@@ -74,6 +74,8 @@ import {ReactComponent as Moment} from "./moment.svg?react";
 import {ReactComponent as Area} from "./area.svg?react";
 import {ReactComponent as Disable} from "./disable.svg?react";
 import {ReactComponent as Spiner} from "./spiner.svg?react";
+import {ReactComponent as Reset} from "./reset.svg?react";
+import {ReactComponent as Upload} from "./upload.svg?react";
 
 export {
   ErrorHexaIcon,
@@ -149,5 +151,7 @@ export {
   Moment,
   Area,
   Disable,
-  Spiner
+  Spiner,
+  Reset,
+  Upload
 };

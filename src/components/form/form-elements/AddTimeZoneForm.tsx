@@ -257,23 +257,28 @@ const AddTimeZoneForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ onSu
                         id="activeTime"
                         label="Activate Date"
                         placeholder="Select a date"
+                        value={createTimeZoneDto.activeTime}
                         onChange={(dates, currentDateString) => {
                           // Handle your logic
                           console.log({ dates, currentDateString });
                           setCreateTimeZoneDto((prev) => ({ ...prev, activeTime: toLocalISOWithOffset(dates[0]) }))
                         }}
+                        
                       />
                     </div>
                     <div>
                       <DatePicker
+                      value={createTimeZoneDto.deactiveTime}
                         id="deactiveTime"
                         label="Deactive Date"
                         placeholder="Select a date"
+                        defaultDate={createTimeZoneDto.deactiveTime}
                         onChange={(dates, currentDateString) => {
                           // Handle your logic
                           console.log({ dates, currentDateString });
                           setCreateTimeZoneDto((prev) => ({ ...prev, deactiveTime: toLocalISOWithOffset(dates[0]) }))
                         }}
+                        
 
                       />
                     </div>

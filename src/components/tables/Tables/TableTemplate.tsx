@@ -7,8 +7,7 @@ import {
 } from "../../ui/table";
 
 import Badge from "../../ui/badge/Badge";
-import React, { PropsWithChildren, ReactNode } from "react";
-
+import React, { ReactNode } from "react";
 interface Object {
   [key: string]: any
 }
@@ -23,31 +22,32 @@ interface StatusDto {
 }
 
 
-interface TableContent {
+interface TableContent<T> {
   checkbox: boolean;
   tableHeaders: string[];
-  tableDatas: Object[];
+  tableDatas: T[];
   tableKeys: string[];
   status?: boolean;
   action?: boolean;
-  actionElement?: (data: Object) => ReactNode;
-  onChecked?: (data: Object, e: React.ChangeEvent<HTMLInputElement>) => void;
-  onCheckedAll?: (data: Object[], e: React.ChangeEvent<HTMLInputElement>) => void;
-  selectedObject?: Object[];
+  actionElement?: (data:T,isDetail:boolean) => ReactNode;
+  onChecked?: (data:T, e: React.ChangeEvent<HTMLInputElement>) => void;
+  onCheckedAll?: (data: T[], e: React.ChangeEvent<HTMLInputElement>) => void;
+  selectedObject?: T[];
   statusDto?: StatusDto[];
   deviceIndicate?: number;
+  isDetail?:boolean;
 }
 
 
 
 
 
-const TableTemplate: React.FC<PropsWithChildren<TableContent>> = ({ checkbox, tableHeaders, tableDatas, tableKeys, status = false, action = false, actionElement, deviceIndicate = 0, onChecked, onCheckedAll, selectedObject, statusDto }) => {
+const TableTemplate = <T,>({ checkbox, tableHeaders, tableDatas, tableKeys, status = false, action = false, actionElement, deviceIndicate = 0, onChecked, onCheckedAll, selectedObject, statusDto,isDetail=false }:TableContent<T>) => {
   {/* Doors */ }
-  const renderDoorStatusComponent = (data: Object, indicator: number, statusDto: StatusDto[]) => {
+  const renderDoorStatusComponent = (data: T, indicator: number, statusDto: StatusDto[]) => {
     switch (indicator) {
       case 0:
-        const s = statusDto.find(b => b.deviceNumber == data["acrNumber"])?.status;
+        const s = statusDto.find(b => b.deviceNumber == data["acrNumber" as keyof T])?.status;
         return <>
               {s === "Secure" ? (
               <Badge size="sm" color="success">{s}</Badge>
@@ -59,135 +59,137 @@ const TableTemplate: React.FC<PropsWithChildren<TableContent>> = ({ checkbox, ta
             </>
 
       case 1:
-        const d = statusDto.find(b => b.deviceNumber == data["acrNumber"])?.tamper;
+        const d = statusDto.find(b => b.deviceNumber == data["acrNumber" as keyof T])?.tamper;
         return <>
         <Badge size="sm" color="dark">{d}</Badge>
         </>
     }
   }
   {/* Module */ }
-  const renderModuleStatusComponent = (data: Object, indicator: number, statusDto: StatusDto[]) => {
+  const renderModuleStatusComponent = (data: T, indicator: number, statusDto: StatusDto[]) => {
     switch (indicator) {
       case 0:
         return <Badge
           size="sm"
           color={
-            statusDto.find(b => b.deviceNumber == data["sioNumber"])?.status == 5
+            statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.status == 5
               ? "success"
-              : statusDto.find(b => b.deviceNumber == data["sioNumber"])?.status == 0
+              : statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.status == 0
                 ? "error"
                 : "warning"
           }
         >
-          {statusDto.find(b => b.deviceNumber == data["sioNumber"])?.status == 5 ? "Online" : statusDto.find(b => b.deviceNumber == data["sioNumber"])?.status == 0 ? "Offline" : "Error"}
+          {statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.status == 5 ? "Online" : statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.status == 0 ? "Offline" : "Error"}
         </Badge>
       case 1:
         return <Badge
           size="sm"
           color={
-            statusDto.find(b => b.deviceNumber == data["sioNumber"])?.tamper == 0
+            statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.tamper == 0
               ? "success"
-              : statusDto.find(b => b.deviceNumber == data["sioNumber"])?.tamper == 1
+              : statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.tamper == 1
                 ? "error"
                 : "warning"
           }
         >
-          {statusDto.find(b => b.deviceNumber == data["sioNumber"])?.tamper == 0 ? "Normal" : statusDto.find(b => b.deviceNumber == data["sioNumber"])?.tamper == 1 ? "Fail" : "Error"}
+          {statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.tamper == 0 ? "Normal" : statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.tamper == 1 ? "Fail" : "Error"}
         </Badge>
       case 2:
         return <Badge
           size="sm"
           color={
-            statusDto.find(b => b.deviceNumber == data["sioNumber"])?.ac == 0
+            statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.ac == 0
               ? "success"
-              : statusDto.find(b => b.deviceNumber == data["sioNumber"])?.ac == 1
+              : statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.ac == 1
                 ? "error"
                 : "warning"
           }
         >
-          {statusDto.find(b => b.deviceNumber == data["sioNumber"])?.ac == 0 ? "Normal" : statusDto.find(b => b.deviceNumber == data["sioNumber"])?.ac == 1 ? "Fail" : "Error"}
+          {statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.ac == 0 ? "Normal" : statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.ac == 1 ? "Fail" : "Error"}
         </Badge>
       case 3:
         return <Badge
           size="sm"
           color={
-            statusDto.find(b => b.deviceNumber == data["sioNumber"])?.batt == 0
+            statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.batt == 0
               ? "success"
-              : statusDto.find(b => b.deviceNumber == data["sioNumber"])?.batt == 1
+              : statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.batt == 1
                 ? "error"
                 : "warning"
           }
         >
-          {statusDto.find(b => b.deviceNumber == data["sioNumber"])?.batt == 0 ? "Normal" : statusDto.find(b => b.deviceNumber == data["sioNumber"])?.batt == 1 ? "Fail" : "Error"}
+          {statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.batt == 0 ? "Normal" : statusDto.find(b => b.deviceNumber == data["sioNumber" as keyof T])?.batt == 1 ? "Fail" : "Error"}
         </Badge>
     }
 
   }
 
-  const renderStatusCompoment = (data: Object, deviceIndicate: number, moduleIndicate: number, statusDto: StatusDto[]) => {
+  const renderStatusCompoment = (data: T, deviceIndicate: number, moduleIndicate: number, statusDto: StatusDto[]) => {
     switch (deviceIndicate) {
+      // SCP Controller
       case 1:
         return <Badge
           size="sm"
           color={
-            statusDto.find(b => b.deviceNumber == data["scpId"])?.status == 1
+            statusDto.find(b => b.deviceNumber == data["scpId" as keyof T])?.status == 1
               ? "success"
-              : statusDto.find(b => b.deviceNumber == data["scpId"])?.status == 0
+              : statusDto.find(b => b.deviceNumber == data["scpId" as keyof T])?.status == 0
                 ? "error"
                 : "warning"
           }
         >
-          {statusDto.find(b => b.deviceNumber == data["scpId"])?.status == 1 ? "Online" : data.status === 0 ? "Offline" : "Pending"}
+          {statusDto.find(b => b.deviceNumber == data["scpId" as keyof T])?.status == 1 ? "Online" : statusDto.find(b => b.deviceNumber == data["scpId" as keyof T])?.status === 0 ? "Offline" : "Pending"}
         </Badge>
       case 2:
+        // Module
         return renderModuleStatusComponent(data, moduleIndicate, statusDto)
       case 3:
-        return data["mode"] == "Normal" ? <Badge
+        // Control Point
+        return data["mode" as keyof T] == "Normal" ? <Badge
           size="sm"
           color={
-            statusDto.find(b => b.deviceNumber == data["cpNumber"])?.status == 1
+            statusDto.find(b => b.deviceNumber == data["cpNumber" as keyof T])?.status == 1
               ? "success"
-              : statusDto.find(b => b.deviceNumber == data["cpNumber"])?.status == 0
+              : statusDto.find(b => b.deviceNumber == data["cpNumber" as keyof T])?.status == 0
                 ? "error"
                 : "warning"
           }
         >
-          {statusDto.find(b => b.deviceNumber == data["cpNumber"])?.status == 1 ? "On" : statusDto.find(b => b.deviceNumber == data["cpNumber"])?.status === 0 ? "Off" : "Error"}
+          {statusDto.find(b => b.deviceNumber == data["cpNumber" as keyof T])?.status == 1 ? "On" : statusDto.find(b => b.deviceNumber == data["cpNumber" as keyof T])?.status === 0 ? "Off" : "Error"}
         </Badge> :
           <Badge
             size="sm"
             color={
-              statusDto.find(b => b.deviceNumber == data["cpNumber"])?.status == 0
+              statusDto.find(b => b.deviceNumber == data["cpNumber" as keyof T])?.status == 0
                 ? "success"
-                : statusDto.find(b => b.deviceNumber == data["cpNumber"])?.status == 1
+                : statusDto.find(b => b.deviceNumber == data["cpNumber" as keyof T])?.status == 1
                   ? "error"
                   : "warning"
             }
           >
-            {statusDto.find(b => b.deviceNumber == data["cpNumber"])?.status == 0 ? "On" : statusDto.find(b => b.deviceNumber == data["cpNumber"])?.status === 1 ? "Off" : "Error"}
+            {statusDto.find(b => b.deviceNumber == data["cpNumber" as keyof T])?.status == 0 ? "On" : statusDto.find(b => b.deviceNumber == data["cpNumber" as keyof T])?.status === 1 ? "Off" : "Error"}
           </Badge>
       case 4:
+        // Monitor Point
         return <Badge
           size="sm"
           color={
-            statusDto.find(b => b.deviceNumber == data["mpNumber"])?.status == 0
+            statusDto.find(b => b.deviceNumber == data["mpNumber" as keyof T])?.status == 0
               ? "success"
-              : statusDto.find(b => b.deviceNumber == data["mpNumber"])?.status == 1
+              : statusDto.find(b => b.deviceNumber == data["mpNumber" as keyof T])?.status == 1
                 ? "error"
                 : "warning"
           }
         >
-          {statusDto.find(b => b.deviceNumber == data["mpNumber"])?.status == 0 ? "Normal" : statusDto.find(b => b.deviceNumber == data["mpNumber"])?.status == 1 ? "Fail" : "Error"}
+          {statusDto.find(b => b.deviceNumber == data["mpNumber" as keyof T])?.status == 0 ? "Normal" : statusDto.find(b => b.deviceNumber == data["mpNumber" as keyof T])?.status == 1 ? "Fail" : "Error"}
         </Badge>
       case 5:
+        // Door
         return renderDoorStatusComponent(data, moduleIndicate, statusDto);
 
     }
   }
 
-  function isStringArray(data: any): data is string[] {
-    return Array.isArray(data) && data.every(item => typeof item === 'string');
-  }
 
   return (
     <>
@@ -213,17 +215,18 @@ const TableTemplate: React.FC<PropsWithChildren<TableContent>> = ({ checkbox, ta
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-            {tableDatas.map((data, i) => (
+            {tableDatas.map((data, i:number) => (
               <TableRow key={i}>
                 {checkbox && onChecked &&
                   <TableCell className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                     <input checked={selectedObject?.includes(data)} type="checkbox" onChange={(e) => onChecked(data, e)} />
                   </TableCell >
                 }
+                
 
-                {tableKeys.map((key, i) =>
+                {tableKeys.map((key:string, i:number) =>
                   <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    {data[key]}
+                    {String(data[key as keyof typeof data])}
                   </TableCell>
                 )}
 
@@ -269,7 +272,7 @@ const TableTemplate: React.FC<PropsWithChildren<TableContent>> = ({ checkbox, ta
 
                 {action && actionElement &&
                   <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                    {actionElement(data)}
+                    {actionElement(data,isDetail)}
                   </TableCell>
                 }
 
