@@ -3,58 +3,24 @@ import PageBreadcrumb from '../../components/common/PageBreadCrumb'
 import TableTemplate from '../../components/tables/Tables/TableTemplate';
 import ActionElement from '../UiElements/ActionElement';
 import * as signalR from '@microsoft/signalr';
-import axios from 'axios';
 import Button from '../../components/ui/button/Button';
 import { Add } from '../../icons';
 import Modals from '../UiElements/Modals';
-import AddCpForm from '../../components/form/form-elements/AddCpForm';
 import DangerModal from '../UiElements/DangerModal';
+import { CpDto, CpTriggerDto, RemoveCpDto, StatusDto } from '../../constants/types';
+import { CP_KEY, CP_TABLE_HEADER, CPEndPoint, HttpMethod, PopUpMsg } from '../../constants/constant';
+import HttpRequest from '../../utility/HttpRequest';
+import { usePopupActions } from '../../utility/PopupCalling';
+import AddCpForm from '../../modals/AddCpForm';
+import Logger from '../../utility/Logger';
 
 // Define Global Variable
-const server = import.meta.env.VITE_SERVER_IP;
-let removeTarget: Object;
-
-// Interface 
-interface Object {
-    [key: string]: any;
-}
-
-
-interface StatusDto {
-    scpIp: string;
-    deviceNumber: number;
-    status: number;
-    tamper:number;
-    ac:number;
-    batt:number;
-}
-
-interface CpDto {
-    no: number;
-    name: string;
-    sioNumber: number;
-    sioName: string;
-    sioModel: string;
-    cpNumber: number;
-    opNumber: number;
-    mode: string;
-    scpIp: string;
-    status: number;
-}
-
-// Define Headers 
-
-const headers: string[] = [
-    "Name", "Module Name", "Module", "Mode", "Status", "Action"
-]
-
-const keys: string[] = [
-    "name", "sioName", "sioModel", "mode"
-];
+let removeTarget: RemoveCpDto;
 
 
 const Control = () => {
-    const [refresh,setRefresh] = useState(false);
+    const {showPopup} = usePopupActions();
+    const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     {/* Modal */ }
     const [isRemoveModal, setIsRemoveModal] = useState(false);
@@ -71,9 +37,12 @@ const Control = () => {
 
     }
 
-    const handleOnClickRemove = (data: Object) => {
+    const handleOnClickRemove = (data: CpDto) => {
         console.log(data);
-        removeTarget = data;
+        removeTarget = {
+            scpMac: data.mac,
+            cpNo: data.componentNo
+        };
         setIsRemoveModal(true);
     }
     const handleOnClickCloseRemove = () => {
@@ -81,21 +50,21 @@ const Control = () => {
     }
     const handleOnClickConfirmRemove = () => {
         removeControlPoint();
-        
+
     }
     {/* Output Data */ }
     const [tableDatas, setTableDatas] = useState<CpDto[]>([]);
     const [status, setStatus] = useState<StatusDto[]>([]);
     const fetchData = async () => {
-        try {
-            const res = await axios.get(`${server}/api/v1/cp/all`);
-            console.log(res.data.content)
-            setTableDatas(res.data.content);
+        const res = await HttpRequest.send(HttpMethod.GET,CPEndPoint.GET_CP_LIST);
+        if(res && res.data.data){
+              console.log(res.data.data)
+            setTableDatas(res.data.data);
 
             // Batch set state
-            const newStatuses = res.data.content.map((a: CpDto) => ({
-                scpIp: a.scpIp,
-                deviceNumber: a.cpNumber,
+            const newStatuses = res.data.data.map((a: CpDto) => ({
+                scpMac: a.mac,
+                deviceNumber: a.componentNo,
                 status: 0
             }));
 
@@ -104,42 +73,39 @@ const Control = () => {
             setStatus((prev) => [...prev, ...newStatuses]);
 
             // Fetch status for each
-            res.data.content.forEach((a: CpDto) => {
-                fetchStatus(a.scpIp, a.cpNumber);
+            res.data.data.forEach((a: CpDto) => {
+                fetchStatus(a.mac, a.componentNo);
             });
 
-        } catch (e) {
-            console.log(e);
         }
     };
-    const fetchStatus = async (ScpIp: string, CpNo: number) => {
-        const res = await axios.get(
-            `${server}/api/v1/cp/status?ScpIp=${ScpIp}&CpNo=${CpNo}`
-        );
-        console.log(res);
+
+    const fetchStatus = async (scpMac: string, cpNo: number) => {
+        const res = await HttpRequest.send(HttpMethod.GET,CPEndPoint.GET_CP_STATUS  + scpMac+"/"+cpNo);
+        Logger.info(res);
     };
 
     const removeControlPoint = async () => {
-        if (removeTarget != undefined) {
-            try {
-                console.log(removeTarget);
-
-                const res = await axios.post(`${server}/api/v1/cp/remove?ScpIp=${removeTarget["scpIp"]}&CpNo=${removeTarget["cpNumber"]}`);
-                if (res.status == 200) {
-                    setIsRemoveModal(false);
-                    console.log("Here");
-                    toggleRefresh();
+        const res = await HttpRequest.send(HttpMethod.DELETE, CPEndPoint.DELETE_CP + removeTarget.scpMac + "/" + removeTarget.cpNo);
+        if (res) {
+            if (res.data.code == 200) {
+                setIsRemoveModal(false);
+                toggleRefresh();
+                showPopup(true, [PopUpMsg.DELETE_CP]);
+                removeTarget = {
+                    scpMac:"",
+                    cpNo:-1
                 }
-                removeTarget = {};
-
-            } catch (e) {
-                console.log(e);
+            } else {
+                setIsRemoveModal(false);
+                toggleRefresh();
+                showPopup(false, res.data.errors);
+                                removeTarget = {
+                    scpMac:"",
+                    cpNo:-1
+                }
             }
-
-        } else {
-            console.log("undefined")
         }
-
     }
 
 
@@ -158,15 +124,16 @@ const Control = () => {
         });
         connection.on(
             "CpStatus",
-            (ScpIp: string, first: number, count: number, status: number[]) => {
+            (scpMac: string, first: number, status: string) => {
+                console.log(scpMac)
                 console.log(first)
                 console.log(status)
                 setStatus((prev) =>
                     prev.map((a) =>
-                        a.scpIp == ScpIp && a.deviceNumber == first
+                        a.scpMac == scpMac && a.deviceNumber == first
                             ? {
                                 ...a,
-                                status: status[0],
+                                status: status,
                             }
                             : {
                                 // scpIp:ScpIp,
@@ -178,12 +145,15 @@ const Control = () => {
                 );
             }
         );
-        fetchData();
+        setTimeout(() => {
+            fetchData();
+        }, 150)
+
 
         return () => {
             connection.stop();
         };
-        
+
     }, [refresh]);
 
     {/* Button Command */ }
@@ -198,37 +168,62 @@ const Control = () => {
             case "on":
                 console.log(selectedObjects);
                 if (selectedObjects.length > 0) {
-                    selectedObjects.map(async (a) => {
-                        const res = await axios.post(
-                            `${server}/api/v1/cp/trigger?ScpIp=${a["scpIp"]}&CpNumber=${a["cpNumber"]}&Command=2`
-                        );
-                        console.log(res);
+                    selectedObjects.map(async (a: CpDto) => {
+                        let data: CpTriggerDto = {
+                            scpMac: a.mac,
+                            cpNo: a.componentNo,
+                            command: 2
+                        }
+                        const res = await HttpRequest.send(HttpMethod.POST, CPEndPoint.POST_CP_TRIGGER, data);
+                        if (res) {
+                            if (res.data.code == 200) {
+                                showPopup(true, [PopUpMsg.TRIGGER_CP]);
+                            } else {
+                                showPopup(false, res.data.errors);
+                            }
+                        }
                         //fetchStatus(a["scpIp"], a["cpNumber"]);
                     });
                 }
 
                 break;
             case "off":
-                console.log(selectedObjects);
                 if (selectedObjects.length > 0) {
-                    selectedObjects.map(async (a) => {
-                        const res = await axios.post(
-                            `${server}/api/v1/cp/trigger?ScpIp=${a["scpIp"]}&CpNumber=${a["cpNumber"]}&Command=1`
-                        );
-                        console.log(res);
+                    selectedObjects.map(async (a: CpDto) => {
+                        let data: CpTriggerDto = {
+                            scpMac: a.mac,
+                            cpNo: a.componentNo,
+                            command: 1
+                        }
+                        const res = await HttpRequest.send(HttpMethod.POST, CPEndPoint.POST_CP_TRIGGER, data);
+                        if (res) {
+                            if (res.data.code == 200) {
+                                showPopup(true, [PopUpMsg.TRIGGER_CP]);
+                            } else {
+                                showPopup(false, res.data.errors);
+                            }
+                        }
                         //fetchStatus(a["scpIp"], a["cpNumber"]);
                     });
                 }
                 break;
             case "toggle":
-                console.log(selectedObjects);
                 if (selectedObjects.length > 0) {
-                    selectedObjects.map(async (a) => {
-                        const res = await axios.post(
-                            `http://localhost:5031/api/v1/cp/trigger?ScpIp=${a["scpIp"]}&CpNumber=${a["cpNumber"]}&Command=3`
-                        );
-                        console.log(res);
-                        //fetchStatus(a["scpIp"],a["cpNumber"]);
+                    selectedObjects.map(async (a: CpDto) => {
+                        let data: CpTriggerDto = {
+                            scpMac: a.mac,
+                            cpNo: a.componentNo,
+                            command: 3
+                        }
+                        const res = await HttpRequest.send(HttpMethod.POST, CPEndPoint.POST_CP_TRIGGER, data);
+                        if (res) {
+                            if (res.data.code == 200) {
+                                showPopup(true, [PopUpMsg.TRIGGER_CP]);
+                            } else {
+                                showPopup(false, res.data.errors);
+                            }
+                        }
+                        //fetchStatus(a["scpIp"], a["cpNumber"]);
                     });
                 }
                 break;
@@ -238,8 +233,8 @@ const Control = () => {
     };
 
     {/* checkBox */ }
-    const [selectedObjects, setSelectedObjects] = useState<Object[]>([]);
-    const handleCheckedAll = (data: Object[], e: React.ChangeEvent<HTMLInputElement>) => {
+    const [selectedObjects, setSelectedObjects] = useState<CpDto[]>([]);
+    const handleCheckedAll = (data: CpDto[], e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(data)
         console.log(e.target.checked)
         if (setSelectedObjects) {
@@ -251,7 +246,7 @@ const Control = () => {
         }
     }
 
-    const handleChecked = (data: Object, e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChecked = (data: CpDto, e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(data)
         console.log(e.target.checked)
         if (setSelectedObjects) {
@@ -259,7 +254,7 @@ const Control = () => {
                 setSelectedObjects((prev) => [...prev, data]);
             } else {
                 setSelectedObjects((prev) =>
-                    prev.filter((item) => item.no !== data.no)
+                    prev.filter((item) => item.componentNo !== data.componentNo)
                 );
             }
         }
@@ -297,7 +292,7 @@ const Control = () => {
                     >
                         Off
                     </Button>
-                                        <Button
+                    <Button
                         name='toggle'
                         size="sm"
                         variant="primary"
@@ -309,7 +304,7 @@ const Control = () => {
                 </div>
                 <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                     <div className="max-w-full overflow-x-auto">
-                        <TableTemplate deviceIndicate={3} statusDto={status} checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={headers} tableDatas={tableDatas} tableKeys={keys} status={true} action={true} selectedObject={selectedObjects} actionElement={(row) => (
+                        <TableTemplate<CpDto> deviceIndicate={3} statusDto={status} checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={CP_TABLE_HEADER} tableDatas={tableDatas} tableKeys={CP_KEY} status={true} action={true} selectedObject={selectedObjects} actionElement={(row) => (
                             <ActionElement onEditClick={handleOnClickEdit} onRemoveClick={handleOnClickRemove} data={row} />
                         )} />
 

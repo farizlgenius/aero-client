@@ -1,62 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import DangerModal from '../UiElements/DangerModal';
 import Modals from '../UiElements/Modals';
-import AddDoorForm from '../../components/form/form-elements/AddDoorForm';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import { Add, Locked, Moment, Unlock } from '../../icons';
+import { Add } from '../../icons';
 import Button from '../../components/ui/button/Button';
 import TableTemplate from '../../components/tables/Tables/TableTemplate';
 import ActionElement from '../UiElements/ActionElement';
 import axios from 'axios';
 import * as signalR from '@microsoft/signalr';
-import AddCredentialForm from '../../components/form/form-elements/AddCredentialForm';
+
+import { CardHolderDto, RemoveCardHolderDto } from '../../constants/types';
+import { CREDENTIAL_KEY, CREDENTIAL_TABLE_HEAD, CredentialEndPoin } from '../../constants/constant';
+import AddCredentialForm from '../../modals/AddCredentialForm';
 
 // Define Global Variable
 const server = import.meta.env.VITE_SERVER_IP;
-let removeTarget: Object;
-
-// Interface 
-interface Object {
-    [key: string]: any;
-}
-
-
-interface CardHolderDto {
-    cardHolderId: number;
-    cardHolderReferenceNumber:string;
-    title:string;
-    name:string;
-    sex:string;
-    email:string;
-    phone:string;
-    description:string;
-    holderStatus:string;
-    issueCodeRunningNumber:number;
-}
-
-interface StatusDto {
-    scpIp: string;
-    deviceNumber: number;
-    status: number | string;
-    tamper: number | string;
-    ac: number;
-    batt: number;
-}
-
-
-// Define Headers 
-
-const headers: string[] = [
-    "Id","Title" ,"Card Holder Name", "Status", "Action"
-]
-
-const keys: string[] = [
-    "cardHolderId","title", "name","holderStatus"
-];
-
+let removeTarget: string;
 
 const Credential = () => {
-       const [refresh, setRefresh] = useState(false);
+    const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     {/* Modal */ }
     const [isRemoveModal, setIsRemoveModal] = useState(false);
@@ -72,21 +34,6 @@ const Credential = () => {
             case "add":
                 setIsAddModalOpen(true);
                 break;
-            case "unlock":
-                selectedObjects.map(a => {
-                    changeDoorMode(a["scpIp"], a["acrNumber"], 2);
-                })
-                break;
-            case "lock":
-                selectedObjects.map(a => {
-                    changeDoorMode(a["scpIp"], a["acrNumber"], 3);
-                })
-                break;
-            case "moment":
-                selectedObjects.map(a => {
-                    unlockDoor(a["scpIp"], a["acrNumber"]);
-                })
-                break;
             default:
                 break;
         }
@@ -97,25 +44,24 @@ const Credential = () => {
 
     }
 
-    const handleOnClickRemove = (data: Object) => {
+    const handleOnClickRemove = (data: CardHolderDto) => {
         console.log(data);
-        removeTarget = data;
+        removeTarget = data.cardHolderReferenceNumber;
         setIsRemoveModal(true);
     }
     const handleOnClickCloseRemove = () => {
         setIsRemoveModal(false);
     }
     const handleOnClickConfirmRemove = () => {
-        removeDoors();
+        removeCardHolder();
 
     }
 
     {/* Door Data */ }
     const [tableDatas, setTableDatas] = useState<CardHolderDto[]>([]);
-    const [status, setStatus] = useState<StatusDto[]>([]);
     const fetchData = async () => {
         try {
-            const res = await axios.get(`${server}/api/v1/credential/all`);
+            const res = await axios.get(server + CredentialEndPoin.GET_CREDENTIAL_LIST);
             console.log(res.data.content)
             setTableDatas(res.data.content);
 
@@ -154,24 +100,17 @@ const Credential = () => {
     //         console.log(e);
     //     }
     // }
-    const removeDoors = async () => {
+    const removeCardHolder = async () => {
         if (removeTarget != undefined) {
             try {
                 console.log(removeTarget);
-                const data = new FormData();
-                data.append("AcrNumber", removeTarget["acrNumber"]);
-                data.append("ScpIp", removeTarget["scpIp"])
-                const res = await axios.post(`${server}/api/v1/acr/remove`, data, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
-                });
+                const res = await axios.delete(server + CredentialEndPoin.POST_REMOVE_CREDENTIAL + removeTarget);
                 if (res.status == 200) {
                     setIsRemoveModal(false);
                     console.log("Here");
                     toggleRefresh();
                 }
-                removeTarget = {};
+                removeTarget ="";
 
             } catch (e) {
                 console.log(e);
@@ -183,83 +122,51 @@ const Credential = () => {
 
     }
 
-    const changeDoorMode = async (ScpIp: string, AcrNo: number, Mode: number) => {
-        const data = new FormData();
-        data.append('ScpIp', ScpIp);
-        data.append('AcrNo', AcrNo.toString());
-        data.append('Mode', Mode.toString())
-        try {
-            const res = await axios.post(`${server}/api/v1/acr/mode`, data, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            })
-            console.log(res);
-        } catch (e) {
-            console.log(e);
-        }
-    }
-
-    const unlockDoor = async (ScpIp: string, AcrNo: number) => {
-        const data = new FormData();
-        data.append('ScpIp', ScpIp);
-        data.append('AcrNo', AcrNo.toString());
-        try {
-            const res = await axios.post(`${server}/api/v1/acr/unlock`, data, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            })
-            console.log(res);
-        } catch (e) {
-            console.log(e);
-        }
-    }
 
 
     {/* UseEffect */ }
     useEffect(() => {
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("http://localhost:5031/acrHub")
-            .withAutomaticReconnect()
-            .build();
+        // const connection = new signalR.HubConnectionBuilder()
+        //     .withUrl("http://localhost:5031/acrHub")
+        //     .withAutomaticReconnect()
+        //     .build();
 
-        connection.start().then(() => {
-            console.log("Connected to SignalR event hub");
-        });
-        connection.on(
-            "AcrStatus",
-            (ScpIp: string, AcrNumber: number, RelayStatus: string, AcrMode: string, AccessPointStatus: string) => {
-                console.log(ScpIp)
-                console.log(AcrNumber)
-                console.log(RelayStatus)
-                console.log(AcrMode)
-                console.log(AccessPointStatus)
-                setStatus((prev) =>
-                    prev.map((a) =>
-                        a.scpIp == ScpIp && a.deviceNumber == AcrNumber ? {
-                            ...a,
-                            status: AccessPointStatus,
-                            tamper: RelayStatus == "" ? a.tamper : RelayStatus,
-                        } : {
-                            ...a
-                        }
-                    )
-                )
-            }
-        );
+        // connection.start().then(() => {
+        //     console.log("Connected to SignalR event hub");
+        // });
+        // connection.on(
+        //     "AcrStatus",
+        //     (ScpMac: string, AcrNo: number, RelayStatus: string, AcrMode: string, AccessPointStatus: string) => {
+        //         console.log(ScpMac)
+        //         console.log(AcrNo)
+        //         console.log(RelayStatus)
+        //         console.log(AcrMode)
+        //         console.log(AccessPointStatus)
+        //         setStatus((prev) =>
+        //             prev.map((a) =>
+        //                 a.scpMac == ScpMac && a.deviceNumber == AcrNo ? {
+        //                     ...a,
+        //                     status: AccessPointStatus,
+        //                     tamper: RelayStatus == "" ? a.tamper : RelayStatus,
+        //                 } : {
+        //                     ...a
+        //                 }
+        //             )
+        //         )
+        //     }
+        // );
 
         fetchData();
 
-        return () => {
-            connection.stop();
-        };
+        // return () => {
+        //     connection.stop();
+        // };
 
     }, [refresh]);
 
     {/* checkBox */ }
-    const [selectedObjects, setSelectedObjects] = useState<Object[]>([]);
-    const handleCheckedAll = (data: Object[], e: React.ChangeEvent<HTMLInputElement>) => {
+    const [selectedObjects, setSelectedObjects] = useState<CardHolderDto[]>([]);
+    const handleCheckedAll = (data: CardHolderDto[], e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(data)
         console.log(e.target.checked)
         if (setSelectedObjects) {
@@ -271,7 +178,7 @@ const Credential = () => {
         }
     }
 
-    const handleChecked = (data: Object, e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChecked = (data: CardHolderDto, e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(data)
         console.log(e.target.checked)
         if (setSelectedObjects) {
@@ -285,10 +192,10 @@ const Credential = () => {
         }
     }
 
-  return (
-      <>
+    return (
+        <>
             {isRemoveModal && <DangerModal header='Remove Credentials' body='Please Click Confirm if you want to remove this users' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
-            {isAddModalOpen && <Modals header='Add Credentials' body={<AddCredentialForm onSubmitHandle={closeModalToggle} />} closeToggle={closeModalToggle} isWide={true}/>}
+            {isAddModalOpen && <Modals header='Add Credentials' body={<AddCredentialForm onSubmitHandle={closeModalToggle} />} closeToggle={closeModalToggle} isWide={true} />}
             <PageBreadcrumb pageTitle="Credentials" />
             <div className="space-y-6">
                 <div className="flex gap-4">
@@ -301,11 +208,38 @@ const Credential = () => {
                     >
                         Create
                     </Button>
+                    <Button
+                        name='deactivate'
+                        onClickWithEvent={handleClick}
+                        size="sm"
+                        variant="primary"
+                        startIcon={<Add className="size-5" />}
+                    >
+                        Deactivate
+                    </Button>
+                    <Button
+                        name='activate'
+                        onClickWithEvent={handleClick}
+                        size="sm"
+                        variant="primary"
+                        startIcon={<Add className="size-5" />}
+                    >
+                        Activate
+                    </Button>
+                    <Button
+                        name='reset'
+                        onClickWithEvent={handleClick}
+                        size="sm"
+                        variant="primary"
+                        startIcon={<Add className="size-5" />}
+                    >
+                        Reset Anti-Passback
+                    </Button>
 
                 </div>
                 <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                     <div className="max-w-full overflow-x-auto">
-                        <TableTemplate statusDto={status} checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={headers} tableDatas={tableDatas} tableKeys={keys} status={false} action={true} selectedObject={selectedObjects} actionElement={(row) => (
+                        <TableTemplate<CardHolderDto> checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={CREDENTIAL_TABLE_HEAD} tableDatas={tableDatas} tableKeys={CREDENTIAL_KEY} status={false} action={true} selectedObject={selectedObjects} actionElement={(row) => (
                             <ActionElement onEditClick={handleOnClickEdit} onRemoveClick={handleOnClickRemove} data={row} />
                         )} />
 
@@ -314,7 +248,7 @@ const Credential = () => {
 
             </div>
         </>
-  )
+    )
 }
 
 export default Credential

@@ -47,7 +47,7 @@ const navItems: NavItem[] = [
   {
     name: "Device",
     icon: <Module />,
-    subItems: [{ name: "Hardware", path: "/hardware", pro: false },{ name: "Module", path: "/module", pro: false },{ name: "Ouputs", path: "/control", pro: false },{ name: "Inputs", path: "/monitor", pro: false }],
+    subItems: [{ name: "Hardware", path: "/hardware", pro: false },{ name: "Module", path: "/module", pro: false },{ name: "Ouputs", path: "/control", pro: false },{ name: "Inputs", path: "/monitor", pro: false },{ name: "Monitor Point Group", path: "/monitorgroup", pro: false }],
   },
   {
     icon: <Door />,
@@ -69,7 +69,7 @@ const navItems: NavItem[] = [
   {
     icon: <CalenderIcon />,
     name: "Time",
-    subItems: [{ name: "Time Zone", path: "/timezone", pro: false },{ name: "Holiday", path: "/holiday", pro: false }],
+    subItems: [{ name: "Time Zone", path: "/timezone", pro: false },{ name: "Holiday", path: "/holiday", pro: false },{ name: "Interval", path: "/interval", pro: false }],
   },
   {
     icon: <Report />,

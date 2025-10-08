@@ -1,11 +1,17 @@
-import React, { PropsWithChildren, useEffect, useRef, useState } from 'react'
-import ComponentCard from '../../common/ComponentCard';
-import Button from '../../ui/button/Button';
-import Label from '../Label';
+import React, { PropsWithChildren, useEffect, useState } from 'react'
+import { ACREndPoint, HttpMethod, PopUpMsg, POST_ADD_ACCESS_LEVEL, TimeZoneEndPoint } from '../constants/constant';
 import axios from 'axios';
-import Input from '../input/InputField';
-import ActionElement from '../../../pages/UiElements/ActionElement';
-import Select from '../Select';
+import { DoorDto, TimeZoneDto } from '../constants/types';
+import ComponentCard from '../components/common/ComponentCard';
+import Label from '../components/form/Label';
+import Select from '../components/form/Select';
+import Input from '../components/form/input/InputField';
+import Button from '../components/ui/button/Button';
+import ActionElement from '../pages/UiElements/ActionElement';
+import HttpRequest from '../utility/HttpRequest';
+import Helper from '../utility/Helper';
+import { usePopupActions } from '../utility/PopupCalling';
+
 
 // Global Variable
 
@@ -23,54 +29,37 @@ interface AddAccessLevelProp {
 
 interface CreateAccessLevelDto {
   name: string;
-  accessLevelNumber: number;
+  elementNo: number;
   mode:number;
   doors: CreateAccessLevelDoorDto[]
 }
 
 interface CreateAccessLevelDoorDto {
-  scpIp:string;
-  acrNumber: number;
+  scpMac:string;
+  acrNo: number;
   acrName:string;
-  tzNumber: number;
+  tzNo: number;
   tzName:string;
 }
 
-interface TimeZoneDto {
-    no:number;
-    name:string;
-    scpIp:string;
-    tzNumber:number;
-    mode:number;
-    activeDate:string;
-    deactiveDate:string;
-    intervals:number;
-}
-
-interface DoorDto {
-    name: string;
-    scpIp: string;
-    acrNumber: number;
-    mode: number;
-    acrModeDesc:string;
-}
 
 
 const AddAccessLevelForm: React.FC<PropsWithChildren<AddAccessLevelProp>> = ({ onSubmitHandle }) => {
+  const {showPopup} = usePopupActions();
   const [doorOption, setDoorOption] = useState<Option[]>([]);
   const [timeZoneOption, setTimeZoneOption] = useState<Option[]>([]);
   const [addDoorForm, setAddDoorForm] = useState<boolean>(false);
   const [createAccessLevelDoorDto, setCreateAccessLevelDoorDto] = useState<CreateAccessLevelDoorDto>({
-    scpIp: "",
-    acrNumber: 0,
+    scpMac: "",
+    acrNo: 0,
     acrName: "",
     tzName: "",
-    tzNumber: 0
+    tzNo: 0
   });
   const [createAccessLevelDoorList, setCreateAccessLevelDoorList] = useState<CreateAccessLevelDoorDto[]>([]);
   const [createAccessLevelDto, setCreateAccessLevelDto] = useState<CreateAccessLevelDto>({
   name: "",
-  accessLevelNumber: 0,
+  elementNo: 0,
   mode:0,
   doors: []
   })
@@ -80,21 +69,21 @@ const AddAccessLevelForm: React.FC<PropsWithChildren<AddAccessLevelProp>> = ({ o
     if(e.target.name == "acrName"){
       const values = value.split(",");
       // Add if Empty
-      if(createAccessLevelDoorDto.scpIp == ''){
-        setCreateAccessLevelDoorDto(prev => ({...prev,scpIp:values[0],acrNumber:Number(values[1]),acrName:values[2]}))
+      if(createAccessLevelDoorDto.scpMac == ''){
+        setCreateAccessLevelDoorDto(prev => ({...prev,scpMac:values[0],acrNo:Number(values[1]),acrName:values[2]}))
       }
       createAccessLevelDoorList.map((a:CreateAccessLevelDoorDto) => {
-        if(a.scpIp == values[0] && a.acrNumber == Number(values[1])){
+        if(a.scpMac == values[0] && a.acrNo == Number(values[1])){
           alert("Can't assign duplicate door to access level")
         }else{
-          setCreateAccessLevelDoorDto(prev => ({...prev,scpIp:values[0],acrNumber:Number(values[1]),acrName:values[2]}))
+          setCreateAccessLevelDoorDto(prev => ({...prev,scpMac:values[0],acrNo:Number(values[1]),acrName:values[2]}))
         }
         console.log(createAccessLevelDoorDto)
       })
       
     }else if(e.target.name == "tzName"){
       const values = value.split(",");
-      setCreateAccessLevelDoorDto(prev => ({...prev,tzNumber:Number(values[0]),tzName:values[1]}))
+      setCreateAccessLevelDoorDto(prev => ({...prev,tzNo:Number(values[0]),tzName:values[1]}))
     }
     
   }
@@ -139,24 +128,24 @@ const AddAccessLevelForm: React.FC<PropsWithChildren<AddAccessLevelProp>> = ({ o
   const handleOnClickEdit = (data:CreateAccessLevelDoorDto) => {
     console.log(data);
     setCreateAccessLevelDoorDto({
-      scpIp: data.scpIp,
-      acrNumber: data.acrNumber,
+      scpMac: data.scpMac,
+      acrNo: data.acrNo,
       acrName: data.acrName,
-      tzNumber: data.tzNumber,
+      tzNo: data.tzNo,
       tzName: data.tzName
     })
         setAddDoorForm(true);
   }
 
   const handleOnClickRemove = (data: CreateAccessLevelDoorDto) => {
-    setCreateAccessLevelDoorList(createAccessLevelDoorList.filter((a:CreateAccessLevelDoorDto) => a.scpIp != data.scpIp && a.acrNumber != data.acrNumber ))
+    setCreateAccessLevelDoorList(createAccessLevelDoorList.filter((a:CreateAccessLevelDoorDto) => a.scpMac != data.scpMac && a.acrNo != data.acrNo ))
   }
 
 
   const addAccessLevel = async (data: CreateAccessLevelDto) => {
     data.doors = createAccessLevelDoorList;
     try {
-      const res = await axios.post(`${server}/api/v1/acslv/add`, data, {
+      const res = await axios.post(POST_ADD_ACCESS_LEVEL, data, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -173,11 +162,11 @@ const AddAccessLevelForm: React.FC<PropsWithChildren<AddAccessLevelProp>> = ({ o
   // Fetch Data
   const fetchDoor = async () => {
     try{
-      const res = await axios.get(`${server}/api/v1/acr/all`)
+      const res = await axios.get(server+ACREndPoint.GET_ACR_LIST)
       console.log(res.data.content)
       res.data.content.map((a:DoorDto) => {
         setDoorOption((prev) => ([...prev,{
-          value:a.scpIp +","+a.acrNumber+","+a.name,
+          value:a.scpMac +","+a.acrNo+","+a.name,
           label:a.name,
         }]))
       })
@@ -186,18 +175,16 @@ const AddAccessLevelForm: React.FC<PropsWithChildren<AddAccessLevelProp>> = ({ o
     }
   }
 
-    const fetchTimeZone = async () => {
-    try{
-      const res = await axios.get(`${server}/api/v1/tz/all`)
-      console.log(res.data.content)
-      res.data.content.map((a:TimeZoneDto) => {
-        setTimeZoneOption((prev) => ([...prev,{
-          value:a.tzNumber + "," + a.name,
-          label:a.name
+  const fetchTimeZone = async () => {
+    const res = await HttpRequest.send(HttpMethod.GET, TimeZoneEndPoint.GET_TZ_LIST)
+    Helper.handlePopup(res, PopUpMsg.GET_TZ, showPopup);
+    if (res) {
+      res.data.data.map((a: TimeZoneDto) => {
+        setTimeZoneOption((prev) => ([...prev, {
+          value: a.tzNumber + "," + a.name,
+          label: a.name
         }]))
       })
-    }catch(e){
-      console.log(e)
     }
   }
 

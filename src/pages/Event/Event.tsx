@@ -75,9 +75,9 @@ const Event = () => {
   async function fetchData() {
     try {
       const res = await axios.get(`${server}/api/v1/event?PageNumber=1&PageSize=10`);
-      console.log(res.data.content);
-      setTablesData(res.data.content.data);
-      setPagination(res.data.content.page);
+      console.log(res.data.data);
+      setTablesData(res.data.data.data);
+      setPagination(res.data.data.page);
     } catch (e) {
       console.log(e);
     }
@@ -86,9 +86,9 @@ const Event = () => {
   async function fetchDataWithParams(pageNumber: number, pageSize: number) {
     try {
       const res = await axios.get(`${server}/api/v1/event?PageNumber=${pageNumber}&PageSize=${pageSize}`);
-      console.log(res.data.content);
-      setTablesData(res.data.content.data);
-      setPagination(res.data.content.page);
+      console.log(res.data.data);
+      setTablesData(res.data.data.data);
+      setPagination(res.data.data.page);
     } catch (e) {
       console.log(e);
     }

@@ -1,64 +1,29 @@
-import React, { PropsWithChildren, useRef, useState } from 'react'
-import ComponentCard from '../../common/ComponentCard';
-import Button from '../../ui/button/Button';
-import Label from '../Label';
+import React, { PropsWithChildren, useState } from 'react'
+import { AccessGroupDto, CreateCardHolderDto, CreateCredentialDto,Option } from '../constants/types';
 import axios from 'axios';
-import Input from '../input/InputField';
-import { EnvelopeIcon } from '../../../icons';
-import Select from '../Select';
-import TextArea from '../input/TextArea';
-import Radio from '../input/Radio';
-import ActionElement from '../../../pages/UiElements/ActionElement';
-import DatePicker from '../date-picker';
-import Modals from '../../../pages/UiElements/Modals';
+import { CredentialEndPoin, GET_ACCESS_LEVEL_LIST, HubEndPoint, Sex } from '../constants/constant';
 import ScanCard from './ScanCard';
+import ComponentCard from '../components/common/ComponentCard';
+import Modals from '../pages/UiElements/Modals';
+import Button from '../components/ui/button/Button';
+import Label from '../components/form/Label';
+import Input from '../components/form/input/InputField';
+import Radio from '../components/form/input/Radio';
+import { EnvelopeIcon } from '../icons';
+import DatePicker from '../components/form/date-picker';
+import Select from '../components/form/Select';
+import ActionElement from '../pages/UiElements/ActionElement';
+import TextArea from '../components/form/input/TextArea';
 import * as signalR from '@microsoft/signalr';
+
 
 // Global Variable
 
 const server = import.meta.env.VITE_SERVER_IP;
 
-// interface 
-interface Option {
-  value: string | number;
-  label: string;
-}
 
 interface AddCredentialProps {
   onSubmitHandle: () => void
-}
-
-
-interface AccessGroupDto {
-  name: string;
-  alvlNo: number;
-}
-
-interface CreateCredentialDto {
-  id: number;
-  cardHolderReferenceNumber: string;
-  bits: number;
-  issueCode: number;
-  facilityCode: number;
-  cardNumber: number;
-  pin: string;
-  activeDate: string;
-  deactiveDate: string;
-  accessLevel: number;
-  image: string;
-}
-
-interface CreateCardHolderDto {
-  cardHolderId: string;
-  cardHolderReferenceNumber: string;
-  title: string;
-  name: string;
-  sex: string;
-  email: string;
-  phone: string;
-  description: string;
-  holderStatus: string;
-  cards: CreateCredentialDto[]
 }
 
 
@@ -67,17 +32,15 @@ const active = "inline-flex items-center rounded-lg px-3 py-2 text-sm font-mediu
 const inactive = "inline-flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200 ease-in-out sm:p-3 bg-transparent text-gray-500 border-transparent hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
 
 const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ onSubmitHandle }) => {
-  const cardHolderReferenceNumber = crypto.randomUUID();
-  let cardRunnungNumber = 1;
-  const formRef = useRef<HTMLFormElement>(null);
+  let cardRunningNumber = 1;
   const [activeTab, setActiveTab] = useState<number>(0);
   const [selectedValue, setSelectedValue] = useState<string>("Male");
   const [addCardForm, setAddCardForm] = useState<boolean>(false);
   const [accessLevelOption, setAccessLevelOption] = useState<Option[]>([]);
   const [scanCard, setScanCard] = useState<boolean>(false);
   const [createCredentialDto, setCreateCredentialDto] = useState<CreateCredentialDto>({
-    id: cardRunnungNumber,
-    cardHolderReferenceNumber: cardHolderReferenceNumber,
+    id: cardRunningNumber,
+    cardHolderReferenceNumber: "",
     bits: 0,
     issueCode: 0,
     facilityCode: 0,
@@ -91,9 +54,11 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
   const [createCredentialList, setCreateCredentialList] = useState<CreateCredentialDto[]>([]);
   const [createCardHolderDto, setCreateCardHolderDto] = useState<CreateCardHolderDto>({
     cardHolderId: "",
-    cardHolderReferenceNumber: cardHolderReferenceNumber,
+    cardHolderReferenceNumber: "",
     title: "",
-    name: "",
+    firstName: "",
+    middleName: "",
+    lastName: "",
     sex: "",
     email: "",
     phone: "",
@@ -102,25 +67,29 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
     cards: []
   })
 
+  function generateEmployeeId(): string {
+  return `${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+}
+
   {/* Start Scan Card */ }
   const handleStartScan = () => {
     const connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5031/credentialHub")
+      .withUrl(server + HubEndPoint.CREDENTIAL_HUB)
       .withAutomaticReconnect()
       .build();
 
     connection.start().then(() => {
       console.log("Connected to SignalR event hub");
     });
-    connection.on("CardScanStatus", (ScpIp: number, FormatNumber: number, FacilityCode: number, CardHolderId: number, IssueCode: number, FloorNumber: number) => {
+    connection.on("CardScanStatus", (ScpMac: string, FormatNumber: number, FacilityCode: number, CardHolderId: number, IssueCode: number, FloorNumber: number) => {
       console.log(FormatNumber);
       console.log(FacilityCode);
       console.log(CardHolderId);
       console.log(IssueCode);
       console.log(FloorNumber);
       setCreateCredentialDto({
-        id: cardRunnungNumber,
-        cardHolderReferenceNumber: cardHolderReferenceNumber,
+        id: cardRunningNumber,
+        cardHolderReferenceNumber: "",
         bits: 0,
         issueCode: IssueCode,
         facilityCode: FacilityCode,
@@ -128,7 +97,7 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
         pin: "",
         activeDate: "",
         deactiveDate: "",
-        accessLevel: 0,
+        accessLevel: -1,
         image: ""
       })
       setScanCard(false);
@@ -158,7 +127,7 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
         break;
       case "addCard":
         setCreateCredentialList(prev => ([...prev, createCredentialDto]))
-        cardRunnungNumber++;
+        cardRunningNumber++;
         setAddCardForm(false)
         break;
       default:
@@ -167,7 +136,7 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
   }
   const handleOnTabClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     setActiveTab(Number(e.currentTarget.value));
-    if (e.currentTarget.value == "1") {
+    if (e.currentTarget.value == "2") {
       fetchAccessLevel();
     }
   }
@@ -184,10 +153,11 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
 
 
   const handleSelectChange = (value: string, e: React.ChangeEvent<HTMLSelectElement>) => {
-    console.log(e.currentTarget.name);
+    console.log(e.target.name);
     console.log(value);
-    switch (e.currentTarget.name) {
+    switch (e.target.name) {
       case "accessLevel":
+        setCreateCredentialDto((prev) => ({...prev,[e.target.name]:value}))
         break;
       default:
         break;
@@ -196,10 +166,11 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
 
   const fetchAccessLevel = async () => {
     try {
-      const res = await axios.get(`${server}/api/v1/acslv/all`);
+      const res = await axios.get(GET_ACCESS_LEVEL_LIST);
+      console.log(res.data.content)
       res.data.content.map((a: AccessGroupDto) => {
         setAccessLevelOption(prev => ([...prev, {
-          value: a.alvlNo,
+          value: a.elementNo,
           label: a.name
         }]))
       })
@@ -218,32 +189,32 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
 
   const handleRadioChange = (value: string) => {
     setSelectedValue(value);
-    if (value == "Male") {
-      setCreateCardHolderDto(prev => ({ ...prev, sex: "Male" }));
+    if (value == Sex.M) {
+      setCreateCardHolderDto(prev => ({ ...prev, sex: Sex.M }));
     } else {
 
-      setCreateCardHolderDto(prev => ({ ...prev, sex: "Female" }));
+      setCreateCardHolderDto(prev => ({ ...prev, sex: Sex.F }));
     }
   }
 
   const addCredentials = async (data: CreateCardHolderDto) => {
     data.cards = createCredentialList;
     try {
-      const res = await axios.post(`${server}/api/v1/credential/add`, data, {
+      const res = await axios.post(server + CredentialEndPoin.POST_ADD_CREDENTIAL, data, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
       console.log(res)
       if (res.status == 201 || res.status == 200) {
-          onSubmitHandle()
+        onSubmitHandle()
       }
     } catch (e) {
       console.log(e);
     }
   }
 
-    const toLocalISOWithOffset = (date: Date) => {
+  const toLocalISOWithOffset = (date: Date) => {
     const pad = (n: number) => String(n).padStart(2, "0");
     const tzOffset = -date.getTimezoneOffset();
     const sign = tzOffset >= 0 ? "+" : "-";
@@ -270,39 +241,58 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
         <div className="flex-1 overflow-x-auto pb-2 sm:w-[200px]">
           <nav className="flex w-full flex-row sm:flex-col sm:space-y-2">
             <button value={0} className={activeTab === 0 ? active : inactive} onClick={handleOnTabClick}>
-              General
+              Personal Information
             </button>
-
             <button value={1} className={activeTab === 1 ? active : inactive} onClick={handleOnTabClick}>
+              Contact Detail
+            </button>
+            <button value={2} className={activeTab === 2 ? active : inactive} onClick={handleOnTabClick}>
               Credentials
             </button>
             <button value={3} className={activeTab === 3 ? active : inactive} onClick={handleOnTabClick}>
-              Advance
+              Image
             </button>
             <Button onClick={handleOutsideSubmit} className="w-50" size="sm">Submit </Button>
           </nav>
         </div>
         <div className='flex-2'>
-          <div /* ref={formRef} onSubmit={handleSubmit} */ className="space-y-6 flex justify-center">
+          <div className="space-y-6 flex justify-center">
             <div className='w-[60%]'>
               {activeTab == 0 &&
 
                 <div className='flex flex-col gap-1'>
-                  <Label htmlFor="cardHolderId">Cardholder ID</Label>
-                  <Input name="cardHolderId" type="text" id="cardHolderId" onChange={handleChangeCreateCardHolderData} value={createCardHolderDto.cardHolderId} />
                   <div className='flex gap-2'>
-                    <div className='flex-1'>
-                      <Label htmlFor="title">Title</Label>
-                      <Input name="title" type="text" id="title" onChange={handleChangeCreateCardHolderData} value={createCardHolderDto.title} />
+
+                    <div className='flex-9'>
+                      <Label htmlFor="cardHolderId">Cardholder ID / Employee ID</Label>
+                      <Input name="cardHolderId" type="text" id="cardHolderId" onChange={handleChangeCreateCardHolderData} value={createCardHolderDto.cardHolderId} />
                     </div>
-                    <div className='flex-3'>
-                      <Label htmlFor="name">Cardholder Name</Label>
-                      <Input name="name" type="text" id="name" onChange={handleChangeCreateCardHolderData} value={createCardHolderDto.name} />
+                    <div className='flex-1 flex items-end'>
+                      <Button onClick={()=>setCreateCardHolderDto((prev) =>({...prev,cardHolderId:generateEmployeeId()}))}>Auto</Button>
                     </div>
-                                        <div className='flex-3 hidden'>
-                      <Label className='hidden' htmlFor="cardHolderReferenceNumber">Card Holder Reference Number</Label>
-                      <Input className='hidden' isReadOnly={true} name="cardHolderReferenceNumber" type="text" id="cardHolderReferenceNumber" onChange={handleChangeCreateCardHolderData} value={createCardHolderDto.cardHolderReferenceNumber} />
-                    </div>
+                  </div>
+
+
+
+                  <div className='flex-1'>
+                    <Label htmlFor="title">Title</Label>
+                    <Input name="title" type="text" id="title" onChange={handleChangeCreateCardHolderData} value={createCardHolderDto.title} />
+                  </div>
+                  <div className='flex-3'>
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input name="firstName" type="text" id="firstName" onChange={handleChangeCreateCardHolderData} value={createCardHolderDto.firstName} />
+                  </div>
+                  <div className='flex-3 hidden'>
+                    <Label className='hidden' htmlFor="cardHolderReferenceNumber">Card Holder Reference Number</Label>
+                    <Input className='hidden' isReadOnly={true} name="cardHolderReferenceNumber" type="text" id="cardHolderReferenceNumber" onChange={handleChangeCreateCardHolderData} value={createCardHolderDto.cardHolderReferenceNumber} />
+                  </div>
+                  <div className='flex-3'>
+                    <Label htmlFor="middleName">Middle Name</Label>
+                    <Input name="middleName" type="text" id="middleName" onChange={handleChangeCreateCardHolderData} value={createCardHolderDto.middleName} />
+                  </div>
+                  <div className='flex-3'>
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input name="lastName" type="text" id="lastName" onChange={handleChangeCreateCardHolderData} value={createCardHolderDto.lastName} />
                   </div>
 
 
@@ -333,6 +323,13 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
 
                     </div>
                   </div>
+
+
+                </div>
+              }
+
+              {activeTab === 1 &&
+                <div className='flex flex-col gap-1'>
 
                   <div>
                     <Label>Email</Label>
@@ -371,7 +368,7 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
                 </div>
               }
 
-              {activeTab === 1 &&
+              {activeTab === 2 &&
 
                 <div className='flex flex-col gap-5'>
                   <div className='gap-3'>
@@ -380,11 +377,6 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
                       {addCardForm ?
                         <>
                           <div>
-                            {/* {autoReadCardData.isWaiting ?
-                            <Button startIcon={<Spinner />} size='sm'>Waiting for card...</Button>
-                            :
-                            
-                            } */}
 
                             <Button name="scanCard" onClickWithEvent={handleClick} size='sm'>Scan Card</Button>
 
@@ -433,28 +425,28 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
                             <div className='flex gap-2'>
                               <div>
                                 <DatePicker
-                                  id="date-picker"
+                                  id="date-picker1"
                                   label="Activate Date"
                                   placeholder="Select a date"
                                   value={createCredentialDto.activeDate}
                                   onChange={(dates, currentDateString) => {
                                     // Handle your logic
                                     console.log({ dates, currentDateString });
-                                    setCreateCredentialDto((prev) => ({...prev,activeDate:toLocalISOWithOffset(dates[0])}));
-                                    
+                                    setCreateCredentialDto((prev) => ({ ...prev, activeDate: toLocalISOWithOffset(dates[0]) }));
+
                                   }}
                                 />
                               </div>
                               <div>
                                 <DatePicker
-                                  id="date-picker"
+                                  id="date-picker2"
                                   label="Deactivate Date"
                                   placeholder="Select a date"
                                   value={createCredentialDto.deactiveDate}
                                   onChange={(dates, currentDateString) => {
                                     // Handle your logic
                                     console.log({ dates, currentDateString });
-                                    setCreateCredentialDto((prev) => ({...prev,deactiveDate:toLocalISOWithOffset(dates[0])}));
+                                    setCreateCredentialDto((prev) => ({ ...prev, deactiveDate: toLocalISOWithOffset(dates[0]) }));
                                   }}
                                 />
                               </div>
@@ -498,8 +490,8 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
 
                           <div className='flex flex-col gap-1'>
                             {/* Card */}
-                            {createCredentialList.map((a: CreateCredentialDto) => (
-                              <div className="p-3 bg-white border border-gray-200 task rounded-xl shadow-theme-sm dark:border-gray-800 dark:bg-white/5">
+                            {createCredentialList.map((a: CreateCredentialDto, i: number) => (
+                              <div key={i} className="p-3 bg-white border border-gray-200 task rounded-xl shadow-theme-sm dark:border-gray-800 dark:bg-white/5">
                                 <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
                                   <div className="flex items-start w-full gap-4">
                                     <label htmlFor="taskCheckbox1" className="w-full cursor-pointer">
@@ -520,26 +512,12 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
                                 </div>
                               </div>
                             ))}
-
-
                           </div>
 
-
-
-
                         </>
-
-
-
                       }
 
-
-
-
                     </div>
-
-
-
                   </div>
                 </div>
               }
@@ -556,3 +534,7 @@ const AddCredentialForm: React.FC<PropsWithChildren<AddCredentialProps>> = ({ on
 }
 
 export default AddCredentialForm
+
+function uuidv4() {
+  throw new Error('Function not implemented.');
+}

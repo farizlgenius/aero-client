@@ -6,32 +6,23 @@ import ActionElement from '../UiElements/ActionElement';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import Modals from '../UiElements/Modals';
-import AddAccessLevelForm from '../../components/form/form-elements/AddAccessLevelForm';
 import DangerModal from '../UiElements/DangerModal';
+import { AccessGroupDto } from '../../constants/types';
+import { ACCESSGROUP_KEY, ACCESSGROUP_TABLE_HEAD, GET_ACCESS_LEVEL_LIST } from '../../constants/constant';
+import AddAccessLevelForm from '../../modals/AddAccessLevelForm';
 
 // Define Global Variable
 const server = import.meta.env.VITE_SERVER_IP;
 let removeTarget: Object;
 
 // Interface 
-interface Object {
-    [key: string]: any;
-}
+// interface Object {
+//     [key: string]: any;
+// }
 
-interface AccessGroupDto{
-    name:string;
-    alvlNo:number;
-}
+
 
 // Define Headers 
-
-const headers: string[] = [
-    "Name", "Access Level Number","Action"
-]
-
-const keys: string[] = [
-    "name", "alvlNo"
-];
 
 const AccessGroup = () => {
         const [refresh,setRefresh] = useState(false);
@@ -79,7 +70,7 @@ const AccessGroup = () => {
     const [tableDatas, setTableDatas] = useState<AccessGroupDto[]>([]);
     const fetchData = async () => {
         try {
-            const res = await axios.get(`${server}/api/v1/acslv/all`);
+            const res = await axios.get(GET_ACCESS_LEVEL_LIST);
             console.log(res.data.content)
             setTableDatas(res.data.content);
 
@@ -90,7 +81,7 @@ const AccessGroup = () => {
         const removeAccessGroup = async () => {
         if (removeTarget != undefined) {
             try {
-                const res = await axios.post(`${server}/api/v1/acslv/delete`,removeTarget,{
+                const res = await axios.post(`${server}/api/v1/accesslevel/delete`,removeTarget,{
                     headers:{
                         "Content-Type":"application/json"
                     }
@@ -121,8 +112,8 @@ const AccessGroup = () => {
         }, [refresh]);
 
             {/* checkBox */ }
-            const [selectedObjects, setSelectedObjects] = useState<Object[]>([]);
-            const handleCheckedAll = (data: Object[], e: React.ChangeEvent<HTMLInputElement>) => {
+            const [selectedObjects, setSelectedObjects] = useState<AccessGroupDto[]>([]);
+            const handleCheckedAll = (data: AccessGroupDto[], e: React.ChangeEvent<HTMLInputElement>) => {
                 console.log(data)
                 console.log(e.target.checked)
                 if (setSelectedObjects) {
@@ -134,7 +125,7 @@ const AccessGroup = () => {
                 }
             }
         
-            const handleChecked = (data: Object, e: React.ChangeEvent<HTMLInputElement>) => {
+            const handleChecked = (data: AccessGroupDto, e: React.ChangeEvent<HTMLInputElement>) => {
                 console.log(data)
                 console.log(e.target.checked)
                 if (setSelectedObjects) {
@@ -168,7 +159,7 @@ const AccessGroup = () => {
                 </div>
                 <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                     <div className="max-w-full overflow-x-auto">
-                        <TableTemplate  checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={headers} tableDatas={tableDatas} tableKeys={keys} status={true} action={true} selectedObject={selectedObjects} actionElement={(row) => (
+                        <TableTemplate  checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={ACCESSGROUP_TABLE_HEAD} tableDatas={tableDatas} tableKeys={ACCESSGROUP_KEY} status={true} action={true} selectedObject={selectedObjects} actionElement={(row) => (
                             <ActionElement onEditClick={handleOnClickEdit} onRemoveClick={handleOnClickRemove} data={row} />
                         )} />
 

@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import NotFound from "./pages/OtherPage/NotFound";
@@ -23,7 +23,7 @@ import Module from "./pages/Module/Module";
 import Event from "./pages/Event/Event";
 import Control from "./pages/Control/Control";
 import Monitor from "./pages/Monitor/Monitor";
-import Hardware from "./pages/Device/Hardware";
+import Hardware from "./pages/Hardware/Hardware";
 import PopupExample from "./pages/UiElements/PopupExample";
 import AccessGroup from "./pages/AccessGroup/AccessGroup";
 import Door from "./pages/Door/Door";
@@ -35,19 +35,28 @@ import { useEffect, useState } from "react";
 import * as signalR from "@microsoft/signalr";
 import { HubEndPoint } from "./constants/constant";
 import { VerifyScpConfigDto } from "./constants/types";
-
-//
+import { usePopup } from "./context/PopupContext";
+import Holiday from "./pages/Holiday/Holiday";
+import Interval from "./pages/Interval/Interval";
+import { useAlert } from "./context/AlertContext";
+import Popup from "./modals/Popup";
 
 const server = import.meta.env.VITE_SERVER_IP;
 
+
 export default function App() {
-  const [isShow, setIsShow] = useState<boolean>(false);
-  const [isSuccess, setIsSuccess] = useState<boolean>(false);
-  let tag = "";
+  const navigate = useNavigate();
+  const { showAlertFlag, setShowAlertFlag, alertSuccessFlag, setAlertSuccessFlag, alertMessage, setAlertMessage } = useAlert();
+  const { showPopupFlag, setShowPopupFlag, popupSuccessFlag, setPopupSuccessFlag, popUpMessage, setPopUpMessage } = usePopup();
+  const [isResetShow, setIsResetShow] = useState<boolean>(false);
+  const [isUploadShow, setIsUploadShow] = useState<boolean>(false);
+  const toggleIsUploadShow = () => {
+    setIsResetShow(false);
+    setIsUploadShow(false);
+  }
   const [message, setMessage] = useState<string>("");
-  const handleClick = () => {
-    setIsShow(false);
-    setMessage("")
+  const handleClick = (e:React.MouseEvent<HTMLDivElement>) => {
+    setShowPopupFlag(false);
   }
   useEffect(() => {
     const cmndConnection = new signalR.HubConnectionBuilder()
@@ -61,63 +70,97 @@ export default function App() {
       console.log(e);
     });
 
-    cmndConnection.on(
-      "CmndStatus",
-      (CmndStatus: number, TagNumber: number, NakReason: string, NakDescriptionCode: number) => {
-        console.log(CmndStatus)
-        console.log(TagNumber)
-        console.log(NakReason)
-        console.log(NakDescriptionCode)
+    if (showAlertFlag == true) {
+      setTimeout(() => {
+        setShowAlertFlag(false);
+        setAlertSuccessFlag(false);
+        if (setAlertMessage) setAlertMessage("")
+      }, 1000)
+    }
 
-        if (CmndStatus == 1) {
-          setIsSuccess(true);
-        } else {
-          setIsSuccess(false);
-        }
-        tag = TagNumber.toString();
-        setIsShow(true);
-        setMessage("tag (" + tag + ")" + " " + message);
-
-      }
-    );
+    if (showPopupFlag == true && popupSuccessFlag == true) {
+      setTimeout(() => {
+        setShowPopupFlag(false);
+        setPopupSuccessFlag(false);
+        setPopUpMessage([])
+      }, 1000)
+    }
 
     cmndConnection.on(
       "VerifyConfig", (data: VerifyScpConfigDto) => {
         console.log(data);
+        console.log(data.isReset);
+        console.log(data.isUpload);
+        if (data.isReset) {
+          setIsResetShow(true);
+        } else if (data.isUpload) {
+          setIsUploadShow(true);
+        }
       }
     )
 
     return () => {
       cmndConnection.stop();
     };
-  }, [])
+  }, [showPopupFlag, showAlertFlag])
   return (
     <>
-
-      <Router>
-        {isShow &&
-          <div onClick={handleClick} className="transition-opacity duration-500 opacity-100 hover:opacity-0">
+      <div>
+        {showPopupFlag &&
+          <div>
+            <Popup
+            handleClick={handleClick}
+              succesFlag={popupSuccessFlag}
+              body={popUpMessage}
+            />
+          </div>
+        }
+        {showAlertFlag &&
+          <div className="transition-opacity duration-500 opacity-100 hover:opacity-0">
             <Alert
               isFixed={true}
-              variant={isSuccess ? "success" : "error"}
-              title={isSuccess ? "Command Success" : "Command Error"}
-              message={message}
+              variant={alertSuccessFlag ? "success" : "error"}
+              title={alertSuccessFlag ? "Command Success" : "Command Error"}
+              message={alertMessage ? alertMessage : ""}
               showLink={false}
             />
 
           </div>
+
         }
 
+        {isUploadShow &&
+          <div onClick={() => navigate("/hardware")} className="cursor-pointer transition-opacity duration-500 opacity-100">
+            <Alert
+              isFixed={true}
+              variant="warning"
+              title="Data Mismatch (Sync Require)"
+              message={message}
+              showLink={false}
+              isTop={false}
+            />
+          </div>
+        }
 
+        {isResetShow &&
+          <div onClick={() => navigate("/hardware")} className="cursor-pointer transition-opacity duration-500 opacity-100">
+            <Alert
+              isFixed={true}
+              variant="warning"
+              title="Reset (Reset Require)"
+              message={message}
+              showLink={false}
+              isTop={false}
+            />
+          </div>
+        }
         <ScrollToTop />
-
-
         <Routes>
           {/* Dashboard Layout */}
           <Route element={<AppLayout />}>
             <Route index path="/" element={<Home />} />
             {/* ACS */}
-            <Route path="/hardware" element={<Hardware />} />
+            <Route path="/hardware" element={<Hardware onUploadClick={toggleIsUploadShow} />} />
             <Route path="/module" element={<Module />} />
             <Route path="/event" element={<Event />} />
             <Route path="/control" element={<Control />} />
@@ -128,6 +171,9 @@ export default function App() {
             <Route path="/timezone" element={<TimeZone />} />
             <Route path="/card" element={<Credential />} />
             <Route path="/card-format" element={<CardFormat />} />
+            <Route path="/holiday" element={<Holiday />} />
+            <Route path="/interval" element={<Interval />} />
+            <Route path="/monitorgroup" element={<Interval />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
@@ -159,7 +205,7 @@ export default function App() {
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </Router>
+      </div>
     </>
   );
 }

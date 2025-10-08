@@ -23,7 +23,7 @@ const Button: React.FC<ButtonProps> = ({
   onClick,
   onClickWithEvent,
   className = "",
-  disabled = false,
+  disabled = variant == "outline" ? true : false,
 }) => {
   // Size Classes
   const sizeClasses = {

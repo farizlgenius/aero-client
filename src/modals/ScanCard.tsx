@@ -1,10 +1,13 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react'
-import ComponentCard from '../../common/ComponentCard'
-import Label from '../Label'
-import Select from '../Select'
+import { DoorDto, ScanCardDto, ScpDto,Option } from '../constants/types';
+import { ACREndPoint, CredentialEndPoin, GET_SCP_LIST } from '../constants/constant';
 import axios from 'axios';
-import Button from '../../ui/button/Button';
-import Spinner from '../../../pages/UiElements/Spinner';
+import Button from '../components/ui/button/Button';
+import ComponentCard from '../components/common/ComponentCard';
+import Spinner from '../pages/UiElements/Spinner';
+import Select from '../components/form/Select';
+import Label from '../components/form/Label';
+
 
 // Global 
 const server = import.meta.env.VITE_SERVER_IP;
@@ -14,35 +17,7 @@ interface ScanCardProps {
     onStartScan:()=>void
 }
 
-interface ScanCardDto {
-    scpIp:string;
-    acrNo:number;
-}
 
-interface ScpDto {
-  no: number;
-  scpId: number;
-  name: string;
-  model: string;
-  mac: string;
-  ipAddress: string;
-  serialnumber: string;
-  status: number; // 1 -> online , 0 -> offline
-}
-
-
-interface DoorDto {
-    name: string;
-    scpIp: string;
-    acrNumber: number;
-    mode: number;
-    acrModeDesc: string;
-}
-
-interface Option {
-    value: string | number;
-    label: string;
-}
 
 
 const ScanCard:React.FC<PropsWithChildren<ScanCardProps>> = ({onStartScan}) => {
@@ -50,16 +25,16 @@ const ScanCard:React.FC<PropsWithChildren<ScanCardProps>> = ({onStartScan}) => {
     const [controllerOption, setControllerOption] = useState<Option[]>([]);
     const [spinner,setSpinner] = useState<boolean>(false);
     const [scanData,setScanData] = useState<ScanCardDto>({
-        scpIp: "",
+        scpMac: "",
         acrNo: 0
     })
 
     const fetchController = async () => {
                 try {
-            const res = await axios.get(`${server}/api/v1/scp/all`);
+            const res = await axios.get(GET_SCP_LIST);
             res.data.content.map((a: ScpDto) => {
                 setControllerOption(prev => ([...prev, {
-                    value: a.ipAddress,
+                    value: a.mac,
                     label: a.name
                 }]))
             })
@@ -69,12 +44,12 @@ const ScanCard:React.FC<PropsWithChildren<ScanCardProps>> = ({onStartScan}) => {
         }
     }
 
-    const fetchDoor = async (ScpIp:string) => {
+    const fetchDoor = async (ScpMac:string) => {
         try {
-            const res = await axios.get(`${server}/api/v1/acr/${ScpIp}`);
+            const res = await axios.get(server+ACREndPoint.GET_ACR_BY_MAC+`${ScpMac}`);
             res.data.content.map((a: DoorDto) => {
                 setDoorOption(prev => ([...prev, {
-                    value: a.acrNumber,
+                    value: a.acrNo,
                     label: a.name
                 }]))
             })
@@ -87,9 +62,9 @@ const ScanCard:React.FC<PropsWithChildren<ScanCardProps>> = ({onStartScan}) => {
     const handleSelectChange = (value: string, e: React.ChangeEvent<HTMLSelectElement>) => {
         console.log(e.currentTarget.name)
         switch (e.currentTarget.name) {
-            case "scpIp":
+            case "scpMac":
                 console.log(value);
-                setScanData(prev => ({...prev,scpIp:e.target.value}));
+                setScanData(prev => ({...prev,scpMac:e.target.value}));
                 fetchDoor(value)
                 break;
             case "doors":
@@ -102,7 +77,7 @@ const ScanCard:React.FC<PropsWithChildren<ScanCardProps>> = ({onStartScan}) => {
 
     const triggerCardRecieve = async () => {
         try{
-            const res = await axios.post(`${server}/api/v1/credential/scan`,scanData,{
+            const res = await axios.post(server+CredentialEndPoin.POST_TRIGGER_SCAN_CARD,scanData,{
                 headers:{
                     "Content-Type":"application/json"
                 }
@@ -128,7 +103,7 @@ const ScanCard:React.FC<PropsWithChildren<ScanCardProps>> = ({onStartScan}) => {
             <div>
                 <Label>Select Controller</Label>
                 <Select
-                    name="scpIp"
+                    name="scpMac"
                     options={controllerOption}
                     placeholder="Select Option"
                     onChangeWithEvent={handleSelectChange}

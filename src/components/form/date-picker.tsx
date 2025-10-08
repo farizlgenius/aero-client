@@ -14,6 +14,7 @@ type PropsType = {
   defaultDate?: DateOption;
   label?: string;
   placeholder?: string;
+  isTime?:boolean
 };
 
 export default function DatePicker({
@@ -24,6 +25,7 @@ export default function DatePicker({
   label,
   defaultDate,
   placeholder,
+  isTime = true
 }: PropsType) {
   useEffect(() => {
     // const flatPickr = flatpickr(`#${id}`, {
@@ -37,7 +39,7 @@ export default function DatePicker({
     // });
 
     const flatPickr = flatpickr(`#${id}`, {
-      enableTime: true,         // enable time selection
+      enableTime: isTime ? true : false,         // enable time selection
       time_24hr: true,          // 24h format (false -> AM/PM)
       enableSeconds: false,     // set true if you need seconds
       minuteIncrement: 5,       // minute steps
@@ -64,6 +66,8 @@ export default function DatePicker({
 
       <div className="relative">
         <input
+        name="date"
+        onChange={()=>onChange}
         value={value}
           id={id}
           placeholder={placeholder}

@@ -1,69 +1,33 @@
 import React, { useEffect, useState } from 'react'
 import Button from '../../components/ui/button/Button'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb'
-import { Add } from '../../icons'
-import axios from 'axios';
+import { Add, Mask, Unmask } from '../../icons'
 import ActionElement from '../UiElements/ActionElement';
 import TableTemplate from '../../components/tables/Tables/TableTemplate';
 import Modals from '../UiElements/Modals';
-import AddMpForm from '../../components/form/form-elements/AddMpForm';
 import * as signalR from '@microsoft/signalr';
 import DangerModal from '../UiElements/DangerModal';
+import { DeleteMpDto, MpDto, StatusDto } from '../../constants/types';
+import { HttpMethod, MP_KEY, MP_TABLE_HEADER, MPEndPoint, PopUpMsg } from '../../constants/constant';
+import HttpRequest from '../../utility/HttpRequest';
+import { usePopupActions } from '../../utility/PopupCalling';
+import Logger from '../../utility/Logger';
+import AddMpForm from '../../modals/AddMpForm';
 
 // Define Global Variable
-const server = import.meta.env.VITE_SERVER_IP;
-let removeTarget: Object;
+let removeTarget: DeleteMpDto;
 
-// Interface 
-interface Object {
-    [key: string]: any;
-}
-
-
-interface StatusDto {
-    scpIp: string;
-    deviceNumber: number;
-    status: number;
-    tamper:number;
-    ac:number;
-    batt:number;
-}
-
-interface MpDto {
-    no: number;
-    name: string;
-    sioNumber: number;
-    sioName: string;
-    sioModel: string;
-    mpNumber: number;
-    ipNumber: number;
-    mode: number;
-    scpIp: string;
-    status: number;
-}
-
-// Define headers
-const headers: string[] = [
-    "Name", "Module Name", "Model","Input" ,"Mode", "Status", "Action"
-]
-
-// Define keys
-const keys: string[] = [
-    "name", "sioName", "sioModel","ipNumber","mode"
-];
 
 const Monitor = () => {
+    const { showPopup } = usePopupActions();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     {/* Modal */ }
-    const [isRemoveModal,setIsRemoveModal] = useState<boolean>(false);
+    const [isRemoveModal, setIsRemoveModal] = useState<boolean>(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
     const closeModalToggle = () => {
         setIsAddModalOpen(false);
         toggleRefresh();
-    }
-    const handleClickAddMp = () => {
-        setIsAddModalOpen(true);
     }
 
     {/* handle Table Action */ }
@@ -71,9 +35,9 @@ const Monitor = () => {
 
     }
 
-    const handleOnClickRemove = (data: Object) => {
+    const handleOnClickRemove = (data: MpDto) => {
         console.log(data);
-        removeTarget = data;
+        removeTarget = { componentNo: data.componentNo, mac: data.mac };
         setIsRemoveModal(true);
     }
     const handleOnClickCloseRemove = () => {
@@ -81,22 +45,59 @@ const Monitor = () => {
     }
     const handleOnClickConfirmRemove = () => {
         removeMonitorPoint();
-        
+        toggleRefresh();
+    }
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        let res;
+        switch (e.currentTarget.name) {
+            case "add":
+                setIsAddModalOpen(true);
+                break;
+            case "mask":
+                selectedObjects.forEach(async (a: MpDto) => {
+                    res = await HttpRequest.send(HttpMethod.POST, MPEndPoint.POST_MASK, a);
+                    console.log(res);
+                    if (res) {
+                        if (res.data.code == 200) {
+                            showPopup(true, [PopUpMsg.MASK_MP]);
+                        } else {
+                            showPopup(false, res.data.errors);
+                        }
+                        toggleRefresh();
+                    }
+                })
+
+                break;
+            case "unmask":
+                selectedObjects.forEach(async (a: MpDto) => {
+                    res = await HttpRequest.send(HttpMethod.POST, MPEndPoint.POST_UNMASK, a);
+                    console.log(res);
+                    if (res) {
+                        if (res.data.code == 200) {
+                            showPopup(true, [PopUpMsg.UNMASK_MP]);
+                        } else {
+                            showPopup(false, res.data.errors);
+                        }
+                        toggleRefresh();
+                    }
+                })
+                break;
+        }
     }
 
     {/* input Data */ }
     const [tableDatas, setTableDatas] = useState<MpDto[]>([]);
     const [status, setStatus] = useState<StatusDto[]>([]);
     const fetchData = async () => {
-        try {
-            const res = await axios.get(`${server}/api/v1/mp/all`);
-            console.log(res.data.content)
-            setTableDatas(res.data.content);
+        const res = await HttpRequest.send(HttpMethod.GET, MPEndPoint.GET_MP_LIST);
+        console.log(res)
+        if (res?.data.data) {
+            setTableDatas(res.data.data);
 
             // Batch set state
-            const newStatuses = res.data.content.map((a: MpDto) => ({
-                scpIp: a.scpIp,
-                deviceNumber: a.mpNumber,
+            const newStatuses = res.data.data.map((a: MpDto) => ({
+                scpMac: a.mac,
+                deviceNumber: a.componentNo,
                 status: 0
             }));
 
@@ -105,47 +106,40 @@ const Monitor = () => {
             setStatus((prev) => [...prev, ...newStatuses]);
 
             // Fetch status for each
-            res.data.content.forEach((a: MpDto) => {
-                fetchStatus(a.scpIp, a.mpNumber);
+            res.data.data.forEach((a: MpDto) => {
+                fetchStatus(a.mac, a.componentNo);
             });
-
-        } catch (e) {
-            console.log(e);
         }
+
     };
-    const fetchStatus = async (ScpIp: string, MpNo: number) => {
-        const res = await axios.get(
-            `${server}/api/v1/mp/status?ScpIp=${ScpIp}&MpNo=${MpNo}`
-        );
-        console.log(res);
+    const fetchStatus = async (scpMac: string, mpNo: number) => {
+        const res = await HttpRequest.send(HttpMethod.GET, MPEndPoint.GET_MP_STATUS + scpMac + "/" + mpNo);
+        Logger.info(res);
     };
 
-        const removeMonitorPoint = async () => {
-        if (removeTarget != undefined) {
-            try {
-                console.log(removeTarget);
-
-                const res = await axios.post(`${server}/api/v1/mp/remove?ScpIp=${removeTarget["scpIp"]}&MpNo=${removeTarget["mpNumber"]}`);
-                if (res.status == 200) {
-                    setIsRemoveModal(false);
-                    toggleRefresh();
-                }
-                removeTarget = {};
-
-            } catch (e) {
-                console.log(e);
+    const removeMonitorPoint = async () => {
+        const res = await HttpRequest.send(HttpMethod.DELETE, MPEndPoint.DELETE_MP + removeTarget.mac + "/" + removeTarget.componentNo);
+        if (res) {
+            if (res.status == 200) {
+                setIsRemoveModal(false);
+                toggleRefresh();
+                showPopup(true, [PopUpMsg.DELETE_MP]);
+            } else {
+                setIsRemoveModal(false);
+                toggleRefresh();
+                showPopup(true, res.data.errors);
             }
-
-        } else {
-            console.log("undefined")
+            removeTarget = {
+                componentNo: -1,
+                mac: "",
+            };
         }
-
     }
 
 
     {/* checkBox */ }
-    const [selectedObjects, setSelectedObjects] = useState<Object[]>([]);
-    const handleCheckedAll = (data: Object[], e: React.ChangeEvent<HTMLInputElement>) => {
+    const [selectedObjects, setSelectedObjects] = useState<MpDto[]>([]);
+    const handleCheckedAll = (data: MpDto[], e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(data)
         console.log(e.target.checked)
         if (setSelectedObjects) {
@@ -159,7 +153,7 @@ const Monitor = () => {
 
 
 
-    const handleChecked = (data: Object, e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChecked = (data: MpDto, e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(data)
         console.log(e.target.checked)
         if (setSelectedObjects) {
@@ -167,7 +161,7 @@ const Monitor = () => {
                 setSelectedObjects((prev) => [...prev, data]);
             } else {
                 setSelectedObjects((prev) =>
-                    prev.filter((item) => item.no !== data.no)
+                    prev.filter((item) => item.componentNo !== data.componentNo)
                 );
             }
         }
@@ -186,15 +180,15 @@ const Monitor = () => {
         });
         connection.on(
             "MpStatus",
-            (ScpIp: string, first: number, count: number, status: number[]) => {
+            (scpMac: string, first: number, status: string) => {
                 console.log(first)
                 console.log(status)
                 setStatus((prev) =>
                     prev.map((a) =>
-                        a.scpIp == ScpIp && a.deviceNumber == first
+                        a.scpMac == scpMac && a.deviceNumber == first
                             ? {
                                 ...a,
-                                status: status[0],
+                                status: status,
                             }
                             : {
                                 // scpIp:ScpIp,
@@ -209,7 +203,7 @@ const Monitor = () => {
         setTimeout(() => {
             fetchData();
         }, 250);
-    
+
         return () => {
             connection.stop();
         };
@@ -217,40 +211,43 @@ const Monitor = () => {
 
     return (
         <>
-        {isRemoveModal && <DangerModal header='Remove Monitor Point' body='Please Click Confirm if you want to remove this Monitor Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
-            {isAddModalOpen && <Modals header='Add Monitor Point' body={<AddMpForm onSubmitHandle={closeModalToggle} />}  closeToggle={closeModalToggle} />}
+            {isRemoveModal && <DangerModal header='Remove Monitor Point' body='Please Click Confirm if you want to remove this Monitor Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {isAddModalOpen && <Modals header='Add Monitor Point' body={<AddMpForm onSubmitHandle={closeModalToggle} />} closeToggle={closeModalToggle} />}
             <PageBreadcrumb pageTitle="Monitor Point" />
             <div className="space-y-6">
                 <div className="flex gap-4">
                     <Button
+                        name='add'
                         size="sm"
                         variant="primary"
                         startIcon={<Add className="size-5" />}
-                        onClick={handleClickAddMp}
+                        onClickWithEvent={handleClick}
                     >
                         Create
                     </Button>
                     <Button
-                        name='on'
+                        name='mask'
                         size="sm"
                         variant="primary"
-
+                        onClickWithEvent={handleClick}
+                        startIcon={<Mask/>}
                     >
-                        Bypass
+                        Mask
                     </Button>
                     <Button
-                        name='off'
+                        name='unmask'
                         size="sm"
                         variant="primary"
-
+                        onClickWithEvent={handleClick}
+                        startIcon={<Unmask/>}
                     >
-                        Un Bypass
+                        Unmask
                     </Button>
 
                 </div>
                 <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                     <div className="max-w-full overflow-x-auto">
-                        <TableTemplate statusDto={status} deviceIndicate={4} checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={headers} tableDatas={tableDatas} tableKeys={keys} status={true} action={true} selectedObject={selectedObjects} actionElement={(row) => (
+                        <TableTemplate<MpDto> statusDto={status} deviceIndicate={4} checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={MP_TABLE_HEADER} tableDatas={tableDatas} tableKeys={MP_KEY} status={true} action={true} selectedObject={selectedObjects} actionElement={(row) => (
                             <ActionElement onEditClick={handleOnClickEdit} onRemoveClick={handleOnClickRemove} data={row} />
                         )} />
 

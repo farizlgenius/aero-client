@@ -1,5 +1,4 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, {  useEffect, useState } from 'react'
 import TableTemplate from '../../components/tables/Tables/TableTemplate';
 import ActionElement from '../UiElements/ActionElement';
 import { Add } from '../../icons';
@@ -7,109 +6,106 @@ import Button from '../../components/ui/button/Button';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import DangerModal from '../UiElements/DangerModal';
 import Modals from '../UiElements/Modals';
-import AddTimeZoneForm from '../../components/form/form-elements/AddTimeZoneForm';
+import { TimeZoneDto } from '../../constants/types';
+import { TIMEZONE_TABLE_HEAD, TIMEZONE_KEY, HttpMethod, TimeZoneEndPoint } from '../../constants/constant';
+import HttpRequest from '../../utility/HttpRequest';
+import { usePopupActions } from '../../utility/PopupCalling';
+import TimeZoneForm from './TimeZoneForm';
+import Helper from '../../utility/Helper';
 
 // Define Global Variable
-const server = import.meta.env.VITE_SERVER_IP;
-let removeTarget: Object;
+let removeTarget: Number;
 
-// Interface 
-interface Object {
-    [key: string]: any;
+
+const defaultDto: TimeZoneDto = {
+    componentNo: -1,
+    name: "",
+    mode: -1,
+    activeTime: "",
+    deactiveTime: "",
+    intervals: []
 }
 
-interface TimeZoneDtp {
-    no:number;
-    name:string;
-    scpIp:string;
-    tzNumber:number;
-    mode:number;
-    activeDate:string;
-    deactiveDate:string;
-    intervals:number;
-}
-
-// Define Headers 
-
-const headers: string[] = [
-    "Name", "Active Date","Deactive Date", "Action"
-]
-
-const keys: string[] = [
-    "name", "activeDate","deactiveDate"
-];
 
 const TimeZone = () => {
+    const { showPopup } = usePopupActions();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     {/* Modal */ }
-    const [isRemoveModal, setIsRemoveModal] = useState(false);
-    const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
-    const closeModalToggle = () => {
-        setIsAddModalOpen(false);
-        toggleRefresh();
-    };
+    const [removeModal, setRemoveModal] = useState<boolean>(false);
+    const [createModal, setCreateModal] = useState<boolean>(false);
+    const [updateModal, setUpdateModal] = useState<boolean>(false);
+    {/* Data */ }
+    const [timeZoneDto, setTimeZoneDto] = useState<TimeZoneDto>(defaultDto);
 
-    const handleClick = (e:React.MouseEvent<HTMLButtonElement>) => {
+
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        console.log(e.currentTarget)
         console.log(e.currentTarget.name);
-        switch(e.currentTarget.name){
+        switch (e.currentTarget.name) {
             case "add":
-                setIsAddModalOpen(true);
+                setCreateModal(true);
                 break;
-                default:
-                    break;
+            case "create":
+                createTimeZone(timeZoneDto);
+                break;
+            case "close":
+                setCreateModal(false);
+                setUpdateModal(false);
+                setTimeZoneDto(defaultDto)
+                break;
+            case "update":
+                break;
+            default:
+                break;
+        }
+    }
+
+    const createTimeZone = async (data: TimeZoneDto) => {
+        const res = await HttpRequest.send(HttpMethod.POST, TimeZoneEndPoint.POST_ADD_TZ, data)
+        if(Helper.handlePopupByResCode(res, showPopup)){
+            setUpdateModal(false);
+            setCreateModal(false);
+            toggleRefresh();
         }
     }
 
     {/* handle Table Action */ }
-    const handleOnClickEdit = () => {
-
+    const handleOnClickEdit = (data:TimeZoneDto) => {
+        console.log(data)
+        setTimeZoneDto(data)
+        setUpdateModal(true)
     }
 
-    const handleOnClickRemove = (data: Object) => {
+    const handleOnClickRemove = (data:TimeZoneDto) => {
         console.log(data);
-        removeTarget = data;
-        setIsRemoveModal(true);
+        removeTarget = data.componentNo;
+        setRemoveModal(true);
     }
     const handleOnClickCloseRemove = () => {
-        setIsRemoveModal(false);
+        setRemoveModal(false);
     }
     const handleOnClickConfirmRemove = () => {
-        removeAccessGroup();
+        removeTimeZone();
 
     }
 
     {/* Group Data */ }
-    const [tableDatas, setTableDatas] = useState<TimeZoneDtp[]>([]);
+    const [tableDatas, setTableDatas] = useState<TimeZoneDto[]>([]);
     const fetchData = async () => {
-        try {
-            const res = await axios.get(`${server}/api/v1/tz/all`);
-            console.log(res.data.content)
-            setTableDatas(res.data.content);
-
-        } catch (e) {
-            console.log(e);
+        const res = await HttpRequest.send(HttpMethod.GET, TimeZoneEndPoint.GET_TZ_LIST)
+        if (res) {
+            setTableDatas(res.data.data);
+            console.log(res.data.data)
         }
     };
-    const removeAccessGroup = async () => {
-        if (removeTarget != undefined) {
-            try {
-                console.log(removeTarget);
 
-                const res = await axios.post(`${server}/api/v1/cp/remove?ScpIp=${removeTarget["scpIp"]}&CpNo=${removeTarget["cpNumber"]}`);
-                if (res.status == 200) {
-                    setIsRemoveModal(false);
-                    console.log("Here");
-                    toggleRefresh();
-                }
-                removeTarget = {};
-
-            } catch (e) {
-                console.log(e);
-            }
-
-        } else {
-            console.log("undefined")
+    const removeTimeZone = async () => {
+        const res = await HttpRequest.send(HttpMethod.DELETE, TimeZoneEndPoint.DELETE_TZ  + removeTarget);
+        console.log(res)
+        if (Helper.handlePopupByResCode(res, showPopup)){
+            setRemoveModal(false);
+            toggleRefresh();
         }
 
     }
@@ -117,14 +113,12 @@ const TimeZone = () => {
 
     {/* UseEffect */ }
     useEffect(() => {
-
         fetchData();
-
-    }, []);
+    }, [refresh]);
 
     {/* checkBox */ }
-    const [selectedObjects, setSelectedObjects] = useState<Object[]>([]);
-    const handleCheckedAll = (data: Object[], e: React.ChangeEvent<HTMLInputElement>) => {
+    const [selectedObjects, setSelectedObjects] = useState<TimeZoneDto[]>([]);
+    const handleCheckedAll = (data: TimeZoneDto[], e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(data)
         console.log(e.target.checked)
         if (setSelectedObjects) {
@@ -136,7 +130,7 @@ const TimeZone = () => {
         }
     }
 
-    const handleChecked = (data: Object, e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChecked = (data: TimeZoneDto, e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(data)
         console.log(e.target.checked)
         if (setSelectedObjects) {
@@ -144,15 +138,16 @@ const TimeZone = () => {
                 setSelectedObjects((prev) => [...prev, data]);
             } else {
                 setSelectedObjects((prev) =>
-                    prev.filter((item) => item.no !== data.no)
+                    prev.filter((item) => item.componentNo !== data.componentNo)
                 );
             }
         }
     }
     return (
         <>
-            {isRemoveModal && <DangerModal header='Remove Time Zone' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
-            {isAddModalOpen && <Modals isWide={false} header='Add Time Zone' body={<AddTimeZoneForm onSubmitHandle={closeModalToggle} />} closeToggle={closeModalToggle} />}
+            {removeModal && <DangerModal header='Remove Time Zone' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {createModal && <Modals isWide={true} body={<TimeZoneForm handleClick={handleClick} data={timeZoneDto}  setTimeZoneDto={setTimeZoneDto} />} handleClickWithEvent={handleClick} />}
+            {updateModal && <Modals isWide={true} body={<TimeZoneForm handleClick={handleClick}  data={timeZoneDto} setTimeZoneDto={setTimeZoneDto} />} handleClickWithEvent={handleClick} />}
             <PageBreadcrumb pageTitle="Time Zone" />
             <div className="space-y-6">
                 <div className="flex gap-4">
@@ -169,10 +164,10 @@ const TimeZone = () => {
                 </div>
                 <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                     <div className="max-w-full overflow-x-auto">
-                        <TableTemplate checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={headers} tableDatas={tableDatas} tableKeys={keys} status={true} action={true} selectedObject={selectedObjects} actionElement={(row) => (
-                            <ActionElement onEditClick={handleOnClickEdit} onRemoveClick={handleOnClickRemove} data={row} />
+                        <TableTemplate<TimeZoneDto> checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={TIMEZONE_TABLE_HEAD} tableDatas={tableDatas} tableKeys={TIMEZONE_KEY} status={true} action={true} selectedObject={selectedObjects} actionElement={(row) => (
+                            row.componentNo !== 1 &&
+                            <ActionElement isDetail={false} onEditClick={handleOnClickEdit} onRemoveClick={handleOnClickRemove} data={row} />
                         )} />
-
                     </div>
                 </div>
 

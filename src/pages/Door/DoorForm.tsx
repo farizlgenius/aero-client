@@ -1,196 +1,27 @@
 import React, { PropsWithChildren, useEffect, useRef, useState } from 'react'
-import ComponentCard from '../../common/ComponentCard'
-import Label from '../Label';
-import Input from '../input/InputField';
-import Radio from '../input/Radio';
-import Button from '../../ui/button/Button';
-import axios from 'axios';
-import Select from '../Select';
+import { ModeDto, ScpDto, SioDto, TimeZoneDto, Option, AcrRdrModeDto, AcrDto } from '../../constants/types';
+import { ACREndPoint, CPEndPoint, HttpMethod, MPEndPoint, PopUpMsg, ScpEndPoint, SioEndPoint, TimeZoneEndPoint } from '../../constants/constant';
+import Select from '../../components/form/Select';
+import Label from '../../components/form/Label';
+import Input from '../../components/form/input/InputField';
+import Radio from '../../components/form/input/Radio';
+import Button from '../../components/ui/button/Button';
+import ComponentCard from '../../components/common/ComponentCard';
+import HttpRequest from '../../utility/HttpRequest';
+import Logger from '../../utility/Logger';
 
 
-// Global Variable
 
-const server = import.meta.env.VITE_SERVER_IP;
-
-// Interface 
-
-interface Option {
-  value: string | number;
-  label: string;
-  isAvailale: boolean;
-}
-
-interface ScpDto {
-  no: number;
-  scpId: number;
-  name: string;
-  model: number;
-  mac: string;
-  ipAddress: string;
-  serialNumber: string;
-  status: number;
-}
-
-interface SioDto {
-  acFail: string;
-  address: number;
-  battFail: string;
-  baudRate: number;
-  model: string;
-  name: string;
-  no: number;
-  protoCol: number;
-  scpIp: string;
-  scpName: string;
-  sioNumber: number;
-  status: number;
-  tamper: string;
-}
-
-interface AcsRdrModeDto {
-  name: string;
-  value: number;
-  description: string;
-}
-
-interface AddAcrDto {
-  name: string;
-  scpIp: string;
-  accessConfig: number;
-  pairACRNo: number;
-  isReaderOsdp: boolean;
-  readerSioNumber: number;
-  readerNumber: number;
-  readerDataFormat: number;
-  keyPadMode: number;
-  osdpBaudRate: number;
-  osdpNoDiscover: number;
-  osdpTracing: number;
-  osdpAddress: number;
-  osdpSecureChannel: number;
-  isAlternateReaderUsed: boolean;
-  isAlternateReaderOsdp: boolean;
-  alternateReaderSioNumber: number;
-  alternateReaderNumber: number;
-  alternateReaderConfig: number;
-  alternateReaderDataFormat: number;
-  alternateKeyPadMode: number;
-  alternateOsdpBaudRate: number;
-  alternateOsdpNoDiscover: number;
-  alternateOsdpTracing: number;
-  alternateOsdpAddress: number;
-  alternateOsdpSecureChannel: number;
-  iSREX0Used: boolean;
-  rEX0SioNumber: number;
-  rEX0Number: number;
-  rEX0SensorMode: number;
-  rEX0TimeZone: number;
-  iSREX1Used: boolean;
-  rEX1SioNumber: number;
-  rEX1Number: number;
-  rEX1TimeZone: number;
-  rEX1SensorMode:number;
-  strikeSioNumber: number;
-  strikeNumber: number;
-  strikeMinActiveTime: number;
-  strikeMaxActiveTime: number;
-  strikeMode: number;
-  strikeRalayDriveMode: number;
-  strikeRelayOfflineMode: number;
-  relayMode: number;
-  sensorSioNumber: number;
-  sensorNumber: number;
-  heldOpenDelay: number;
-  sensorMode: number;
-  sensorDebounce: number;
-  sensorHoldTime: number;
-  antiPassbackMode: number;
-  offlineMode: number;
-  defaultMode: number;
-}
-
-interface ModeDto {
-  description: string;
-  value: number;
-  name: string;
-}
-
-interface Object {
-  [key: string]: any
-}
-
-interface TimeZoneDto {
-  tzNumber: number;
-  name: string;
-}
-
-interface AddDoorFormProps {
-  onSubmitHandle?: () => void
-}
-
-const defaultAcrDto: AddAcrDto = {
-  name: '',
-  scpIp: "",
-  accessConfig: 0,
-  pairACRNo: -1,
-  readerSioNumber: -1,
-  readerNumber: -1,
-  readerDataFormat: 0x01,
-  keyPadMode: 2,
-  isReaderOsdp: false,
-  osdpBaudRate: 0x00,
-  osdpNoDiscover: 0x00,
-  osdpTracing: 0x00,
-  osdpAddress: 0x00,
-  osdpSecureChannel: 0x00,
-  isAlternateReaderUsed: false,
-  isAlternateReaderOsdp: false,
-  alternateReaderSioNumber: -1,
-  alternateReaderNumber: -1,
-  alternateReaderConfig: -1,
-  alternateReaderDataFormat: 0x01,
-  alternateKeyPadMode: 2,
-  alternateOsdpBaudRate: 0x00,
-  alternateOsdpNoDiscover: 0x00,
-  alternateOsdpTracing: 0x00,
-  alternateOsdpAddress: 0x00,
-  alternateOsdpSecureChannel: 0x00,
-  iSREX0Used: false,
-  rEX0SioNumber: -1,
-  rEX0Number: -1,
-  rEX0TimeZone: -1,
-  rEX0SensorMode: 0,
-  iSREX1Used: false,
-  rEX1SioNumber: -1,
-  rEX1Number: -1,
-  rEX1TimeZone: -1,
-  rEX1SensorMode: 0,
-  strikeSioNumber: -1,
-  strikeNumber: -1,
-  strikeMinActiveTime: 1,
-  strikeMaxActiveTime: 5,
-  strikeMode: 0,
-  strikeRalayDriveMode: 0,
-  strikeRelayOfflineMode: 0,
-  relayMode: -1,
-  sensorSioNumber: -1,
-  sensorNumber: -1,
-  heldOpenDelay: 0,
-  sensorMode: 0,
-  sensorDebounce: 4,
-  sensorHoldTime: 2,
-  antiPassbackMode: 0,
-  offlineMode: 8,
-  defaultMode: 8
+interface DoorFormProps {
+  handleClick?: (e: React.MouseEvent<HTMLButtonElement>) => void,
+  data: AcrDto,
+  setAcrDto: React.Dispatch<React.SetStateAction<AcrDto>>;
 }
 
 const active = "inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 ease-in-out sm:p-3 text-brand-500 dark:bg-brand-400/20 dark:text-brand-400 bg-brand-50 text-brand-500 dark:bg-brand-400/20 dark:text-brand-400 bg-brand-50";
 const inactive = "inline-flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200 ease-in-out sm:p-3 bg-transparent text-gray-500 border-transparent hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
 
-const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHandle }) => {
-  const [formData, setFormData] = useState<Object>({
-  })
-  const formRef = useRef<HTMLFormElement>(null);
+const DoorForm: React.FC<PropsWithChildren<DoorFormProps>> = ({ handleClick, data, setAcrDto }) => {
   const [isReaderInOut, setIsReaderInOut] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<number>(0);
   const [selectedValue, setSelectedValue] = useState<string>("1");
@@ -200,80 +31,50 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
     {
       label: "9600",
       value: 0x01,
-      isAvailale: true
     }, {
       label: "19200",
       value: 0x02,
-      isAvailale: true
     }, {
       label: "38400",
       value: 0x03,
-      isAvailale: true
     }, {
       label: "115200",
       value: 0x04,
-      isAvailale: true
     }, {
       label: "57600",
       value: 0x05,
-      isAvailale: true
     }, {
       label: "230400",
       value: 0x06,
-      isAvailale: true
     }]
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const data = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      data.append(key, value.toString())
-    })
-    try {
-      const res = await axios.post(`${server}/api/v1/acr/add`, data, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-      console.log(res)
-      if (res.status == 201 || res.status == 200) {
-        if (onSubmitHandle)
-          onSubmitHandle();
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
 
-  const handleOutsideSubmit = () => {
-    formRef.current?.requestSubmit();
-  }
 
   const handleRadioChange = (value: string) => {
     setSelectedValue(value);
     if (value == "0") {
-      setFormData(prev => ({ ...prev, isAlternateReaderUsed: false, iSREX0Used: true }));
+      setAcrDto(prev => ({ ...prev, isAlternateReaderUsed: false, iSREX0Used: true }));
       setIsReaderInOut(false);
     } else {
       setIsReaderInOut(true);
-      setFormData(prev => ({ ...prev, isAlternateReaderUsed: true, iSREX0Used: false }));
+      setAcrDto(prev => ({ ...prev, isAlternateReaderUsed: true, iSREX0Used: false }));
     }
   }
 
   const handleRadioChangeReaderType = (value: string) => {
     setSelectedReaderType(value);
     if (value == "0") {
-      setFormData(prev => ({ ...prev, isReaderOsdp: false }));
+      setAcrDto(prev => ({ ...prev, isReaderOsdp: false }));
 
     } else if (value == "1") {
 
-      setFormData(prev => ({ ...prev, isReaderOsdp: true }));
+      setAcrDto(prev => ({ ...prev, isReaderOsdp: true }));
     }
 
     if (value == "2") {
-      setFormData(prev => ({ ...prev, isAlternateReaderOsdp: false }));
+      setAcrDto(prev => ({ ...prev, isAlternateReaderOsdp: false }));
     } else if (value == "3") {
-      setFormData(prev => ({ ...prev, isAlternateReaderOsdp: true }));
+      setAcrDto(prev => ({ ...prev, isAlternateReaderOsdp: true }));
     }
   }
 
@@ -281,9 +82,9 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
     setSelectedAlterReaderType(value);
 
     if (value == "0") {
-      setFormData(prev => ({ ...prev, isAlternateReaderOsdp: false }));
+      setAcrDto(prev => ({ ...prev, isAlternateReaderOsdp: false }));
     } else if (value == "1") {
-      setFormData(prev => ({ ...prev, isAlternateReaderOsdp: true }));
+      setAcrDto(prev => ({ ...prev, isAlternateReaderOsdp: true }));
     }
   }
 
@@ -293,80 +94,73 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setAcrDto(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
   };
 
   {/* Reader Module */ }
-  const [moduleOption, setModuleOption] = useState<Option[]>([
-
-  ]);
+  const [moduleOption, setModuleOption] = useState<Option[]>([]);
   const fetchSio = async (value: string) => {
-    try {
-      const res = await axios.get(`${server}/api/v1/sio/${value}`);
-      console.log(res);
-      res.data.content.map((a: SioDto) => {
+    const res = await HttpRequest.send(HttpMethod.GET, SioEndPoint.GET_SIO_BY_MAC + value);
+    if (res && res.data.data) {
+      res.data.data.map((a: SioDto) => {
         setModuleOption((prev) => [...prev, {
           label: a.name,
-          value: a.sioNumber,
+          value: a.componentNo,
           isAvailale: true
         }]);
-        // fetchReaderIn(res.data.content[0].sioNumber);
-        // fetchReaderOut(res.data.content[0].sioNumber);
-        // fetchInput(res.data.content[0].sioNumber);
-        // fetchOutput(res.data.content[0].sioNumber);
       });
-    } catch (e) {
-      console.log(e)
     }
   }
   {/* SCP Data */ }
-  const [controller, setController] = useState<ScpDto[]>([
-  ]);
-  const [controllerOption, setControllerOption] = useState<Option[]>([
-  ]);
+  const [controller, setController] = useState<ScpDto[]>([]);
+  const [controllerOption, setControllerOption] = useState<Option[]>([]);
   const handleSelectChange = (value: string, e: React.ChangeEvent<HTMLSelectElement>) => {
     console.log(value);
     console.log(e.target.name);
     if (e?.target.name != null) {
-      setFormData(prev => ({ ...prev, [e?.target.name]: value }));
+      setAcrDto(prev => ({ ...prev, [e?.target.name]: value }));
     }
     switch (e?.target.name) {
-      case "scpIp":
+      case "mac":
         fetchSio(value);
-        fetchAcrByIp(value);
+        fetchAcrByMac(value);
+        setAcrDto(prev => ({ ...prev, mac: value }));
         break;
       case "accessConfig":
         if (Number(value) == 1 || Number(value) == 2) {
           setIsPairUse(true);
         } else {
           setIsPairUse(false);
-          setFormData(prev => ({ ...prev, pairACRNo: -1 }));
+          setAcrDto(prev => ({ ...prev, pairACRNo: -1 }));
         }
         break;
-      case "readerSioNumber":
-        fetchReaderIn(Number(value));
+      case "rdrSio":
+        fetchReaderIn(data.mac, Number(value));
         break;
-      case "alternateReaderSioNumber":
-        fetchReaderOut(Number(value));
+      case "altRdrSioNo":
+        fetchReaderOut(data.mac, Number(value));
         break;
-      case "readerNumber":
-        setFormData(prev => ({ ...prev, osdpAddress: Number(value) }))
+      case "rdrNo":
+        setAcrDto(prev => ({ ...prev, osdpAddress: Number(value) }))
         break;
-      case "alternateReaderNumber":
-        setFormData(prev => ({ ...prev, alternateOsdpAddress: Number(value) }))
+      case "altRdrNo":
+        setAcrDto(prev => ({ ...prev, alternateOsdpAddress: Number(value) }))
         break;
-      case "strikeSioNumber":
-        fetchOutput(Number(value))
+      case "strkSio":
+        fetchOutput(data.mac, Number(value))
         break;
-      case "rEX0SioNumber":
-        fetchInputRex0(Number(value));
+      case "rex0SioNo":
+        fetchInputRex0(data.mac, Number(value));
         break;
-      case "rEX1SioNumber":
-        fetchInputRex1(Number(value));
+      case "rex1SioNo":
+        fetchInputRex1(data.mac, Number(value));
         break;
-      case "sensorSioNumber":
-        fetchInputSensor(Number(value));
+      case "sensorSio":
+        fetchInputSensor(data.mac, Number(value));
+        break;
+      case "defaultMode":
+        setAcrDto(prev => ({ ...prev, mode: Number(value) }));
         break;
       default:
         break;
@@ -374,86 +168,70 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
 
   }
   const fetchScp = async () => {
-    try {
-      const res = await axios.get(`${server}/api/v1/scp/all`);
-      console.log(res.data.content);
-      setController(res.data.content);
-      res.data.content.map((a: ScpDto) => {
+    const res = await HttpRequest.send(HttpMethod.GET, ScpEndPoint.GET_SCP_LIST)
+    Logger.info(res)
+    if (res && res.data.data) {
+      setController(res.data.data);
+      res.data.data.map((a: ScpDto) => {
         setControllerOption(prev => [...prev, {
           label: a.name,
-          value: a.ipAddress,
+          value: a.mac,
           isAvailale: true
         }])
       });
-    } catch (e) {
-      console.log(e);
     }
+
   }
   {/* Access Reader Config */ }
-  const [accessReaderConfigOption, setAccessReaderConfigOption] = useState<Option[]>([
-  ]);
+  const [accessReaderConfigOption, setAccessReaderConfigOption] = useState<Option[]>([]);
   const [isPairUse, setIsPairUse] = useState<boolean>(false);
   const fetchAccessReaderMode = async () => {
-    try {
-      const res = await axios.get(`${server}/api/v1/acr/reader/mode`);
-      console.log(res.data.content);
-      res.data.content.map((a: AcsRdrModeDto) => {
+    const res = await HttpRequest.send(HttpMethod.GET, ACREndPoint.GET_ACCESS_READER_MODE)
+    Logger.info(res)
+    if (res && res.data.data) {
+      res.data.data.map((a: AcrRdrModeDto) => {
         setAccessReaderConfigOption(prev => [...prev, {
           label: a.name,
           value: a.value,
           isAvailale: true
         }])
       });
-    } catch (e) {
-      console.log(e);
     }
   }
   {/* Pair Reader */ }
-  const fetchAcrByIp = async (ScpIp: string) => {
-    try {
-      const res = await axios.get(`${server}/api/v1/acr/${ScpIp}`);
-      console.log(res);
-    } catch (e) {
-      console.log(e);
-    }
+  const fetchAcrByMac = async (ScpMac: string) => {
+    const res = await HttpRequest.send(HttpMethod.GET, ACREndPoint.GET_ACR_BY_MAC + ScpMac)
+    Logger.info(res)
   }
   {/* Reader In Out*/ }
-  const [readerInOption, setReaderInOption] = useState<Option[]>([
-  ]);
-
-
-  const [readerOutOption, setReaderOutOption] = useState<Option[]>([
-  ]);
-
-
-  const fetchReaderIn = async (sio: number) => {
-    try {
-      const res = await axios.get(`${server}/api/v1/acr/reader/${sio}`);
-      console.log(res.data.content);
-      res.data.content.map((a: number) => {
+  const [readerInOption, setReaderInOption] = useState<Option[]>([]);
+  const [readerOutOption, setReaderOutOption] = useState<Option[]>([]);
+  const fetchReaderIn = async (mac: string, sio: number) => {
+    const res = await HttpRequest.send(HttpMethod.GET, ACREndPoint.GET_ACR_READER + mac + "/" + sio)
+    Logger.info(res)
+    if (res && res.data.data) {
+      res.data.data.map((a: number) => {
         setReaderInOption(prev => [...prev, {
           label: `Reader ${a + 1}`,
           value: a,
           isAvailale: true
         }])
       });
-    } catch (e) {
-      console.log(e);
+
     }
   }
-  const fetchReaderOut = async (sio: number) => {
-    try {
-      const res = await axios.get(`${server}/api/v1/acr/reader/${sio}`);
-      console.log(res.data.content);
-      res.data.content.map((a: number) => {
+  const fetchReaderOut = async (mac: string, sio: number) => {
+    const res = await HttpRequest.send(HttpMethod.GET, ACREndPoint.GET_ACR_READER + mac + "/" + sio)
+    Logger.info(res)
+    if (res && res.data.data) {
+      res.data.data.map((a: number) => {
         setReaderOutOption(prev => [...prev, {
           label: `Reader ${a + 1}`,
           value: a,
           isAvailale: true
         }])
       });
-    } catch (e) {
-      console.log(e);
+
     }
   }
   {/* Input */ }
@@ -461,178 +239,140 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
   const [inputRex1Option, setInputRex1Option] = useState<Option[]>([])
   const [inputSensorOption, setInputSensorOption] = useState<Option[]>([])
   const [inputModeOption, setInputModeOption] = useState<Option[]>([])
-  const fetchInputRex0 = async (sio: number) => {
-    try {
-      const res = await axios.get(`${server}/api/v1/mp/${sio}`)
-      console.log(res.data.content)
-      res.data.content.map((a: number) => {
+  const fetchInputRex0 = async (mac: string, sio: number) => {
+    const res = await HttpRequest.send(HttpMethod.GET, MPEndPoint.GET_IP_LIST + mac + "/" + sio)
+    if (res && res.data.data) {
+      res.data.data.map((a: number) => {
         setInputRex0Option(prev => [...prev, {
           label: `Input ${a + 1}`,
           value: a,
           isAvailale: true
         }])
       })
-    } catch (e) {
-      console.log(e);
     }
+
   }
-  const fetchInputRex1 = async (sio: number) => {
-    try {
-      const res = await axios.get(`${server}/api/v1/mp/${sio}`)
-      console.log(res.data.content)
-      console.log("##############");
-      res.data.content.map((a: number) => {
+  const fetchInputRex1 = async (mac: string, sio: number) => {
+    const res = await HttpRequest.send(HttpMethod.GET, MPEndPoint.GET_IP_LIST + mac + "/" + sio)
+    if (res && res.data.data) {
+      res.data.data.map((a: number) => {
         setInputRex1Option(prev => [...prev, {
           label: `Input ${a + 1}`,
           value: a,
           isAvailale: true
         }])
       })
-    } catch (e) {
-      console.log(e);
     }
   }
-  const fetchInputSensor = async (sio: number) => {
-    try {
-      const res = await axios.get(`${server}/api/v1/mp/${sio}`)
-      console.log(res.data.content)
-      res.data.content.map((a: number) => {
+  const fetchInputSensor = async (mac: string, sio: number) => {
+    const res = await HttpRequest.send(HttpMethod.GET, MPEndPoint.GET_IP_LIST + mac + "/" + sio)
+    if (res && res.data.data) {
+      res.data.data.map((a: number) => {
         setInputSensorOption(prev => [...prev, {
           label: `Input ${a + 1}`,
           value: a,
           isAvailale: true
         }])
       })
-    } catch (e) {
-      console.log(e);
     }
   }
   const fetchInputMode = async () => {
-        try {
-      const res = await axios.get(`${server}/api/v1/mp/mode`)
-      console.log(res.data.content)
-      res.data.content.map((a: ModeDto) => {
+
+    const res = await HttpRequest.send(HttpMethod.GET, MPEndPoint.GET_IP_MODE)
+    if (res && res.data.data) {
+      res.data.data.map((a: ModeDto) => {
         setInputModeOption(prev => [...prev, {
           label: a.name,
           value: a.value,
           isAvailale: true
         }])
       })
-    } catch (e) {
-      console.log(e);
     }
   }
   {/* Output */ }
-  const [outputOption, setOutputOption] = useState<Option[]>([
-
-  ])
-  const [relayMode, setRelayMode] = useState<Option[]>([
-
-  ])
-  const [strikeModeOption, setStrikeModeOption] = useState<Option[]>([
-
-  ])
-  const fetchOutput = async (sio: number) => {
-    try {
-      const res = await axios.get(`${server}/api/v1/cp/${sio}`);
-      console.log(res.data.content);
-      res.data.content.map((a: number) => {
+  const [outputOption, setOutputOption] = useState<Option[]>([])
+  const [relayMode, setRelayMode] = useState<Option[]>([])
+  const [strikeModeOption, setStrikeModeOption] = useState<Option[]>([])
+  const fetchOutput = async (mac: string, sio: number) => {
+    const res = await HttpRequest.send(HttpMethod.GET, CPEndPoint.GET_CP_OUTPUT + mac + "/" + sio)
+    if (res && res.data.data) {
+      res.data.data.map((a: number) => {
         setOutputOption(prev => [...prev, {
           label: `Output ${a + 1}`,
           value: a,
           isAvailale: true
         }])
       })
-    } catch (e) {
-      console.log(e);
     }
   }
   const fetchStrikeMode = async () => {
-    try {
-      const res = await axios.get(`${server}/api/v1/acr/strike/mode`);
-      console.log(res.data.content);
-      res.data.content.map((a: ModeDto) => {
+    const res = await HttpRequest.send(HttpMethod.GET, ACREndPoint.GET_STRK_MODE)
+    if (res && res.data.data) {
+      res.data.data.map((a: ModeDto) => {
         setStrikeModeOption(prev => [...prev, {
           label: a.name,
           value: a.value,
           isAvailale: true
         }])
       })
-    } catch (e) {
-      console.log(e)
     }
   }
   const fetchRelayMode = async () => {
-    try {
-      const res = await axios.get(`${server}/api/v1/cp/mode`);
-      console.log(res.data.content);
-      res.data.content.map((a: ModeDto) => {
+    const res = await HttpRequest.send(HttpMethod.GET, CPEndPoint.GET_RELAY_OP_MODE)
+    if (res && res.data.data) {
+      res.data.data.map((a: ModeDto) => {
         setRelayMode(prev => [...prev, {
           label: a.description,
           value: a.value,
           isAvailale: true
         }])
       })
-    } catch (e) {
-      console.log(e)
     }
   }
   {/* Time Zone */ }
-  const [timeZoneOption, setTimeZoneOption] = useState<Option[]>([
-
-  ])
+  const [timeZoneOption, setTimeZoneOption] = useState<Option[]>([])
   const fetchTimeZone = async () => {
-    try {
-      const res = await axios.get(`${server}/api/v1/tz/all`)
-      console.log(res.data.content)
-      res.data.content.map((a: TimeZoneDto) => {
+    const res = await HttpRequest.send(HttpMethod.GET, TimeZoneEndPoint.GET_TZ_LIST)
+    Logger.info(res)
+    if (res && res.data.data) {
+      res.data.data.map((a: TimeZoneDto) => {
         setTimeZoneOption(prev => [...prev, {
           label: a.name,
-          value: a.tzNumber,
+          value: a.componentNo,
           isAvailale: true
         }])
       })
-    } catch (e) {
-      console.log(e);
     }
   }
   {/* Access Control Reader */ }
-  const [doorModeOption, setDoorModeOption] = useState<Option[]>([
-
-  ]);
+  const [doorModeOption, setDoorModeOption] = useState<Option[]>([]);
   const fetchAcrMode = async () => {
-    try {
-      const res = await axios.get(`${server}/api/v1/acr/mode`);
-      console.log(res.data.content)
-      res.data.content.map((a: ModeDto) => {
+    const res = await HttpRequest.send(HttpMethod.GET, ACREndPoint.GET_ACR_MODE)
+    Logger.info(res)
+    if (res && res.data.data) {
+      res.data.data.map((a: ModeDto) => {
         setDoorModeOption(prev => [...prev, {
           label: a.name,
           value: a.value,
           isAvailale: true
         }])
       })
-    } catch (e) {
-      console.log(e)
     }
   }
   // const [acs,setAcs] = useState<>()
   {/* Anti Passback */ }
-  const [antipassbackOption, setAntipassbackMode] = useState<Option[]>([
-
-  ]);
+  const [antipassbackOption, setAntipassbackMode] = useState<Option[]>([]);
   const fetchApbMode = async () => {
-    try {
-      const res = await axios.get(`${server}/api/v1/acr/apb/mode`);
-      console.log(res.data.content)
-      res.data.content.map((a: ModeDto) => {
+    const res = await HttpRequest.send(HttpMethod.GET, ACREndPoint.GET_APB_MODE)
+    Logger.info(res)
+    if (res && res.data.data) {
+      res.data.data.map((a: ModeDto) => {
         setAntipassbackMode(prev => [...prev, {
           label: a.name,
           value: a.value,
           isAvailale: true
         }])
       })
-    } catch (e) {
-      console.log(e)
     }
   }
   {/* UseEffect */ }
@@ -677,14 +417,13 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
             <button value={6} className={activeTab === 6 ? active : inactive} onClick={handleOnTabClick}>
               Advance
             </button>
-            <Button onClick={handleOutsideSubmit} className="w-50" size="sm">Submit </Button>
+            <Button onClickWithEvent={handleClick} name='create' className="w-50" size="sm">Submit </Button>
           </nav>
         </div>
         <div className='flex-2'>
-          <form ref={formRef} onSubmit={handleSubmit} className="space-y-6 flex justify-center">
+          <div className="space-y-6 flex justify-center">
             <div className='w-[60%]'>
               {activeTab == 0 &&
-
                 <div className='flex flex-col gap-1'>
                   <Label htmlFor='mode' >Door Type</Label>
                   <div className="flex justify-around gap-3 pb-3">
@@ -712,15 +451,16 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
 
                   </div>
                   <Label htmlFor="name">Door Name</Label>
-                  <Input value={formData.name} name="name" type="text" id="name" onChange={handleChange} />
+                  <Input value={data.name} name="name" type="text" id="name" onChange={handleChange} />
                   <div>
-                    <Label htmlFor='scpIp'>Controller</Label>
+                    <Label htmlFor='mac'>Controller</Label>
                     <Select
-                      name="scpIp"
+                      isString={true}
+                      name="mac"
                       options={controllerOption}
                       onChangeWithEvent={handleSelectChange}
                       className="dark:bg-dark-900"
-                      defaultValue={formData.scpIp}
+                      defaultValue={data.mac}
                     />
                   </div>
                   <div>
@@ -731,7 +471,7 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
                       //placeholder="Select Option"
                       onChangeWithEvent={handleSelectChange}
                       className="dark:bg-dark-900"
-                      defaultValue={formData.accessConfig}
+                      defaultValue={data.accessConfig}
                     />
                   </div>
                   {isPairUse &&
@@ -740,10 +480,7 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
                       <Input name="pare" type="text" id="pare" onChange={handleChange} />
                     </>
                   }
-
                 </div>
-
-
               }
 
               {activeTab === 1 &&
@@ -776,28 +513,28 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
 
                       </div>
 
-                      <Label htmlFor='readerSioNumber' >Reader In - Module</Label>
+                      <Label htmlFor='rdrSio' >Reader In - Module</Label>
                       <Select
-                        name="readerSioNumber"
+                        name="rdrSio"
                         options={moduleOption}
                         placeholder="Select Option"
                         onChangeWithEvent={handleSelectChange}
                         className="dark:bg-dark-900"
-                        defaultValue={formData.readerSioNumber}
+                        defaultValue={data.rdrSio}
                       />
-                      <Label htmlFor='readerNumber'>Reader In - No</Label>
+                      <Label htmlFor='rdrNo'>Reader In - No</Label>
                       <Select
-                        name="readerNumber"
+                        name="rdrNo"
                         options={readerInOption}
                         placeholder="Select Option"
                         onChangeWithEvent={handleSelectChange}
                         className="dark:bg-dark-900"
-                        defaultValue={formData.readerNumber}
+                        defaultValue={data.rdrNo}
                       />
-                      {formData.isReaderOsdp &&
+                      {data.isReaderOsdp &&
                         <>
                           <Label htmlFor='osdpAddress'>Reader Address</Label>
-                          <Input isReadOnly={true} value={formData.osdpAddress} name="osdpAddress" type="number" id="osdpAddress" onChange={handleChange} />
+                          <Input isReadOnly={true} value={data.osdpAddress} name="osdpAddress" type="number" id="osdpAddress" onChange={handleChange} />
                           <Label htmlFor='readerNumber'>Reader Baud Rate</Label>
                           <Select
                             name="osdpBaudRate"
@@ -805,7 +542,7 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
                             placeholder="Select Option"
                             onChangeWithEvent={handleSelectChange}
                             className="dark:bg-dark-900"
-                            defaultValue={formData.osdpBaudRate}
+                            defaultValue={data.osdpBaudRate}
                           />
                         </>
 
@@ -846,40 +583,40 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
 
                   </div>
                   <div>
-                    <Label htmlFor='alternateReaderSioNumber'>Reader Out - Module</Label>
+                    <Label htmlFor='altRdrSioNo'>Reader Out - Module</Label>
                     <Select
-                      name="alternateReaderSioNumber"
+                      name="altRdrSioNo"
                       options={moduleOption}
                       placeholder="Select Option"
                       onChangeWithEvent={handleSelectChange}
                       className="dark:bg-dark-900"
-                      defaultValue={formData.alternateReaderSioNumber}
+                      defaultValue={data.altRdrSioNo}
                     />
                   </div>
                   <div>
-                    <Label htmlFor='alternateReaderNumber'>Reader Out - No</Label>
+                    <Label htmlFor='altRdrNo'>Reader Out - No</Label>
                     <Select
-                      name="alternateReaderNumber"
+                      name="altRdrNo"
                       options={readerOutOption}
                       placeholder="Select Option"
                       onChangeWithEvent={handleSelectChange}
                       className="dark:bg-dark-900"
-                      defaultValue={formData.alternateReaderNumber}
+                      defaultValue={data.altRdrNo}
                     />
                   </div>
 
-                  {formData.isAlternateReaderOsdp &&
+                  {data.isAltRdrOsdp &&
                     <>
-                      <Label htmlFor='alternateOsdpAddress'>Reader Address</Label>
-                      <Input isReadOnly={true} value={formData.alternateOsdpAddress} name="alternateOsdpAddress" type="number" id="alternateOsdpAddress" onChange={handleChange} />
-                      <Label htmlFor='alternateOsdpBaudRate'>Reader Baud Rate</Label>
+                      <Label htmlFor='altOsdpAddress'>Reader Address</Label>
+                      <Input isReadOnly={true} value={data.altOsdpAddress} name="altOsdpAddress" type="number" id="alternateOsdpAddress" onChange={handleChange} />
+                      <Label htmlFor='altOsdpBaudRate'>Reader Baud Rate</Label>
                       <Select
-                        name="alternateOsdpBaudRate"
+                        name="altOsdpBaudRate"
                         options={osdpBaudRateOption}
                         placeholder="Select Option"
                         onChangeWithEvent={handleSelectChange}
                         className="dark:bg-dark-900"
-                        defaultValue={formData.alternateOsdpBaudRate}
+                        defaultValue={data.altOsdpBaudRate}
                       />
                     </>
                   }
@@ -890,29 +627,29 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
               {activeTab === 3 &&
 
                 <div className='flex flex-col gap-1'>
-                  <Label htmlFor='rEX0SioNumber'>REX 1 - Module</Label>
+                  <Label htmlFor='rex0SioNo'>REX 1 - Module</Label>
                   <Select
-                    name="rEX0SioNumber"
+                    name="rex0SioNo"
                     options={moduleOption}
                     onChangeWithEvent={handleSelectChange}
                     className="dark:bg-dark-900"
-                    defaultValue={formData.rEX0SioNumber}
+                    defaultValue={data.rex0SioNo}
                   />
-                  <Label htmlFor='rEX0Number'>REX 1 - Input No</Label>
+                  <Label htmlFor='rex0No'>REX 1 - Input No</Label>
                   <Select
-                    name="rEX0Number"
+                    name="rex0No"
                     options={inputRex0Option}
                     onChangeWithEvent={handleSelectChange}
                     className="dark:bg-dark-900"
-                    defaultValue={formData.rEX0Number}
+                    defaultValue={data.rex0No}
                   />
-                                    <Label htmlFor="rEX0SensorMode">REX 1 - Input Mode</Label>
+                  <Label htmlFor="rex0SensorMode">REX 1 - Input Mode</Label>
                   <Select
-                    name="rEX0SensorMode"
+                    name="rex0SensorMode"
                     options={inputModeOption}
                     onChangeWithEvent={handleSelectChange}
                     className="dark:bg-dark-900"
-                    defaultValue={formData.rEX0SensorMode}
+                    defaultValue={data.rex0SensorMode}
                   />
                   {/* <Label htmlFor="rEX0TimeZone">REX 1 - Time Zone</Label>
                   <Select
@@ -923,33 +660,33 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
                     defaultValue={formData.rEX0TimeZone}
                   /> */}
 
-                  { formData.iSREX1Used && 
-                                    <>
-                    <Label htmlFor="rEX1SioNumber">REX 2 - Module</Label>
-                    <Select
-                      name="rEX1SioNumber"
-                      options={moduleOption}
-                      onChangeWithEvent={handleSelectChange}
-                      className="dark:bg-dark-900"
-                      defaultValue={formData.rEX1SioNumber}
-                    />
-                    <Label htmlFor="rEX1Number">REX 2 - Input No</Label>
-                    <Select
-                      name="rEX1Number"
-                      options={inputRex1Option}
-                      onChangeWithEvent={handleSelectChange}
-                      className="dark:bg-dark-900"
-                      defaultValue={formData.rEX1Number}
-                    />
-                                                        <Label htmlFor="rEX1SensorMode">REX 2 - Input Mode</Label>
-                  <Select
-                    name="rEX1SensorMode"
-                    options={inputModeOption}
-                    onChangeWithEvent={handleSelectChange}
-                    className="dark:bg-dark-900"
-                    defaultValue={formData.rEX1SensorMode}
-                  />
-                    {/* <Label htmlFor="rEX1TimeZone">REX 2 - Time Zone</Label>
+                  {data.isRex1Used &&
+                    <>
+                      <Label htmlFor="rex1SioNo">REX 2 - Module</Label>
+                      <Select
+                        name="rex1SioNo"
+                        options={moduleOption}
+                        onChangeWithEvent={handleSelectChange}
+                        className="dark:bg-dark-900"
+                        defaultValue={data.rex1SioNo}
+                      />
+                      <Label htmlFor="rex1No">REX 2 - Input No</Label>
+                      <Select
+                        name="rex1No"
+                        options={inputRex1Option}
+                        onChangeWithEvent={handleSelectChange}
+                        className="dark:bg-dark-900"
+                        defaultValue={data.rex1No}
+                      />
+                      <Label htmlFor="rex1SensorMode">REX 2 - Input Mode</Label>
+                      <Select
+                        name="rex1SensorMode"
+                        options={inputModeOption}
+                        onChangeWithEvent={handleSelectChange}
+                        className="dark:bg-dark-900"
+                        defaultValue={data.rex1SensorMode}
+                      />
+                      {/* <Label htmlFor="rEX1TimeZone">REX 2 - Time Zone</Label>
                     <Select
                       name="rEX1TimeZone"
                       options={timeZoneOption}
@@ -957,49 +694,41 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
                       className="dark:bg-dark-900"
                       defaultValue={formData.rEX1TimeZone}
                     /> */}
-                  </>
-
-                  
+                    </>
                   }
 
-
-
-
                 </div>
-
               }
-
-
               {
                 activeTab === 4 &&
                 <div className='flex flex-col gap-1'>
-                  <Label htmlFor="strikeSioNumber">Strike Module</Label>
+                  <Label htmlFor="strkSio">Strike Module</Label>
                   <Select
-                    name="strikeSioNumber"
+                    name="strkSio"
                     options={moduleOption}
                     onChangeWithEvent={handleSelectChange}
                     className="dark:bg-dark-900"
-                    defaultValue={formData.strikeSioNumber}
+                    defaultValue={data.strkSio}
                   />
-                  <Label htmlFor="strikeNumber">Relay No</Label>
+                  <Label htmlFor="strkNo">Relay No</Label>
                   <Select
-                    name="strikeNumber"
+                    name="strkNo"
                     options={outputOption}
                     onChangeWithEvent={handleSelectChange}
                     className="dark:bg-dark-900"
-                    defaultValue={formData.strikeNumber}
+                    defaultValue={data.strkNo}
                   />
-                  <Label htmlFor="strikeMinActiveTime">Minimum Strike Active Time</Label>
-                  <Input defaultValue={0} value={formData.strikeMinActiveTime} name="strikeMinActiveTime" type="number" id="strikeMinActiveTime" onChange={handleChange} />
-                  <Label htmlFor="strikeMaxActiveTime">Maximum Strike Active Time</Label>
-                  <Input defaultValue={0} value={formData.strikeMaxActiveTime} name="strikeMaxActiveTime" type="number" id="strikeMaxActiveTime" onChange={handleChange} />
-                  <Label htmlFor="strikeMode">Strike Mode</Label>
+                  <Label htmlFor="strkMin">Minimum Strike Active Time</Label>
+                  <Input defaultValue={0} value={data.strkMin} name="strkMin" type="number" id="strikeMinActiveTime" onChange={handleChange} />
+                  <Label htmlFor="strkMax">Maximum Strike Active Time</Label>
+                  <Input defaultValue={0} value={data.strkMax} name="strkMax" type="number" id="strikeMaxActiveTime" onChange={handleChange} />
+                  <Label htmlFor="strkMode">Strike Mode</Label>
                   <Select
-                    name="strikeMode"
+                    name="strkMode"
                     options={strikeModeOption}
                     onChangeWithEvent={handleSelectChange}
                     className="dark:bg-dark-900"
-                    defaultValue={formData.strikeMode}
+                    defaultValue={data.strkMode}
                   />
                   <Label htmlFor="relayMode">Relay Mode</Label>
                   <Select
@@ -1007,7 +736,7 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
                     options={relayMode}
                     onChangeWithEvent={handleSelectChange}
                     className="dark:bg-dark-900"
-                    defaultValue={formData.relayMode}
+                    defaultValue={data.relayMode}
                   />
                 </div>
 
@@ -1015,21 +744,21 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
 
               {activeTab == 5 &&
                 <div className='flex flex-col gap-1'>
-                  <Label htmlFor="sensorSioNumber">Sensor Module</Label>
+                  <Label htmlFor="sensorSio">Sensor Module</Label>
                   <Select
-                    name="sensorSioNumber"
+                    name="sensorSio"
                     options={moduleOption}
                     onChangeWithEvent={handleSelectChange}
                     className="dark:bg-dark-900"
-                    defaultValue={formData.sensorSioNumber}
+                    defaultValue={data.sensorSio}
                   />
-                  <Label htmlFor="sensorNumber">Input No</Label>
+                  <Label htmlFor="sensorNo">Input No</Label>
                   <Select
-                    name="sensorNumber"
+                    name="sensorNo"
                     options={inputSensorOption}
                     onChangeWithEvent={handleSelectChange}
                     className="dark:bg-dark-900"
-                    defaultValue={formData.sensorNumber}
+                    defaultValue={data.sensorNo}
                   />
                   <Label htmlFor="sensorMode">Input Mode</Label>
                   <Select
@@ -1037,7 +766,7 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
                     options={inputModeOption}
                     onChangeWithEvent={handleSelectChange}
                     className="dark:bg-dark-900"
-                    defaultValue={formData.sensorMode}
+                    defaultValue={data.sensorMode}
                   />
                 </div>
               }
@@ -1050,7 +779,7 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
                     options={antipassbackOption}
                     onChangeWithEvent={handleSelectChange}
                     className="dark:bg-dark-900"
-                    defaultValue={formData.antiPassbackMode}
+                    defaultValue={data.antiPassbackMode}
                   />
                   <Label htmlFor="offlineMode">Offline Mode</Label>
                   <Select
@@ -1058,7 +787,7 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
                     options={doorModeOption}
                     onChangeWithEvent={handleSelectChange}
                     className="dark:bg-dark-900"
-                    defaultValue={formData.offlineMode}
+                    defaultValue={data.offlineMode}
                   />
                   <Label htmlFor="defaultMode">Default Mode</Label>
                   <Select
@@ -1066,24 +795,16 @@ const AddDoorForm: React.FC<PropsWithChildren<AddDoorFormProps>> = ({ onSubmitHa
                     options={doorModeOption}
                     onChangeWithEvent={handleSelectChange}
                     className="dark:bg-dark-900"
-                    defaultValue={formData.defaultMode}
+                    defaultValue={data.defaultMode}
                   />
                 </div>
-
               }
-
             </div>
-          </form>
+          </div>
         </div>
-
       </div>
-
     </ComponentCard>
-
-
-
-
   )
 }
 
-export default AddDoorForm
+export default DoorForm

@@ -6,6 +6,9 @@ import "flatpickr/dist/flatpickr.css";
 import App from "./App.tsx";
 import { AppWrapper } from "./components/common/PageMeta.tsx";
 import { ThemeProvider } from "./context/ThemeContext.tsx";
+import { BrowserRouter } from "react-router-dom";
+import { PopupProvider } from "./context/PopupContext.tsx";
+import { AlertProvider } from "./context/AlertContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   // <StrictMode>
@@ -15,9 +18,15 @@ createRoot(document.getElementById("root")!).render(
   //     </AppWrapper>
   //   </ThemeProvider>
   // </StrictMode>,
-      <ThemeProvider> 
+  <ThemeProvider>
+    <BrowserRouter>
       <AppWrapper>
-        <App />
+        <PopupProvider>
+          <AlertProvider>
+            <App />
+          </AlertProvider>
+        </PopupProvider>
       </AppWrapper>
-    </ThemeProvider>
+    </BrowserRouter>
+  </ThemeProvider>
 );

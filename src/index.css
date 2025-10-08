@@ -11,6 +11,18 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme {
+  --animate-flash: flash 1s ease-in-out infinite;
+
+  @keyframes flash {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50%{
+      opacity: 0;
+    }
+  }
+
   --font-*: initial;
   --font-outfit: Outfit, sans-serif;
 
@@ -781,3 +793,13 @@ span.flatpickr-weekday,
 .simplebar-scrollbar.simplebar-visible:before {
   @apply opacity-100;
 }
+
+.hidden-scroll {
+    overflow: auto;
+    scrollbar-width: none;       /* Firefox */
+    -ms-overflow-style: none;    /* IE 10+ */
+  }
+
+  .hidden-scroll::-webkit-scrollbar {
+    display: none;               /* Chrome, Safari, Edge */
+  }

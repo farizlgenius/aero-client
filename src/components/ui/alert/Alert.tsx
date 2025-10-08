@@ -1,14 +1,7 @@
 import { Link } from "react-router";
+import { AlertProps } from "../../../constants/types";
 
-interface AlertProps {
-  isFixed?:boolean
-  variant: "success" | "error" | "warning" | "info"; // Alert type
-  title: string; // Title of the alert
-  message: string; // Message of the alert
-  showLink?: boolean; // Whether to show the "Learn More" link
-  linkHref?: string; // Link URL
-  linkText?: string; // Link text
-}
+
 
 const Alert: React.FC<AlertProps> = ({
   isFixed = false,
@@ -18,27 +11,28 @@ const Alert: React.FC<AlertProps> = ({
   showLink = false,
   linkHref = "#",
   linkText = "Learn more",
+  isTop = true
 }) => {
   // Tailwind classes for each variant
   const variantClasses = {
     success: {
       container:
-        "border-success-500 bg-success-50 dark:border-success-500/50 dark:bg-success-600/50",
+        "border-3 border-success-500 bg-success-50 dark:border-success-500/50 dark:bg-success-600/50",
       icon: "text-success-500",
     },
     error: {
       container:
-        "border-error-500 bg-error-50 dark:border-error-500/50 dark:bg-error-600/50",
+        "border-3 border-error-500 bg-error-50 dark:border-error-500/50 dark:bg-error-600/50",
       icon: "text-error-500",
     },
     warning: {
       container:
-        "border-warning-500 bg-warning-50 dark:border-warning-500/30 dark:bg-warning-500/15",
+        "border-3 border-warning-500 bg-warning-50 dark:border-warning-500/30 dark:bg-warning-500/15",
       icon: "text-warning-500",
     },
     info: {
       container:
-        "border-blue-light-500 bg-blue-light-50 dark:border-blue-light-500/30 dark:bg-blue-light-500/15",
+        "border-3 border-blue-light-500 bg-blue-light-50 dark:border-blue-light-500/30 dark:bg-blue-light-500/15",
       icon: "text-blue-light-500",
     },
   };
@@ -115,7 +109,7 @@ const Alert: React.FC<AlertProps> = ({
 
   return (
     <div
-      className={`${isFixed ? "fixed w-100 z-200 top-[10%] right-[70%] left-[40%]" : ""} rounded-xl border p-4 ${variantClasses[variant].container}`}
+      className={`${ isFixed ? isTop ? "fixed w-70 z-200 top-[85%] right-[5%]" : "fixed w-100 z-200 top-[85%] right-[70%] left-[40%]" : ""} rounded-xl border p-4 ${variantClasses[variant].container}`}
     >
       <div className="flex items-start gap-3">
         <div className={`-mt-0.5 ${variantClasses[variant].icon}`}>
@@ -126,9 +120,8 @@ const Alert: React.FC<AlertProps> = ({
           <h4 className="mb-1 text-sm font-semibold text-gray-800 dark:text-white/90">
             {title}
           </h4>
-
-          <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
-
+          <p  className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
+          
           {showLink && (
             <Link
               to={linkHref}

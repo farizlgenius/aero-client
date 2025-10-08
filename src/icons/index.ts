@@ -76,6 +76,10 @@ import {ReactComponent as Disable} from "./disable.svg?react";
 import {ReactComponent as Spiner} from "./spiner.svg?react";
 import {ReactComponent as Reset} from "./reset.svg?react";
 import {ReactComponent as Upload} from "./upload.svg?react";
+import {ReactComponent as Clear} from "./clear.svg?react";
+import {ReactComponent as Mask} from "./mask.svg?react";
+import {ReactComponent as Unmask} from "./unmask.svg?react";
+import {ReactComponent as Mpg} from "./mpg.svg?react";
 
 export {
   ErrorHexaIcon,
@@ -153,5 +157,9 @@ export {
   Disable,
   Spiner,
   Reset,
-  Upload
+  Upload,
+  Clear,
+  Mask,
+  Unmask,
+  Mpg
 };

@@ -1,14 +1,10 @@
 import React, { useState } from "react";
-
-interface Option {
-  value: string | number ;
-  label: string;
-}
-
+import { Option } from '../../constants/types'
 
 interface SelectProps {
+  isString?:boolean
   name:string;
-  options: Option[];
+  options: Option[] ;
   placeholder?: string;
   onChange?: (value: string) => void;
   onChangeWithEvent?:(value:string,e:React.ChangeEvent<HTMLSelectElement>) => void
@@ -17,6 +13,7 @@ interface SelectProps {
 }
 
 const Select: React.FC<SelectProps> = ({
+  isString,
   name="",
   options,
   placeholder = "Select an option",
@@ -53,15 +50,14 @@ const Select: React.FC<SelectProps> = ({
     >
       {/* Placeholder option */}
       <option
-        value=""
+        value={isString ? "" : -1}
         disabled
         className="text-gray-700 dark:bg-gray-900 dark:text-gray-400"
       >
         {placeholder}
       </option>
       {/* Map over options */}
-      {options.map((option) => (
-        
+      {options.map((option) => (     
         <option
           key={option.value + crypto.randomUUID()}
           value={option.value}
