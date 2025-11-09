@@ -4,7 +4,7 @@ interface ButtonProps {
   name?:string;
   children: ReactNode; // Button text or content
   size?: "sm" | "md"; // Button size
-  variant?: "primary" | "outline" | "danger"; // Button variant
+  variant?: "primary" | "outline" | "danger" | "purple" | "orange" | "yellow" | "green" ; // Button variant
   startIcon?: ReactNode; // Icon before the text
   endIcon?: ReactNode; // Icon after the text
   onClick?: () => void; // Click handler
@@ -23,7 +23,7 @@ const Button: React.FC<ButtonProps> = ({
   onClick,
   onClickWithEvent,
   className = "",
-  disabled = variant == "outline" ? true : false,
+  disabled = false
 }) => {
   // Size Classes
   const sizeClasses = {
@@ -33,6 +33,11 @@ const Button: React.FC<ButtonProps> = ({
 
   // Variant Classes
   const variantClasses = {
+    red:"bg-red-500 text-white shadow-theme-xs hover:bg-red-600 disabled:bg-red-300",
+    orange:"bg-orange-500 text-white shadow-theme-xs hover:bg-orange-600 disabled:bg-orange-300",
+    yellow:"bg-yellow-500 text-white shadow-theme-xs hover:bg-yellow-600 disabled:bg-yellow-300",
+    green:"bg-green-500 text-white shadow-theme-xs hover:bg-green-600 disabled:bg-green-300",
+    purple:"bg-purple-500 text-white shadow-theme-xs hover:bg-purple-600 disabled:bg-purple-300",
     primary:
       "bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300",
       danger:"bg-red-500 text-white shadow-theme-xs hover:bg-red-600 disabled:bg-red-300",

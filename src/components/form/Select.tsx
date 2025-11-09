@@ -1,18 +1,21 @@
 import React, { useState } from "react";
-import { Option } from '../../constants/types'
+import { Options } from "../../model/Options";
+import { ReaderType } from "../../enum/ReaderType";
 
 interface SelectProps {
+  id?:string;
   isString?:boolean
   name:string;
-  options: Option[] ;
+  options: Options[] ;
   placeholder?: string;
-  onChange?: (value: string) => void;
+  onChange?: (value: string ) => void;
   onChangeWithEvent?:(value:string,e:React.ChangeEvent<HTMLSelectElement>) => void
   className?: string;
   defaultValue?: string | number;
 }
 
 const Select: React.FC<SelectProps> = ({
+  id,
   isString,
   name="",
   options,
@@ -39,6 +42,7 @@ const Select: React.FC<SelectProps> = ({
 
   return (
     <select
+    id={id}
     name={name}
       className={`h-11 w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 pr-11 text-sm shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 ${
         selectedValue

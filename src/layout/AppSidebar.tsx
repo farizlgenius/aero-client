@@ -56,7 +56,7 @@ const navItems: NavItem[] = [
   },  {
     icon: <Card />,
     name: "Credential",
-    path: "/card",
+    path: "/cardholder",
   }, {
     icon: <GroupIcon />,
     name: "Access Group",
@@ -79,7 +79,7 @@ const navItems: NavItem[] = [
   {
     icon: <Setting />,
     name: "Settings",
-    subItems: [{ name: "Card Format", path: "/card-format", pro: false }],
+    subItems: [{ name: "Card Format", path: "/cardformat", pro: false },{ name: "Reader LED", path: "/led", pro: false }],
   },
   {
     icon: <CalenderIcon />,

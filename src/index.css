@@ -55,7 +55,10 @@
 
   --color-current: currentColor;
   --color-transparent: transparent;
-  --color-white: #ffffff;
+  /* --color-white: #ffffff; */
+  /* --color-white: #F5F5F5; */
+  /* --color-white: #ececec;    */
+  --color-white: #f8fafc;
   --color-black: #101828;
 
   --color-brand-25: #f2f7ff;

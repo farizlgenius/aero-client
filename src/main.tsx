@@ -9,6 +9,8 @@ import { ThemeProvider } from "./context/ThemeContext.tsx";
 import { BrowserRouter } from "react-router-dom";
 import { PopupProvider } from "./context/PopupContext.tsx";
 import { AlertProvider } from "./context/AlertContext.tsx";
+import { ToastProvider } from "./context/ToastContext.tsx";
+import { NotificationProvider } from "./context/NotificationContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   // <StrictMode>
@@ -21,11 +23,17 @@ createRoot(document.getElementById("root")!).render(
   <ThemeProvider>
     <BrowserRouter>
       <AppWrapper>
-        <PopupProvider>
-          <AlertProvider>
-            <App />
-          </AlertProvider>
-        </PopupProvider>
+        <NotificationProvider>
+          <PopupProvider>
+            <AlertProvider>
+              <ToastProvider>
+                <App />
+              </ToastProvider>
+
+            </AlertProvider>
+          </PopupProvider>
+        </NotificationProvider>
+
       </AppWrapper>
     </BrowserRouter>
   </ThemeProvider>

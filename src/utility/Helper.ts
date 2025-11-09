@@ -1,6 +1,10 @@
 import { AxiosResponse } from "axios";
-import { DaysInWeek,Option } from "../constants/types";
-import { HttpCode, PopUpMsg } from "../constants/constant";
+import { DaysInWeekDto } from "../model/Interval/DaysInWeekDto";
+import { ToastMessage } from "../model/ToastMessage";
+import { Options } from "../model/Options";
+import { HttpCode } from "../enum/Httpcode";
+
+type ToastType = "success" | "error" | 'info';
 
 class Helper {
 
@@ -23,7 +27,36 @@ class Helper {
                     return false;
             }
         } else {
-            showPopup(false, [PopUpMsg.API_ERROR]);
+            showPopup(false, [ToastMessage.API_ERROR]);
+            return false;
+        }
+    }
+
+    static handleToastByResCode(res: AxiosResponse<any, any> | null | undefined,message:string,toggleToast:(toastType:ToastType,toastMessage:string) => void):boolean{
+                if (res) {
+            switch (res.data.code) {
+                case HttpCode.OK:
+                    toggleToast("success",message)
+                    return true;
+                case HttpCode.CREATED:
+                    toggleToast("success",message)
+                    return true;
+                case HttpCode.BAD_REQUEST:
+                    toggleToast("error",res.data.message)
+                    return false;
+                case HttpCode.NOT_FOUND:
+                    toggleToast("error",res.data.message)
+                    return false;
+                case HttpCode.INTERNAL_ERROR:
+                    toggleToast("error",res.data.message)
+                    //showPopup(false,[res.data.detail,res.data.message])
+                    return false;
+                default:
+                     toggleToast("error","error with code : " + res.data.code)
+                    return false;
+            }
+        } else {
+            toggleToast("error",ToastMessage.API_ERROR)
             return false;
         }
     }
@@ -39,7 +72,7 @@ class Helper {
         return startMinutes < endMinutes;
     }
 
-    static isDayEmpty(data: DaysInWeek): boolean {
+    static isDayEmpty(data: DaysInWeekDto): boolean {
         if (data.sunday || data.monday || data.tuesday || data.wednesday || data.thursday || data.friday || data.saturday) {
             return true;
         }
@@ -47,10 +80,10 @@ class Helper {
     }
     
     static updateOptionByValue(
-        array: Option[],
+        array: Options[],
         value: string | number,
         isTaken: boolean
-    ): Option[] {
+    ): Options[] {
         const index = array.findIndex(item => item.value === value);
         if (index === -1) return array; // not found → return original
 

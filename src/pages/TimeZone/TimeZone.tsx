@@ -1,24 +1,29 @@
 import React, {  useEffect, useState } from 'react'
-import TableTemplate from '../../components/tables/Tables/TableTemplate';
-import ActionElement from '../UiElements/ActionElement';
 import { Add } from '../../icons';
 import Button from '../../components/ui/button/Button';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import DangerModal from '../UiElements/DangerModal';
-import Modals from '../UiElements/Modals';
-import { TimeZoneDto } from '../../constants/types';
-import { TIMEZONE_TABLE_HEAD, TIMEZONE_KEY, HttpMethod, TimeZoneEndPoint } from '../../constants/constant';
 import HttpRequest from '../../utility/HttpRequest';
-import { usePopupActions } from '../../utility/PopupCalling';
 import TimeZoneForm from './TimeZoneForm';
 import Helper from '../../utility/Helper';
+import { TimeZoneDto } from '../../model/TimeZone/TimeZoneDto';
+import { TimeZoneTable } from './TimeZoneTable';
+import { useToast } from '../../context/ToastContext';
+import { CreateTimeZoneDto } from '../../model/TimeZone/CreateTimeZone';
+import { ToastMessage } from '../../model/ToastMessage';
+import { TimeZoneEndPoint } from '../../enum/endpoint/TimezoneEndpoint';
+import { HttpMethod } from '../../enum/HttpMethod';
 
 // Define Global Variable
 let removeTarget: Number;
 
 
 const defaultDto: TimeZoneDto = {
-    componentNo: -1,
+    uuid:"",
+    locationId:1,
+    locationName:"Main Location",
+    componentId:-1,
+    isActive:true,
     name: "",
     mode: -1,
     activeTime: "",
@@ -28,7 +33,7 @@ const defaultDto: TimeZoneDto = {
 
 
 const TimeZone = () => {
-    const { showPopup } = usePopupActions();
+    const {toggleToast} = useToast();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     {/* Modal */ }
@@ -61,9 +66,9 @@ const TimeZone = () => {
         }
     }
 
-    const createTimeZone = async (data: TimeZoneDto) => {
+    const createTimeZone = async (data: CreateTimeZoneDto) => {
         const res = await HttpRequest.send(HttpMethod.POST, TimeZoneEndPoint.POST_ADD_TZ, data)
-        if(Helper.handlePopupByResCode(res, showPopup)){
+        if(Helper.handleToastByResCode(res,ToastMessage.CREATE_TZ,toggleToast)){
             setUpdateModal(false);
             setCreateModal(false);
             toggleRefresh();
@@ -71,15 +76,15 @@ const TimeZone = () => {
     }
 
     {/* handle Table Action */ }
-    const handleOnClickEdit = (data:TimeZoneDto) => {
+    const handleEdit = (data:TimeZoneDto) => {
         console.log(data)
         setTimeZoneDto(data)
         setUpdateModal(true)
     }
 
-    const handleOnClickRemove = (data:TimeZoneDto) => {
+    const handleRemove = (data:TimeZoneDto) => {
         console.log(data);
-        removeTarget = data.componentNo;
+        removeTarget = data.componentId;
         setRemoveModal(true);
     }
     const handleOnClickCloseRemove = () => {
@@ -91,11 +96,11 @@ const TimeZone = () => {
     }
 
     {/* Group Data */ }
-    const [tableDatas, setTableDatas] = useState<TimeZoneDto[]>([]);
+    const [timeZonesDto, setTimeZonesDto] = useState<TimeZoneDto[]>([]);
     const fetchData = async () => {
         const res = await HttpRequest.send(HttpMethod.GET, TimeZoneEndPoint.GET_TZ_LIST)
         if (res) {
-            setTableDatas(res.data.data);
+            setTimeZonesDto(res.data.data);
             console.log(res.data.data)
         }
     };
@@ -103,7 +108,7 @@ const TimeZone = () => {
     const removeTimeZone = async () => {
         const res = await HttpRequest.send(HttpMethod.DELETE, TimeZoneEndPoint.DELETE_TZ  + removeTarget);
         console.log(res)
-        if (Helper.handlePopupByResCode(res, showPopup)){
+        if (Helper.handleToastByResCode(res,ToastMessage.DELETE_TZ,toggleToast)){
             setRemoveModal(false);
             toggleRefresh();
         }
@@ -138,7 +143,7 @@ const TimeZone = () => {
                 setSelectedObjects((prev) => [...prev, data]);
             } else {
                 setSelectedObjects((prev) =>
-                    prev.filter((item) => item.componentNo !== data.componentNo)
+                    prev.filter((item) => item.componentId !== data.componentId)
                 );
             }
         }
@@ -146,10 +151,11 @@ const TimeZone = () => {
     return (
         <>
             {removeModal && <DangerModal header='Remove Time Zone' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
-            {createModal && <Modals isWide={true} body={<TimeZoneForm handleClick={handleClick} data={timeZoneDto}  setTimeZoneDto={setTimeZoneDto} />} handleClickWithEvent={handleClick} />}
-            {updateModal && <Modals isWide={true} body={<TimeZoneForm handleClick={handleClick}  data={timeZoneDto} setTimeZoneDto={setTimeZoneDto} />} handleClickWithEvent={handleClick} />}
             <PageBreadcrumb pageTitle="Time Zone" />
-            <div className="space-y-6">
+            {createModal || updateModal ?
+            <TimeZoneForm handleClick={handleClick} data={timeZoneDto}  setTimeZoneDto={setTimeZoneDto} />
+            : 
+                        <div className="space-y-6">
                 <div className="flex gap-4">
                     <Button
                         name='add'
@@ -164,14 +170,14 @@ const TimeZone = () => {
                 </div>
                 <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                     <div className="max-w-full overflow-x-auto">
-                        <TableTemplate<TimeZoneDto> checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={TIMEZONE_TABLE_HEAD} tableDatas={tableDatas} tableKeys={TIMEZONE_KEY} status={true} action={true} selectedObject={selectedObjects} actionElement={(row) => (
-                            row.componentNo !== 1 &&
-                            <ActionElement isDetail={false} onEditClick={handleOnClickEdit} onRemoveClick={handleOnClickRemove} data={row} />
-                        )} />
+                        <TimeZoneTable data={timeZonesDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove}/>
                     </div>
                 </div>
 
             </div>
+            }
+
+
         </>
     )
 }

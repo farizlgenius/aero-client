@@ -1,13 +1,13 @@
 import React, { PropsWithChildren} from 'react'
 import ComponentCard from '../../components/common/ComponentCard';
-import {  DaysInWeek, IntervalDto } from '../../constants/types';
 import Button from '../../components/ui/button/Button';
 import Label from '../../components/form/Label';
 import Checkbox from '../../components/form/input/Checkbox';
 import Input from '../../components/form/input/InputField';
 import { TimeIcon } from '../../icons';
-import Modals from '../UiElements/Modals';
 import Helper from '../../utility/Helper';
+import { IntervalDto } from '../../model/Interval/IntervalDto';
+import { DaysInWeekDto } from '../../model/Interval/DaysInWeekDto';
 
 
 
@@ -43,7 +43,7 @@ const intervalForm: React.FC<PropsWithChildren<IntervalProp>> = ({ handleClickWi
                       <div className='flex-1' >
                         <Checkbox
                           name={d}
-                          checked={data.days[d as keyof DaysInWeek]}
+                          checked={data.days[d as keyof DaysInWeekDto]}
                           onChange={handleChange}
                           label={Helper.toCapitalCase(d)}
                         />

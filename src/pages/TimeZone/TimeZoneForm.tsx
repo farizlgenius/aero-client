@@ -4,17 +4,35 @@ import Label from '../../components/form/Label';
 import Input from '../../components/form/input/InputField';
 import Button from '../../components/ui/button/Button';
 import DatePicker from '../../components/form/date-picker';
-import { IntervalDto, Option, TimeZoneFormProp, TimeZoneModeDto } from '../../constants/types';
 import HttpRequest from '../../utility/HttpRequest';
-import { HttpMethod, IntervalEndPoint, TimeZoneEndPoint } from '../../constants/constant';
 import Select from '../../components/form/Select';
 import Modals from '../UiElements/Modals';
 import { usePopupActions } from '../../utility/PopupCalling';
 import Helper from '../../utility/Helper';
 import ActionElement from '../UiElements/ActionElement';
+import { IntervalDto } from '../../model/Interval/IntervalDto';
+import { TimeZoneDto } from '../../model/TimeZone/TimeZoneDto';
+import { Options } from '../../model/Options';
+import { ModeDto } from '../../model/ModeDto';
+import { HttpMethod } from '../../enum/HttpMethod';
+import { TimeZoneEndPoint } from '../../enum/endpoint/TimezoneEndpoint';
+import { IntervalEndpoint } from '../../enum/endpoint/IntervalEndpoint';
+
+
+export interface TimeZoneFormProp {
+  isUpdate?:boolean;
+  data:TimeZoneDto
+  setTimeZoneDto:React.Dispatch<React.SetStateAction<TimeZoneDto>>;
+  handleClick: (e: React.MouseEvent<HTMLButtonElement>) => void
+}
+
 
 const defaultIntervalDto: IntervalDto = {
-  componentNo: -1,
+  uuid:"",
+  locationId:1,
+  locationName:"Main Location",
+  isActive:true,
+  componentId: -1,
   days: {
     sunday: false,
     monday: false,
@@ -29,12 +47,12 @@ const defaultIntervalDto: IntervalDto = {
   endTime: ""
 }
 
-const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ setTimeZoneDto, data, handleClick }) => {
+const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({isUpdate=false, setTimeZoneDto, data, handleClick }) => {
   const { showPopup } = usePopupActions();
   const [modeDetail, setModeDetail] = useState<string>("");
   const [modeDetailPopup, setModeDetailPopup] = useState<boolean>(false);
-  const [modeOption, setModeOption] = useState<Option[]>([])
-  const [intervalOption, setIntervalOption] = useState<Option[]>([])
+  const [modeOption, setModeOption] = useState<Options[]>([])
+  const [intervalOption, setIntervalOption] = useState<Options[]>([])
   const [intervalForm, setIntervalForm] = useState<boolean>(false);
   const [interval, setInterval] = useState<IntervalDto>(defaultIntervalDto);
   const [allIntervals, setAllIntervals] = useState<IntervalDto[]>([]);
@@ -65,7 +83,7 @@ const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ setTimeZo
     const res = await HttpRequest.send(HttpMethod.GET, TimeZoneEndPoint.GET_MODE_TZ)
     if (res) {
       if (res.data.code == 200) {
-        res.data.data.map((a: TimeZoneModeDto) => {
+        res.data.data.map((a: ModeDto) => {
           setModeOption((prev) => [...prev, {
             value: a.value,
             label: a.name,
@@ -77,14 +95,14 @@ const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ setTimeZo
   }
 
   const fetchInterval = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET, IntervalEndPoint.GET_INTERVAL)
+    const res = await HttpRequest.send(HttpMethod.GET, IntervalEndpoint.GET_INTERVAL)
     if (res) {
       if (res.data.code == 200) {
         setAllIntervals(res.data.data)
         res.data.data.map((a: IntervalDto) => {
             setIntervalOption((prev) => [...prev, {
             label: a.startTime + " - " + a.endTime + " " + a.daysDesc,
-            value: a.componentNo,
+            value: a.componentId,
           }])
         })
       }
@@ -93,12 +111,12 @@ const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ setTimeZo
 
   const handleSelect = (value: string, e: React.ChangeEvent<HTMLSelectElement>) => {
     console.log(value)
-    setInterval(allIntervals.filter(a => a.componentNo == Number(value))[0]);
+    setInterval(allIntervals.filter(a => a.componentId == Number(value))[0]);
   }
 
 const handleClickWithData = (data: IntervalDto) => {
-  setIntervalOption(prev => Helper.updateOptionByValue(prev,data.componentNo,false));
-  setTimeZoneDto(prev => ({...prev,intervals:[...prev.intervals.filter(a => a.componentNo !== data.componentNo)]}));
+  setIntervalOption(prev => Helper.updateOptionByValue(prev,data.componentId,false));
+  setTimeZoneDto((prev:TimeZoneDto) => ({...prev,intervals:[...prev.intervals.filter(a => a.componentId !== data.componentId)]}));
 };
   const handleClickWithEvent = (e: React.MouseEvent<HTMLButtonElement>) => {
     console.log(e)
@@ -112,12 +130,12 @@ const handleClickWithData = (data: IntervalDto) => {
         setModeDetailPopup(true);
         break;
       case "interval":
-        if(interval.componentNo == -1){
+        if(interval.componentId == -1){
           showPopup(false,["Please select interval"])
         }
         else{
-        setTimeZoneDto((prev) => ({...prev,intervals:[...prev.intervals,interval]}))
-        setIntervalOption((prev) => Helper.updateOptionByValue(prev,interval.componentNo,true))
+        setTimeZoneDto((prev:TimeZoneDto) => ({...prev,intervals:[...prev.intervals,interval]}))
+        setIntervalOption((prev) => Helper.updateOptionByValue(prev,interval.componentId,true))
         setIntervalForm(false);
         setInterval(defaultIntervalDto)
         }
@@ -143,9 +161,12 @@ const handleClickWithData = (data: IntervalDto) => {
           <div className="flex flex-1 gap-6">
             {/* Normal Form */}
             <div className='flex-1'>
-              <div className='flex flex-col gap-1'>
-                <Label htmlFor="name">Name</Label>
-                <Input name="name" type="text" id="name" onChange={(e) => setTimeZoneDto((prev) => ({ ...prev, name: e.target.value }))} value={data.name} />
+              <div className='flex flex-col gap-3'>
+                <div>
+                                    <Label htmlFor="name">Name</Label>
+                <Input name="name" type="text" id="name" onChange={(e) => setTimeZoneDto((prev:TimeZoneDto) => ({ ...prev, name: e.target.value }))} value={data.name} />
+                </div>
+
                 <div>
                   <DatePicker
                     id="activeTime"
@@ -155,7 +176,7 @@ const handleClickWithData = (data: IntervalDto) => {
                     onChange={(dates, currentDateString) => {
                       // Handle your logic
                       console.log({ dates, currentDateString });
-                      setTimeZoneDto((prev) => ({ ...prev, activeTime: toLocalISOWithOffset(dates[0]) }))
+                      setTimeZoneDto((prev:TimeZoneDto) => ({ ...prev, activeTime: toLocalISOWithOffset(dates[0]) }))
                     }}
                   />
                 </div>
@@ -168,7 +189,7 @@ const handleClickWithData = (data: IntervalDto) => {
                     onChange={(dates, currentDateString) => {
                       // Handle your logic
                       console.log({ dates, currentDateString });
-                      setTimeZoneDto((prev) => ({ ...prev, deactiveTime: toLocalISOWithOffset(dates[0]) }))
+                      setTimeZoneDto((prev:TimeZoneDto) => ({ ...prev, deactiveTime: toLocalISOWithOffset(dates[0]) }))
                     }}
                   />
                 </div>
@@ -179,16 +200,16 @@ const handleClickWithData = (data: IntervalDto) => {
                       name="mode"
                       options={modeOption}
                       placeholder="Select Option"
-                      onChangeWithEvent={(e) => setTimeZoneDto((prev) => ({ ...prev, mode: Number(e) }))}
+                      onChangeWithEvent={(e) => setTimeZoneDto((prev:TimeZoneDto) => ({ ...prev, mode: Number(e) }))}
                       className="dark:bg-dark-900"
                       defaultValue={data.mode == -1 ? -1 : data.mode}
                     />
                     <Button name='detail' onClickWithEvent={handleClickWithEvent}>Info</Button>
                   </div>
-
                 </div>
-                <div>
+                <div className='flex gap-4'>
                   <Button onClickWithEvent={handleClick} name='create' className='w-50'>Create</Button>
+                  <Button onClickWithEvent={handleClick} name='close' className='w-50 danger'>Cancel</Button>
                 </div>
               </div>
             </div>

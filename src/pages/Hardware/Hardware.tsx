@@ -4,27 +4,51 @@ import TableTemplate from "../../components/tables/Tables/TableTemplate";
 import Button from "../../components/ui/button/Button";
 import { Add, Reset, Scan, Upload } from "../../icons";
 import Modals from "../UiElements/Modals";
-import * as signalR from "@microsoft/signalr";
-import ActionElement from "../UiElements/ActionElement";
 import DangerModal from "../UiElements/DangerModal";
-import {  HARDWARE_TABLE_HEADER, HARDWARE_TABLE_KEY, HttpMethod, HubEndPoint, ID_REPORT_KEY, ID_REPORT_TABLE_HEADER, IdReportEndPoint, ModalDetail, PopUpMsg, POST_ADD_SCP, POST_REMOVE_SCP, POST_RESET_SCP, POST_UPCONFIG_SCP, ScpEndPoint } from "../../constants/constant";
-import { AddScpDto,  HardwareProps, IdReport, ResetScpDto, ScpDto, StatusDto } from "../../constants/types";
+import {  ID_REPORT_KEY, ID_REPORT_TABLE_HEADER, IdReportEndPoint, ModalDetail } from "../../constants/constant";
+import { HardwareProps, ResetScpDto } from "../../constants/types";
 import SelectDeviceForm from "../../components/form/form-elements/SelectDeviceForm";
 import LoadingModals from "../UiElements/LoadingModals";
 import HttpRequest from "../../utility/HttpRequest";
 import Helper from "../../utility/Helper";
 import { usePopupActions } from "../../utility/PopupCalling";
-import AddHardwareForm from "../../modals/AddHardwareForm";
+import HardwareForm from "./HardwareForm";
 import Logger from "../../utility/Logger";
+import { HardwareDto } from "../../model/Hardware/HardwareDto";
+import { IdReport } from "../../model/IdReport/IdReport";
+import { HardwareTable } from "./HardwareTable";
+import SignalRService from "../../services/SignalRService";
+import { StatusDto } from "../../model/StatusDto";
+import { AxiosResponse } from "axios";
+import { ResponseDto } from "../../model/ResponseDto";
+import { HttpMethod } from "../../enum/HttpMethod";
+import { HardwareEndpoint } from "../../enum/endpoint/HardwareEndpoint";
 
 // Get Global Variable
-
-const server = import.meta.env.VITE_SERVER_IP;
 let removeTarget: ResetScpDto = {
-  ScpMac:""
+  ScpMac: ""
 };
-let resetTarget:ResetScpDto = {
-  ScpMac:""
+let resetTarget: ResetScpDto = {
+  ScpMac: ""
+}
+
+const defaultDto: HardwareDto = {
+  // Base
+  uuid: "",
+  componentId: -1,
+  macAddress: "",
+  locationId: 1,
+  locationName: "Main Location",
+  isActive: true,
+
+  // Define
+  name: "",
+  model: "",
+  ipAddress: "",
+  modules: [],
+  serialNumber: "",
+  isUpload: false,
+  isReset: false
 }
 
 const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick }) => {
@@ -36,19 +60,19 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
 
 
   {/* Modal Handler */ }
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
-  const [isModalAddOpen, setIsModalAddOpen] = useState<boolean>(false);
+  const [scanModal, setScanModal] = useState<boolean>(false)
+  const [createModal, setCreateModal] = useState<boolean>(false);
+  const [editModal, setEditModal] = useState<boolean>(false);
   const [isModalSelectDeviceOpen, setIsModalSelectDeviceOpen] = useState<boolean>(false);
   const [isModalAddDetailOpen, setIsModalAddDetailOpen] = useState<boolean>(false);
   const [isRemoveClick, SetIsRemoveClick] = useState<boolean>(false);
-  const [isReseting,setIsReseting] = useState<boolean>(false);
-  const [isSendingCommand,setIsSendingCommand] = useState<boolean>(false); 
+  const [isReseting, setIsReseting] = useState<boolean>(false);
+  const [isSendingCommand, setIsSendingCommand] = useState<boolean>(false);
 
   // Upload Modal
-  const [isUploading,setIsUploading] = useState<boolean>(false);
-  const [uploadMessage,setUploadMessage] = useState<string>("");
-  const handleCloseModal = () => setIsModalOpen(false);
-  const handleCloseAddModal = () => setIsModalAddOpen(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [uploadMessage, setUploadMessage] = useState<string>("");
+  const handleCloseModal = () => setScanModal(false);
   const handleCloseAddDetailModal = () => setIsModalAddDetailOpen(false);
   const handleCloseSelectDevice = () => setIsModalSelectDeviceOpen(false);
 
@@ -56,24 +80,33 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
   {/* IdReport */ }
   const [idReportList, setIdReportList] = useState<IdReport[]>([]);
   const handleAddIdReport = async (data: IdReport) => {
-    setAddScp({
-      componentNo: data.scpID,
+    setHardwareDto({
+      // Base
+      uuid: "",
+      componentId: data.scpId,
+      macAddress: data.macAddress,
+      locationId: 1,
+      locationName: "Main Location",
+      isActive: true,
+
+      // Define
       name: "",
       model: data.model,
-      mac: data.macAddress,
+      ipAddress: data.ip,
+      modules: [],
       serialNumber: data.serialNumber.toString(),
-      port:0,
-      ip:data.ip
+      isUpload: false,
+      isReset: false
     });
     console.log(data);
-    setIsModalOpen(false);
-    setIsModalAddOpen(true);
+    setScanModal(false);
+    setCreateModal(true);
   }
   const fetchIdReport = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET,IdReportEndPoint.GET_ID_REPORT_LIST)
+    const res = await HttpRequest.send(HttpMethod.GET, IdReportEndPoint.GET_ID_REPORT_LIST)
     Logger.info(res);
     console.log(res);
-    if(res && res.data.data){
+    if (res && res.data.data) {
       setIdReportList(res.data.data);
     }
   }
@@ -84,59 +117,47 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
     </Button>
   )} />
 
-
   {/* Hardware Data */ }
-  const [addScp, setAddScp] = useState<AddScpDto>({
-    componentNo: 0,
-    name: "",
-    model: "",
-    mac: "",
-    ip: "",
-    port: 0,
-    serialNumber: ""
-  })
+  const [hardwareDto, setHardwareDto] = useState<HardwareDto>(defaultDto)
   const [notifying, setNotifying] = useState(true);
-  const [tableDatas, setTableDatas] = useState<ScpDto[]>([]);
+  const [data, setData] = useState<HardwareDto[]>([]);
   const [status, setStatus] = useState<StatusDto[]>([]);
   const fetchData = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET,ScpEndPoint.GET_SCP_LIST);
-    Logger.info(res);
-    if(res && res.data.data){
-        setTableDatas(res.data.data);
+    const res: AxiosResponse<ResponseDto<HardwareDto[]>, any> | null | undefined = await HttpRequest.send(HttpMethod.GET, HardwareEndpoint.GET_SCP_LIST);
+    if (res && res.data.data) {
+      setData(res.data.data);
 
       // Batch set state
-      const newStatuses = res.data.data.map((a: ScpDto) => ({
-        scpMac: a.mac,
-        deviceNumber: a.componentNo,
-        status: -1
+      const newStatuses = res.data.data.map((a: HardwareDto) => ({
+        macAddress: a.macAddress,
+        componentId: a.componentId,
+        status: -1,
+        tamper: -1,
+        ac: -1,
+        batt: -1
       }));
 
       console.log(newStatuses);
 
       setStatus((prev) => [...prev, ...newStatuses]);
-      console.log("#####")
       console.log(res.data.data)
       // Fetch status for each
-      res.data.data.forEach((a: ScpDto) => {
-        fetchStatus(a.mac,a.componentNo);
+      res.data.data.forEach((a: HardwareDto) => {
+        fetchStatus(a.macAddress, a.componentId);
       });
     }
 
   }
-  const fetchStatus = async (mac: string,id:number) => {
-    const res = await HttpRequest.send(HttpMethod.GET,ScpEndPoint.GET_SCP_STATUS + mac+"/"+id)
-    Logger.info(res)
-    if(res){
-            setStatus((prev) => prev.map((a) =>
-        a.scpMac == res.data.data["mac"]
+  const fetchStatus = async (mac: string, id: number) => {
+    const res: AxiosResponse<ResponseDto<StatusDto>, any> | null | undefined = await HttpRequest.send(HttpMethod.GET, HardwareEndpoint.GET_SCP_STATUS + mac + "/" + id)
+    if (res?.data.data) {
+      setStatus((prev) => prev.map((a) =>
+        a.macAddress == res.data.data.macAddress
           ? {
             ...a,
-            status: res.data.data["status"],
+            status: res.data.data.status,
           }
           : {
-            // scpIp:ScpIp,
-            // cpNumber:first,
-            // status:status[0]
             ...a
           }
       )
@@ -145,78 +166,88 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
   }
 
   const resetDevice = async (ScpMac: string) => {
-    const res = await HttpRequest.send(HttpMethod.POST,ScpEndPoint.POST_SCP_RESET+ScpMac)
-    Helper.handlePopup(res,PopUpMsg.RESET_SCP,showPopup)
-    if(res){
-      if(res.data.code == 200) setIsReseting(true);
-    }
+    const res = await HttpRequest.send(HttpMethod.POST, HardwareEndpoint.POST_SCP_RESET + ScpMac)
+    if (Helper.handlePopupByResCode(res, showPopup)) setIsReseting(true)
   }
 
-    const uploadConfig = async (ScpMac: string) => {
-    const res = await HttpRequest.send(HttpMethod.POST,ScpEndPoint.POST_SCP_UPLOAD+ScpMac)
-    Helper.handlePopup(res,PopUpMsg.RESET_SCP,showPopup)
-    if(res){
-      if(res.data.code == 200) setIsUploading(true);
-    }
-
+  const uploadConfig = async (ScpMac: string) => {
+    const res = await HttpRequest.send(HttpMethod.POST, HardwareEndpoint.POST_SCP_UPLOAD + ScpMac)
+    if (Helper.handlePopupByResCode(res, showPopup)) setIsUploading(true);
   }
 
   const removeScp = async (data: ResetScpDto) => {
     setIsSendingCommand(true);
-    const res = await HttpRequest.send(HttpMethod.DELETE,ScpEndPoint.DELETE_SCP+data.ScpMac);
-    Helper.handlePopup(res,PopUpMsg.DELETE_SCP,showPopup);
-    setIsSendingCommand(false);
-    toggleRefresh();
+    const res = await HttpRequest.send(HttpMethod.DELETE, HardwareEndpoint.DELETE_SCP + data.ScpMac);
+    if (Helper.handlePopupByResCode(res, showPopup)) {
+      setIsSendingCommand(false);
+      toggleRefresh();
+    }
+
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAddScp((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setHardwareDto((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  const handleSubmit = async () => {
-    const res = await HttpRequest.send(HttpMethod.POST,ScpEndPoint.POST_ADD_SCP,addScp)
-          setIsSendingCommand(true);
-      setIsModalAddOpen(false);
-    Helper.handlePopup(res,PopUpMsg.POST_ADD_SCP,showPopup)
-    if(res){
-        setIsSendingCommand(false);
-        toggleRefresh()
+  const createHardware = async () => {
+    const res = await HttpRequest.send(HttpMethod.POST, HardwareEndpoint.POST_ADD_SCP, hardwareDto)
+    setIsSendingCommand(true);
+    setCreateModal(false);
+    if (Helper.handlePopupByResCode(res, showPopup)) {
+      setIsSendingCommand(false);
+      toggleRefresh()
     }
   }
 
   {/* Handle Action Table*/ }
-  const handleOnEditClick = (data: ScpDto) => {
+  const handleEdit = (data: HardwareDto) => {
     console.log(data);
-    setAddScp({
-      componentNo: data.componentNo,
+    setHardwareDto({
+      // Base
+      uuid: data.uuid,
+      componentId: data.componentId,
+      macAddress: data.macAddress,
+      locationId: data.locationId,
+      locationName: data.locationName,
+      isActive: true,
+      // detail
+
       name: data.name,
       model: data.model,
-      mac: data.mac,
-      ip: data.ip,
+      ipAddress: data.ipAddress,
+      modules: data.modules,
       serialNumber: data.serialNumber,
-      port:0
+      isUpload: data.isUpload,
+      isReset: data.isReset
     })
-    setIsModalAddDetailOpen(true);
+    setEditModal(true);
   }
-  const handleOnRemoveClick = (data: ScpDto) => {
-    removeTarget = {ScpMac: data.mac};
+  const handleRemove = (data: HardwareDto) => {
+    removeTarget = { ScpMac: data.macAddress };
     SetIsRemoveClick(true);
   }
   {/* Handle Click */ }
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClickWithEvent = (e: React.MouseEvent<HTMLButtonElement>) => {
     console.log(e.currentTarget.name);
     switch (e.currentTarget.name) {
       case "add":
         setIsModalSelectDeviceOpen(true);
         break;
+      case "submit":
+        createHardware()
+        break;
       case "scan":
-        setIsModalOpen(true);
+        setScanModal(true);
         fetchIdReport();
+        break;
+      case "close":
+        setCreateModal(false)
+        setEditModal(false)
         break;
       case "reset":
         if (selectedObjects.length != 0) {
-          selectedObjects.map((a: ScpDto) => {
-            resetDevice(a.mac);
+          selectedObjects.map((a: HardwareDto) => {
+            resetDevice(a.macAddress);
           })
           onUploadClick();
         } else {
@@ -228,8 +259,8 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
         break;
       case "upload":
         if (selectedObjects.length != 0) {
-          selectedObjects.map((a: ScpDto) => {
-            uploadConfig(a.mac);
+          selectedObjects.map((a: HardwareDto) => {
+            uploadConfig(a.macAddress);
           })
           onUploadClick();
         } else {
@@ -248,12 +279,12 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
   const handleOnClickConfirmRemove = () => {
     removeScp(removeTarget);
     SetIsRemoveClick(false);
-    
+
   }
 
   {/* checkBox */ }
-  const [selectedObjects, setSelectedObjects] = useState<ScpDto[]>([]);
-  const handleCheckedAll = (data: ScpDto[], e: React.ChangeEvent<HTMLInputElement>) => {
+  const [selectedObjects, setSelectedObjects] = useState<HardwareDto[]>([]);
+  const handleCheckedAll = (data: HardwareDto[], e: React.ChangeEvent<HTMLInputElement>) => {
     console.log(data)
     console.log(e.target.checked)
     if (setSelectedObjects) {
@@ -265,7 +296,7 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
     }
   }
 
-  const handleChecked = (data: ScpDto, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChecked = (data: HardwareDto, e: React.ChangeEvent<HTMLInputElement>) => {
     console.log(data)
     console.log(e.target.checked)
     if (setSelectedObjects) {
@@ -273,7 +304,7 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
         setSelectedObjects((prev) => [...prev, data]);
       } else {
         setSelectedObjects((prev) =>
-          prev.filter((item) => item.no !== data.no)
+          prev.filter((item) => item.componentId !== data.componentId)
         );
       }
     }
@@ -281,48 +312,39 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
 
   {/* UseEffect */ }
   useEffect(() => {
-    const connection = new signalR.HubConnectionBuilder()
-      .withUrl(server + HubEndPoint.AERO_HUB)
-      .withAutomaticReconnect()
-      .build();
-
-    connection.start().then(() => {
-      console.log("Connected to SignalR event hub");
-    });
-    connection.on("CommStatus", (ScpMac: string,CommStatus:number) => {
+    var connection = SignalRService.getConnection();
+    connection.on("CommStatus", (ScpMac: string, CommStatus: number) => {
       console.log(ScpMac);
       console.log(CommStatus);
       //fetchStatus(ScpMac);
-      if(resetTarget.ScpMac == ScpMac && CommStatus == 2){
-          setIsReseting(false);
+      if (resetTarget.ScpMac == ScpMac && CommStatus == 2) {
+        setIsReseting(false);
       }
-      
+
     });
-        connection.on("SyncStatus", () => {
-      toggleRefresh();
-    });
-            connection.on("UploadStatus", (message:string,isFinish:boolean) => {
+
+    connection.on("UploadStatus", (message: string, isFinish: boolean) => {
       setUploadMessage(message);
       console.log(message);
       console.log(isFinish)
-      if(isFinish){
-        setTimeout(()=>{
+      if (isFinish) {
+        setTimeout(() => {
           setIsUploading(false);
-        },500)
-        
+        }, 500)
+
       }
-      connection.on("UploadFinish",() => {
+      connection.on("UploadFinish", () => {
         setIsUploading(false);
       })
     });
-    connection.on("IdReport",(IdReports:IdReport[])=>{
+    connection.on("IdReport", (IdReports: IdReport[]) => {
       setIdReportList(IdReports);
     })
     //connection.on
     fetchIdReport();
     fetchData();
     return () => {
-      connection.stop();
+      //SignalRService.stopConnection()
     };
   }, [refresh]);
 
@@ -334,34 +356,27 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
         <DangerModal header={ModalDetail.REMOVE_HARDWARE.header} body={ModalDetail.REMOVE_HARDWARE.body} onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />
       }
       {isModalSelectDeviceOpen &&
-        <Modals header="Hardware Select" body={<SelectDeviceForm />} closeToggle={handleCloseSelectDevice} />
+        <Modals header="Hardware Select" body={<SelectDeviceForm />} handleClickWithEvent={handleCloseSelectDevice} />
       }
-      {isModalOpen &&
-        <Modals header="Host List" body={ScanTableTemplate} closeToggle={handleCloseModal} />
-      }
-      {isModalAddOpen &&
-        <Modals header="Add Hardware" body={<AddHardwareForm handleSubmit={handleSubmit} handleChange={handleChange} data={addScp} isDetail={false} />} closeToggle={handleCloseAddModal} />
-      }
-      {isModalAddDetailOpen &&
-        <Modals header="Add Hosts" body={<AddHardwareForm handleSubmit={handleSubmit} handleChange={handleChange} data={addScp} isDetail={true} />} closeToggle={handleCloseAddDetailModal} />
+      {scanModal &&
+        <Modals header="Host List" body={ScanTableTemplate} handleClickWithEvent={handleCloseModal} />
       }
       {isSendingCommand &&
-        <LoadingModals isReset={false} header="Processing..."/>
+        <LoadingModals isReset={false} header="Processing..." />
       }
-      {isReseting && 
-        <LoadingModals isReset={true} header="Reseting..."/>
+      {isReseting &&
+        <LoadingModals isReset={true} header="Reseting..." />
+      }
+      {isUploading &&
+        <LoadingModals isReset={false} header="Uploading Please wait" body={uploadMessage} />
       }
 
-      {isUploading && 
-      <LoadingModals isReset={false} header="Uploading Please wait" body={uploadMessage}/>
-      }
-      
       <PageBreadcrumb pageTitle="Hardware" />
       <div className="space-y-6">
         <div className="flex gap-4">
           <Button
             name="add"
-            onClickWithEvent={handleClick}
+            onClickWithEvent={handleClickWithEvent}
             size="sm"
             variant="primary"
             startIcon={<Add className="size-5" />}
@@ -372,9 +387,9 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
           </Button>
           <div>
             <Button
-            //className="animate-bounce"
+              //className="animate-bounce"
               name="reset"
-              onClickWithEvent={handleClick}
+              onClickWithEvent={handleClickWithEvent}
               size="sm"
               variant="primary"
               startIcon={<Reset className="size-5" />}
@@ -387,7 +402,7 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
           <div>
             <Button
               name="upload"
-              onClickWithEvent={handleClick}
+              onClickWithEvent={handleClickWithEvent}
               size="sm"
               variant="primary"
               startIcon={<Upload className="size-5" />}
@@ -400,7 +415,7 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
           <div>
             <Button
               name="transfer"
-              onClickWithEvent={handleClick}
+              onClickWithEvent={handleClickWithEvent}
               size="sm"
               variant="primary"
               startIcon={<Upload className="size-5" />}
@@ -412,7 +427,7 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
           </div>
           <Button
             name="scan"
-            onClickWithEvent={handleClick}
+            onClickWithEvent={handleClickWithEvent}
             size="sm"
             variant="primary"
             startIcon={<Scan className="size-5" />}
@@ -432,16 +447,16 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
 
 
         </div>
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-          <div className="max-w-full overflow-x-auto">
-
-            <TableTemplate<ScpDto> deviceIndicate={1} statusDto={status} selectedObject={selectedObjects} checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={HARDWARE_TABLE_HEADER} tableDatas={tableDatas} tableKeys={HARDWARE_TABLE_KEY} status={true} action={true} isDetail={true} actionElement={(data, isDetail) => (
-              <ActionElement isDetail={isDetail} onEditClick={handleOnEditClick} onRemoveClick={handleOnRemoveClick} data={data} />
-
-            )} />
-
+        {createModal || editModal ?
+          <HardwareForm handleClickWithEvent={handleClickWithEvent} handleChange={handleChange} data={hardwareDto} isDetail={false} />
+          :
+          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
+            <div className="max-w-full overflow-x-auto">
+              <HardwareTable data={data} statusDto={status} handleEdit={handleEdit} handleRemove={handleRemove} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} selectedObject={selectedObjects} />
+            </div>
           </div>
-        </div>
+        }
+
 
       </div>
     </>

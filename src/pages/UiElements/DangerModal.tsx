@@ -12,7 +12,7 @@ const DangerModal:React.FC<PropsWithChildren<DangerModalProp>> = ({header,body,o
     return (
         <>
             <div className="fixed inset-0 flex items-center justify-center p-5 overflow-y-auto modal z-99999" >
-                <div className="modal-close-btn fixed inset-0 h-full w-full bg-gray-400/50 backdrop-blur-[32px]"></div>
+                <div className="modal-close-btn fixed inset-0 h-full w-full bg-gray-700/50 backdrop-blur-[1px]"></div>
                 <div className="relative w-full max-w-[600px] rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10">
 
                     <button onClick={onCloseModal}  className="absolute right-3 top-3 z-999 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white sm:right-6 sm:top-6 sm:h-11 sm:w-11">

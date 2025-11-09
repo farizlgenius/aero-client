@@ -1,30 +1,36 @@
 import React, { useEffect, useState } from 'react'
-import TableTemplate from '../../components/tables/Tables/TableTemplate';
-import ActionElement from '../UiElements/ActionElement';
 import { Add } from '../../icons';
 import Button from '../../components/ui/button/Button';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import DangerModal from '../UiElements/DangerModal';
-import Modals from '../UiElements/Modals';
-import { HolidayDto } from '../../constants/types';
-import { HttpMethod, HolidayEndPoint, PopUpMsg, Hol_TABLE_HEAD, Hol_KEY } from '../../constants/constant';
 import HttpRequest from '../../utility/HttpRequest';
-import { usePopupActions } from '../../utility/PopupCalling';
 import HolidayForm from './HolidayForm';
 import Helper from '../../utility/Helper';
+import { HolidayDto } from '../../model/Holiday/HolidayDto';
+import { HolidayTable } from './HolidayTable';
+import { useToast } from '../../context/ToastContext';
+import { CreateHolidayDto } from '../../model/Holiday/CreateHolidayDto';
+import { ToastMessage } from '../../model/ToastMessage';
+import { HolidayEndpoint } from '../../enum/endpoint/HolidayEndpoint';
+import { HttpMethod } from '../../enum/HttpMethod';
 
 // Define Global Variable
 let removeTarget: number;
 const defaultDto: HolidayDto = {
-    componentNo: -1,
+    uuid:"",
+    locationId:1,
+    locationName:"Main Location",
+    isActive:true,
+    componentId: -1,
     year: 0,
     month: 0,
     day: 0,
+    extend:0,
     typeMask: 0
 }
 
 const Holiday = () => {
-    const { showPopup } = usePopupActions();
+    const { toggleToast } = useToast();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     const [holidatDto,setHolidayDto] = useState<HolidayDto>(defaultDto)
@@ -55,14 +61,14 @@ const Holiday = () => {
     }
 
     {/* handle Table Action */ }
-    const handleOnClickEdit = (data:HolidayDto) => {
+    const handleEdit = (data:HolidayDto) => {
         setHolidayDto(data)
         setUpdateModal(true);
     }
 
-    const handleOnClickRemove = (data: HolidayDto) => {
+    const handleRemove = (data: HolidayDto) => {
         console.log(data);
-        removeTarget = data.componentNo;
+        removeTarget = data.componentId;
         setIsRemoveModal(true);
     }
     const handleOnClickCloseRemove = () => {
@@ -73,38 +79,31 @@ const Holiday = () => {
         removeHoliday();
     }
 
-    const createHoliday = async (data: HolidayDto) => {
-        const res = await HttpRequest.send(HttpMethod.POST, HolidayEndPoint.POST_HOL, data)
-        if(Helper.handlePopupByResCode(res,showPopup)) setCreateModal(false);
+    const createHoliday = async (data: CreateHolidayDto) => {
+        const res = await HttpRequest.send(HttpMethod.POST, HolidayEndpoint.POST_HOL, data)
+        if(Helper.handleToastByResCode(res,ToastMessage.CREATE_HOL,toggleToast)) setCreateModal(false);
         toggleRefresh();
     }
 
     const updateHoliday = async (data:HolidayDto) => {
-        const res = await HttpRequest.send(HttpMethod.PUT,HolidayEndPoint.PUT_HOL,data)
-        if(Helper.handlePopupByResCode(res,showPopup)) setUpdateModal(false);
+        const res = await HttpRequest.send(HttpMethod.PUT,HolidayEndpoint.PUT_HOL,data)
+         if(Helper.handleToastByResCode(res,ToastMessage.UPDATE_HOL,toggleToast)) setUpdateModal(false);
         toggleRefresh();
     }
 
     {/* Group Data */ }
-    const [tableDatas, setTableDatas] = useState<HolidayDto[]>([]);
+    const [holidaysDto, setHolidaysDto] = useState<HolidayDto[]>([]);
     const fetchData = async () => {
-        const res = await HttpRequest.send(HttpMethod.GET, HolidayEndPoint.GET_HOL_LIST)
+        const res = await HttpRequest.send(HttpMethod.GET, HolidayEndpoint.GET_HOL_LIST)
         if (res) {
-            setTableDatas(res.data.data);
+            console.log(res.data.data)
+            setHolidaysDto(res.data.data);
         }
     };
 
     const removeHoliday = async () => {
-        const res = await HttpRequest.send(HttpMethod.DELETE, HolidayEndPoint.DELETE_HOL + removeTarget)
-        if (res) {
-            if (res.data.code == 200) {
-                showPopup(true, [PopUpMsg.DELETE_HOL]);
-            } else {
-                showPopup(false, res.data.errors);
-            }
-        } else {
-            showPopup(false, [PopUpMsg.DELETE_HOL]);
-        }
+        const res = await HttpRequest.send(HttpMethod.DELETE, HolidayEndpoint.DELETE_HOL + removeTarget)
+        if(Helper.handleToastByResCode(res,ToastMessage.DELETE_HOL,toggleToast))
         toggleRefresh();
 
 
@@ -139,7 +138,7 @@ const Holiday = () => {
                 setSelectedObjects((prev) => [...prev, data]);
             } else {
                 setSelectedObjects((prev) =>
-                    prev.filter((item) => item.componentNo !== data.componentNo)
+                    prev.filter((item) => item.componentId !== data.componentId)
                 );
             }
         }
@@ -147,10 +146,12 @@ const Holiday = () => {
     return (
         <>
             {isRemoveModal && <DangerModal header='Remove Holiday' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
-            {createModal && <Modals isWide={false} header='Add Holiday' body={<HolidayForm isUpdate={false} setHolidayDto={setHolidayDto} handleClickWithEvent={handleClick} data={holidatDto} />} handleClickWithEvent={handleClick} />}
-            {updateModal && <Modals isWide={false} header='Update Holiday' body={<HolidayForm isUpdate={true} setHolidayDto={setHolidayDto} handleClickWithEvent={handleClick} data={holidatDto} />} handleClickWithEvent={handleClick} />}
             <PageBreadcrumb pageTitle="Holiday" />
-            <div className="space-y-6">
+            {createModal || updateModal ?
+             
+             <HolidayForm isUpdate={updateModal} setHolidayDto={setHolidayDto} handleClickWithEvent={handleClick} data={holidatDto} />
+             :
+                         <div className="space-y-6">
                 <div className="flex gap-4">
                     <Button
                         name='add'
@@ -165,14 +166,16 @@ const Holiday = () => {
                 </div>
                 <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                     <div className="max-w-full overflow-x-auto">
-                        <TableTemplate checkbox={true} onCheckedAll={handleCheckedAll} onChecked={handleChecked} tableHeaders={Hol_TABLE_HEAD} tableDatas={tableDatas} tableKeys={Hol_KEY} status={true} action={true} selectedObject={selectedObjects} actionElement={(row) => (
-                            <ActionElement onEditClick={handleOnClickEdit} onRemoveClick={handleOnClickRemove} data={row} />
-                        )} />
+
+                        <HolidayTable selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} data={holidaysDto}/>
 
                     </div>
                 </div>
 
             </div>
+             
+             }
+
         </>
     )
 }

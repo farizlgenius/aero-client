@@ -21,33 +21,32 @@ import Home from "./pages/Dashboard/Home";
 // ACS
 import Module from "./pages/Module/Module";
 import Event from "./pages/Event/Event";
-import Control from "./pages/Control/Control";
-import Monitor from "./pages/Monitor/Monitor";
+import ControlPoint from "./pages/ControlPoint/ControlPoint";
+import MonitorPoint from "./pages/MonitorPoint/MonitorPoint";
 import Hardware from "./pages/Hardware/Hardware";
 import PopupExample from "./pages/UiElements/PopupExample";
 import AccessGroup from "./pages/AccessGroup/AccessGroup";
 import Door from "./pages/Door/Door";
-import Credential from "./pages/Credential/Credential";
+import CardHolder from "./pages/CardHolder/CardHolder";
 import TimeZone from "./pages/TimeZone/TimeZone";
 import CardFormat from "./pages/CardFormat/CardFormat";
 import Alert from "./components/ui/alert/Alert";
 import { useEffect, useState } from "react";
-import * as signalR from "@microsoft/signalr";
-import { HubEndPoint } from "./constants/constant";
-import { VerifyScpConfigDto } from "./constants/types";
-import { usePopup } from "./context/PopupContext";
 import Holiday from "./pages/Holiday/Holiday";
 import Interval from "./pages/Interval/Interval";
 import { useAlert } from "./context/AlertContext";
-import Popup from "./modals/Popup";
+import SignalRService from "./services/SignalRService";
+import Toast from "./pages/UiElements/Toast";
+import { useToast } from "./context/ToastContext";
+import { Area } from "./icons";
+import { Led } from "./pages/Led/Led";
 
-const server = import.meta.env.VITE_SERVER_IP;
 
 
 export default function App() {
   const navigate = useNavigate();
-  const { showAlertFlag, setShowAlertFlag, alertSuccessFlag, setAlertSuccessFlag, alertMessage, setAlertMessage } = useAlert();
-  const { showPopupFlag, setShowPopupFlag, popupSuccessFlag, setPopupSuccessFlag, popUpMessage, setPopUpMessage } = usePopup();
+  const { showAlertFlag, alertSuccessFlag, alertMessage } = useAlert();
+  const { showToast,setShowToast,toastMessage,toastType } = useToast();
   const [isResetShow, setIsResetShow] = useState<boolean>(false);
   const [isUploadShow, setIsUploadShow] = useState<boolean>(false);
   const toggleIsUploadShow = () => {
@@ -55,66 +54,29 @@ export default function App() {
     setIsUploadShow(false);
   }
   const [message, setMessage] = useState<string>("");
-  const handleClick = (e:React.MouseEvent<HTMLDivElement>) => {
-    setShowPopupFlag(false);
-  }
+
+
+
   useEffect(() => {
-    const cmndConnection = new signalR.HubConnectionBuilder()
-      .withUrl(server + HubEndPoint.CMND_HUB)
-      .withAutomaticReconnect()
-      .build();
-
-    cmndConnection.start().then(() => {
-      console.log("Connected to SignalR event hub");
-    }).catch(e => {
-      console.log(e);
-    });
-
-    if (showAlertFlag == true) {
-      setTimeout(() => {
-        setShowAlertFlag(false);
-        setAlertSuccessFlag(false);
-        if (setAlertMessage) setAlertMessage("")
-      }, 1000)
-    }
-
-    if (showPopupFlag == true && popupSuccessFlag == true) {
-      setTimeout(() => {
-        setShowPopupFlag(false);
-        setPopupSuccessFlag(false);
-        setPopUpMessage([])
-      }, 1000)
-    }
-
-    cmndConnection.on(
-      "VerifyConfig", (data: VerifyScpConfigDto) => {
-        console.log(data);
-        console.log(data.isReset);
-        console.log(data.isUpload);
-        if (data.isReset) {
-          setIsResetShow(true);
-        } else if (data.isUpload) {
-          setIsUploadShow(true);
-        }
-      }
-    )
+    SignalRService.getConnection();
 
     return () => {
-      cmndConnection.stop();
+      SignalRService.stopConnection();
     };
-  }, [showPopupFlag, showAlertFlag])
+  }, [])
+
   return (
     <>
       <div>
-        {showPopupFlag &&
-          <div>
-            <Popup
-            handleClick={handleClick}
-              succesFlag={popupSuccessFlag}
-              body={popUpMessage}
-            />
-          </div>
-        }
+        {showToast && (
+          <Toast
+            type={toastType}
+            message={toastMessage}
+            duration={3000}
+            onClose={() => setShowToast(false)}
+          />
+        )}
+
         {showAlertFlag &&
           <div className="transition-opacity duration-500 opacity-100 hover:opacity-0">
             <Alert
@@ -163,14 +125,16 @@ export default function App() {
             <Route path="/hardware" element={<Hardware onUploadClick={toggleIsUploadShow} />} />
             <Route path="/module" element={<Module />} />
             <Route path="/event" element={<Event />} />
-            <Route path="/control" element={<Control />} />
-            <Route path="/monitor" element={<Monitor />} />
+            <Route path="/control" element={<ControlPoint />} />
+            <Route path="/monitor" element={<MonitorPoint />} />
             <Route path="/popup" element={<PopupExample />} />
             <Route path="/door" element={<Door />} />
             <Route path="/group" element={<AccessGroup />} />
+            <Route path="/area" element={<Area/>}/>
             <Route path="/timezone" element={<TimeZone />} />
-            <Route path="/card" element={<Credential />} />
-            <Route path="/card-format" element={<CardFormat />} />
+            <Route path="/cardholder" element={<CardHolder/>} />
+            <Route path="/cardformat" element={<CardFormat />} />
+            <Route path="/led" element={<Led/>}/>
             <Route path="/holiday" element={<Holiday />} />
             <Route path="/interval" element={<Interval />} />
             <Route path="/monitorgroup" element={<Interval />} />
