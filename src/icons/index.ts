@@ -80,6 +80,7 @@ import {ReactComponent as Clear} from "./clear.svg?react";
 import {ReactComponent as Mask} from "./mask.svg?react";
 import {ReactComponent as Unmask} from "./unmask.svg?react";
 import {ReactComponent as Mpg} from "./mpg.svg?react";
+import {ReactComponent as CamIcon} from "./cam.svg?react";
 
 export {
   ErrorHexaIcon,
@@ -161,5 +162,6 @@ export {
   Clear,
   Mask,
   Unmask,
-  Mpg
+  Mpg,
+  CamIcon
 };

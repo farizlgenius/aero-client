@@ -4,28 +4,29 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../compon
 import { HardwareDto } from "../../model/Hardware/HardwareDto";
 import SignalRService from "../../services/SignalRService";
 import { StatusDto } from "../../model/StatusDto";
+import { CheckCircleIcon } from "../../icons";
 
-const HARDWARE_TABLE_HEADER = ["Name", "Model", "Mac address", "Ip address", "Status", "Action"];
+const HARDWARE_TABLE_HEADER = ["Name", "Model", "Mac address", "Ip address", "Configuration", "Status", "Action"];
 const HARDWARE_TABLE_KEY = ["name", "model", "macAddress", "ipAddress"];
 
 interface TableContent {
     data: HardwareDto[]
     statusDto: StatusDto[]
-    handleEdit:(data:HardwareDto)=>void
-    handleRemove:(data:HardwareDto) => void
+    handleEdit: (data: HardwareDto) => void
+    handleRemove: (data: HardwareDto) => void
     handleCheck: (data: HardwareDto, e: React.ChangeEvent<HTMLInputElement>) => void;
     handleCheckAll: (data: HardwareDto[], e: React.ChangeEvent<HTMLInputElement>) => void;
     selectedObject: HardwareDto[];
 }
 
-export const HardwareTable: React.FC<PropsWithChildren<TableContent>> = ({ selectedObject,data, statusDto,handleEdit,handleRemove,handleCheck,handleCheckAll }) => {
+export const HardwareTable: React.FC<PropsWithChildren<TableContent>> = ({ selectedObject, data, statusDto, handleEdit, handleRemove, handleCheck, handleCheckAll }) => {
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     // UseEffect 
     useEffect(() => {
-            // Initialize SignalR as soon as app starts
+        // Initialize SignalR as soon as app starts
         var connection = SignalRService.getConnection();
-        connection.on("SyncStatus",toggleRefresh);
+        connection.on("SyncStatus", toggleRefresh);
         return () => {
             //SignalRService.stopConnection()
         };
@@ -68,34 +69,59 @@ export const HardwareTable: React.FC<PropsWithChildren<TableContent>> = ({ selec
                                     <>
                                         {data.isReset == true ?
                                             <Badge
+                                                variant="solid"
                                                 size="sm"
-                                                color="warning"
+                                                color="error"
                                             >
-                                                Pending Restart
+                                                Restart
                                             </Badge>
                                             : data.isUpload == true ?
                                                 <Badge
+                                                    variant="solid"
                                                     size="sm"
                                                     color="warning"
                                                 >
-                                                    Pending Upload
+                                                    Upload
                                                 </Badge>
                                                 :
                                                 <Badge
+                                                    variant="solid"
                                                     size="sm"
-                                                    color={
-                                                        statusDto.find(b => b.macAddress == data.macAddress)?.status == 1
-                                                            ? "success"
-                                                            : statusDto.find(b => b.macAddress == data.macAddress)?.status == 0
-                                                                ? "error"
-                                                                : "warning"
-                                                    }
+                                                    color="success"
                                                 >
-                                                    {statusDto.find(b => b.macAddress == data.macAddress)?.status == 1 ? "Online" : statusDto.find(b => b.macAddress == data.macAddress)?.status == 0 ? "Offline" : statusDto.find(b => b.macAddress == data.macAddress)?.status}
+                                                    Synced
                                                 </Badge>
                                         }
 
                                     </>
+                                </TableCell>
+                                {/* Status */}
+                                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                    {data.isReset || data.isUpload ?
+                                        <Badge
+                                            size="sm"
+                                            color="error"
+                                        >
+                                            Error
+                                        </Badge>
+                                        :
+                                        <Badge
+                                            size="sm"
+                                            color={
+                                                statusDto.find(b => b.macAddress == data.macAddress)?.status == 1
+                                                    ? "success"
+                                                    : statusDto.find(b => b.macAddress == data.macAddress)?.status == 0
+                                                        ? "error"
+                                                        : "warning"
+                                            }
+                                        >
+                                            {statusDto.find(b => b.macAddress == data.macAddress)?.status == 1 ? "Online" : statusDto.find(b => b.macAddress == data.macAddress)?.status == 0 ? "Offline" : statusDto.find(b => b.macAddress == data.macAddress)?.status}
+                                        </Badge>
+
+                                    }
+
+
+
                                 </TableCell>
 
                                 {/* Action */}

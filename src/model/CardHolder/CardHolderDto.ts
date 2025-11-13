@@ -1,21 +1,26 @@
 import { AccessGroupDto } from "../AccessGroup/AccessGroupDto";
 import { NoMacBaseDto } from "../NoMacBaseDto";
 import { CredentialDto } from "./CredentialDto";
+import { ImageFileDto } from "./ImageFileDto";
 
 export interface CardHolderDto extends NoMacBaseDto {
     userId:string;
+    identification:string;
     title:string;
     firstName:string;
     middleName:string;
     lastName:string;
-    sex:string;
+    gender:string;
+    dateOfBirth:string;
     email:string;
     phone:string;
+    address:string;
     company:string;
     position:string;
     department:string;
-    imagePath:string;
+    image:ImageFileDto;
     additionals:string[];
     credentials:CredentialDto[];
     accessLevels:AccessGroupDto[];
+    flag:number;
 }

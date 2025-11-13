@@ -3,7 +3,6 @@ import { NoMacBaseDto } from "../NoMacBaseDto";
 
 export interface CredentialDto extends NoMacBaseDto{
     componentId:number;
-    flag:number;
     bits:number;
     issueCode:number;
     facilityCode:number;

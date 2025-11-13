@@ -1,11 +1,11 @@
-import React, { PropsWithChildren, useState } from 'react'
+import React, { PropsWithChildren, useEffect, useState } from 'react'
 import ComponentCard from '../../components/common/ComponentCard';
 import Modals from '../UiElements/Modals';
 import Button from '../../components/ui/button/Button';
 import Label from '../../components/form/Label';
 import Input from '../../components/form/input/InputField';
 import Radio from '../../components/form/input/Radio';
-import { EnvelopeIcon } from '../../icons';
+import { CamIcon, EnvelopeIcon, FileIcon } from '../../icons';
 import DatePicker from '../../components/form/date-picker';
 import Select from '../../components/form/Select';
 import ActionElement from '../UiElements/ActionElement';
@@ -21,10 +21,13 @@ import HttpRequest from '../../utility/HttpRequest';
 import { HttpMethod } from '../../enum/HttpMethod';
 import { AccessLevelEndPoint } from '../../constants/constant';
 import { Sex } from '../../enum/Sex';
+import Switch from '../../components/form/switch/Switch';
+import { ModeDto } from '../../model/ModeDto';
+import DropzoneComponent from '../../components/form/form-elements/DropZone';
 
 
 enum formTab {
-  Info, AccessLevel, Credentials, Image,UserSetting
+  Info, AccessLevel, Credentials, UserSetting
 }
 
 
@@ -32,44 +35,46 @@ enum formTab {
 const active = "inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 ease-in-out sm:p-3 text-brand-500 dark:bg-brand-400/20 dark:text-brand-400 bg-brand-50 text-brand-500 dark:bg-brand-400/20 dark:text-brand-400 bg-brand-50";
 const inactive = "inline-flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200 ease-in-out sm:p-3 bg-transparent text-gray-500 border-transparent hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
 
-const CardHolderForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({  handleClickWithEvent, setDto, dto }) => {
+const CardHolderForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({ handleClickWithEvent, setDto, dto }) => {
 
-var defaultCredential: CredentialDto = {
-  componentId: 0,
-  flag: 1,
-  bits: 0,
-  issueCode: 0,
-  facilityCode: -1,
-  cardNo: 0,
-  pin: 0,
-  activeDate: new Date().toISOString(),
-  deactiveDate: new Date(new Date().setFullYear(new Date().getFullYear() + 10)).toISOString(),
-  accessLevels: [],
-  uuid: '',
-  locationId: 1,
-  locationName: 'Main Location',
-  isActive: true
-}
+  var defaultCredential: CredentialDto = {
+    componentId: 0,
+    bits: 0,
+    issueCode: 0,
+    facilityCode: -1,
+    cardNo: 0,
+    pin: 0,
+    activeDate: new Date().toISOString(),
+    deactiveDate: new Date(new Date().setFullYear(new Date().getFullYear() + 10)).toISOString(),
+    accessLevels: [],
+    uuid: '',
+    locationId: 1,
+    locationName: 'Main Location',
+    isActive: true
+  }
 
-var defaultAccessLevel: AccessGroupDto = {
-  name: '',
-  componentId: -1,
-  accessLevelDoorTimeZoneDto: [],
-  uuid: '',
-  locationId: 1,
-  locationName: 'Main Location',
-  isActive: true
-}
+  var defaultAccessLevel: AccessGroupDto = {
+    name: '',
+    componentId: -1,
+    accessLevelDoorTimeZoneDto: [],
+    uuid: '',
+    locationId: 1,
+    locationName: 'Main Location',
+    isActive: true
+  }
 
 
   const [activeTab, setActiveTab] = useState<number>(0);
   const [selectedValue, setSelectedValue] = useState<string>(Sex.M);
   const [addCardForm, setAddCardForm] = useState<boolean>(false);
-  const [addAccessLeveForm,setAddAccessLeveForm] = useState<boolean>(false);
+  const [addAccessLeveForm, setAddAccessLeveForm] = useState<boolean>(false);
   const [accessLevelOption, setAccessLevelOption] = useState<Options[]>([]);
   const [scanCard, setScanCard] = useState<boolean>(false);
   const [credentialDto, setCredentialDto] = useState<CredentialDto>(defaultCredential);
   const [accessGroupDto, setAccessGroupDto] = useState<AccessGroupDto>(defaultAccessLevel);
+  const [userFlag,setUserFlag] = useState<ModeDto[]>([])
+  const [file,setFile] = useState<boolean>(false);
+  const [cam,setCam] = useState<boolean>(false);
 
 
   function generateEmployeeId(): string {
@@ -87,8 +92,9 @@ var defaultAccessLevel: AccessGroupDto = {
       console.log(CardHolderId);
       console.log(IssueCode);
       console.log(FloorNumber);
-      setCredentialDto(prev => ({...prev,
-                issueCode: IssueCode,
+      setCredentialDto(prev => ({
+        ...prev,
+        issueCode: IssueCode,
         facilityCode: FacilityCode,
         cardNo: CardHolderId,
       }))
@@ -129,6 +135,16 @@ var defaultAccessLevel: AccessGroupDto = {
         setAccessGroupDto(defaultAccessLevel);
         setAddAccessLeveForm(false)
         break;
+      case "file":
+        setFile(true)
+        break;
+        case "cam":
+          setCam(true)
+          break;
+      case 'close':
+        setCam(false)
+        setFile(false)
+        break;
     }
   }
 
@@ -149,7 +165,7 @@ var defaultAccessLevel: AccessGroupDto = {
     setAddCardForm(true);
   }
 
-    const handleClickAccessLevel = () => {
+  const handleClickAccessLevel = () => {
     setAddAccessLeveForm(true);
   }
 
@@ -184,6 +200,10 @@ var defaultAccessLevel: AccessGroupDto = {
     setDto(prev => ({ ...prev, sex: value }))
   }
 
+  const fetchUserFlag = () => {
+
+  }
+
 
   const toLocalISOWithOffset = (date: Date) => {
     const pad = (n: number) => String(n).padStart(2, "0");
@@ -203,8 +223,16 @@ var defaultAccessLevel: AccessGroupDto = {
     );
   }
 
+  useEffect(() => {
+    fetchUserFlag();
+  },[])
+
   return (
     <ComponentCard title="Create CardHolder">
+
+      {cam && <Modals isWide={false} handleClickWithEvent={handleClick} />}
+
+      {file && <Modals isWide={false} body={ <DropzoneComponent />} handleClickWithEvent={handleClick} />}
 
       {scanCard && <Modals isWide={false} body={<ScanCardModal onStartScan={handleStartScan} />} handleClickWithEvent={handleClickWithEvent} />}
 
@@ -215,144 +243,188 @@ var defaultAccessLevel: AccessGroupDto = {
               Personal Information
             </button>
             <button value={formTab.AccessLevel} className={activeTab === formTab.AccessLevel ? active : inactive} onClick={handleOnTabClick}>
-             Access Level
+              Access Level
             </button>
             <button value={formTab.Credentials} className={activeTab === formTab.Credentials ? active : inactive} onClick={handleOnTabClick}>
               Credentials
             </button>
-            <button value={formTab.Image} className={activeTab === formTab.Image ? active : inactive} onClick={handleOnTabClick}>
-              Image
-            </button>
-                        <button value={formTab.UserSetting} className={activeTab === formTab.UserSetting ? active : inactive} onClick={handleOnTabClick}>
+            <button value={formTab.UserSetting} className={activeTab === formTab.UserSetting ? active : inactive} onClick={handleOnTabClick}>
               Setting
             </button>
-            <Button name='create' onClickWithEvent={handleClickWithEvent} className="w-50" size="sm">Create</Button>
-            <Button name='cancle' onClickWithEvent={handleClickWithEvent} className="w-50" size="sm" variant='danger'>Cancle</Button>
           </nav>
         </div>
         <div className='flex-3'>
           <div className="space-y-6 flex justify-center">
             <div className='w-[60%]'>
               {activeTab == formTab.Info &&
-
                 <div className='flex flex-col gap-4'>
-                  <div className='flex gap-2'>
-
-                    <div className='flex-9'>
-                      <Label htmlFor="userId">Cardholder ID / Employee ID</Label>
-                      <Input name="userId" type="text" id="cardHolderId" onChange={handleChange} value={dto.userId} />
+                  <Label>User Image</Label>
+                  {/* Image */}
+                  <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+                    <div className="cursor-pointer w-50 h-50 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800">
+                      <img src="/images/user/default.jpg" alt="user" />
                     </div>
-                    <div className='flex-1 flex items-end'>
-                      <Button onClick={() => setDto((prev) => ({ ...prev, userId: generateEmployeeId() }))}>Auto</Button>
+                    <div className='flex gap-5'>
+                      <Button name='file' onClickWithEvent={handleClick} startIcon={<FileIcon/>}>Browse</Button>
+                      <Button name='cam' onClickWithEvent={handleClick} startIcon={<CamIcon/>}>Take Picture</Button>
                     </div>
                   </div>
+                  {/* Personal Information */}
+                  <Label>Personal Information</Label>
+                  <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+                    <div className='flex gap-2 mb-3'>
+                      <div className='flex-5'>
+                        <Label htmlFor="userId">Cardholder ID / Employee ID</Label>
+                        <Input name="userId" type="text" id="cardHolderId" onChange={handleChange} value={dto.userId} />
+                      </div>
+                      <div className='flex-1 flex items-end'>
+                        <Button onClick={() => setDto((prev) => ({ ...prev, userId: generateEmployeeId() }))}>Auto</Button>
+                      </div>
+                    </div>
+                    <div className='flex gap-2 mb-3'>
+                      <div className='flex-1'>
+                        <Label>Identification ( ID Card | Passport )</Label>
+                        <Input type='text' name='identification' onChange={handleChange} value={dto.identification} />
+                      </div>
 
-                  <div className='flex-1'>
-                    <Label htmlFor="title">Title</Label>
-                    <Input name="title" type="text" id="title" onChange={handleChange} value={dto.title} />
-                  </div>
-                  <div className='flex-3'>
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input name="firstName" type="text" id="firstName" onChange={handleChange} value={dto.firstName} />
-                  </div>
-                  <div className='flex-3'>
-                    <Label htmlFor="middleName">Middle Name</Label>
-                    <Input name="middleName" type="text" id="middleName" onChange={handleChange} value={dto.middleName} />
-                  </div>
-                  <div className='flex-3'>
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input name="lastName" type="text" id="lastName" onChange={handleChange} value={dto.lastName} />
-                  </div>
+                    </div>
+                    <div className='flex gap-2 mb-3'>
+                      <div className='flex-1'>
+                        <Label htmlFor="title">Title</Label>
+                        <Input name="title" type='text' id="title" onChange={handleChange} value={dto.title} />
+                      </div>
+                      <div className='flex-3'>
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input name="firstName" type="text" id="firstName" onChange={handleChange} value={dto.firstName} />
+                      </div>
+                    </div>
+                    <div className='flex gap-2 mb-3'>
+                      <div className='flex-1'>
+                        <Label htmlFor="middleName">Middle Name</Label>
+                        <Input name="middleName" type="text" id="middleName" onChange={handleChange} value={dto.middleName} />
+                      </div>
+                      <div className='flex-1'>
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input name="lastName" type="text" id="lastName" onChange={handleChange} value={dto.lastName} />
+                      </div>
+                    </div>
+                    <div className='flex gap-2 mb-3'>
+                      <div className='flex-1'>
+                        <Label htmlFor='gender'>Gender</Label>
+                        <div className="flex justify-around gap-3 pb-3">
+                          <div className="flex flex-col flex-wrap gap-8">
+                            <Radio
+                              id="gender1"
+                              name="gender"
+                              value="Male"
+                              checked={selectedValue === "Male"}
+                              onChange={handleRadioChange}
+                              label="Male"
+                            />
+                          </div>
+
+                          <div className="flex flex-col flex-wrap gap-8">
+                            <Radio
+                              id="gender2"
+                              name="gender"
+                              value="Female"
+                              checked={selectedValue === "Female"}
+                              onChange={handleRadioChange}
+                              label="Female"
+                            />
+                          </div>
 
 
-                  <div>
-                    <Label htmlFor='scpIp'>Sex</Label>
-                    <div className="flex justify-around gap-3 pb-3">
-                      <div className="flex flex-col flex-wrap gap-8">
-                        <Radio
-                          id="sex1"
-                          name="sex"
-                          value="Male"
-                          checked={selectedValue === "Male"}
-                          onChange={handleRadioChange}
-                          label="Male"
+                        </div>
+
+                      </div>
+                      <div className='flex-1'>
+                        <DatePicker
+                          isTime={false}
+                          id="Date"
+                          label="Date of birth"
+                          placeholder="Select a date"
+                          onChange={(date) => setDto((prev) => ({ ...prev, dateOfBirth: date[0].toISOString() }))}
+                        />
+                      </div>
+                    </div>
+
+                    <div className='flex gap-2 mb-3'>
+                      <div className='flex-1'>
+                        <Label>Email</Label>
+                        <div className="relative">
+                          <Input
+                            name="email"
+                            placeholder="info@gmail.com"
+                            type="text"
+                            className="pl-[62px]"
+                            onChange={handleChange}
+                            value={dto.email}
+                          />
+                          <span className="absolute left-0 top-1/2 -translate-y-1/2 border-r border-gray-200 px-3.5 py-3 text-gray-500 dark:border-gray-800 dark:text-gray-400">
+                            <EnvelopeIcon className="size-6" />
+                          </span>
+                        </div>
+                      </div>
+                      <div className='flex-1'>
+                        <Label>Phone</Label>
+                        <Input
+                          onChange={handleChange}
+                          value={dto.phone}
+                          name="phone"
+                          placeholder="+1 (555) 000-0000"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Address</Label>
+                      <TextArea value={dto.address} onChange={(e:string) => setDto(prev => ({...prev,address:e}))} />
+                    </div>
+                  </div>
+                  <Label>Company Information</Label>
+                  <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+
+                    <div className='flex gap-2 mb-3'>
+                      <div className='flex-1'>
+                        <Label>Company</Label>
+                        <Input
+                          onChange={handleChange}
+                          value={dto.company}
+                          name="company"
+                          placeholder="Company Co.,Ltd."
                         />
                       </div>
 
-                      <div className="flex flex-col flex-wrap gap-8">
-                        <Radio
-                          id="sex2"
-                          name="sex"
-                          value="Female"
-                          checked={selectedValue === "Female"}
-                          onChange={handleRadioChange}
-                          label="Female"
-                        />
-                      </div>
-
-
                     </div>
-
-                  </div>
-                  <div>
-                    <Label>Company</Label>
-                    <Input
-                      onChange={handleChange}
-                      value={dto.company}
-                      name="company"
-                      placeholder="Company Co.,Ltd."
-                    />
-                  </div>
-                  <div>
-                    <Label>Position</Label>
-                    <Input
-                      onChange={handleChange}
-                      value={dto.position}
-                      name="position"
-                      placeholder="Engineer"
-                    />
-                  </div>
-                  <div>
-                    <Label>Department</Label>
-                    <Input
-                      onChange={handleChange}
-                      value={dto.department}
-                      name="department"
-                      placeholder="Engineering Department"
-                    />
-                  </div>
-                  <div>
-                    <Label>Email</Label>
-                    <div className="relative">
+                    <div className='flex gap-2 mb-3'>
+                                          <div className='flex-1'>
+                      <Label>Position</Label>
                       <Input
-                        name="email"
-                        placeholder="info@gmail.com"
-                        type="text"
-                        className="pl-[62px]"
                         onChange={handleChange}
-                        value={dto.email}
+                        value={dto.position}
+                        name="position"
+                        placeholder="Engineer"
                       />
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 border-r border-gray-200 px-3.5 py-3 text-gray-500 dark:border-gray-800 dark:text-gray-400">
-                        <EnvelopeIcon className="size-6" />
-                      </span>
+                    </div>
+                    </div>
+
+                    <div className='flex gap-2 mb-3'>
+                                          <div className='flex-1'>
+                      <Label>Department</Label>
+                      <Input
+                        onChange={handleChange}
+                        value={dto.department}
+                        name="department"
+                        placeholder="Engineering Department"
+                      />
+                    </div>
                     </div>
                   </div>
-                  <div>
-                    <Label>Phone</Label>
-                    <Input
-                      onChange={handleChange}
-                      value={dto.phone}
-                      name="phone"
-                      placeholder="+1 (555) 000-0000"
-                    />
-                  </div>
-
-
                 </div>
               }
 
               {activeTab === formTab.AccessLevel &&
-                               <div className='flex flex-col gap-5'>
+                <div className='flex flex-col gap-5'>
                   <div className='gap-3'>
                     <div className='flex flex-col gap-1 w-100'>
 
@@ -570,6 +642,29 @@ var defaultAccessLevel: AccessGroupDto = {
                   </div>
                 </div>
               }
+              {activeTab == formTab.UserSetting &&
+                <>
+                  <Label>User Settings</Label>
+                  <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+                  {userFlag.map((d, i) => <div className='m-3'>
+                    <Switch
+                      key={i}
+                      label={d.name}
+                      defaultChecked={false}
+                      onChange={(checked: boolean) => setDto(prev => ({ ...prev, flag: checked ? prev.flag | d.value : prev.flag & (~d.value) }))}
+                    />
+                  </div>)}
+                  </div>
+                  <div className='flex m-5 gap-5 justify-center items-center'>
+                    <Button name='create' onClickWithEvent={handleClickWithEvent} className="w-50" size="sm">Create</Button>
+                    <Button name='cancle' onClickWithEvent={handleClickWithEvent} className="w-50" size="sm" variant='danger'>Cancle</Button>
+                  </div>
+                </>
+
+
+              }
+
+
 
 
             </div>

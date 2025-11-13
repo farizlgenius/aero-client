@@ -68,6 +68,7 @@ const CardFormat = () => {
         }
     }
 
+
     {/* handle Table Action */ }
     const handleEdit = () => {
 

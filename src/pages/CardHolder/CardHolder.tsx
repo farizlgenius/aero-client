@@ -22,20 +22,29 @@ const defaultDto: CardHolderDto = {
     firstName: '',
     middleName: '',
     lastName: '',
-    sex: '',
+    gender: '',
     email: '',
     phone: '',
     company: '',
     position: '',
     department: '',
-    imagePath: '',
+    image: {
+        fileName: "",
+        contentType: '',
+        fileSize: 0,
+        fileData: null,
+    },
     additionals: [],
     credentials: [],
-    accessLevels:[],
+    accessLevels: [],
     uuid: '',
     locationId: 1,
     locationName: 'Main Location',
-    isActive: true
+    isActive: true,
+    identification: '',
+    dateOfBirth: '',
+    address: '',
+    flag: 0
 }
 
 const CardHolder = () => {

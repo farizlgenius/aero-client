@@ -138,9 +138,9 @@ const DoorForm: React.FC<PropsWithChildren<DoorFormProps>> = ({ handleClick, dat
   {/* Card format */ }
   const [formatsOption, setFormatsOption] = useState<MultiselectOption[]>([]);
 
-  {/* Advance */}
-  const [spareFlag,setSpareFlag] = useState<ModeDto[]>([]);
-  const [accessFlag,setAccessFlag] = useState<ModeDto[]>([]);
+  {/* Advance */ }
+  const [spareFlag, setSpareFlag] = useState<ModeDto[]>([]);
+  const [accessFlag, setAccessFlag] = useState<ModeDto[]>([]);
 
 
   const handleOnTabClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -458,25 +458,25 @@ const DoorForm: React.FC<PropsWithChildren<DoorFormProps>> = ({ handleClick, dat
   }
 
   const fetchSpareMode = async () => {
-    const res= await HttpRequest.send(HttpMethod.GET,DoorEndpoint.GET_SPARE_FLAG)
-        if (res && res.data.data) {
+    const res = await HttpRequest.send(HttpMethod.GET, DoorEndpoint.GET_SPARE_FLAG)
+    if (res && res.data.data) {
       res.data.data.map((a: ModeDto) => {
         setSpareFlag(prev => [...prev, {
           description: a.description,
-          value:a.value,
-          name:a.name
+          value: a.value,
+          name: a.name
         }])
       })
     }
   }
-    const fetchAccessControlMode = async () => {
-    const res= await HttpRequest.send(HttpMethod.GET,DoorEndpoint.GET_ACCESS_CONTROL_FLAG)
-        if (res && res.data.data) {
+  const fetchAccessControlMode = async () => {
+    const res = await HttpRequest.send(HttpMethod.GET, DoorEndpoint.GET_ACCESS_CONTROL_FLAG)
+    if (res && res.data.data) {
       res.data.data.map((a: ModeDto) => {
         setAccessFlag(prev => [...prev, {
           description: a.description,
-          value:a.value,
-          name:a.name
+          value: a.value,
+          name: a.name
         }])
       })
     }
@@ -1171,31 +1171,37 @@ const DoorForm: React.FC<PropsWithChildren<DoorFormProps>> = ({ handleClick, dat
               }
 
               {activeTab == FormTab.Advance &&
-                <div className='flex gap-1'>
-                  <div className='flex-1'>
-                    <Label htmlFor="defaultMode">Access Control Mode</Label>
-                        {accessFlag.map((d,i) => <div className='m-3'>
-                        <Switch
-                        key={i}
-                        label={d.name}
-                        defaultChecked={false}
-                        onChange={(checked: boolean) => setDoorDto(prev => ({ ...prev, accessControlFlags: checked ? prev.accessControlFlags | d.value : prev.accessControlFlags & (~d.value) }))}
-                      />
-                      </div>)}
+                <>
+                  <Label>Door Setting</Label>
+                  <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+                    <div className='flex gap-1'>
+                      <div className='flex-1'>
+                        <Label htmlFor="defaultMode">Access Control Mode</Label>
+                        {accessFlag.map((d, i) => <div className='m-3'>
+                          <Switch
+                            key={i}
+                            label={d.name}
+                            defaultChecked={false}
+                            onChange={(checked: boolean) => setDoorDto(prev => ({ ...prev, accessControlFlags: checked ? prev.accessControlFlags | d.value : prev.accessControlFlags & (~d.value) }))}
+                          />
+                        </div>)}
+                      </div>
+                      <div className='flex-1'>
+                        <Label htmlFor="defaultMode">Advance Mode</Label>
+                        {spareFlag.map((d, i) => <div className='m-3'>
+                          <Switch
+                            key={i}
+                            label={d.name}
+                            defaultChecked={false}
+                            onChange={(checked: boolean) => setDoorDto(prev => ({ ...prev, spareTags: checked ? prev.spareTags | d.value : prev.spareTags & (~d.value) }))}
+                          />
+                        </div>)}
+                      </div>
+
+                    </div>
                   </div>
-                  <div className='flex-1'>
-                    <Label htmlFor="defaultMode">Advance Mode</Label>
-                        {spareFlag.map((d,i) => <div className='m-3'>
-                        <Switch
-                        key={i}
-                        label={d.name}
-                        defaultChecked={false}
-                        onChange={(checked: boolean) => setDoorDto(prev => ({ ...prev, spareTags: checked ? prev.spareTags | d.value : prev.spareTags & (~d.value) }))}
-                      />
-                      </div>)}
-                  </div>
-                 
-                </div>
+                </>
+
               }
             </div>
           </div>
