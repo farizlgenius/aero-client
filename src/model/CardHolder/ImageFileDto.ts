@@ -1,6 +1,6 @@
 export interface ImageFileDto{
-    fileName:string;
-    contentType:string;
-    fileSize:number;
-    fileData: Uint8Array | null;
+    fileName:string | undefined;
+    contentType:string | undefined;
+    fileSize:number | undefined;
+    fileData: string | undefined;
 }

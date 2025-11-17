@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Button from '../../components/ui/button/Button'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb'
-import { Add, Mask, Unmask } from '../../icons'
+import { AddIcon, MaskIcon, UnmaskIcon } from '../../icons'
 import DangerModal from '../UiElements/DangerModal';
 import HttpRequest from '../../utility/HttpRequest';
 import Logger from '../../utility/Logger';
@@ -204,7 +204,7 @@ const MonitorPoint = () => {
                             name='add'
                             size="sm"
                             variant="primary"
-                            startIcon={<Add className="size-5" />}
+                            startIcon={<AddIcon className="size-5" />}
                             onClickWithEvent={handleClick}
                         >
                             Create
@@ -214,7 +214,7 @@ const MonitorPoint = () => {
                             size="sm"
                             variant="primary"
                             onClickWithEvent={handleClick}
-                            startIcon={<Mask />}
+                            startIcon={<MaskIcon />}
                         >
                             Mask
                         </Button>
@@ -223,7 +223,7 @@ const MonitorPoint = () => {
                             size="sm"
                             variant="primary"
                             onClickWithEvent={handleClick}
-                            startIcon={<Unmask />}
+                            startIcon={<UnmaskIcon />}
                         >
                             Unmask
                         </Button>

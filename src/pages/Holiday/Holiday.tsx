@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Add } from '../../icons';
+import { AddIcon } from '../../icons';
 import Button from '../../components/ui/button/Button';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import DangerModal from '../UiElements/DangerModal';
@@ -157,7 +157,7 @@ const Holiday = () => {
                         name='add'
                         size="sm"
                         variant="primary"
-                        startIcon={<Add className="size-5" />}
+                        startIcon={<AddIcon className="size-5" />}
                         onClickWithEvent={handleClick}
                     >
                         Add

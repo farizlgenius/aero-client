@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import Button from '../../components/ui/button/Button';
-import { Add, Control, Disable, Locked, Moment, Unlock } from '../../icons';
+import { AddIcon, ControlIcon, DisableIcon, LockedIcon, MomentIcon, UnlockIcon } from '../../icons';
 import DangerModal from '../UiElements/DangerModal';
 import HttpRequest from '../../utility/HttpRequest';
 import Logger from '../../utility/Logger';
@@ -363,7 +363,7 @@ const Door = () => {
                             onClickWithEvent={handleClick}
                             size="sm"
                             variant="primary"
-                            startIcon={<Add className="size-5" />}
+                            startIcon={<AddIcon className="size-5" />}
                         >
                             Create
                         </Button>
@@ -372,7 +372,7 @@ const Door = () => {
                             onClickWithEvent={handleClick}
                             size="sm"
                             variant="primary"
-                            startIcon={<Moment className="size-5" />}
+                            startIcon={<MomentIcon className="size-5" />}
                         >
                             Secure (Default Mode)
                         </Button>
@@ -381,7 +381,7 @@ const Door = () => {
                             onClickWithEvent={handleClick}
                             size="sm"
                             variant="primary"
-                            startIcon={<Control className="size-5" />}
+                            startIcon={<ControlIcon className="size-5" />}
                         >
                             Toggle Door
                         </Button>
@@ -390,7 +390,7 @@ const Door = () => {
                             onClickWithEvent={handleClick}
                             size="sm"
                             variant="primary"
-                            startIcon={<Unlock className="size-5" />}
+                            startIcon={<UnlockIcon className="size-5" />}
                         >
                             Unlock
                         </Button>
@@ -399,7 +399,7 @@ const Door = () => {
                             onClickWithEvent={handleClick}
                             size="sm"
                             variant="primary"
-                            startIcon={<Locked className="size-5" />}
+                            startIcon={<LockedIcon className="size-5" />}
                         >
                             Locked
                         </Button>
@@ -408,7 +408,7 @@ const Door = () => {
                             onClickWithEvent={handleClick}
                             size="sm"
                             variant="danger"
-                            startIcon={<Disable className="size-5" />}
+                            startIcon={<DisableIcon className="size-5" />}
                         >
                             Disable
                         </Button>

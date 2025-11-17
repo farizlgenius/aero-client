@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Button from '../../components/ui/button/Button';
-import { Add } from '../../icons';
+import { AddIcon } from '../../icons';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import DangerModal from '../UiElements/DangerModal';
 import CardFormatForm from './CardFormatForm';
@@ -162,7 +162,7 @@ const CardFormat = () => {
                             name='add'
                             size="sm"
                             variant="primary"
-                            startIcon={<Add className="size-5" />}
+                            startIcon={<AddIcon className="size-5" />}
                             onClickWithEvent={handleClick}
                         >
                             Add

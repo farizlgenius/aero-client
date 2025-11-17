@@ -1184,6 +1184,7 @@ const DoorForm: React.FC<PropsWithChildren<DoorFormProps>> = ({ handleClick, dat
                             defaultChecked={false}
                             onChange={(checked: boolean) => setDoorDto(prev => ({ ...prev, accessControlFlags: checked ? prev.accessControlFlags | d.value : prev.accessControlFlags & (~d.value) }))}
                           />
+                          
                         </div>)}
                       </div>
                       <div className='flex-1'>

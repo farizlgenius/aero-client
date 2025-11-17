@@ -2,38 +2,43 @@ import { useEffect, useState } from "react";
 import { useToast } from "../../context/ToastContext";
 import { AreaDto } from "../../model/Area/AreaDto";
 import HttpRequest from "../../utility/HttpRequest";
-import { AreaEndPoint, HttpMethod } from "../../constants/constant";
+import { AreaEndPoint } from "../../constants/constant";
 import Helper from "../../utility/Helper";
 import { ToastMessage } from "../../model/ToastMessage";
 import DangerModal from "../UiElements/DangerModal";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import Button from "../../components/ui/button/Button";
-import { AreaForm } from "./AreaForm";
-import { Add } from "../../icons";
-import { AreaTable } from "./AreaTable";
+import { AddIcon, AreaIcon } from "../../icons";
+import { HttpMethod } from "../../enum/HttpMethod";
+import { BaseForm } from "../UiElements/BaseForm";
+import { FormContent } from "../../model/Form/FormContent";
+import { AreaForm } from "../../components/form/Area/AreaForm";
+import { BaseTable } from "../UiElements/BaseTable";
+import { OccupancyForm } from "../../components/form/Area/OccupancyForm";
 
-var removeTarget:number;
-var defaultDto:AreaDto = {
+var removeTarget: number;
+var defaultDto: AreaDto = {
     // base
     uuid: "",
     name: "",
-    multiOccupancy: 0,
-    accessControl: 0,
+    multiOccupancy: -1,
+    accessControl: -1,
     occControl: 0,
     occSet: 0,
     occMax: 0,
     occUp: 0,
     occDown: 0,
-    areaFlag: 0,
+    areaFlag: 0x00,
     componentId: 0,
-    macAddress: "",
     locationId: 1,
-    locationName: "Main Location",
+    locationName: "Main",
     isActive: true
 }
+const AREA_HEADERS = ["Name","Action"]
+const AREA_KEY = ["name"]
 
 export const Area = () => {
-  const { toggleToast } = useToast();
+    const { toggleToast } = useToast();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     const [areaDto, setAreaDto] = useState<AreaDto>(defaultDto);
@@ -49,7 +54,7 @@ export const Area = () => {
                 setCreate(true);
                 break;
             case "create":
-                createCardformat();
+                createArea();
                 break;
             case "cancle":
                 setCreate(false);
@@ -79,10 +84,10 @@ export const Area = () => {
     }
 
     {/* Group Data */ }
-    const [cardFormatsDto, setCardFormatsDto] = useState<AreaDto[]>([]);
-    const createCardformat = async () => {
-        var res = await HttpRequest.send(HttpMethod.POST,AreaEndPoint.CREATE_AREA,areaDto)
-        if(Helper.handleToastByResCode(res,ToastMessage.CREATE_CARD_FORMAT,toggleToast)){
+    const [areasDto, setAreasDto] = useState<AreaDto[]>([]);
+    const createArea = async () => {
+        var res = await HttpRequest.send(HttpMethod.POST, AreaEndPoint.CREATE_AREA, areaDto)
+        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_AREA, toggleToast)) {
             setCreate(false)
             setUpdate(false)
             toggleRefresh();
@@ -91,7 +96,8 @@ export const Area = () => {
     const fetchData = async () => {
         var res = await HttpRequest.send(HttpMethod.GET, AreaEndPoint.GET_AREA);
         if (res) {
-            setCardFormatsDto(res.data.data);
+            console.log(res.data.data)
+            setAreasDto(res.data.data);
         }
 
     };
@@ -140,12 +146,27 @@ export const Area = () => {
             }
         }
     }
+
+    {/* Form */ }
+    const createContent: FormContent[] = [
+        {
+            icon: <AreaIcon />,
+            label: "Area",
+            content: <AreaForm dto={areaDto} setDto={setAreaDto} handleClickWithEvent={handleClick} />
+        },{
+            icon: <AreaIcon />,
+            label: "Occupancy",
+            content: <OccupancyForm dto={areaDto} setDto={setAreaDto} handleClickWithEvent={handleClick} />
+        }
+    ];
+
+
     return (
         <>
             {isRemoveModal && <DangerModal header='Remove Card Format' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
-            <PageBreadcrumb pageTitle="Card Format Configuration" />
+            <PageBreadcrumb pageTitle="Access Area" />
             {create || update ?
-                <AreaForm data={areaDto} setAreaDto={setAreaDto} isUpdate={update} handleClickWithEvent={handleClick} />
+                <BaseForm tabContent={createContent}/>
                 :
                 <div className="space-y-6">
                     <div className="flex gap-4">
@@ -153,7 +174,7 @@ export const Area = () => {
                             name='add'
                             size="sm"
                             variant="primary"
-                            startIcon={<Add className="size-5" />}
+                            startIcon={<AddIcon className="size-5" />}
                             onClickWithEvent={handleClick}
                         >
                             Add
@@ -162,7 +183,8 @@ export const Area = () => {
                     </div>
                     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                         <div className="max-w-full overflow-x-auto">
-                            <AreaTable data={cardFormatsDto} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} selectedObject={selectedObjects} />
+                            {/* <AreaTable data={areasDto} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} selectedObject={selectedObjects} /> */}
+                            <BaseTable<AreaDto> headers={AREA_HEADERS} keys={AREA_KEY} data={areasDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove}  />
                         </div>
                     </div>
 

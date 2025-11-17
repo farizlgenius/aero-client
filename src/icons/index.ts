@@ -57,30 +57,35 @@ import { ReactComponent as ErrorHexaIcon } from "./info-hexa.svg?react";
 
 
 // ACS
-import { ReactComponent as Host } from "./host.svg?react";
-import {ReactComponent as Scan} from "./scan.svg?react";
-import {ReactComponent as Search} from "./search.svg?react";
-import {ReactComponent as Module} from "./module.svg?react";
-import {ReactComponent as Event} from "./event.svg?react";
-import {ReactComponent as Control} from "./control.svg?react";
-import {ReactComponent as Add} from "./add.svg?react";
-import {ReactComponent as Door} from "./door.svg?react";
-import {ReactComponent as Setting} from "./setting.svg?react";
-import {ReactComponent as Report} from "./report.svg?react";
-import {ReactComponent as Card} from "./card.svg?react";
-import {ReactComponent as Locked} from "./locked.svg?react";
-import {ReactComponent as Unlock} from "./unlock.svg?react";
-import {ReactComponent as Moment} from "./moment.svg?react";
-import {ReactComponent as Area} from "./area.svg?react";
-import {ReactComponent as Disable} from "./disable.svg?react";
-import {ReactComponent as Spiner} from "./spiner.svg?react";
-import {ReactComponent as Reset} from "./reset.svg?react";
-import {ReactComponent as Upload} from "./upload.svg?react";
-import {ReactComponent as Clear} from "./clear.svg?react";
-import {ReactComponent as Mask} from "./mask.svg?react";
-import {ReactComponent as Unmask} from "./unmask.svg?react";
-import {ReactComponent as Mpg} from "./mpg.svg?react";
+import { ReactComponent as HardwareIcon } from "./host.svg?react";
+import {ReactComponent as ScanIcon} from "./scan.svg?react";
+import {ReactComponent as SearchIcon} from "./search.svg?react";
+import {ReactComponent as ModuleIcon} from "./module.svg?react";
+import {ReactComponent as EventIcon} from "./event.svg?react";
+import {ReactComponent as ControlIcon} from "./control.svg?react";
+import {ReactComponent as AddIcon} from "./add.svg?react";
+import {ReactComponent as DoorIcon} from "./door.svg?react";
+import {ReactComponent as SettingIcon} from "./setting.svg?react";
+import {ReactComponent as ReportIcon} from "./report.svg?react";
+import {ReactComponent as CardIcon} from "./card.svg?react";
+import {ReactComponent as LockedIcon} from "./locked.svg?react";
+import {ReactComponent as UnlockIcon} from "./unlock.svg?react";
+import {ReactComponent as MomentIcon} from "./moment.svg?react";
+import {ReactComponent as AreaIcon} from "./area.svg?react";
+import {ReactComponent as DisableIcon} from "./disable.svg?react";
+import {ReactComponent as SpinerIcon} from "./spiner.svg?react";
+import {ReactComponent as ResetIcon} from "./reset.svg?react";
+import {ReactComponent as UploadIcon} from "./upload.svg?react";
+import {ReactComponent as ClearIcon} from "./clear.svg?react";
+import {ReactComponent as MaskIcon} from "./mask.svg?react";
+import {ReactComponent as UnmaskIcon} from "./unmask.svg?react";
+import {ReactComponent as MonitorPointGroupIcon} from "./mpg.svg?react";
 import {ReactComponent as CamIcon} from "./cam.svg?react";
+import {ReactComponent as LocationIcon} from "./location.svg?react";
+import {ReactComponent as TriggerIcon} from "./trigger.svg?react";
+import {ReactComponent as OperatorIcon} from "./operator.svg?react";
+import {ReactComponent as NotiIcon} from "./noti.svg?react";
+import {ReactComponent as Info2Icon} from "./info2.svg?react";
 
 export {
   ErrorHexaIcon,
@@ -140,28 +145,30 @@ export {
   AngleLeftIcon,
   AngleRightIcon,
   //*ACS
-  Host,
-  Scan,
-  Search,
-  Module,
-  Event,
-  Control,
-  Add,
-  Door,
-  Setting,
-  Report,
-  Card,
-  Locked,
-  Unlock,
-  Moment,
-  Area,
-  Disable,
-  Spiner,
-  Reset,
-  Upload,
-  Clear,
-  Mask,
-  Unmask,
-  Mpg,
-  CamIcon
+  HardwareIcon,
+  ScanIcon,
+  SearchIcon,
+  ModuleIcon,
+  EventIcon,
+  ControlIcon,
+  AddIcon,
+  DoorIcon,
+  SettingIcon,
+  ReportIcon,
+  CardIcon,
+  LockedIcon,
+  UnlockIcon,
+  MomentIcon,
+  AreaIcon,
+  DisableIcon,
+  SpinerIcon,
+  ResetIcon,
+  UploadIcon,
+  ClearIcon,
+  MaskIcon,
+  UnmaskIcon,
+  MonitorPointGroupIcon,
+  CamIcon,
+  LocationIcon,
+  TriggerIcon,OperatorIcon,NotiIcon,Info2Icon
 };

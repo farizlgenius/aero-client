@@ -1,3 +1,12 @@
+import { useState } from "react"
+import { BaseForm } from "../UiElements/BaseForm";
+
 export const Location = () => {
-    return (<></>)
+    const [create,setCreate] = useState<boolean>(false);
+
+    return (
+    <>
+    {create && <BaseForm/>}
+    </>
+)
 }

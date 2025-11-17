@@ -38,9 +38,10 @@ import { useAlert } from "./context/AlertContext";
 import SignalRService from "./services/SignalRService";
 import Toast from "./pages/UiElements/Toast";
 import { useToast } from "./context/ToastContext";
-import { Area } from "./icons";
+import { AreaIcon } from "./icons";
 import { Led } from "./pages/Led/Led";
-
+import { Location } from "./pages/Location/Location";
+import { Area } from "./pages/Area/Area";
 
 
 export default function App() {
@@ -122,6 +123,7 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route index path="/" element={<Home />} />
             {/* ACS */}
+            <Route path="/location" element={<Location/>}/>
             <Route path="/hardware" element={<Hardware onUploadClick={toggleIsUploadShow} />} />
             <Route path="/module" element={<Module />} />
             <Route path="/event" element={<Event />} />
@@ -129,7 +131,7 @@ export default function App() {
             <Route path="/monitor" element={<MonitorPoint />} />
             <Route path="/popup" element={<PopupExample />} />
             <Route path="/door" element={<Door />} />
-            <Route path="/group" element={<AccessGroup />} />
+            <Route path="/level" element={<AccessGroup />} />
             <Route path="/area" element={<Area/>}/>
             <Route path="/timezone" element={<TimeZone />} />
             <Route path="/cardholder" element={<CardHolder/>} />

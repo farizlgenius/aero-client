@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import DangerModal from '../UiElements/DangerModal';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import { Add } from '../../icons';
+import { AddIcon, BoxIcon, CamIcon } from '../../icons';
 import Button from '../../components/ui/button/Button';
-import CardHolderForm from './CardHolderForm';
 import { CardHolderDto } from '../../model/CardHolder/CardHolderDto';
 import { CardHolderTable } from './CardHolderTable';
 import HttpRequest from '../../utility/HttpRequest';
@@ -12,6 +11,12 @@ import { CardHolderEndpoint } from '../../enum/endpoint/CardHolderEndpoint';
 import { useToast } from '../../context/ToastContext';
 import Helper from '../../utility/Helper';
 import { ToastMessage } from '../../model/ToastMessage';
+import { FormContent } from '../../model/Form/FormContent';
+import { PersonalInformationForm } from '../../components/form/card-holder/PersonalInformationForm';
+import { AccessLevelForm } from '../../components/form/card-holder/AccessLevelForm';
+import { CredentialForm } from '../../components/form/card-holder/CredentialForm';
+import { UserSettingForm } from '../../components/form/card-holder/UserSettingForm';
+import { BaseForm } from '../UiElements/BaseForm';
 
 
 let removeTarget: string;
@@ -32,9 +37,10 @@ const defaultDto: CardHolderDto = {
         fileName: "",
         contentType: '',
         fileSize: 0,
-        fileData: null,
+        fileData: '',
     },
-    additionals: [],
+    additionals: [
+    ],
     credentials: [],
     accessLevels: [],
     uuid: '',
@@ -48,14 +54,20 @@ const defaultDto: CardHolderDto = {
 }
 
 const CardHolder = () => {
+
+
+    
     const { toggleToast } = useToast();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
+    const [cardHoldersDto, setCardHoldersDto] = useState<CardHolderDto[]>([]);
+    const [cardHolderDto, setCardHolderDto] = useState<CardHolderDto>(defaultDto)
     {/* Modal */ }
     const [deleteModal, setRemoveModal] = useState<boolean>(false);
     const [createModal, setCreateModal] = useState<boolean>(false);
     const [updateModal, setUpdateModal] = useState<boolean>(false);
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+
+        const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         console.log(e.currentTarget.name);
         console.log(e.currentTarget.value)
         switch (e.currentTarget.name) {
@@ -74,6 +86,30 @@ const CardHolder = () => {
         }
     }
 
+    {/* Form */}
+    const tabContent: FormContent[] = [
+        {
+            icon: <CamIcon />,
+            label: "Personal Information",
+            content: <PersonalInformationForm dto={cardHolderDto} setDto={setCardHolderDto} />
+        }, {
+            icon: <BoxIcon />,
+            label: "Access Level",
+            content: <AccessLevelForm dto={cardHolderDto} setDto={setCardHolderDto} />
+        },
+        {
+            icon: <BoxIcon />,
+            label: "Credentials",
+            content: <CredentialForm dto={cardHolderDto} setDto={setCardHolderDto} />
+        },
+        {
+            icon: <BoxIcon />,
+            label: "Settings",
+            content: <UserSettingForm handleClickWithEvent={handleClick} dto={cardHolderDto} setDto={setCardHolderDto} />
+        }
+    ];
+
+
     {/* handle Table Action */ }
     const handleEdit = () => {
 
@@ -91,36 +127,32 @@ const CardHolder = () => {
         removeCardHolder(removeTarget);
 
     }
-
-    const [cardHoldersDto, setCardHoldersDto] = useState<CardHolderDto[]>([]);
-    const [cardHolderDto,setCardHolderDto] = useState<CardHolderDto>(defaultDto)
     const fetchData = async () => {
         const res = await HttpRequest.send(HttpMethod.GET, CardHolderEndpoint.GET_CARDHOLDERS)
-        if (res && res.data.data){
-                            setCardHoldersDto(res.data.data)
-        console.log(res.data.data)
+        if (res && res.data.data) {
+            setCardHoldersDto(res.data.data)
+            console.log(res.data.data)
         }
 
     };
 
     const removeCardHolder = async (UserId: string) => {
-        const res = await HttpRequest.send(HttpMethod.DELETE, CardHolderEndpoint.DELETE_CARDHOLDER  + UserId)
+        const res = await HttpRequest.send(HttpMethod.DELETE, CardHolderEndpoint.DELETE_CARDHOLDER + UserId)
         if (Helper.handleToastByResCode(res, ToastMessage.DELETE_CARDHOLDER, toggleToast)) {
             setRemoveModal(false);
             toggleRefresh();
         }
     }
 
-    
-  const createCardHolder = async (data: CardHolderDto) => {
-    const res = await HttpRequest.send(HttpMethod.POST,CardHolderEndpoint.CREATE_CARDHOLDER,data)
-    if(Helper.handleToastByResCode(res,ToastMessage.CREATE_CARDHOLDER,toggleToast)){
-        setUpdateModal(false)
-        setCreateModal(false)
-        toggleRefresh();
-    }
-  }
 
+    const createCardHolder = async (data: CardHolderDto) => {
+        const res = await HttpRequest.send(HttpMethod.POST, CardHolderEndpoint.CREATE_CARDHOLDER, data)
+        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_CARDHOLDER, toggleToast)) {
+            setUpdateModal(false)
+            setCreateModal(false)
+            toggleRefresh();
+        }
+    }
 
 
     {/* UseEffect */ }
@@ -162,7 +194,7 @@ const CardHolder = () => {
             {deleteModal && <DangerModal header='Remove Credentials' body='Please Click Confirm if you want to remove this users' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             {createModal || updateModal ?
 
-                <CardHolderForm dto={cardHolderDto} setDto={setCardHolderDto} isUpdate={updateModal} handleClickWithEvent={handleClick} />
+                <BaseForm tabContent={tabContent} />
 
                 :
 
@@ -173,7 +205,7 @@ const CardHolder = () => {
                             onClickWithEvent={handleClick}
                             size="sm"
                             variant="primary"
-                            startIcon={<Add className="size-5" />}
+                            startIcon={<AddIcon className="size-5" />}
                         >
                             Create
                         </Button>
@@ -182,7 +214,7 @@ const CardHolder = () => {
                             onClickWithEvent={handleClick}
                             size="sm"
                             variant="primary"
-                            startIcon={<Add className="size-5" />}
+                            startIcon={<AddIcon className="size-5" />}
                         >
                             Deactivate
                         </Button>
@@ -191,7 +223,7 @@ const CardHolder = () => {
                             onClickWithEvent={handleClick}
                             size="sm"
                             variant="primary"
-                            startIcon={<Add className="size-5" />}
+                            startIcon={<AddIcon className="size-5" />}
                         >
                             Activate
                         </Button>
@@ -200,7 +232,7 @@ const CardHolder = () => {
                             onClickWithEvent={handleClick}
                             size="sm"
                             variant="primary"
-                            startIcon={<Add className="size-5" />}
+                            startIcon={<AddIcon className="size-5" />}
                         >
                             Reset Anti-Passback
                         </Button>

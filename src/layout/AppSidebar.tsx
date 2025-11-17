@@ -9,19 +9,23 @@ import {
   GridIcon,
   HorizontaLDots,
   ListIcon,
-  Module,
+  ModuleIcon,
   PageIcon,
   PieChartIcon,
   PlugInIcon,
   TableIcon,
   UserCircleIcon,
-  Event,
-  Door,
+  EventIcon,
+  DoorIcon,
   GroupIcon,
-  Setting,
-  Report,
-  Card,
-  Area
+  SettingIcon,
+  ReportIcon,
+  CardIcon,
+  AreaIcon,
+  LocationIcon,
+  TriggerIcon,
+  OperatorIcon,
+  NotiIcon
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 
@@ -39,30 +43,45 @@ const navItems: NavItem[] = [
     name: "Dashboard",
     path: "/"
   },
-    {
+  {
     name: "Events",
-    icon: <Event/>,
+    icon: <EventIcon/>,
     path: "/event"
   },
   {
+    name:"Locations",
+    icon: <LocationIcon/>,
+    path: "/location"
+  },
+    {
+    name: "Alerts",
+    icon: <NotiIcon />,
+    path: "/"
+  },
+    {
+    name: "Operators",
+    icon: <OperatorIcon />,
+    subItems: [{ name: "User", path: "/hardware", pro: false },{ name: "Role", path: "/module", pro: false }],
+  },
+  {
     name: "Device",
-    icon: <Module />,
+    icon: <ModuleIcon />,
     subItems: [{ name: "Hardware", path: "/hardware", pro: false },{ name: "Module", path: "/module", pro: false },{ name: "Ouputs", path: "/control", pro: false },{ name: "Inputs", path: "/monitor", pro: false },{ name: "Monitor Point Group", path: "/monitorgroup", pro: false }],
   },
   {
-    icon: <Door />,
+    icon: <DoorIcon />,
     name: "Doors",
     path: "/door",
   },  {
-    icon: <Card />,
-    name: "Credential",
+    icon: <CardIcon />,
+    name: "Card Holder",
     path: "/cardholder",
   }, {
     icon: <GroupIcon />,
-    name: "Access Group",
-    path: "/group",
+    name: "Access Level",
+    path: "/level",
   },{
-    icon: <Area />,
+    icon: <AreaIcon />,
     name: "Access Area",
     path: "/area",
   },
@@ -71,13 +90,18 @@ const navItems: NavItem[] = [
     name: "Time",
     subItems: [{ name: "Time Zone", path: "/timezone", pro: false },{ name: "Holiday", path: "/holiday", pro: false },{ name: "Interval", path: "/interval", pro: false }],
   },
+    {
+    icon: <TriggerIcon />,
+    name: "Trigger & Procedure",
+    subItems: [{ name: "Time Zone", path: "/timezone", pro: false },{ name: "Holiday", path: "/holiday", pro: false },{ name: "Interval", path: "/interval", pro: false }],
+  },
   {
-    icon: <Report />,
+    icon: <ReportIcon />,
     name: "Reports",
     subItems: [{ name: "Transaction", path: "/transaction", pro: false },{ name: "Audit Trail", path: "/audit", pro: false },{ name: "Time Attendance", path: "/attendance", pro: false }],
   },
   {
-    icon: <Setting />,
+    icon: <SettingIcon />,
     name: "Settings",
     subItems: [{ name: "Card Format", path: "/cardformat", pro: false },{ name: "Reader LED", path: "/led", pro: false }],
   },

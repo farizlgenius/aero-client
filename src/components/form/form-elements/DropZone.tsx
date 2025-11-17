@@ -1,11 +1,23 @@
+import React, { PropsWithChildren, useEffect, useState } from "react";
+import Helper from "../../../utility/Helper";
 import ComponentCard from "../../common/ComponentCard";
 import { useDropzone } from "react-dropzone";
+import { ImageFileDto } from "../../../model/CardHolder/ImageFileDto";
+import Button from "../../ui/button/Button";
 // import Dropzone from "react-dropzone";
 
-const DropzoneComponent: React.FC = () => {
+interface DropzoneComponentProp{
+  handleClick:(e:React.MouseEvent<HTMLButtonElement>) => void;
+  setImageFileDto:React.Dispatch<React.SetStateAction<ImageFileDto>>
+}
+
+const DropzoneComponent: React.FC<PropsWithChildren<DropzoneComponentProp>> = ({setImageFileDto,handleClick}) => {
+  const [image,setImage] = useState<File>()
+
   const onDrop = (acceptedFiles: File[]) => {
     console.log("Files dropped:", acceptedFiles);
     // Handle file uploads here
+    setImage(acceptedFiles[0]);
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -17,6 +29,21 @@ const DropzoneComponent: React.FC = () => {
       "image/svg+xml": [],
     },
   });
+
+  const convert = async (image:File) => {
+    setImageFileDto({
+      fileName: image?.name,
+      contentType: image?.type,
+      fileSize: image?.size,
+      fileData: await Helper.fileToBase64(image)
+    })
+  } 
+
+  useEffect(() => {
+    if(image != undefined)
+    convert(image)
+  }, [image])
+
   return (
     <ComponentCard title="Dropzone">
       <div className="transition border border-gray-300 border-dashed cursor-pointer dark:hover:border-brand-500 dark:border-gray-700 rounded-xl hover:border-brand-500">
@@ -69,6 +96,7 @@ const DropzoneComponent: React.FC = () => {
           </div>
         </form>
       </div>
+      <Button name="cancle" onClickWithEvent={handleClick} variant="danger">Cancle</Button>
     </ComponentCard>
   );
 };

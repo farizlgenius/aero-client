@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb'
 import Button from '../../components/ui/button/Button';
-import { Add } from '../../icons';
+import { AddIcon } from '../../icons';
 import DangerModal from '../UiElements/DangerModal';
 import HttpRequest from '../../utility/HttpRequest';
 import ControlPointForm from './ControlPointForm';
@@ -245,7 +245,7 @@ const ControlPoint = () => {
                                 onClick={handleClickAddCpModal}
                                 size="sm"
                                 variant="primary"
-                                startIcon={<Add className="size-5" />}
+                                startIcon={<AddIcon className="size-5" />}
                             >
                                 Create
                             </Button>

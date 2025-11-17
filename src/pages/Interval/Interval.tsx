@@ -1,17 +1,20 @@
 import React, { useEffect, useState } from 'react'
-import { Add } from '../../icons';
+import { AddIcon, CamIcon } from '../../icons';
 import Button from '../../components/ui/button/Button';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import DangerModal from '../UiElements/DangerModal';
 import HttpRequest from '../../utility/HttpRequest';
-import AddIntervalForm from './IntervalForm';
 import Helper from '../../utility/Helper';
-import { IntervalTable } from './IntervalTable';
 import { IntervalDto } from '../../model/Interval/IntervalDto';
 import { useToast } from '../../context/ToastContext';
 import { ToastMessage } from '../../model/ToastMessage';
 import { IntervalEndpoint } from '../../enum/endpoint/IntervalEndpoint';
 import { HttpMethod } from '../../enum/HttpMethod';
+import { BaseTable } from '../UiElements/BaseTable';
+import { TableCell } from '../../components/ui/table';
+import { BaseForm } from '../UiElements/BaseForm';
+import { FormContent } from '../../model/Form/FormContent';
+import { IntervalForm } from '../../components/form/interval/IntervalForm';
 
 
 
@@ -37,6 +40,8 @@ const defaultDto = {
     endTime: ""
 }
 
+export const INTERVAL_TABLE_HEAD: string[] = ["Start Time", "End Time", "Days", "Action"]
+export const INTERVAL_KEY: string[] = ["startTime", "endTime", "days"];
 
 const Interval = () => {
     const { toggleToast } = useToast();
@@ -209,6 +214,15 @@ const Interval = () => {
         }
     }
 
+        {/* Form */}
+        const tabContent: FormContent[] = [
+            {
+                icon: <CamIcon />,
+                label: "Intevals",
+                content: <IntervalForm dto={intervalDto} setDto={setIntervalDto} handleClickWithEvent={handleClickWithEvent} />
+            }
+        ];
+
 
 
     return (
@@ -216,8 +230,10 @@ const Interval = () => {
             {isRemoveModal && <DangerModal header='Remove Interval' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             <PageBreadcrumb pageTitle="Interval" />
             {createModal || updateModal ?
+            <>
+                <BaseForm tabContent={tabContent}/>
+            </>
 
-                <AddIntervalForm isUpdate={updateModal} data={intervalDto} handleClickWithEvent={handleClickWithEvent} handleChange={handleChange} />
                 :
                 <div className="space-y-6">
                     <div className="flex gap-4">
@@ -225,7 +241,7 @@ const Interval = () => {
                             name='add'
                             size="sm"
                             variant="primary"
-                            startIcon={<Add className="size-5" />}
+                            startIcon={<AddIcon className="size-5" />}
                             onClickWithEvent={handleClickWithEvent}
                         >
                             Add
@@ -234,8 +250,37 @@ const Interval = () => {
                     </div>
                     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                         <div className="max-w-full overflow-x-auto">
-                            <IntervalTable data={intervalsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} />
-
+                            {/* <IntervalTable data={intervalsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} /> */}
+                            <BaseTable<IntervalDto> headers={INTERVAL_TABLE_HEAD} keys={INTERVAL_KEY} data={intervalsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} specialDisplay={[
+                                {
+                                    key:"days",
+                                    content: (d,i) =>  <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                            <div className="flex gap-5">
+                                                <p className={d.days.sunday ? "text-green-500" : "text-gray-700"} >
+                                                    Sun
+                                                </p>
+                                                <p className={d.days.monday ? "text-green-500" : "text-gray-700"}>
+                                                    Mon
+                                                </p>
+                                                <p className={d.days.tuesday ? "text-green-500" : "text-gray-700"}>
+                                                    Tue
+                                                </p>
+                                                <p className={d.days.wednesday ? "text-green-500" : "text-gray-700"}>
+                                                    Wed
+                                                </p>
+                                                <p className={d.days.thursday ? "text-green-500" : "text-gray-700"}>
+                                                    Thu
+                                                </p>
+                                                <p className={d.days.friday ? "text-green-500" : "text-gray-700"}>
+                                                    Fri
+                                                </p>
+                                                <p className={d.days.saturday ? "text-green-500" : "text-gray-700"}>
+                                                    Sat
+                                                </p>
+                                            </div>
+                                        </TableCell>
+                                }
+                            ]}/>
                         </div>
                     </div>
 

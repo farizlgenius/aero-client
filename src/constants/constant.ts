@@ -62,7 +62,11 @@ export enum HubEndPoint {
 export enum AreaEndPoint {
     GET_AREA = "/api/v1/AccessArea",
     CREATE_AREA = "/api/v1/AccessArea",
-    DELETE_AREA = "/api/v1/AccessArea/"
+    DELETE_AREA = "/api/v1/AccessArea/",
+    GET_ACCESS_CONTROL = "/api/v1/AccessArea/access",
+    GET_OCC_CONTROL = "/api/v1/AccessArea/occcontrol",
+    GET_ARE_FLAG = "/api/v1/AccessArea/areaflag",
+    GET_MULTI_OCC = "/api/v1/AccessArea/multiocc"
 }
 
 

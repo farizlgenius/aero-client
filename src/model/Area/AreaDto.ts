@@ -1,7 +1,8 @@
-import { BaseDto } from "../BaseDto";
+import { NoMacBaseDto } from "../NoMacBaseDto";
 
-export interface AreaDto extends BaseDto {
+export interface AreaDto extends NoMacBaseDto {
     name:string;
+    componentId:number;
     multiOccupancy:number;
     accessControl:number;
     occControl:number;

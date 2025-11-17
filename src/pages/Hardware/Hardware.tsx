@@ -2,7 +2,7 @@ import { PropsWithChildren, ReactNode, useEffect, useState } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import TableTemplate from "../../components/tables/Tables/TableTemplate";
 import Button from "../../components/ui/button/Button";
-import { Add, Reset, Scan, Upload } from "../../icons";
+import { AddIcon, ResetIcon, ScanIcon, UploadIcon } from "../../icons";
 import Modals from "../UiElements/Modals";
 import DangerModal from "../UiElements/DangerModal";
 import {  ID_REPORT_KEY, ID_REPORT_TABLE_HEADER, IdReportEndPoint, ModalDetail } from "../../constants/constant";
@@ -379,7 +379,7 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
             onClickWithEvent={handleClickWithEvent}
             size="sm"
             variant="primary"
-            startIcon={<Add className="size-5" />}
+            startIcon={<AddIcon className="size-5" />}
           >
 
             Add
@@ -392,7 +392,7 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
               onClickWithEvent={handleClickWithEvent}
               size="sm"
               variant="primary"
-              startIcon={<Reset className="size-5" />}
+              startIcon={<ResetIcon className="size-5" />}
             >
 
               Reset & Upload
@@ -405,7 +405,7 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
               onClickWithEvent={handleClickWithEvent}
               size="sm"
               variant="primary"
-              startIcon={<Upload className="size-5" />}
+              startIcon={<UploadIcon className="size-5" />}
             >
 
               Upload Config
@@ -418,7 +418,7 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
               onClickWithEvent={handleClickWithEvent}
               size="sm"
               variant="primary"
-              startIcon={<Upload className="size-5" />}
+              startIcon={<UploadIcon className="size-5" />}
             >
 
               Transfer Config
@@ -430,7 +430,7 @@ const Hardware: React.FC<PropsWithChildren<HardwareProps>> = ({ onUploadClick })
             onClickWithEvent={handleClickWithEvent}
             size="sm"
             variant="primary"
-            startIcon={<Scan className="size-5" />}
+            startIcon={<ScanIcon className="size-5" />}
           >
 
             Scan Hardware
