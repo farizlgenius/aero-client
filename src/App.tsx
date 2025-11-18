@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router";
-import SignIn from "./pages/AuthPages/SignIn";
-import SignUp from "./pages/AuthPages/SignUp";
+import { SignIn } from "./pages/AuthPages/SignIn";
 import NotFound from "./pages/OtherPage/NotFound";
 import UserProfiles from "./pages/UserProfiles";
 import Images from "./pages/UiElements/Images";
@@ -38,29 +37,80 @@ import { useAlert } from "./context/AlertContext";
 import SignalRService from "./services/SignalRService";
 import Toast from "./pages/UiElements/Toast";
 import { useToast } from "./context/ToastContext";
-import { AreaIcon } from "./icons";
 import { Led } from "./pages/Led/Led";
 import { Location } from "./pages/Location/Location";
 import { Area } from "./pages/Area/Area";
+import { License } from "./pages/License/License";
+import HttpRequest from "./utility/HttpRequest";
+import { HttpMethod } from "./enum/HttpMethod";
+import { LicenseEndpoint } from "./enum/endpoint/LicenseEndpoint";
+import { LoginEndpoint } from "./enum/endpoint/LoginEndpoint";
+import { LoginDto } from "./model/Auth/LoginDto";
 
 
 export default function App() {
   const navigate = useNavigate();
   const { showAlertFlag, alertSuccessFlag, alertMessage } = useAlert();
-  const { showToast,setShowToast,toastMessage,toastType } = useToast();
+  const { showToast, setShowToast, toastMessage, toastType } = useToast();
   const [isResetShow, setIsResetShow] = useState<boolean>(false);
   const [isUploadShow, setIsUploadShow] = useState<boolean>(false);
+  const [license, setLicense] = useState<boolean>(false);
+  const [signIn, setSignIn] = useState<boolean>(false);
+  const [loginDto, setLoginDto] = useState<LoginDto>({
+    username: "",
+    password: ""
+  })
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    switch (e.currentTarget.name) {
+      case "signin":
+        break;
+      case "license":
+        break;
+      default:
+        break;
+    }
+  }
   const toggleIsUploadShow = () => {
     setIsResetShow(false);
     setIsUploadShow(false);
   }
   const [message, setMessage] = useState<string>("");
+  {/* License Check */ }
+  const checkLicense = async () => {
+    const res = await HttpRequest.send(HttpMethod.GET, LicenseEndpoint.GET_LICENSE)
+    if (res && res.data.data) {
+      console.log(res.data.data)
+      //setLicense(true);
+    }
+  }
 
+  {/* License */}
+  const addLicense = async () => {
+    const res = await HttpRequest.send(HttpMethod.POST,LicenseEndpoint.POST_LICENSE,)
+        if (res && res.data.data) {
+      console.log(res.data.data)
+      //setLicense(true);
+    }
+  } 
 
+  {/* Login */ }
+  const login = async () => {
+    const res = await HttpRequest.send(HttpMethod.POST, LoginEndpoint.POST_LOGIN, loginDto)
+    if (res && res.data.data) {
+
+    }
+  }
 
   useEffect(() => {
+    checkLicense();
+    if(!license){
+      navigate("/license")
+    }else if(!signIn){
+      navigate("/signin")
+    }
+    
     SignalRService.getConnection();
-
     return () => {
       SignalRService.stopConnection();
     };
@@ -123,7 +173,7 @@ export default function App() {
           <Route element={<AppLayout />}>
             <Route index path="/" element={<Home />} />
             {/* ACS */}
-            <Route path="/location" element={<Location/>}/>
+            <Route path="/location" element={<Location />} />
             <Route path="/hardware" element={<Hardware onUploadClick={toggleIsUploadShow} />} />
             <Route path="/module" element={<Module />} />
             <Route path="/event" element={<Event />} />
@@ -132,11 +182,11 @@ export default function App() {
             <Route path="/popup" element={<PopupExample />} />
             <Route path="/door" element={<Door />} />
             <Route path="/level" element={<AccessGroup />} />
-            <Route path="/area" element={<Area/>}/>
+            <Route path="/area" element={<Area />} />
             <Route path="/timezone" element={<TimeZone />} />
-            <Route path="/cardholder" element={<CardHolder/>} />
+            <Route path="/cardholder" element={<CardHolder />} />
             <Route path="/cardformat" element={<CardFormat />} />
-            <Route path="/led" element={<Led/>}/>
+            <Route path="/led" element={<Led />} />
             <Route path="/holiday" element={<Holiday />} />
             <Route path="/interval" element={<Interval />} />
             <Route path="/monitorgroup" element={<Interval />} />
@@ -165,8 +215,8 @@ export default function App() {
           </Route>
 
           {/* Auth Layout */}
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/signin" element={<SignIn handleClick={handleClick} setDto={setLoginDto} />} />
+          <Route path="/License" element={<License />} />
 
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />

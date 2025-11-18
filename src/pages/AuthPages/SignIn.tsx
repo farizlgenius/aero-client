@@ -1,16 +1,18 @@
-import PageMeta from "../../components/common/PageMeta";
+import { PropsWithChildren } from "react";
+import { SignInForm } from "../../components/auth/SignInForm";
+import { LoginDto } from "../../model/Auth/LoginDto";
 import AuthLayout from "./AuthPageLayout";
-import SignInForm from "../../components/auth/SignInForm";
 
-export default function SignIn() {
+interface SignInProp{
+  setDto:React.Dispatch<React.SetStateAction<LoginDto>>;
+  handleClick:(e:React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+export const SignIn:React.FC<PropsWithChildren<SignInProp>> = ({setDto,handleClick}) => {
   return (
     <>
-      <PageMeta
-        title="React.js SignIn Dashboard | TailAdmin - Next.js Admin Dashboard Template"
-        description="This is React.js SignIn Tables Dashboard page for TailAdmin - React.js Tailwind CSS Admin Dashboard Template"
-      />
       <AuthLayout>
-        <SignInForm />
+        <SignInForm setDto={setDto} handleClick={handleClick} />
       </AuthLayout>
     </>
   );

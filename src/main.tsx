@@ -11,6 +11,7 @@ import { PopupProvider } from "./context/PopupContext.tsx";
 import { AlertProvider } from "./context/AlertContext.tsx";
 import { ToastProvider } from "./context/ToastContext.tsx";
 import { NotificationProvider } from "./context/NotificationContext.tsx";
+import { License } from "./pages/License/License.tsx";
 
 createRoot(document.getElementById("root")!).render(
   // <StrictMode>
@@ -27,7 +28,7 @@ createRoot(document.getElementById("root")!).render(
           <PopupProvider>
             <AlertProvider>
               <ToastProvider>
-                <App />
+                <App/>
               </ToastProvider>
 
             </AlertProvider>
