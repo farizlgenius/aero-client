@@ -1,57 +1,57 @@
-import { useEffect, useState } from "react"
-import { BaseForm } from "../UiElements/BaseForm";
-import PageBreadcrumb from "../../components/common/PageBreadCrumb";
-import DangerModal from "../UiElements/DangerModal";
-import { LocationDto } from "../../model/Location/LocationDto";
-import { FormContent } from "../../model/Form/FormContent";
-import { AddIcon, LocationIcon } from "../../icons";
-import { LocationForm } from "../../components/form/location/LocationForm";
+import { useEffect, useState } from "react";
+import PageBreadcrumb from "../../components/common/PageBreadCrumb"
+import { useToast } from "../../context/ToastContext";
+import { RoleDto } from "../../model/Role/RoleDto";
 import HttpRequest from "../../utility/HttpRequest";
 import { HttpMethod } from "../../enum/HttpMethod";
-import { LocationEndpoint } from "../../enum/endpoint/LocationEndpoint";
-import { useToast } from "../../context/ToastContext";
-import Helper from "../../utility/Helper";
 import { ToastMessage } from "../../model/ToastMessage";
-import { BaseTable } from "../UiElements/BaseTable";
+import { FormContent } from "../../model/Form/FormContent";
+import DangerModal from "../UiElements/DangerModal";
 import Button from "../../components/ui/button/Button";
+import { BaseForm } from "../UiElements/BaseForm";
+import { AddIcon, RoleIcon } from "../../icons";
+import { BaseTable } from "../UiElements/BaseTable";
+import { RoleEndpoint } from "../../enum/endpoint/RoleEndpoint";
+import Helper from "../../utility/Helper";
+import { RoleForm } from "../../components/form/role/RoleForm";
+
 
 var removeTarget: number = 0;
 
-const defaultDto: LocationDto = {
-    uuid: "",
+const defaultDto: RoleDto = {
     componentId: 0,
-    locationName: "",
-    description: "",
-    isActive: true
+    name: "",
+    features: []
 }
 
 export const LOCATION_HEADER: string[] = ["Name", "Action"]
 export const LOCATION_KEY: string[] = ["locationName"];
 
-export const Location = () => {
+
+export const Role = () => {
     const { toggleToast } = useToast();
     const [create, setCreate] = useState<boolean>(false);
     const [update, setUpdate] = useState<boolean>(false);
-    const [isRemoveModal, setIsRemoveModal] = useState(false);
+    const [remove, setRemove] = useState(false);
     const [refresh, setRefresh] = useState<boolean>(false);
-    const [locationDto, setLocationDto] = useState<LocationDto>(defaultDto);
-    const [locationsDto, setLocationsDto] = useState<LocationDto[]>([]);
+    const [locationDto, setLocationDto] = useState<RoleDto>(defaultDto);
+    const [locationsDto, setLocationsDto] = useState<RoleDto[]>([]);
     const toggleRefresh = () => setRefresh(!refresh)
 
-    const handleRemove = (data: LocationDto) => {
+    const handleRemove = (data: RoleDto) => {
         removeTarget = data.componentId;
-        setIsRemoveModal(true);
+        setRemove(true);
     }
     const handleOnClickCloseRemove = () => {
-        setIsRemoveModal(false);
+        setRemove(false);
     }
     const handleOnClickConfirmRemove = () => {
-        setIsRemoveModal(false);
+        setRemove(false);
         removeLocation(removeTarget);
     }
 
     {/* handle Table Action */ }
-    const handleEdit = (data: LocationDto) => {
+    const handleEdit = (data: RoleDto) => {
         setLocationDto(data);
         setUpdate(true);
     }
@@ -80,8 +80,8 @@ export const Location = () => {
         }
     }
 
-    const createLocation = async (dto: LocationDto) => {
-        const res = await HttpRequest.send(HttpMethod.POST, LocationEndpoint.CREATE_LOC, dto)
+    const createLocation = async (dto: RoleDto) => {
+        const res = await HttpRequest.send(HttpMethod.POST, RoleEndpoint.CREATE_ROLE, dto)
         if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
             setCreate(false)
             setUpdate(false)
@@ -89,8 +89,8 @@ export const Location = () => {
         }
     }
 
-    const updateLocation = async (dto: LocationDto) => {
-        const res = await HttpRequest.send(HttpMethod.PUT, LocationEndpoint.UPDATE_LOC, dto)
+    const updateLocation = async (dto: RoleDto) => {
+        const res = await HttpRequest.send(HttpMethod.PUT, RoleEndpoint.UPDATE_ROLE, dto)
         if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
             setCreate(false)
             setUpdate(false)
@@ -99,15 +99,15 @@ export const Location = () => {
     }
 
     const removeLocation = async (id: number) => {
-        const res = await HttpRequest.send(HttpMethod.DELETE, LocationEndpoint.DELETE_LOC + id)
+        const res = await HttpRequest.send(HttpMethod.DELETE, RoleEndpoint.DELETE_ROLE + id)
         if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
-            setIsRemoveModal(false)
+            setRemove(false)
             toggleRefresh();
         }
     }
 
-    const [selectedObjects, setSelectedObjects] = useState<LocationDto[]>([]);
-    const handleCheckedAll = (data: LocationDto[], e: React.ChangeEvent<HTMLInputElement>) => {
+    const [selectedObjects, setSelectedObjects] = useState<RoleDto[]>([]);
+    const handleCheckedAll = (data: RoleDto[], e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(data)
         console.log(e.target.checked)
         if (setSelectedObjects) {
@@ -119,7 +119,7 @@ export const Location = () => {
         }
     }
 
-    const handleChecked = (data: LocationDto, e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChecked = (data: RoleDto, e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(data)
         console.log(e.target.checked)
         if (setSelectedObjects) {
@@ -134,7 +134,7 @@ export const Location = () => {
     }
 
     const fetchDate = async () => {
-        const res = await HttpRequest.send(HttpMethod.GET, LocationEndpoint.GET_LOC)
+        const res = await HttpRequest.send(HttpMethod.GET, RoleEndpoint.GET_ROLE)
         console.log(res?.data.data)
         if (res && res.data.data) {
             setLocationsDto(res.data.data);
@@ -145,9 +145,9 @@ export const Location = () => {
     {/* Form */ }
     const tabContent: FormContent[] = [
         {
-            icon: <LocationIcon />,
-            label: "Intevals",
-            content: <LocationForm dto={locationDto} setDto={setLocationDto} handleClickWithEvent={handleClickWithEvent} />
+            icon: <RoleIcon />,
+            label: "Role",
+            content: <RoleForm dto={locationDto} setDto={setLocationDto} handleClickWithEvent={handleClickWithEvent} />
         }
     ];
 
@@ -159,9 +159,10 @@ export const Location = () => {
 
 
     return (
+
         <>
-            {isRemoveModal && <DangerModal header='Remove Location' body='Please Click Confirm if you want to remove location' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
-            <PageBreadcrumb pageTitle="Locations" />
+            <PageBreadcrumb pageTitle="Roles" />
+            {remove && <DangerModal header='Remove Role' body='Please Click Confirm if you want to remove role' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             {create || update ?
 
                 <BaseForm tabContent={tabContent} />
@@ -181,13 +182,12 @@ export const Location = () => {
                     </div>
                     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                         <div className="max-w-full overflow-x-auto">
-                            <BaseTable<LocationDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={locationsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} />
+                            <BaseTable<RoleDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={locationsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} />
 
                         </div>
                     </div>
                 </div>
 
             }
-        </>
-    )
-}
+        </>)
+}   

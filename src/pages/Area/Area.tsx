@@ -12,9 +12,9 @@ import { AddIcon, AreaIcon } from "../../icons";
 import { HttpMethod } from "../../enum/HttpMethod";
 import { BaseForm } from "../UiElements/BaseForm";
 import { FormContent } from "../../model/Form/FormContent";
-import { AreaForm } from "../../components/form/Area/AreaForm";
+import { AreaForm } from "../../components/form/area/AreaForm";
 import { BaseTable } from "../UiElements/BaseTable";
-import { OccupancyForm } from "../../components/form/Area/OccupancyForm";
+import { OccupancyForm } from "../../components/form/area/OccupancyForm";
 
 var removeTarget: number;
 var defaultDto: AreaDto = {

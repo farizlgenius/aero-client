@@ -86,6 +86,7 @@ import {ReactComponent as TriggerIcon} from "./trigger.svg?react";
 import {ReactComponent as OperatorIcon} from "./operator.svg?react";
 import {ReactComponent as NotiIcon} from "./noti.svg?react";
 import {ReactComponent as Info2Icon} from "./info2.svg?react";
+import {ReactComponent as RoleIcon} from "./role.svg?react";
 
 export {
   ErrorHexaIcon,
@@ -170,5 +171,9 @@ export {
   MonitorPointGroupIcon,
   CamIcon,
   LocationIcon,
-  TriggerIcon,OperatorIcon,NotiIcon,Info2Icon
+  TriggerIcon,
+  OperatorIcon,
+  NotiIcon,
+  Info2Icon,
+  RoleIcon
 };

@@ -46,6 +46,8 @@ import { HttpMethod } from "./enum/HttpMethod";
 import { LicenseEndpoint } from "./enum/endpoint/LicenseEndpoint";
 import { LoginEndpoint } from "./enum/endpoint/LoginEndpoint";
 import { LoginDto } from "./model/Auth/LoginDto";
+import { Role } from "./pages/Role/Role";
+import { Operator } from "./pages/Operator/Operator";
 
 
 export default function App() {
@@ -54,8 +56,8 @@ export default function App() {
   const { showToast, setShowToast, toastMessage, toastType } = useToast();
   const [isResetShow, setIsResetShow] = useState<boolean>(false);
   const [isUploadShow, setIsUploadShow] = useState<boolean>(false);
-  const [license, setLicense] = useState<boolean>(false);
-  const [signIn, setSignIn] = useState<boolean>(false);
+  const [license, setLicense] = useState<boolean>(true);
+  const [signIn, setSignIn] = useState<boolean>(true);
   const [loginDto, setLoginDto] = useState<LoginDto>({
     username: "",
     password: ""
@@ -190,6 +192,8 @@ export default function App() {
             <Route path="/holiday" element={<Holiday />} />
             <Route path="/interval" element={<Interval />} />
             <Route path="/monitorgroup" element={<Interval />} />
+            <Route path="/role" element={<Role/>} />
+            <Route path="/operator" element={<Operator/>}/>
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />

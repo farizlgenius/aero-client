@@ -61,7 +61,7 @@ const navItems: NavItem[] = [
     {
     name: "Operators",
     icon: <OperatorIcon />,
-    subItems: [{ name: "User", path: "/hardware", pro: false },{ name: "Role", path: "/module", pro: false }],
+    subItems: [{ name: "Operator", path: "/operator", pro: false },{ name: "Role", path: "/role", pro: false }],
   },
   {
     name: "Device",

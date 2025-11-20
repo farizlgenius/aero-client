@@ -41,5 +41,6 @@ export enum ToastMessage{
     DELETE_ACCESS_LEVEL = "Delete AccessGroup",
     DELETE_CARDHOLDER = "Delte Card Holder",
     CREATE_CARDHOLDER = "Create Card Holder",
-    CREATE_AREA = "Create Area"
+    CREATE_AREA = "Create Area",
+    CREATE_LOCATION = "Create Location",
 }
