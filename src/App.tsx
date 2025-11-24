@@ -44,28 +44,34 @@ import { License } from "./pages/License/License";
 import HttpRequest from "./utility/HttpRequest";
 import { HttpMethod } from "./enum/HttpMethod";
 import { LicenseEndpoint } from "./enum/endpoint/LicenseEndpoint";
-import { LoginEndpoint } from "./enum/endpoint/LoginEndpoint";
 import { LoginDto } from "./model/Auth/LoginDto";
 import { Role } from "./pages/Role/Role";
 import { Operator } from "./pages/Operator/Operator";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { useAuth } from "./context/AuthContext";
+import { useLoading } from "./context/LoadingContext";
 
 
 export default function App() {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const { showAlertFlag, alertSuccessFlag, alertMessage } = useAlert();
   const { showToast, setShowToast, toastMessage, toastType } = useToast();
+  const { loading, Loading } = useLoading();
   const [isResetShow, setIsResetShow] = useState<boolean>(false);
   const [isUploadShow, setIsUploadShow] = useState<boolean>(false);
   const [license, setLicense] = useState<boolean>(true);
-  const [signIn, setSignIn] = useState<boolean>(true);
   const [loginDto, setLoginDto] = useState<LoginDto>({
     username: "",
     password: ""
   })
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     switch (e.currentTarget.name) {
-      case "signin":
+      case "login":
+        const res = await signIn(loginDto.username, loginDto.password);
+        console.log(res)
+        if (res) navigate("/")
         break;
       case "license":
         break;
@@ -87,31 +93,21 @@ export default function App() {
     }
   }
 
-  {/* License */}
+  {/* License */ }
   const addLicense = async () => {
-    const res = await HttpRequest.send(HttpMethod.POST,LicenseEndpoint.POST_LICENSE,)
-        if (res && res.data.data) {
+    const res = await HttpRequest.send(HttpMethod.POST, LicenseEndpoint.POST_LICENSE,)
+    if (res && res.data.data) {
       console.log(res.data.data)
       //setLicense(true);
-    }
-  } 
-
-  {/* Login */ }
-  const login = async () => {
-    const res = await HttpRequest.send(HttpMethod.POST, LoginEndpoint.POST_LOGIN, loginDto)
-    if (res && res.data.data) {
-
     }
   }
 
   useEffect(() => {
     checkLicense();
-    if(!license){
+    if (!license) {
       navigate("/license")
-    }else if(!signIn){
-      navigate("/signin")
     }
-    
+
     SignalRService.getConnection();
     return () => {
       SignalRService.stopConnection();
@@ -121,13 +117,20 @@ export default function App() {
   return (
     <>
       <div>
+
+        {loading &&
+          <Loading />
+        }
         {showToast && (
-          <Toast
-            type={toastType}
-            message={toastMessage}
-            duration={3000}
-            onClose={() => setShowToast(false)}
-          />
+          <>
+            <Toast
+              type={toastType}
+              message={toastMessage}
+              duration={3000}
+              onClose={() => setShowToast(false)}
+            />
+          </>
+
         )}
 
         {showAlertFlag &&
@@ -172,7 +175,12 @@ export default function App() {
         <ScrollToTop />
         <Routes>
           {/* Dashboard Layout */}
-          <Route element={<AppLayout />}>
+          <Route element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+
+          }>
             <Route index path="/" element={<Home />} />
             {/* ACS */}
             <Route path="/location" element={<Location />} />
@@ -192,8 +200,8 @@ export default function App() {
             <Route path="/holiday" element={<Holiday />} />
             <Route path="/interval" element={<Interval />} />
             <Route path="/monitorgroup" element={<Interval />} />
-            <Route path="/role" element={<Role/>} />
-            <Route path="/operator" element={<Operator/>}/>
+            <Route path="/role" element={<Role />} />
+            <Route path="/operator" element={<Operator />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
@@ -218,13 +226,14 @@ export default function App() {
             <Route path="/bar-chart" element={<BarChart />} />
           </Route>
 
-          {/* Auth Layout */}
-          <Route path="/signin" element={<SignIn handleClick={handleClick} setDto={setLoginDto} />} />
-          <Route path="/License" element={<License />} />
 
+          {/* Auth Layout */}
+          <Route path="/login" element={<SignIn handleClick={handleClick} setDto={setLoginDto} />} />
+          <Route path="/License" element={<License />} />
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+
       </div>
     </>
   );

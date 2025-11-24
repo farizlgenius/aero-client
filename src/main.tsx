@@ -11,7 +11,8 @@ import { PopupProvider } from "./context/PopupContext.tsx";
 import { AlertProvider } from "./context/AlertContext.tsx";
 import { ToastProvider } from "./context/ToastContext.tsx";
 import { NotificationProvider } from "./context/NotificationContext.tsx";
-import { License } from "./pages/License/License.tsx";
+import { AuthProvider } from "./context/AuthContext.tsx";
+import { LoadingProvider } from "./context/LoadingContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   // <StrictMode>
@@ -24,16 +25,24 @@ createRoot(document.getElementById("root")!).render(
   <ThemeProvider>
     <BrowserRouter>
       <AppWrapper>
-        <NotificationProvider>
-          <PopupProvider>
-            <AlertProvider>
-              <ToastProvider>
-                <App/>
-              </ToastProvider>
+        <LoadingProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <NotificationProvider>
+                <PopupProvider>
+                  <AlertProvider>
+                    <App />
+                  </AlertProvider>
+                </PopupProvider>
+              </NotificationProvider>
 
-            </AlertProvider>
-          </PopupProvider>
-        </NotificationProvider>
+
+            </AuthProvider>
+
+          </ToastProvider>
+
+        </LoadingProvider>
+
 
       </AppWrapper>
     </BrowserRouter>

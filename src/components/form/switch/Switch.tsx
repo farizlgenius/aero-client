@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface SwitchProps {
   label: string;
@@ -25,6 +25,11 @@ const Switch: React.FC<SwitchProps> = ({
       onChange(newCheckedState);
     }
   };
+
+  useEffect(()=>{
+    setIsChecked(defaultChecked)
+  },[defaultChecked])
+
 
   const switchColors =
     color === "blue"

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from "react"
 
 // small types used by the toast system
-type ToastType = "success" | "error" | "info";
+type ToastType = "success" | "error" | "warning";
 
 export interface ToastContextInterface {
   toastType:ToastType;
@@ -17,7 +17,7 @@ const ToastContext = createContext<ToastContextInterface | null>(null);
 
 // Provider
 export const ToastProvider:React.FC<{children:React.ReactNode}> = ({children}) => {
-    const [toastType,setToastType] = useState<ToastType>("info");
+    const [toastType,setToastType] = useState<ToastType>("success");
     const [toastMessage,setToastMessage] = useState<string>("")
     const [showToast, setShowToast] = useState(false);
     const toggleToast = (toastType:ToastType,toastMessage:string) => {

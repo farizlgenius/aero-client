@@ -25,7 +25,7 @@ const defaultDto: RoleDto = {
 }
 
 export const LOCATION_HEADER: string[] = ["Name", "Action"]
-export const LOCATION_KEY: string[] = ["locationName"];
+export const LOCATION_KEY: string[] = ["name"];
 
 
 export const Role = () => {
@@ -34,8 +34,8 @@ export const Role = () => {
     const [update, setUpdate] = useState<boolean>(false);
     const [remove, setRemove] = useState(false);
     const [refresh, setRefresh] = useState<boolean>(false);
-    const [locationDto, setLocationDto] = useState<RoleDto>(defaultDto);
-    const [locationsDto, setLocationsDto] = useState<RoleDto[]>([]);
+    const [roleDto, setRoleDto] = useState<RoleDto>(defaultDto);
+    const [rolesDto, setRolesDto] = useState<RoleDto[]>([]);
     const toggleRefresh = () => setRefresh(!refresh)
 
     const handleRemove = (data: RoleDto) => {
@@ -52,7 +52,7 @@ export const Role = () => {
 
     {/* handle Table Action */ }
     const handleEdit = (data: RoleDto) => {
-        setLocationDto(data);
+        setRoleDto(data);
         setUpdate(true);
     }
 
@@ -64,14 +64,14 @@ export const Role = () => {
                 setCreate(true);
                 break;
             case "create":
-                createLocation(locationDto);
+                createLocation(roleDto);
                 break;
             case "update":
-                updateLocation(locationDto)
+                updateLocation(roleDto)
                 break;
             case "close":
             case "cancel":
-                setLocationDto(defaultDto)
+                setRoleDto(defaultDto)
                 setCreate(false);
                 setUpdate(false);
                 break;
@@ -137,7 +137,7 @@ export const Role = () => {
         const res = await HttpRequest.send(HttpMethod.GET, RoleEndpoint.GET_ROLE)
         console.log(res?.data.data)
         if (res && res.data.data) {
-            setLocationsDto(res.data.data);
+            setRolesDto(res.data.data);
         }
     }
 
@@ -147,7 +147,7 @@ export const Role = () => {
         {
             icon: <RoleIcon />,
             label: "Role",
-            content: <RoleForm dto={locationDto} setDto={setLocationDto} handleClickWithEvent={handleClickWithEvent} />
+            content: <RoleForm isUpdate={update} dto={roleDto} setDto={setRoleDto} handleClickWithEvent={handleClickWithEvent} />
         }
     ];
 
@@ -182,8 +182,7 @@ export const Role = () => {
                     </div>
                     <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                         <div className="max-w-full overflow-x-auto">
-                            <BaseTable<RoleDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={locationsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} />
-
+                            <BaseTable<RoleDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={rolesDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} />
                         </div>
                     </div>
                 </div>

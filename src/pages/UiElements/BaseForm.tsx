@@ -17,13 +17,13 @@ export const BaseForm: React.FC<PropsWithChildren<FormProp>> = ({ tabContent }) 
       <div className="border-b border-gray-200 dark:border-gray-800">
         <nav className="-mb-px flex space-x-2 overflow-x-auto [&;::-webkit-scrollbar-thumb]:rounded-full [&;::-webkit-scrollbar-thumb]:bg-gray-200 dark:[&;::-webkit-scrollbar-thumb]:bg-gray-600 dark:[&;::-webkit-scrollbar-track]:bg-transparent [&;::-webkit-scrollbar]:h-1.5">
           {
-            tabContent.map((a: FormContent) => {
-              return (<>
+            tabContent.map((a: FormContent,i:number) => {
+              return (<div key={i}>
                 <button onClick={(e) => setActiveTab(e.currentTarget.name)} name={a.label} className={`inline-flex items-center gap-2 border-b-2 px-2.5 py-2 text-sm font-medium transition-colors duration-200 ease-in-out ${activeTab == a.label ? activeStyle : inactiveStyle}`}>
                   {a.icon}
                   {a.label}
                 </button>
-              </>)
+              </div>)
             })
           }
         </nav>
@@ -31,23 +31,22 @@ export const BaseForm: React.FC<PropsWithChildren<FormProp>> = ({ tabContent }) 
 
       <div className="pt-4 dark:border-gray-800">
 
-        {tabContent.map((a: FormContent) => {
+        {tabContent.map((a: FormContent,i:number) => {
           return (
-            <>
+            <div key={i}>
               {activeTab == a.label &&
-
                 <div>
                   <h3 className="mb-1 text-xl font-medium text-gray-800 dark:text-white/90">
                     {a.label}
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
                     {a.content}
-                  </p>
+                  </div>
                 </div>
 
               }
 
-            </>)
+            </div>)
         })}
 
       </div>

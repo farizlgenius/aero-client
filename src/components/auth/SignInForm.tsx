@@ -66,7 +66,7 @@ export const SignInForm: React.FC<PropsWithChildren<SignInFormProp>> = ({ setDto
                   </Link>
                 </div>
                 <div>
-                  <Button name="signin" onClickWithEvent={handleClick} className="w-full" size="sm">
+                  <Button name="login" onClickWithEvent={handleClick} className="w-full" size="sm">
                     Sign in
                   </Button>
                 </div>
