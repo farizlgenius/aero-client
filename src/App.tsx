@@ -71,7 +71,9 @@ export default function App() {
       case "login":
         const res = await signIn(loginDto.username, loginDto.password);
         console.log(res)
-        if (res) navigate("/")
+        if (res){
+          navigate("/")
+        }
         break;
       case "license":
         break;

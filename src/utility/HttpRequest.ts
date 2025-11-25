@@ -83,9 +83,10 @@ class HttpRequest {
                         withCredentials:withCredentials
                     });
             }
-        } catch (e) {
+        } catch (e:any) {
+            console.log(e)
             Logger.error(e)
-            return null;
+            return e.response ?? null;
         }
     }
 }

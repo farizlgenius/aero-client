@@ -5,7 +5,10 @@ import { AuthEndpoint } from "../enum/endpoint/AuthEndpoint";
 import { useLoading } from "./LoadingContext";
 import { useToast } from "./ToastContext";
 
-type User = { id: string; name?: string; email?: string; roles?: string[] } | null;
+type User = { id: string; name?: string; info?: Info; location?: Location;role?:Role  } | null;
+type Info = { title?:string; firstname?:string; middlename?:string; lastname?:string; }
+type Location ={ locationNo?:number; locationName?:string; }
+type Role = { roleNo?:number; roleName?:string; features?:number[]}
 
 interface AuthContextType {
   user: User;
@@ -54,7 +57,7 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
         const res = await HttpRequest.sendWithToken(HttpMethod.GET,AuthEndpoint.GET_ME,_accessToken,false)
         if(res?.status !== 200) return false;
         console.log(res);
-        setUser(res.data.user);
+        setUser(res.data);
         return true;
     },[])
 
@@ -75,9 +78,10 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
         setLoading(true);
         const res = await HttpRequest.send(HttpMethod.POST,AuthEndpoint.POST_LOGIN,true,{username,password})
         setLoading(false);
-        console.log(res)
-        if(res?.data.code !== 200){
-            toggleToast("error",res?.data.details[0])
+        console.log(res.data.details)
+        console.log(res.status)
+        if(res.status !== 200){
+            toggleToast("error",res.data.details[0])
             return false;
         }
         _accessToken = res.data.data.accessToken
