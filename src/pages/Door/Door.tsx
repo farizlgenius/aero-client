@@ -13,7 +13,7 @@ import { DoorTable } from './DoorTable';
 import { useToast } from '../../context/ToastContext';
 import { ToastMessage } from '../../model/ToastMessage';
 import { HttpMethod } from '../../enum/HttpMethod';
-import { DoorEndpoint } from '../../enum/endpoint/DoorEndpoint';
+import { DoorEndpoint } from '../../endpoint/DoorEndpoint';
 
 // Define Global Variable
 let removeTarget: DoorDto;

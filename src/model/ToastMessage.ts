@@ -43,4 +43,5 @@ export enum ToastMessage{
     CREATE_CARDHOLDER = "Create Card Holder",
     CREATE_AREA = "Create Area",
     CREATE_LOCATION = "Create Location",
+    LOGIN = "Login",
 }

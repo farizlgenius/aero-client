@@ -11,7 +11,7 @@ import { TimeZoneTable } from './TimeZoneTable';
 import { useToast } from '../../context/ToastContext';
 import { CreateTimeZoneDto } from '../../model/TimeZone/CreateTimeZone';
 import { ToastMessage } from '../../model/ToastMessage';
-import { TimeZoneEndPoint } from '../../enum/endpoint/TimezoneEndpoint';
+import { TimeZoneEndPoint } from '../../endpoint/TimezoneEndpoint';
 import { HttpMethod } from '../../enum/HttpMethod';
 
 // Define Global Variable

@@ -11,9 +11,9 @@ import { MonitorPointDto } from "../../model/MonitorPoint/MonitorPointDto";
 import { ModeDto } from "../../model/ModeDto";
 import { ModuleDto } from "../../model/Module/ModuleDto";
 import { HttpMethod } from "../../enum/HttpMethod";
-import { ModuleEndpoint } from "../../enum/endpoint/ModuleEndpoint";
-import { MonitorPointEndpoint } from "../../enum/endpoint/MonitorPointEndpoint";
-import { HardwareEndpoint } from "../../enum/endpoint/HardwareEndpoint";
+import { ModuleEndpoint } from "../../endpoint/ModuleEndpoint";
+import { MonitorPointEndpoint } from "../../endpoint/MonitorPointEndpoint";
+import { HardwareEndpoint } from "../../endpoint/HardwareEndpoint";
 
 
 

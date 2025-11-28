@@ -10,10 +10,10 @@ import { ModuleDto } from "../../model/Module/ModuleDto";
 import { Options } from "../../model/Options";
 import { ControlPointDto } from "../../model/ControlPoint/ControlPointDto";
 import { ModeDto } from "../../model/ModeDto";
-import { HardwareEndpoint } from "../../enum/endpoint/HardwareEndpoint";
+import { HardwareEndpoint } from "../../endpoint/HardwareEndpoint";
 import { HttpMethod } from "../../enum/HttpMethod";
-import { ControlPointEndpoint } from "../../enum/endpoint/ControlPointEndpoint";
-import { ModuleEndpoint } from "../../enum/endpoint/ModuleEndpoint";
+import { ControlPointEndpoint } from "../../endpoint/ControlPointEndpoint";
+import { ModuleEndpoint } from "../../endpoint/ModuleEndpoint";
 
 
 interface AddCpformProp {

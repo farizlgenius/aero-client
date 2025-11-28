@@ -8,13 +8,15 @@ import Helper from '../../utility/Helper';
 import { IntervalDto } from '../../model/Interval/IntervalDto';
 import { useToast } from '../../context/ToastContext';
 import { ToastMessage } from '../../model/ToastMessage';
-import { IntervalEndpoint } from '../../enum/endpoint/IntervalEndpoint';
+import { IntervalEndpoint } from '../../endpoint/IntervalEndpoint';
 import { HttpMethod } from '../../enum/HttpMethod';
 import { BaseTable } from '../UiElements/BaseTable';
 import { TableCell } from '../../components/ui/table';
 import { BaseForm } from '../UiElements/BaseForm';
 import { FormContent } from '../../model/Form/FormContent';
 import { IntervalForm } from '../../components/form/interval/IntervalForm';
+import Search from '../../components/ui/table/Search';
+import { send } from '../../api/api';
 
 
 
@@ -58,13 +60,13 @@ const Interval = () => {
 
     const createInterval = async (data: IntervalDto) => {
         if (!Helper.isDayEmpty(data.days)) {
-            toggleToast("error","Day can't be empty")
+            toggleToast("error", "Day can't be empty")
         } else if (!Helper.isValidTimeRange(data.startTime, data.endTime)) {
-            toggleToast("error","Start time must lower than end time")
+            toggleToast("error", "Start time must lower than end time")
         }
         else {
-            const res = await HttpRequest.send(HttpMethod.POST, IntervalEndpoint.POST_ADD_INTERVAL, data)
-            if (Helper.handleToastByResCode(res,ToastMessage.CREATE_INTERVAL,toggleToast)) {
+            const res = await send.post(IntervalEndpoint.POST_ADD_INTERVAL,data)
+            if (Helper.handleToastByResCode(res, ToastMessage.CREATE_INTERVAL, toggleToast)) {
                 setCreateModal(false);
                 setUpdateModal(false);
                 toggleRefresh();
@@ -80,13 +82,13 @@ const Interval = () => {
 
     const updateInterval = async (data: IntervalDto) => {
         if (!Helper.isDayEmpty(data.days)) {
-            toggleToast("error","Day can't be empty")
+            toggleToast("error", "Day can't be empty")
         } else if (!Helper.isValidTimeRange(data.startTime, data.endTime)) {
-            toggleToast("error","Start time must lower than end time")
+            toggleToast("error", "Start time must lower than end time")
         }
         else {
-            const res = await HttpRequest.send(HttpMethod.PUT, IntervalEndpoint.PUT_UPDATE_INTERVAL, data)
-            if (Helper.handleToastByResCode(res,ToastMessage.UPDATE_INTERVAL,toggleToast)) {
+            const res = await send.put(IntervalEndpoint.PUT_UPDATE_INTERVAL,data);
+            if (Helper.handleToastByResCode(res, ToastMessage.UPDATE_INTERVAL, toggleToast)) {
                 setCreateModal(false);
                 setUpdateModal(false);
                 toggleRefresh();
@@ -154,15 +156,15 @@ const Interval = () => {
     };
     const removeInterval = async () => {
         const res = await HttpRequest.send(HttpMethod.DELETE, IntervalEndpoint.DELETE_INTERVAL + removeTarget)
-            if (Helper.handleToastByResCode(res,ToastMessage.REMOVE_INTERVAL,toggleToast)) {
-                setCreateModal(false);
-                setUpdateModal(false);
-                toggleRefresh();
-            } else {
-                setCreateModal(false);
-                setUpdateModal(false);
-                toggleRefresh();
-            }
+        if (Helper.handleToastByResCode(res, ToastMessage.REMOVE_INTERVAL, toggleToast)) {
+            setCreateModal(false);
+            setUpdateModal(false);
+            toggleRefresh();
+        } else {
+            setCreateModal(false);
+            setUpdateModal(false);
+            toggleRefresh();
+        }
     }
     {/* State */ }
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,14 +216,14 @@ const Interval = () => {
         }
     }
 
-        {/* Form */}
-        const tabContent: FormContent[] = [
-            {
-                icon: <CamIcon />,
-                label: "Intevals",
-                content: <IntervalForm dto={intervalDto} setDto={setIntervalDto} handleClickWithEvent={handleClickWithEvent} />
-            }
-        ];
+    {/* Form */ }
+    const tabContent: FormContent[] = [
+        {
+            icon: <CamIcon />,
+            label: "Intevals",
+            content: <IntervalForm dto={intervalDto} setDto={setIntervalDto} handleClick={handleClickWithEvent} />
+        }
+    ];
 
 
 
@@ -230,60 +232,42 @@ const Interval = () => {
             {isRemoveModal && <DangerModal header='Remove Interval' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             <PageBreadcrumb pageTitle="Interval" />
             {createModal || updateModal ?
-            <>
-                <BaseForm tabContent={tabContent}/>
-            </>
+                <>
+                    <BaseForm tabContent={tabContent} />
+                </>
 
                 :
                 <div className="space-y-6">
-                    <div className="flex gap-4">
-                        <Button
-                            name='add'
-                            size="sm"
-                            variant="primary"
-                            startIcon={<AddIcon className="size-5" />}
-                            onClickWithEvent={handleClickWithEvent}
-                        >
-                            Add
-                        </Button>
-
-                    </div>
-                    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                        <div className="max-w-full overflow-x-auto">
-                            {/* <IntervalTable data={intervalsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} /> */}
-                            <BaseTable<IntervalDto> headers={INTERVAL_TABLE_HEAD} keys={INTERVAL_KEY} data={intervalsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} specialDisplay={[
-                                {
-                                    key:"days",
-                                    content: (d,i) =>  <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                                            <div className="flex gap-5">
-                                                <p className={d.days.sunday ? "text-green-500" : "text-gray-700"} >
-                                                    Sun
-                                                </p>
-                                                <p className={d.days.monday ? "text-green-500" : "text-gray-700"}>
-                                                    Mon
-                                                </p>
-                                                <p className={d.days.tuesday ? "text-green-500" : "text-gray-700"}>
-                                                    Tue
-                                                </p>
-                                                <p className={d.days.wednesday ? "text-green-500" : "text-gray-700"}>
-                                                    Wed
-                                                </p>
-                                                <p className={d.days.thursday ? "text-green-500" : "text-gray-700"}>
-                                                    Thu
-                                                </p>
-                                                <p className={d.days.friday ? "text-green-500" : "text-gray-700"}>
-                                                    Fri
-                                                </p>
-                                                <p className={d.days.saturday ? "text-green-500" : "text-gray-700"}>
-                                                    Sat
-                                                </p>
-                                            </div>
-                                        </TableCell>
-                                }
-                            ]}/>
-                        </div>
-                    </div>
-
+                                        <BaseTable<IntervalDto> headers={INTERVAL_TABLE_HEAD} keys={INTERVAL_KEY} data={intervalsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} specialDisplay={[
+                        {
+                            key: "days",
+                            content: (d, i) => <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                <div className="flex gap-5">
+                                    <p className={d.days.sunday ? "text-green-500" : "text-gray-700"}>
+                                        Sun
+                                    </p>
+                                    <p className={d.days.monday ? "text-green-500" : "text-gray-700"}>
+                                        Mon
+                                    </p>
+                                    <p className={d.days.tuesday ? "text-green-500" : "text-gray-700"}>
+                                        Tue
+                                    </p>
+                                    <p className={d.days.wednesday ? "text-green-500" : "text-gray-700"}>
+                                        Wed
+                                    </p>
+                                    <p className={d.days.thursday ? "text-green-500" : "text-gray-700"}>
+                                        Thu
+                                    </p>
+                                    <p className={d.days.friday ? "text-green-500" : "text-gray-700"}>
+                                        Fri
+                                    </p>
+                                    <p className={d.days.saturday ? "text-green-500" : "text-gray-700"}>
+                                        Sat
+                                    </p>
+                                </div>
+                            </TableCell>
+                        }
+                    ]} handleClick={handleClickWithEvent}/>
                 </div>
             }
 

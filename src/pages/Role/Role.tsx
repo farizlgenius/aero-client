@@ -11,9 +11,10 @@ import Button from "../../components/ui/button/Button";
 import { BaseForm } from "../UiElements/BaseForm";
 import { AddIcon, RoleIcon } from "../../icons";
 import { BaseTable } from "../UiElements/BaseTable";
-import { RoleEndpoint } from "../../enum/endpoint/RoleEndpoint";
+import { RoleEndpoint } from "../../endpoint/RoleEndpoint";
 import Helper from "../../utility/Helper";
 import { RoleForm } from "../../components/form/role/RoleForm";
+import { send } from "../../api/api";
 
 
 var removeTarget: number = 0;
@@ -57,7 +58,7 @@ export const Role = () => {
     }
 
 
-    const handleClickWithEvent = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
@@ -81,7 +82,7 @@ export const Role = () => {
     }
 
     const createLocation = async (dto: RoleDto) => {
-        const res = await HttpRequest.send(HttpMethod.POST, RoleEndpoint.CREATE_ROLE, dto)
+        const res = await send.post(RoleEndpoint.CREATE_ROLE, dto)
         if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
             setCreate(false)
             setUpdate(false)
@@ -90,7 +91,7 @@ export const Role = () => {
     }
 
     const updateLocation = async (dto: RoleDto) => {
-        const res = await HttpRequest.send(HttpMethod.PUT, RoleEndpoint.UPDATE_ROLE, dto)
+        const res = await send.put(RoleEndpoint.UPDATE_ROLE, dto)
         if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
             setCreate(false)
             setUpdate(false)
@@ -99,7 +100,7 @@ export const Role = () => {
     }
 
     const removeLocation = async (id: number) => {
-        const res = await HttpRequest.send(HttpMethod.DELETE, RoleEndpoint.DELETE_ROLE + id)
+        const res = await send.delete(RoleEndpoint.DELETE_ROLE + id);
         if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
             setRemove(false)
             toggleRefresh();
@@ -147,7 +148,7 @@ export const Role = () => {
         {
             icon: <RoleIcon />,
             label: "Role",
-            content: <RoleForm isUpdate={update} dto={roleDto} setDto={setRoleDto} handleClickWithEvent={handleClickWithEvent} />
+            content: <RoleForm isUpdate={update} dto={roleDto} setDto={setRoleDto} handleClick={handleClick} />
         }
     ];
 
@@ -168,23 +169,7 @@ export const Role = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <div className="flex gap-4">
-                        <Button
-                            name='add'
-                            size="sm"
-                            variant="primary"
-                            startIcon={<AddIcon className="size-5" />}
-                            onClickWithEvent={handleClickWithEvent}
-                        >
-                            Add
-                        </Button>
-
-                    </div>
-                    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                        <div className="max-w-full overflow-x-auto">
-                            <BaseTable<RoleDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={rolesDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} />
-                        </div>
-                    </div>
+                    <BaseTable<RoleDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={rolesDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} />
                 </div>
 
             }

@@ -11,7 +11,7 @@ import { HolidayTable } from './HolidayTable';
 import { useToast } from '../../context/ToastContext';
 import { CreateHolidayDto } from '../../model/Holiday/CreateHolidayDto';
 import { ToastMessage } from '../../model/ToastMessage';
-import { HolidayEndpoint } from '../../enum/endpoint/HolidayEndpoint';
+import { HolidayEndpoint } from '../../endpoint/HolidayEndpoint';
 import { HttpMethod } from '../../enum/HttpMethod';
 
 // Define Global Variable

@@ -6,7 +6,7 @@ import Label from "../Label"
 import Input from "../input/InputField"
 import TextArea from "../input/TextArea"
 
-export const LocationForm: React.FC<PropsWithChildren<FormProp<LocationDto>>> = ({ isUpdate, handleClickWithEvent, setDto, dto }) => {
+export const LocationForm: React.FC<PropsWithChildren<FormProp<LocationDto>>> = ({ isUpdate, handleClick: handleClickWithEvent, setDto, dto }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setDto(prev => ({ ...prev, [e.target.name]: e.target.value }))
     }

@@ -22,7 +22,7 @@ import { StatusDto } from "../../model/StatusDto";
 import { AxiosResponse } from "axios";
 import { ResponseDto } from "../../model/ResponseDto";
 import { HttpMethod } from "../../enum/HttpMethod";
-import { HardwareEndpoint } from "../../enum/endpoint/HardwareEndpoint";
+import { HardwareEndpoint } from "../../endpoint/HardwareEndpoint";
 
 // Get Global Variable
 let removeTarget: ResetScpDto = {

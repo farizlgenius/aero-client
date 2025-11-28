@@ -15,6 +15,7 @@ import { FormContent } from "../../model/Form/FormContent";
 import { AreaForm } from "../../components/form/area/AreaForm";
 import { BaseTable } from "../UiElements/BaseTable";
 import { OccupancyForm } from "../../components/form/area/OccupancyForm";
+import { send } from "../../api/api";
 
 var removeTarget: number;
 var defaultDto: AreaDto = {
@@ -86,7 +87,7 @@ export const Area = () => {
     {/* Group Data */ }
     const [areasDto, setAreasDto] = useState<AreaDto[]>([]);
     const createArea = async () => {
-        var res = await HttpRequest.send(HttpMethod.POST, AreaEndPoint.CREATE_AREA, areaDto)
+        var res = await send.post(AreaEndPoint.CREATE_AREA,areaDto);
         if (Helper.handleToastByResCode(res, ToastMessage.CREATE_AREA, toggleToast)) {
             setCreate(false)
             setUpdate(false)
@@ -152,11 +153,11 @@ export const Area = () => {
         {
             icon: <AreaIcon />,
             label: "Area",
-            content: <AreaForm dto={areaDto} setDto={setAreaDto} handleClickWithEvent={handleClick} />
+            content: <AreaForm dto={areaDto} setDto={setAreaDto} handleClick={handleClick} />
         },{
             icon: <AreaIcon />,
             label: "Occupancy",
-            content: <OccupancyForm dto={areaDto} setDto={setAreaDto} handleClickWithEvent={handleClick} />
+            content: <OccupancyForm dto={areaDto} setDto={setAreaDto} handleClick={handleClick} />
         }
     ];
 
@@ -169,24 +170,7 @@ export const Area = () => {
                 <BaseForm tabContent={createContent}/>
                 :
                 <div className="space-y-6">
-                    <div className="flex gap-4">
-                        <Button
-                            name='add'
-                            size="sm"
-                            variant="primary"
-                            startIcon={<AddIcon className="size-5" />}
-                            onClickWithEvent={handleClick}
-                        >
-                            Add
-                        </Button>
-
-                    </div>
-                    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                        <div className="max-w-full overflow-x-auto">
-                            {/* <AreaTable data={areasDto} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} selectedObject={selectedObjects} /> */}
-                            <BaseTable<AreaDto> headers={AREA_HEADERS} keys={AREA_KEY} data={areasDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove}  />
-                        </div>
-                    </div>
+<BaseTable<AreaDto> headers={AREA_HEADERS} keys={AREA_KEY} data={areasDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick}  />
 
                 </div>
             }

@@ -122,14 +122,13 @@ const Event = () => {
 
   return (
     <>
-      <PageBreadcrumb pageTitle="Host Controller" />
+      <PageBreadcrumb pageTitle="Events" />
       <div className="space-y-6">
         <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
           <div className="max-w-full overflow-x-auto">
             <Search onSelectPageSize={handlePageSizeSelect} />
             <TableTemplate checkbox={false} tableHeaders={headers} tableDatas={tableDatas} tableKeys={keys} />
             <Pagination pageNumber={pagination.pageNumber} pageSize={pagination.pageSize} totalCount={pagination.totalCount} totalPage={pagination.totalPage} onClickFirst={handleClickFirst} onClickPrevious={handleClickPrevious} onClickLast={handleClickLast} onClickNext={handleClickNext} />
-
           </div>
         </div>
 

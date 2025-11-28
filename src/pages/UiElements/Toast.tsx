@@ -26,7 +26,7 @@ const Toast: React.FC<ToastProps> = ({ type = "success", message, duration = 300
   return (
     <>
 
-      <div className=" fixed top-5 inset-0 z-50 flex items-start justify-center gap-3">
+      <div className=" fixed top-5 inset-0 z-50 flex items-start justify-center gap-3 z-99999">
         {type === "success" &&
           <div id="toast-success"
             className="flex items-center w-full max-w-xs p-4 mb-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800"

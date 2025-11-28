@@ -14,7 +14,7 @@ import { ToastMessage } from '../../model/ToastMessage';
 import { useToast } from '../../context/ToastContext';
 import Helper from '../../utility/Helper';
 import { HttpMethod } from '../../enum/HttpMethod';
-import { MonitorPointEndpoint } from '../../enum/endpoint/MonitorPointEndpoint';
+import { MonitorPointEndpoint } from '../../endpoint/MonitorPointEndpoint';
 
 // Define Global Variable
 let removeTarget: RemoveInput;

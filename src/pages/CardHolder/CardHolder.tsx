@@ -7,7 +7,7 @@ import { CardHolderDto } from '../../model/CardHolder/CardHolderDto';
 import { CardHolderTable } from './CardHolderTable';
 import HttpRequest from '../../utility/HttpRequest';
 import { HttpMethod } from '../../enum/HttpMethod';
-import { CardHolderEndpoint } from '../../enum/endpoint/CardHolderEndpoint';
+import { CardHolderEndpoint } from '../../endpoint/CardHolderEndpoint';
 import { useToast } from '../../context/ToastContext';
 import Helper from '../../utility/Helper';
 import { ToastMessage } from '../../model/ToastMessage';
@@ -105,7 +105,7 @@ const CardHolder = () => {
         {
             icon: <BoxIcon />,
             label: "Settings",
-            content: <UserSettingForm handleClickWithEvent={handleClick} dto={cardHolderDto} setDto={setCardHolderDto} />
+            content: <UserSettingForm handleClick={handleClick} dto={cardHolderDto} setDto={setCardHolderDto} />
         }
     ];
 

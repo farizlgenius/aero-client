@@ -10,7 +10,7 @@ import HttpRequest from '../../utility/HttpRequest';
 import Helper from '../../utility/Helper';
 import { ToastMessage } from '../../model/ToastMessage';
 import { useToast } from '../../context/ToastContext';
-import { CardFormatEndpoint } from '../../enum/endpoint/CardFormatEndpoint';
+import { CardFormatEndpoint } from '../../endpoint/CardFormatEndpoint';
 import { HttpMethod } from '../../enum/HttpMethod';
 
 

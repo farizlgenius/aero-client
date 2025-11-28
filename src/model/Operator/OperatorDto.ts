@@ -12,5 +12,5 @@ export interface OperatorDto{
     phone:string;
     imagePath:string;
     roleId:number;
-    locationId:number;
+    locationIds:number[];
 }

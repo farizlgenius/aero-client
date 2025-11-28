@@ -6,7 +6,7 @@ import Switch from "../switch/Switch"
 import Button from "../../ui/button/Button"
 import { ModeDto } from "../../../model/ModeDto"
 
-export const UserSettingForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({ handleClickWithEvent,dto, setDto }) => {
+export const UserSettingForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({ handleClick: handleClickWithEvent,dto, setDto }) => {
       const [userFlag, setUserFlag] = useState<ModeDto[]>([])
     const fetchUserFlag = () => {
     }

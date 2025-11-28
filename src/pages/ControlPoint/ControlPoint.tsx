@@ -15,7 +15,7 @@ import { useToast } from '../../context/ToastContext';
 import { ToastMessage } from '../../model/ToastMessage';
 import { ControlPointTable } from './ControlPointTable';
 import { HttpMethod } from '../../enum/HttpMethod';
-import { ControlPointEndpoint } from '../../enum/endpoint/ControlPointEndpoint';
+import { ControlPointEndpoint } from '../../endpoint/ControlPointEndpoint';
 
 // Define Global Variable
 let removeTarget: RemoveOutput;

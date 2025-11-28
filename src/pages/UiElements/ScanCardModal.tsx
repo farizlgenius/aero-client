@@ -11,9 +11,9 @@ import Spinner from './Spinner';
 import { ScanCardDto } from '../../model/CardHolder/ScanCard';
 import HttpRequest from '../../utility/HttpRequest';
 import { HttpMethod } from '../../enum/HttpMethod';
-import { HardwareEndpoint } from '../../enum/endpoint/HardwareEndpoint';
-import { DoorEndpoint } from '../../enum/endpoint/DoorEndpoint';
-import { CredentialEndpoint } from '../../enum/endpoint/CredentialEndpoint';
+import { HardwareEndpoint } from '../../endpoint/HardwareEndpoint';
+import { DoorEndpoint } from '../../endpoint/DoorEndpoint';
+import { CredentialEndpoint } from '../../endpoint/CredentialEndpoint';
 
 
 

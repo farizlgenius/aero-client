@@ -12,7 +12,7 @@ import { ModeDto } from "../../../model/ModeDto";
 import Select from "../Select";
 
 
-export const OccupancyForm: React.FC<PropsWithChildren<FormProp<AreaDto>>> = ({ handleClickWithEvent, setDto, dto }) => {
+export const OccupancyForm: React.FC<PropsWithChildren<FormProp<AreaDto>>> = ({ handleClick: handleClickWithEvent, setDto, dto }) => {
   const [multiOccOption, setMultiOccOption] = useState<Options[]>([]);
   const [occControlOption, setOccControlOption] = useState<Options[]>([]);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

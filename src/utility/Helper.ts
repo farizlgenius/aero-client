@@ -1,10 +1,10 @@
-import { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 import { DaysInWeekDto } from "../model/Interval/DaysInWeekDto";
 import { ToastMessage } from "../model/ToastMessage";
 import { Options } from "../model/Options";
 import { HttpCode } from "../enum/Httpcode";
 
-type ToastType = "success" | "error" | 'info';
+type ToastType = "success" | "error" | 'warning';
 
 class Helper {
 
@@ -34,6 +34,10 @@ class Helper {
 
     static handleToastByResCode(res: AxiosResponse<any, any> | null | undefined, message: string, toggleToast: (toastType: ToastType, toastMessage: string) => void): boolean {
         if (res) {
+            if(axios.isAxiosError(res)){
+                toggleToast("error",res.message)
+                return false;
+            }
             switch (res.data.code) {
                 case HttpCode.OK:
                     toggleToast("success", message)

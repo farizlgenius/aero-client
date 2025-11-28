@@ -15,8 +15,8 @@ import { TimeZoneDto } from '../../model/TimeZone/TimeZoneDto';
 import { Options } from '../../model/Options';
 import { ModeDto } from '../../model/ModeDto';
 import { HttpMethod } from '../../enum/HttpMethod';
-import { TimeZoneEndPoint } from '../../enum/endpoint/TimezoneEndpoint';
-import { IntervalEndpoint } from '../../enum/endpoint/IntervalEndpoint';
+import { TimeZoneEndPoint } from '../../endpoint/TimezoneEndpoint';
+import { IntervalEndpoint } from '../../endpoint/IntervalEndpoint';
 
 
 export interface TimeZoneFormProp {

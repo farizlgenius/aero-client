@@ -5,11 +5,14 @@ import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
-import Input from "../components/form/input/InputField";
+import { LocationIcon } from "../icons";
+import Button from "../components/ui/button/Button";
+import { useLocation } from "../context/LocationContext";
 
 const AppHeader: React.FC = () => {
+  const { locationName,setShow } = useLocation();
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
-  const [location,setLocation] = useState<string>("")
+
 
   const { isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
 
@@ -162,9 +165,8 @@ const AppHeader: React.FC = () => {
 
           <div className="flex items-center gap-2 2xsm:gap-3">
             {/* <!-- Location Selector --> */}
-             <div>
-              <Input type="text" placeholder="Location"/>
-             </div>
+            <Button onClick={() => setShow(true)} variant="outline" startIcon={<LocationIcon className="h-5 w-5"/>}>{locationName}</Button>
+                         
              {/* <!-- Language Toggler --> */}
             {/* <!-- Dark Mode Toggler --> */}
             <ThemeToggleButton />

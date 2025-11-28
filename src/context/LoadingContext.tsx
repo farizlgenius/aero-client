@@ -10,7 +10,7 @@ interface LoadingContextInterface {
 const LoadingContext = createContext<LoadingContextInterface | null>(null);
 
 export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [loading, setLoading] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
     const Loading = () => {
         return (
             <>

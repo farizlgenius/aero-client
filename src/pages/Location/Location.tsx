@@ -8,12 +8,15 @@ import { AddIcon, LocationIcon } from "../../icons";
 import { LocationForm } from "../../components/form/location/LocationForm";
 import HttpRequest from "../../utility/HttpRequest";
 import { HttpMethod } from "../../enum/HttpMethod";
-import { LocationEndpoint } from "../../enum/endpoint/LocationEndpoint";
+import { LocationEndpoint } from "../../endpoint/LocationEndpoint";
 import { useToast } from "../../context/ToastContext";
 import Helper from "../../utility/Helper";
 import { ToastMessage } from "../../model/ToastMessage";
 import { BaseTable } from "../UiElements/BaseTable";
-import Button from "../../components/ui/button/Button";
+import { send } from "../../api/api";
+import { FeatureEndpoint } from "../../endpoint/FeatureEndpoint";
+import { useAuth } from "../../context/AuthContext";
+import { FeatureDto } from "../../model/Role/FeatureDto";
 
 var removeTarget: number = 0;
 
@@ -30,12 +33,14 @@ export const LOCATION_KEY: string[] = ["locationName"];
 
 export const Location = () => {
     const { toggleToast } = useToast();
+    const {user} = useAuth();
     const [create, setCreate] = useState<boolean>(false);
     const [update, setUpdate] = useState<boolean>(false);
     const [isRemoveModal, setIsRemoveModal] = useState(false);
     const [refresh, setRefresh] = useState<boolean>(false);
     const [locationDto, setLocationDto] = useState<LocationDto>(defaultDto);
     const [locationsDto, setLocationsDto] = useState<LocationDto[]>([]);
+    const [permission,setPermission] = useState<FeatureDto | undefined>(undefined);
     const toggleRefresh = () => setRefresh(!refresh)
 
     const handleRemove = (data: LocationDto) => {
@@ -81,7 +86,7 @@ export const Location = () => {
     }
 
     const createLocation = async (dto: LocationDto) => {
-        const res = await HttpRequest.send(HttpMethod.POST, LocationEndpoint.CREATE_LOC, dto)
+        const res = await send.post(LocationEndpoint.CREATE_LOC,dto);
         if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
             setCreate(false)
             setUpdate(false)
@@ -90,7 +95,7 @@ export const Location = () => {
     }
 
     const updateLocation = async (dto: LocationDto) => {
-        const res = await HttpRequest.send(HttpMethod.PUT, LocationEndpoint.UPDATE_LOC, dto)
+        const res = await HttpRequest.send(HttpMethod.PUT, LocationEndpoint.UPDATE_LOC,true,dto)
         if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
             setCreate(false)
             setUpdate(false)
@@ -141,19 +146,28 @@ export const Location = () => {
         }
     }
 
+    const fetchPermission = async () => {
+        if(user?.role?.roleNo){
+            const res = await send.get(FeatureEndpoint.GET_BY_ROLE_FEATURE(user.role.roleNo,3))
+            setPermission(res.data.data)
+        }
+        
+    }
+
 
     {/* Form */ }
     const tabContent: FormContent[] = [
         {
             icon: <LocationIcon />,
             label: "Intevals",
-            content: <LocationForm dto={locationDto} setDto={setLocationDto} handleClickWithEvent={handleClickWithEvent} />
+            content: <LocationForm dto={locationDto} setDto={setLocationDto} handleClick={handleClickWithEvent} />
         }
     ];
 
 
 
     useEffect(() => {
+        fetchPermission();
         fetchDate();
     }, [refresh])
 
@@ -167,24 +181,7 @@ export const Location = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <div className="flex gap-4">
-                        <Button
-                            name='add'
-                            size="sm"
-                            variant="primary"
-                            startIcon={<AddIcon className="size-5" />}
-                            onClickWithEvent={handleClickWithEvent}
-                        >
-                            Add
-                        </Button>
-
-                    </div>
-                    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                        <div className="max-w-full overflow-x-auto">
-                            <BaseTable<LocationDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={locationsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} />
-
-                        </div>
-                    </div>
+                      <BaseTable<LocationDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={locationsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClickWithEvent} permission={permission} />
                 </div>
 
             }

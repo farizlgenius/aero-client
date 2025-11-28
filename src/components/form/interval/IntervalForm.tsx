@@ -11,7 +11,7 @@ import Helper from "../../../utility/Helper"
 
 const daysInWeek = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
-export const IntervalForm: React.FC<PropsWithChildren<FormProp<IntervalDto>>> = ({ isUpdate, handleClickWithEvent, setDto, dto }) => {
+export const IntervalForm: React.FC<PropsWithChildren<FormProp<IntervalDto>>> = ({ isUpdate, handleClick: handleClickWithEvent, setDto, dto }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(e.target.name)
         console.log(e.target.value);

@@ -1,13 +1,16 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import HttpRequest from "../utility/HttpRequest";
-import { HttpMethod } from "../enum/HttpMethod";
-import { AuthEndpoint } from "../enum/endpoint/AuthEndpoint";
+import { AuthEndpoint } from "../endpoint/AuthEndpoint";
 import { useLoading } from "./LoadingContext";
 import { useToast } from "./ToastContext";
+import { LocationEndpoint } from "../endpoint/LocationEndpoint";
+import { clearAccessToken, getAccessToken, send, setAccessToken } from "../api/api";
+import Helper from "../utility/Helper";
+import { ToastMessage } from "../model/ToastMessage";
+import { useLocation } from "./LocationContext";
+import { LocationDto } from "../model/Location/LocationDto";
 
-type User = { id: string; name?: string; info?: Info; location?: Location;role?:Role  } | null;
+type User = { id: string; name?: string; info?: Info; location?: number[];role?:Role  } | null;
 type Info = { title?:string; firstname?:string; middlename?:string; lastname?:string; }
-type Location ={ locationNo?:number; locationName?:string; }
 type Role = { roleNo?:number; roleName?:string; features?:number[]}
 
 interface AuthContextType {
@@ -16,13 +19,11 @@ interface AuthContextType {
   loading: boolean;
   signIn: (username: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
-  fetchWithAuth: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
 };
 
 const AuthContext = createContext<AuthContextType|undefined>(undefined);
 
 
-let _accessToken: string | null = null;
 let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
 
@@ -32,9 +33,9 @@ const doRefresh = async () => {
     isRefreshing = true;
     refreshPromise = (async () => {
         try{
-            const res = await HttpRequest.send(HttpMethod.POST,AuthEndpoint.POST_REFRESH,true)
+            const res = await send.post(AuthEndpoint.REFRESH)
             if(res?.status !== 200) return false;
-            _accessToken = res.data.data.accessToken;
+            setAccessToken(res.data.data.accessToken)
             return true;
         }catch{
              return false;
@@ -50,21 +51,46 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
     const [user,setUser] = useState<User>(null);
     // const [loading,setLoading] = useState<boolean>(true);
     const  {loading,setLoading} = useLoading();
+    const {setLocationId,setLocationList,setLocationName} = useLocation();
     const {toggleToast} = useToast();
 
     const fetchMe = useCallback(async () =>{
-        if(!_accessToken) return false;
-        const res = await HttpRequest.sendWithToken(HttpMethod.GET,AuthEndpoint.GET_ME,_accessToken,false)
+        if(!getAccessToken()) return false;
+        const res = await send.get(AuthEndpoint.ME);
         if(res?.status !== 200) return false;
-        console.log(res);
-        setUser(res.data);
+        console.log(res.data.user);
+        setUser(res.data.user);
+        fetchLocation(res.data.user.location)
         return true;
     },[])
 
+    const fetchLocation = useCallback(async (locationIds:number[]) => {
+        if(!getAccessToken()) return false;
+        var dto = {
+            locationIds:locationIds
+        }
+        const res = await send.post(LocationEndpoint.POST_GET_LOC_RANGE,dto)
+        let locs:LocationDto[] = res.data.data;
+        setLocationList(locs)
+        if(locs.length > 0){
+            setLocationName(locs[0].locationName)
+            setLocationId(locs[0].componentId)
+        }
+        // res.data.data.map((a:LocationDto) => {
+        //     setLocationOption(prev => ([...prev,{
+        //         label:a.locationName,
+        //         value:a.componentId,
+        //         isTaken:false,
+        //         description:a.description
+        //     }]))
+        // })
+    },[])
+
+
     useEffect(() => {
         (async () => {
-            setLoading(true);
             const ok = await doRefresh();
+            console.log(ok)
             if(ok){
                 await fetchMe();
             }else{
@@ -76,43 +102,23 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
 
     const signIn = useCallback(async (username:string,password:string) => {
         setLoading(true);
-        const res = await HttpRequest.send(HttpMethod.POST,AuthEndpoint.POST_LOGIN,true,{username,password})
+        const res = await send.post(AuthEndpoint.LOGIN,{username,password})
         setLoading(false);
-        console.log(res.data.details)
-        console.log(res.status)
-        if(res.status !== 200){
-            toggleToast("error",res.data.details[0])
+        if(!Helper.handleToastByResCode(res,ToastMessage.LOGIN,toggleToast)){
             return false;
         }
-        _accessToken = res.data.data.accessToken
+        setAccessToken(res.data.data.accessToken)
         await fetchMe();
         return true
     },[fetchMe])
 
     const signOut = useCallback(async () => {
-        const res = await HttpRequest.send(HttpMethod.POST,AuthEndpoint.POST_LOGOUT,true)
+        const res = await send.post(AuthEndpoint.LOGOUT) 
         console.log(res)
-        _accessToken = null;
+        clearAccessToken()
         setUser(null);
     },[])
 
-    const fetchWithAuth = useCallback(async (input:RequestInfo,init?:RequestInit) => {
-        const doFetch = async () => {
-            const headers = new Headers(init?.headers as HeadersInit);
-            if(_accessToken) headers.set("Authorization",`Bearer ${_accessToken}`);
-            const merged:RequestInit = {...init,headers,credentials:init?.credentials ?? "same-origin"};
-            return fetch(input,merged);
-        };
-
-        let res = await doFetch();
-        if(res.status === 401){
-            const refreshed = await doRefresh();
-            if(refreshed){
-                res = await doFetch();
-            }
-        }
-        return res;
-    },[]);
 
     return (
         <AuthContext.Provider
@@ -122,7 +128,6 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
             loading,
             signIn,
             signOut,
-            fetchWithAuth
         }}
         >
             {children}

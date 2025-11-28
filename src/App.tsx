@@ -43,18 +43,21 @@ import { Area } from "./pages/Area/Area";
 import { License } from "./pages/License/License";
 import HttpRequest from "./utility/HttpRequest";
 import { HttpMethod } from "./enum/HttpMethod";
-import { LicenseEndpoint } from "./enum/endpoint/LicenseEndpoint";
+import { LicenseEndpoint } from "./endpoint/LicenseEndpoint";
 import { LoginDto } from "./model/Auth/LoginDto";
 import { Role } from "./pages/Role/Role";
 import { Operator } from "./pages/Operator/Operator";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
+import { LocationModal } from "./components/form/location/LocationModal";
 import { useLoading } from "./context/LoadingContext";
+import { useLocation } from "./context/LocationContext";
 
 
 export default function App() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
+  const { show,locationId } = useLocation();
   const { showAlertFlag, alertSuccessFlag, alertMessage } = useAlert();
   const { showToast, setShowToast, toastMessage, toastType } = useToast();
   const { loading, Loading } = useLoading();
@@ -65,6 +68,7 @@ export default function App() {
     username: "",
     password: ""
   })
+
 
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     switch (e.currentTarget.name) {
@@ -104,6 +108,7 @@ export default function App() {
     }
   }
 
+
   useEffect(() => {
     checkLicense();
     if (!license) {
@@ -119,7 +124,9 @@ export default function App() {
   return (
     <>
       <div>
-
+         { show &&
+          <LocationModal/>
+         }
         {loading &&
           <Loading />
         }

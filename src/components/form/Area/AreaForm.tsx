@@ -14,7 +14,7 @@ import Switch from "../switch/Switch";
 import { Info2Icon } from "../../../icons";
 
 
-export const AreaForm: React.FC<PropsWithChildren<FormProp<AreaDto>>> = ({ handleClickWithEvent, setDto, dto }) => {
+export const AreaForm: React.FC<PropsWithChildren<FormProp<AreaDto>>> = ({ handleClick: handleClickWithEvent, setDto, dto }) => {
   const [areaFlag, setAreaFlag] = useState<ModeDto[]>([]);
   const [accessControlOption, setAccessControlOption] = useState<Options[]>([]);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

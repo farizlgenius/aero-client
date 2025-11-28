@@ -12,9 +12,12 @@ import HttpRequest from "../../utility/HttpRequest";
 import Helper from "../../utility/Helper";
 import { ToastMessage } from "../../model/ToastMessage";
 import { FormContent } from "../../model/Form/FormContent";
-import { RoleEndpoint } from "../../enum/endpoint/RoleEndpoint";
-import { OpearatorEndpoint } from "../../enum/endpoint/OperatorEndpoint";
+import { RoleEndpoint } from "../../endpoint/RoleEndpoint";
+import { OpearatorEndpoint } from "../../endpoint/OperatorEndpoint";
 import { OperatorForm } from "../../components/form/operator/OperatorForm";
+import { useLocation } from "../../context/LocationContext";
+import api, { send } from "../../api/api";
+import { useAuth } from "../../context/AuthContext";
 
 
 var removeTarget: number = 0;
@@ -31,7 +34,7 @@ const defaultDto: OperatorDto = {
     phone: "",
     imagePath: "",
     roleId: -1,
-    locationId:-1,
+    locationIds:[],
 }
 
 export const LOCATION_HEADER: string[] = ["Username", "Action"]
@@ -39,7 +42,9 @@ export const LOCATION_KEY: string[] = ["username"];
 
 
 export const Operator = () => {
-  const { toggleToast } = useToast();
+    const { locationId } = useLocation();
+    const { user } = useAuth();
+    const { toggleToast } = useToast();
     const [create, setCreate] = useState<boolean>(false);
     const [update, setUpdate] = useState<boolean>(false);
     const [remove, setRemove] = useState(false);
@@ -67,7 +72,7 @@ export const Operator = () => {
     }
 
 
-    const handleClickWithEvent = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement,MouseEvent>) => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
@@ -144,7 +149,7 @@ export const Operator = () => {
     }
 
     const fetchDate = async () => {
-        const res = await HttpRequest.send(HttpMethod.GET, OpearatorEndpoint.GET_OPER)
+        const res = await send.get(OpearatorEndpoint.GET_OPER(String(locationId)));
         console.log(res?.data.data)
         if (res && res.data.data) {
             setOperatorsDto(res.data.data);
@@ -157,7 +162,7 @@ export const Operator = () => {
         {
             icon: <OperatorIcon />,
             label: "Operator",
-            content: <OperatorForm isUpdate={update} dto={operatorDto} setDto={setOperatorDto} handleClickWithEvent={handleClickWithEvent} />
+            content: <OperatorForm isUpdate={update} dto={operatorDto} setDto={setOperatorDto} handleClick={handleClick} />
         }
     ];
 
@@ -178,23 +183,7 @@ export const Operator = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <div className="flex gap-4">
-                        <Button
-                            name='add'
-                            size="sm"
-                            variant="primary"
-                            startIcon={<AddIcon className="size-5" />}
-                            onClickWithEvent={handleClickWithEvent}
-                        >
-                            Add
-                        </Button>
-
-                    </div>
-                    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                        <div className="max-w-full overflow-x-auto">
-                            <BaseTable<OperatorDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={operatorsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} />
-                        </div>
-                    </div>
+                    <BaseTable<OperatorDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={operatorsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} />
                 </div>
 
             }

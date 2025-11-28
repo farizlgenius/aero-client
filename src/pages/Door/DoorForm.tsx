@@ -25,13 +25,13 @@ import { RequestExitDto } from '../../model/RequestExit/RequestExitDto';
 import { MultiselectOption } from '../../model/MultiselectOption';
 import { CardFormatDto } from '../../model/CardFormat/CardFormatDto';
 import { HttpMethod } from '../../enum/HttpMethod';
-import { ModuleEndpoint } from '../../enum/endpoint/ModuleEndpoint';
-import { HardwareEndpoint } from '../../enum/endpoint/HardwareEndpoint';
-import { DoorEndpoint } from '../../enum/endpoint/DoorEndpoint';
-import { MonitorPointEndpoint } from '../../enum/endpoint/MonitorPointEndpoint';
-import { ControlPointEndpoint } from '../../enum/endpoint/ControlPointEndpoint';
-import { TimeZoneEndPoint } from '../../enum/endpoint/TimezoneEndpoint';
-import { CardFormatEndpoint } from '../../enum/endpoint/CardFormatEndpoint';
+import { ModuleEndpoint } from '../../endpoint/ModuleEndpoint';
+import { HardwareEndpoint } from '../../endpoint/HardwareEndpoint';
+import { DoorEndpoint } from '../../endpoint/DoorEndpoint';
+import { MonitorPointEndpoint } from '../../endpoint/MonitorPointEndpoint';
+import { ControlPointEndpoint } from '../../endpoint/ControlPointEndpoint';
+import { TimeZoneEndPoint } from '../../endpoint/TimezoneEndpoint';
+import { CardFormatEndpoint } from '../../endpoint/CardFormatEndpoint';
 
 
 

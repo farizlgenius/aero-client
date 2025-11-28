@@ -8,7 +8,7 @@ import { ModuleDto } from "../../model/Module/ModuleDto";
 import { ModuleTable } from "./ModuleTable";
 import { StatusDto } from "../../model/StatusDto";
 import { HttpMethod } from "../../enum/HttpMethod";
-import { ModuleEndpoint } from "../../enum/endpoint/ModuleEndpoint";
+import { ModuleEndpoint } from "../../endpoint/ModuleEndpoint";
 
 
 

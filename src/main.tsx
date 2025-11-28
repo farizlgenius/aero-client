@@ -13,6 +13,7 @@ import { ToastProvider } from "./context/ToastContext.tsx";
 import { NotificationProvider } from "./context/NotificationContext.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { LoadingProvider } from "./context/LoadingContext.tsx";
+import { LocationProvider } from "./context/LocationContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   // <StrictMode>
@@ -27,23 +28,19 @@ createRoot(document.getElementById("root")!).render(
       <AppWrapper>
         <LoadingProvider>
           <ToastProvider>
-            <AuthProvider>
-              <NotificationProvider>
-                <PopupProvider>
-                  <AlertProvider>
-                    <App />
-                  </AlertProvider>
-                </PopupProvider>
-              </NotificationProvider>
-
-
-            </AuthProvider>
-
+            <LocationProvider>
+              <AuthProvider>
+                <NotificationProvider>
+                  <PopupProvider>
+                    <AlertProvider>
+                      <App />
+                    </AlertProvider>
+                  </PopupProvider>
+                </NotificationProvider>
+              </AuthProvider>
+            </LocationProvider>
           </ToastProvider>
-
         </LoadingProvider>
-
-
       </AppWrapper>
     </BrowserRouter>
   </ThemeProvider>
