@@ -1,26 +1,25 @@
 import { PropsWithChildren } from "react";
-import ComponentCard from "../../components/common/ComponentCard.tsx";
-import Label from "../../components/form/Label.tsx";
-import Input from "../../components/form/input/InputField.tsx";
-import Button from "../../components/ui/button/Button.tsx";
-import { HardwareDto } from "../../model/Hardware/HardwareDto.ts";
+import Label from "../Label.tsx";
+import Input from "../input/InputField.tsx";
+import Button from "../../ui/button/Button.tsx";
+import { HardwareDto } from "../../../model/Hardware/HardwareDto.ts";
 
 
 
 
 interface FormProps {
   data: HardwareDto;
-  handleClickWithEvent:(e: React.MouseEvent<HTMLButtonElement>) => void;
+  handleClickWithEvent: (e: React.MouseEvent<HTMLButtonElement>) => void;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   isDetail: boolean;
 }
 
 
-const HardwareForm: React.FC<PropsWithChildren<FormProps>> = ({ data, handleChange, isDetail = false,handleClickWithEvent }) => {
+const HardwareForm: React.FC<PropsWithChildren<FormProps>> = ({ data, handleChange, isDetail = false, handleClickWithEvent }) => {
 
 
   return (
-    <ComponentCard title="Hardware">
+    <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="space-y-6">
         <div>
           <Label htmlFor="name">Hardware Name</Label>
@@ -63,7 +62,10 @@ const HardwareForm: React.FC<PropsWithChildren<FormProps>> = ({ data, handleChan
 
         </div>
       </div>
-    </ComponentCard>
+
+    </div>
+
+
   );
 }
 

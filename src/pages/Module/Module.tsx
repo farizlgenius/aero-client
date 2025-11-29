@@ -2,49 +2,68 @@ import { useEffect, useState } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import Modals from "../UiElements/Modals";
 import EditModuleInputs from "../../components/form/form-elements/EditModuleInputs";
-import HttpRequest from "../../utility/HttpRequest";
-import { usePopupActions } from "../../utility/PopupCalling";
 import { ModuleDto } from "../../model/Module/ModuleDto";
-import { ModuleTable } from "./ModuleTable";
 import { StatusDto } from "../../model/StatusDto";
-import { HttpMethod } from "../../enum/HttpMethod";
 import { ModuleEndpoint } from "../../endpoint/ModuleEndpoint";
+import { send } from "../../api/api";
+import { useLocation } from "../../context/LocationContext";
+import { BaseTable } from "../UiElements/BaseTable";
+import { useAuth } from "../../context/AuthContext";
+import { FeatureId } from "../../enum/FeatureId";
+import SignalRService from "../../services/SignalRService";
+import { TableCell } from "../../components/ui/table";
+import Badge from "../../components/ui/badge/Badge";
+
+const MODULE_TABLE_HEADER: string[] = [
+  "Address", "Model", "Tamper", "AC", "Battery", "Status", "Action"
+]
+
+// Define Keys
+const MODULE_KEY: string[] = [
+  "address", "model",
+]
 
 
 
 export default function Module() {
-  const { showPopup } = usePopupActions();
+  const { locationId } = useLocation();
+  const { filterPermission } = useAuth();
   {/* Module Data */ }
   const [status, setStatus] = useState<StatusDto[]>([]);
   const [moduleDto, setModuleDto] = useState<ModuleDto[]>([]);
+  const [refresh, setRefresh] = useState<boolean>(false);
+  const toggleRefresh = () => setRefresh(prev => !prev)
   const fetchModule = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET, ModuleEndpoint.GET_SIO_LIST);
-    if (res) {
+    console.log(locationId)
+    const res = await send.get(ModuleEndpoint.GET_MODULE(locationId))
+    if (res && res.data.data) {
       //Helper.handlePopup(res, PopUpMsg.GET_MODULE_STATUS, showPopup)
-        console.log(res.data.data)
-        setModuleDto(res.data.data);
-        const newStatuses = res.data.data.map((a: ModuleDto) => ({
-          macAddress: a.macAddress,
-          componentId: a.componentId,
-          status: 0,
-          tamper: "",
-          ac: "",
-          batt: ""
-        }));
+      console.log(res.data.data)
+      setModuleDto(res.data.data);
+      const newStatuses = res.data.data.map((a: ModuleDto) => ({
+        macAddress: a.macAddress,
+        componentId: a.componentId,
+        status: 0,
+        tamper: "",
+        ac: "",
+        batt: ""
+      }));
 
-        console.log(newStatuses);
+      console.log(newStatuses);
 
-        setStatus((prev) => [...prev, ...newStatuses]);
+      setStatus((prev) => [...prev, ...newStatuses]);
 
-        // Fetch status for each
-        res.data.data.forEach((a: ModuleDto) => {
-          fetchStatus(a.macAddress, a.componentId);
-        });
-        
+      // Fetch status for each
+      res.data.data.forEach((a: ModuleDto) => {
+        fetchStatus(a.macAddress, a.componentId);
+      });
+
 
     }
 
   }
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => { }
 
   {/* Modals Module */ }
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -52,7 +71,7 @@ export default function Module() {
 
   {/* Module Status */ }
   const fetchStatus = async (ScpMac: string, SioNo: number) => {
-    await HttpRequest.send(HttpMethod.GET, ModuleEndpoint.GET_SIO_STATUS + ScpMac + "/" + SioNo)
+    await send.get(ModuleEndpoint.GET_MODULE_STATUS(ScpMac, SioNo))
     //Helper.handlePopup(res, PopUpMsg.GET_MODULE_STATUS, showPopup)
   };
 
@@ -94,20 +113,118 @@ export default function Module() {
     fetchModule();
   }, []);
 
+  useEffect(() => {
+    // Initialize SignalR as soon as app starts
+    var connection = SignalRService.getConnection();
+    connection.on(
+      "SioStatus",
+      (
+        ScpMac: string,
+        SioNo: number,
+        Status: string,
+        Tamper: string,
+        Ac: string,
+        Batt: string
+      ) => {
+        console.log(Status);
+        console.log(Tamper);
+        console.log(Ac);
+        console.log(Batt);
+        setStatus((prev) =>
+          prev.map((a) =>
+            a.macAddress == ScpMac && a.componentId == SioNo
+              ? {
+                ...a,
+                status: Status,
+                tamper: Tamper == null ? a.tamper : Tamper,
+                ac: Ac == null ? a.ac : Ac,
+                batt: Batt == null ? a.batt : Batt
+              }
+              : {
+                ...a
+              }
+          )
+        );
+        toggleRefresh();
+      }
+    );
+
+    return () => {
+      //SignalRService.stopConnection()
+    };
+  }, [refresh]);
+
+  const filterComponent = (data: any, statusDto: StatusDto[]) => {
+    return [
+      <>
+        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+          <Badge
+            size="sm"
+            color={
+              statusDto.find(b => b.componentId == data.componentId)?.tamper == "Active"
+                ? "success"
+                : statusDto.find(b => b.componentId == data.componentId)?.tamper == "Inactive"
+                  ? "error"
+                  : "warning"
+            }
+          >
+            {statusDto.find(b => b.componentId == data.componentId)?.tamper == "" ? "Error" : statusDto.find(b => b.componentId == data.componentId)?.tamper}
+          </Badge>
+        </TableCell>
+        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+          <Badge
+            size="sm"
+            color={
+              statusDto.find(b => b.componentId == data.componentId)?.ac == "Active"
+                ? "success"
+                : statusDto.find(b => b.componentId == data.componentId)?.ac == "Inactive"
+                  ? "error"
+                  : "warning"
+            }
+          >
+            {statusDto.find(b => b.componentId == data.componentId)?.ac == "" ? "Error" : statusDto.find(b => b.componentId == data.componentId)?.ac}
+          </Badge>
+        </TableCell>
+        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+          <Badge
+            size="sm"
+            color={
+              statusDto.find(b => b.componentId == data.componentId)?.batt == "Active"
+                ? "success"
+                : statusDto.find(b => b.componentId == data.componentId)?.batt == "Inactive"
+                  ? "error"
+                  : "warning"
+            }
+          >
+            {statusDto.find(b => b.componentId == data.componentId)?.batt == "" ? "Error" : statusDto.find(b => b.componentId == data.componentId)?.batt}
+          </Badge>
+        </TableCell>
+        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+          <Badge
+            size="sm"
+            color={
+              statusDto.find(b => b.componentId == data.componentId)?.status == "Online" || statusDto.find(b => b.componentId == data.componentId)?.status == "Active"
+                ? "success"
+                : statusDto.find(b => b.componentId == data.componentId)?.status == "Offline"
+                  ? "error"
+                  : "warning"
+            }
+          >
+            {statusDto.find(b => b.componentId == data.componentId)?.status == "" ? "Offline" : statusDto.find(b => b.componentId == data.componentId)?.status}
+          </Badge>
+        </TableCell>
+      </>
+    ]
+  }
+
+
   return (
     <>
       {isModalOpen &&
         <Modals header="Edit Module" body={<EditModuleInputs data={moduleDto[0]} />} handleClickWithEvent={closeModalToggle} />
       }
       <PageBreadcrumb pageTitle="Module" />
-      <div className="space-y-6">
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-          <div className="max-w-full overflow-x-auto">
-            <ModuleTable setStatus={setStatus} data={moduleDto} statusDto={status} handleCheck={handleCheck} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} selectedObject={selectedObjects}/>
-          </div>
-        </div>
-
-      </div>
+      <BaseTable<ModuleDto> headers={MODULE_TABLE_HEADER} keys={MODULE_KEY} data={moduleDto} status={status} handleCheck={handleCheck} handleCheckAll={handleCheckedAll} selectedObject={selectedObjects} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} permission={filterPermission(FeatureId.DEVICE)} renderOptionalComponent={filterComponent} />
     </>
   );
 }

@@ -5,7 +5,7 @@ export enum ToastMessage{
     UPLOAD_SCP = "Upload Hardware",
     GET_SCP_STATUS = "Get Hardware Status",
     GET_SCP_LIST = "Get Hardware List",
-    POST_ADD_SCP = "Create Hardware",
+    CREATE_HARDWARE = "Create Hardware",
     GET_ID_REPORT_LIST = "Get Id Report List",
     CREATE_CP = "Control Point Created",
     GET_CP_STATUS = "Retrive Control Point Status",

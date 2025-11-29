@@ -18,6 +18,7 @@ import { OperatorForm } from "../../components/form/operator/OperatorForm";
 import { useLocation } from "../../context/LocationContext";
 import api, { send } from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
+import { FeatureId } from "../../enum/FeatureId";
 
 
 var removeTarget: number = 0;
@@ -43,7 +44,7 @@ export const LOCATION_KEY: string[] = ["username"];
 
 export const Operator = () => {
     const { locationId } = useLocation();
-    const { user } = useAuth();
+    const { filterPermission } = useAuth();
     const { toggleToast } = useToast();
     const [create, setCreate] = useState<boolean>(false);
     const [update, setUpdate] = useState<boolean>(false);
@@ -166,6 +167,7 @@ export const Operator = () => {
         }
     ];
 
+    
 
 
     useEffect(() => {
@@ -183,7 +185,7 @@ export const Operator = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <BaseTable<OperatorDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={operatorsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} />
+                    <BaseTable<OperatorDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={operatorsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} permission={filterPermission(FeatureId.OPERATOR)} />
                 </div>
 
             }

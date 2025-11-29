@@ -3,6 +3,5 @@ export interface BaseDto{
   componentId:number;
   macAddress:string;
   locationId:number;
-  locationName:string;
   isActive:boolean;
 }

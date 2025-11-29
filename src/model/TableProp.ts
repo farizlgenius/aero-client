@@ -1,6 +1,8 @@
 import React, { JSX } from "react";
 import { TableSpecialDisplay } from "./TableSpecialDisplay";
 import { FeatureDto } from "./Role/FeatureDto";
+import { ActionButton } from "./ActionButton";
+import { StatusDto } from "./StatusDto";
 
 export interface TableProp<T> {
     headers?:string[];
@@ -12,7 +14,9 @@ export interface TableProp<T> {
     handleCheckAll: (data: T[], e: React.ChangeEvent<HTMLInputElement>) => void;
     handleClick:(e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     selectedObject: T[];
-    optionalComponent?:JSX.Element;
+    renderOptionalComponent?:(data: any, statusDto: StatusDto[]) => JSX.Element[];
     specialDisplay?:TableSpecialDisplay<T>[];
     permission?:FeatureDto;
+    status?:StatusDto[];
+    action?:ActionButton[];
 }

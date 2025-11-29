@@ -16,6 +16,8 @@ import { ToastMessage } from '../../model/ToastMessage';
 import { ControlPointTable } from './ControlPointTable';
 import { HttpMethod } from '../../enum/HttpMethod';
 import { ControlPointEndpoint } from '../../endpoint/ControlPointEndpoint';
+import { send } from '../../api/api';
+import { useLocation } from '../../context/LocationContext';
 
 // Define Global Variable
 let removeTarget: RemoveOutput;
@@ -33,7 +35,6 @@ const defaultDto: ControlPointDto = {
     componentId: -1,
     macAddress: '',
     locationId: 1,
-    locationName: 'Main Location',
     isActive: true
 }
 
@@ -41,6 +42,7 @@ const defaultDto: ControlPointDto = {
 
 const ControlPoint = () => {
     const { toggleToast } = useToast();
+    const {locationId} = useLocation();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     {/* Modal */ }
@@ -77,7 +79,7 @@ const ControlPoint = () => {
     const [outputsDto, setOutputsDto] = useState<ControlPointDto[]>([]);
     const [status, setStatus] = useState<StatusDto[]>([]);
     const fetchData = async () => {
-        const res = await HttpRequest.send(HttpMethod.GET, ControlPointEndpoint.GET_CP_LIST);
+        const res = await send.get(ControlPointEndpoint.GET_CP(locationId));
         if (res && res.data.data) {
             console.log(res.data.data)
             setOutputsDto(res.data.data);
@@ -107,7 +109,7 @@ const ControlPoint = () => {
     };
 
     const createControlPoint = async () => {
-        const res = await HttpRequest.send(HttpMethod.POST, ControlPointEndpoint.POST_ADD_CP, outputDto);
+        const res = await send.post(ControlPointEndpoint.CREATE_CP,outputDto)
         if (Helper.handleToastByResCode(res, ToastMessage.CREATE_CP, toggleToast)) {
             setUpdate(false);
             setCreate(false);
@@ -164,7 +166,7 @@ const ControlPoint = () => {
                             componentId: a.componentId,
                             command: 2
                         }
-                        const res = await HttpRequest.send(HttpMethod.POST, ControlPointEndpoint.POST_CP_TRIGGER, data);
+                        const res = await send.post(ControlPointEndpoint.CP_TRIGGER,data);
                         Helper.handleToastByResCode(res, ToastMessage.TOGGLE_OUTPUT, toggleToast)
                     });
                 }
@@ -178,7 +180,7 @@ const ControlPoint = () => {
                             componentId: a.componentId,
                             command: 1
                         }
-                        const res = await HttpRequest.send(HttpMethod.POST, ControlPointEndpoint.POST_CP_TRIGGER, data);
+                        const res = await send.post(ControlPointEndpoint.CP_TRIGGER,data);
                         Helper.handleToastByResCode(res, ToastMessage.TOGGLE_OUTPUT, toggleToast)
                     });
                 }
@@ -191,7 +193,7 @@ const ControlPoint = () => {
                             componentId: a.componentId,
                             command: 3
                         }
-                        const res = await HttpRequest.send(HttpMethod.POST, ControlPointEndpoint.POST_CP_TRIGGER, data);
+                       const res = await send.post(ControlPointEndpoint.CP_TRIGGER,data);
                         Helper.handleToastByResCode(res, ToastMessage.TOGGLE_OUTPUT, toggleToast)
                     });
                 }

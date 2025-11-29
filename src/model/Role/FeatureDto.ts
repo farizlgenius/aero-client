@@ -6,4 +6,4 @@ export interface FeatureDto{
     isModify:boolean;
     isDelete:boolean;
     isAction:boolean;
-}
+} 

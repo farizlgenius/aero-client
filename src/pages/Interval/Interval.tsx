@@ -17,6 +17,8 @@ import { FormContent } from '../../model/Form/FormContent';
 import { IntervalForm } from '../../components/form/interval/IntervalForm';
 import Search from '../../components/ui/table/Search';
 import { send } from '../../api/api';
+import { useAuth } from '../../context/AuthContext';
+import { FeatureId } from '../../enum/FeatureId';
 
 
 
@@ -47,6 +49,7 @@ export const INTERVAL_KEY: string[] = ["startTime", "endTime", "days"];
 
 const Interval = () => {
     const { toggleToast } = useToast();
+    const {filterPermission} = useAuth();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
 
@@ -238,7 +241,7 @@ const Interval = () => {
 
                 :
                 <div className="space-y-6">
-                                        <BaseTable<IntervalDto> headers={INTERVAL_TABLE_HEAD} keys={INTERVAL_KEY} data={intervalsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} specialDisplay={[
+                        <BaseTable<IntervalDto> headers={INTERVAL_TABLE_HEAD} keys={INTERVAL_KEY} data={intervalsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} specialDisplay={[
                         {
                             key: "days",
                             content: (d, i) => <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
@@ -267,7 +270,7 @@ const Interval = () => {
                                 </div>
                             </TableCell>
                         }
-                    ]} handleClick={handleClickWithEvent}/>
+                    ]} handleClick={handleClickWithEvent} permission={filterPermission(FeatureId.TIME)} />
                 </div>
             }
 

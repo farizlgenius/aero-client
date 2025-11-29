@@ -16,6 +16,8 @@ import { AreaForm } from "../../components/form/area/AreaForm";
 import { BaseTable } from "../UiElements/BaseTable";
 import { OccupancyForm } from "../../components/form/area/OccupancyForm";
 import { send } from "../../api/api";
+import { useAuth } from "../../context/AuthContext";
+import { FeatureId } from "../../enum/FeatureId";
 
 var removeTarget: number;
 var defaultDto: AreaDto = {
@@ -35,11 +37,12 @@ var defaultDto: AreaDto = {
     locationName: "Main",
     isActive: true
 }
-const AREA_HEADERS = ["Name","Action"]
+const AREA_HEADERS = ["Name", "Action"]
 const AREA_KEY = ["name"]
 
 export const Area = () => {
     const { toggleToast } = useToast();
+    const { filterPermission } = useAuth();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     const [areaDto, setAreaDto] = useState<AreaDto>(defaultDto);
@@ -87,7 +90,7 @@ export const Area = () => {
     {/* Group Data */ }
     const [areasDto, setAreasDto] = useState<AreaDto[]>([]);
     const createArea = async () => {
-        var res = await send.post(AreaEndPoint.CREATE_AREA,areaDto);
+        var res = await send.post(AreaEndPoint.CREATE_AREA, areaDto);
         if (Helper.handleToastByResCode(res, ToastMessage.CREATE_AREA, toggleToast)) {
             setCreate(false)
             setUpdate(false)
@@ -154,7 +157,7 @@ export const Area = () => {
             icon: <AreaIcon />,
             label: "Area",
             content: <AreaForm dto={areaDto} setDto={setAreaDto} handleClick={handleClick} />
-        },{
+        }, {
             icon: <AreaIcon />,
             label: "Occupancy",
             content: <OccupancyForm dto={areaDto} setDto={setAreaDto} handleClick={handleClick} />
@@ -167,10 +170,10 @@ export const Area = () => {
             {isRemoveModal && <DangerModal header='Remove Card Format' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             <PageBreadcrumb pageTitle="Access Area" />
             {create || update ?
-                <BaseForm tabContent={createContent}/>
+                <BaseForm tabContent={createContent} />
                 :
                 <div className="space-y-6">
-<BaseTable<AreaDto> headers={AREA_HEADERS} keys={AREA_KEY} data={areasDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick}  />
+                    <BaseTable<AreaDto> headers={AREA_HEADERS} keys={AREA_KEY} data={areasDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} permission={filterPermission(FeatureId.ACCESSAREA)} />
 
                 </div>
             }

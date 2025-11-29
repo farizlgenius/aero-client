@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from 'react'
+import React, { PropsWithChildren, useEffect, useState } from 'react'
 import Label from '../Label'
 import Select from '../Select'
-import { Option } from '../../../constants/types'
 import Button from '../../ui/button/Button'
+import { Options } from '../../../model/Options'
+
+interface SelectDeviceForm {
+    handleClick:(e:React.MouseEvent<HTMLButtonElement,MouseEvent>)=>void;
+    setDto:React.Dispatch<React.SetStateAction<number>>
+}
 
 
-
-const SelectDeviceForm = () => {
-    const [deviceOption,setDeviceOption] = useState<Option[]>([]);
-    const handleSelect = (value:string,e:React.ChangeEvent<HTMLSelectElement>) => {
-        console.log(value);
-    }
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-        console.log(e.currentTarget.name);
+const SelectDeviceForm:React.FC<PropsWithChildren<SelectDeviceForm>> = ({handleClick,setDto}) => {
+    const [deviceOption,setDeviceOption] = useState<Options[]>([]);
+    const handleSelect = (value:string) => {
+        setDto(Number(value))
     }
     useEffect(() => {
         setDeviceOption([{
@@ -30,7 +31,7 @@ const SelectDeviceForm = () => {
             name="type"
             options={deviceOption}
             placeholder="Select Option"
-            onChangeWithEvent={handleSelect}
+            onChange={handleSelect}
             className="dark:bg-dark-900"
           />
           <Button name='type' onClickWithEvent={handleClick}>Ok</Button>

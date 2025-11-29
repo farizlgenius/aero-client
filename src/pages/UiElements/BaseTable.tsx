@@ -3,6 +3,8 @@ import Search from "../../components/ui/table/Search";
 import { TableProp } from "../../model/TableProp";
 import { PaginationNew } from "../../components/ui/table/PaginationNew";
 import { EditIcon, Info2Icon, TrashBinIcon } from "../../icons";
+import React, { JSX } from "react";
+import { StatusDto } from "../../model/StatusDto";
 
 interface PageProp {
     pageNumber: number;
@@ -12,16 +14,20 @@ interface PageProp {
 }
 
 
-export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, handleCheck, handleCheckAll, handleEdit, handleRemove, selectedObject, optionalComponent, specialDisplay, handleClick, permission }: TableProp<T>) => {
+export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, handleCheck, handleCheckAll, handleEdit, handleRemove, selectedObject, renderOptionalComponent, specialDisplay, handleClick, permission, action,status }: TableProp<T>) => {
+
     const handlePageSizeSelect = (data: string) => {
         // setPageSize(Number(data));
     }
+   
 
+    console.log(status)
+    console.log(data)
     return (
         <>
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                 <div className="max-w-full overflow-x-auto">
-                    <Search onClick={handleClick} onSelectPageSize={handlePageSizeSelect} />
+                    <Search action={action} onClick={handleClick} onSelectPageSize={handlePageSizeSelect} permission={permission} />
                     <div className="max-h-[70vh] overflow-y-auto hidden-scroll">
                         <Table>
                             {/* Table Header */}
@@ -55,7 +61,9 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
                                                     {String(data[key as keyof typeof data])}
                                                 </TableCell>
                                         )}
-                                        {optionalComponent}
+                                        {status && renderOptionalComponent && renderOptionalComponent(data,status)}
+
+
                                         {/* Action */}
                                         <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                                             <div className="flex gap-2">

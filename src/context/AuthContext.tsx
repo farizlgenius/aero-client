@@ -8,6 +8,8 @@ import Helper from "../utility/Helper";
 import { ToastMessage } from "../model/ToastMessage";
 import { useLocation } from "./LocationContext";
 import { LocationDto } from "../model/Location/LocationDto";
+import { FeatureDto } from "../model/Role/FeatureDto";
+import { FeatureEndpoint } from "../endpoint/FeatureEndpoint";
 
 type User = { id: string; name?: string; info?: Info; location?: number[];role?:Role  } | null;
 type Info = { title?:string; firstname?:string; middlename?:string; lastname?:string; }
@@ -19,6 +21,7 @@ interface AuthContextType {
   loading: boolean;
   signIn: (username: string, password: string) => Promise<boolean>;
   signOut: () => Promise<void>;
+  filterPermission:(FeatureId:number) => FeatureDto | undefined;
 };
 
 const AuthContext = createContext<AuthContextType|undefined>(undefined);
@@ -48,6 +51,8 @@ const doRefresh = async () => {
 } 
 
 export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) => {
+    // const [permission,setPermission] = useState<FeatureDto[]>([]);
+    let permission:FeatureDto[] = [];
     const [user,setUser] = useState<User>(null);
     // const [loading,setLoading] = useState<boolean>(true);
     const  {loading,setLoading} = useLoading();
@@ -61,6 +66,7 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
         console.log(res.data.user);
         setUser(res.data.user);
         fetchLocation(res.data.user.location)
+        fetchPermission(res.data.user.role.roleNo)
         return true;
     },[])
 
@@ -84,6 +90,15 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
         //         description:a.description
         //     }]))
         // })
+    },[])
+
+    const fetchPermission = useCallback(async (RoleId:number) => {
+        if(!getAccessToken()) return false;
+        const res = await send.get(FeatureEndpoint.GET_BY_ROLE(RoleId))
+        console.log(res.data.data)
+        if(res && res.data.data){
+            permission = res.data.data
+        }
     },[])
 
 
@@ -119,6 +134,11 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
         setUser(null);
     },[])
 
+    const filterPermission = useCallback((FeatureId:number) => {
+        console.log(permission)
+        return permission.find(s => s.componentId == FeatureId);
+    },[fetchMe])
+
 
     return (
         <AuthContext.Provider
@@ -128,6 +148,7 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
             loading,
             signIn,
             signOut,
+            filterPermission
         }}
         >
             {children}

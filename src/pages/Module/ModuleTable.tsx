@@ -78,6 +78,7 @@ export const ModuleTable: React.FC<PropsWithChildren<TableContent>> = ({ selecte
             //SignalRService.stopConnection()
         };
     }, [refresh]);
+    
     return (<>
         <div className="max-h-[70vh] overflow-y-auto hidden-scroll">
             <Table>

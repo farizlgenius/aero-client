@@ -15,6 +15,8 @@ import { RoleEndpoint } from "../../endpoint/RoleEndpoint";
 import Helper from "../../utility/Helper";
 import { RoleForm } from "../../components/form/role/RoleForm";
 import { send } from "../../api/api";
+import { useAuth } from "../../context/AuthContext";
+import { FeatureId } from "../../enum/FeatureId";
 
 
 var removeTarget: number = 0;
@@ -31,6 +33,7 @@ export const LOCATION_KEY: string[] = ["name"];
 
 export const Role = () => {
     const { toggleToast } = useToast();
+    const {filterPermission} = useAuth();
     const [create, setCreate] = useState<boolean>(false);
     const [update, setUpdate] = useState<boolean>(false);
     const [remove, setRemove] = useState(false);
@@ -169,7 +172,7 @@ export const Role = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <BaseTable<RoleDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={rolesDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} />
+                    <BaseTable<RoleDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={rolesDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} permission={filterPermission(FeatureId.OPERATOR)} />
                 </div>
 
             }
