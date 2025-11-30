@@ -1,10 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import Button from '../../components/ui/button/Button';
-import { AddIcon } from '../../icons';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import DangerModal from '../UiElements/DangerModal';
 import CardFormatForm from './CardFormatForm';
-import { CardFormatTable } from './CardFormatTable';
 import { CardFormatDto } from '../../model/CardFormat/CardFormatDto';
 import HttpRequest from '../../utility/HttpRequest';
 import Helper from '../../utility/Helper';
@@ -12,38 +9,54 @@ import { ToastMessage } from '../../model/ToastMessage';
 import { useToast } from '../../context/ToastContext';
 import { CardFormatEndpoint } from '../../endpoint/CardFormatEndpoint';
 import { HttpMethod } from '../../enum/HttpMethod';
+import { useLocation } from '../../context/LocationContext';
+import { useAuth } from '../../context/AuthContext';
+import { BaseTable } from '../UiElements/BaseTable';
+import { FeatureId } from '../../enum/FeatureId';
+import { send } from '../../api/api';
+import { FormContent } from '../../model/Form/FormContent';
+import { AddIcon } from '../../icons';
+import { BaseForm } from '../UiElements/BaseForm';
 
 
 // Define Global Variable
 let removeTarget: number = -1;
-const defaultDto: CardFormatDto = {
-    name: '',
-    componentId: 0,
-    facility: -1,
-    flags:0,
-    offset:0,
-    functionId:1,
-    bits: 0,
-    peLn: 0,
-    peLoc: 0,
-    poLn: 0,
-    poLoc: 0,
-    fcLn: 0,
-    fcLoc: 0,
-    chLn: 0,
-    chLoc: 0,
-    icLn: 0,
-    icLoc: 0,
-    uuid: '',
-    locationId: 0,
-    locationName: '',
-    isActive: false
-}
+export const CARDFORMAT_TABLE_HEAD: string[] = [
+    "Name", "Bits", "Facility", "Action"
+]
+export const CARDFORMAT_KEY: string[] = [
+    "name", "bits", "facility",
+];
 
 const CardFormat = () => {
     const { toggleToast } = useToast();
+    const { locationId } = useLocation();
+    const { filterPermission } = useAuth();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
+    const defaultDto: CardFormatDto = {
+        name: '',
+        componentId: 0,
+        facility: -1,
+        flags: 0,
+        offset: 0,
+        functionId: 1,
+        bits: 0,
+        peLn: 0,
+        peLoc: 0,
+        poLn: 0,
+        poLoc: 0,
+        fcLn: 0,
+        fcLoc: 0,
+        chLn: 0,
+        chLoc: 0,
+        icLn: 0,
+        icLoc: 0,
+        uuid: '',
+        locationId: locationId,
+        isActive: false
+    }
+
     const [cardFormatDto, setCardFormatDto] = useState<CardFormatDto>(defaultDto);
     {/* Modal */ }
     const [isRemoveModal, setIsRemoveModal] = useState(false);
@@ -90,15 +103,15 @@ const CardFormat = () => {
     {/* Group Data */ }
     const [cardFormatsDto, setCardFormatsDto] = useState<CardFormatDto[]>([]);
     const createCardformat = async () => {
-        var res = await HttpRequest.send(HttpMethod.POST,CardFormatEndpoint.CREATE_CARDFORMAT,cardFormatDto)
-        if(Helper.handleToastByResCode(res,ToastMessage.CREATE_CARD_FORMAT,toggleToast)){
+        var res = await send.post(CardFormatEndpoint.CREATE_CARDFORMAT,cardFormatDto)
+        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_CARD_FORMAT, toggleToast)) {
             setCreate(false)
             setUpdate(false)
             toggleRefresh();
         }
     }
     const fetchData = async () => {
-        var res = await HttpRequest.send(HttpMethod.GET, CardFormatEndpoint.GET_ALL_CARDFORMAT);
+        var res = await send.get(CardFormatEndpoint.GET_CARDFORMAT);
         if (res) {
             setCardFormatsDto(res.data.data);
         }
@@ -149,33 +162,23 @@ const CardFormat = () => {
             }
         }
     }
+
+    const content:FormContent[] = [
+        {
+            label:"Card Format",
+            icon:<AddIcon/>,
+            content: <CardFormatForm data={cardFormatDto} setCardFormatDto={setCardFormatDto} isUpdate={update} handleClickWithEvent={handleClick} />
+        }
+    ]
     return (
         <>
             {isRemoveModal && <DangerModal header='Remove Card Format' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             <PageBreadcrumb pageTitle="Card Format Configuration" />
             {create || update ?
-                <CardFormatForm data={cardFormatDto} setCardFormatDto={setCardFormatDto} isUpdate={update} handleClickWithEvent={handleClick} />
+                <BaseForm tabContent={content}/>
                 :
-                <div className="space-y-6">
-                    <div className="flex gap-4">
-                        <Button
-                            name='add'
-                            size="sm"
-                            variant="primary"
-                            startIcon={<AddIcon className="size-5" />}
-                            onClickWithEvent={handleClick}
-                        >
-                            Add
-                        </Button>
+                <BaseTable<CardFormatDto> headers={CARDFORMAT_TABLE_HEAD} keys={CARDFORMAT_KEY} data={cardFormatsDto} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} selectedObject={selectedObjects} handleClick={handleClick} permission={filterPermission(FeatureId.SETTING)} />
 
-                    </div>
-                    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                        <div className="max-w-full overflow-x-auto">
-                            <CardFormatTable data={cardFormatsDto} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} selectedObject={selectedObjects} />
-                        </div>
-                    </div>
-
-                </div>
             }
 
 

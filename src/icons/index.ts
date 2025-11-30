@@ -88,6 +88,11 @@ import {ReactComponent as NotiIcon} from "./noti.svg?react";
 import {ReactComponent as Info2Icon} from "./info2.svg?react";
 import {ReactComponent as RoleIcon} from "./role.svg?react";
 import {ReactComponent as EditIcon} from "./edit.svg?react";
+import {ReactComponent as OnIcon} from "./on.svg?react";
+import {ReactComponent as OffIcon} from "./off.svg?react";
+import {ReactComponent as ToggleIcon} from "./toggle.svg?react";
+import {ReactComponent as MonitorIcon} from "./monitorpoint.svg?react";
+import {ReactComponent as TimezonIcon} from "./timezone.svg?react";
 
 export {
   ErrorHexaIcon,
@@ -177,5 +182,10 @@ export {
   NotiIcon,
   Info2Icon,
   RoleIcon,
-  EditIcon
+  EditIcon,
+  OnIcon,
+  OffIcon,
+  ToggleIcon,
+  MonitorIcon,
+  TimezonIcon
 };

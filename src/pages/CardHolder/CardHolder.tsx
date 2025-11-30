@@ -2,11 +2,7 @@ import React, { useEffect, useState } from 'react'
 import DangerModal from '../UiElements/DangerModal';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import { AddIcon, BoxIcon, CamIcon } from '../../icons';
-import Button from '../../components/ui/button/Button';
 import { CardHolderDto } from '../../model/CardHolder/CardHolderDto';
-import { CardHolderTable } from './CardHolderTable';
-import HttpRequest from '../../utility/HttpRequest';
-import { HttpMethod } from '../../enum/HttpMethod';
 import { CardHolderEndpoint } from '../../endpoint/CardHolderEndpoint';
 import { useToast } from '../../context/ToastContext';
 import Helper from '../../utility/Helper';
@@ -17,57 +13,66 @@ import { AccessLevelForm } from '../../components/form/card-holder/AccessLevelFo
 import { CredentialForm } from '../../components/form/card-holder/CredentialForm';
 import { UserSettingForm } from '../../components/form/card-holder/UserSettingForm';
 import { BaseForm } from '../UiElements/BaseForm';
+import { send } from '../../api/api';
+import { useLocation } from '../../context/LocationContext';
+import { BaseTable } from '../UiElements/BaseTable';
+import { useAuth } from '../../context/AuthContext';
+import { FeatureId } from '../../enum/FeatureId';
+import { ActionButton } from '../../model/ActionButton';
 
 
 let removeTarget: string;
 
-const defaultDto: CardHolderDto = {
-    userId: '',
-    title: '',
-    firstName: '',
-    middleName: '',
-    lastName: '',
-    gender: '',
-    email: '',
-    phone: '',
-    company: '',
-    position: '',
-    department: '',
-    image: {
-        fileName: "",
-        contentType: '',
-        fileSize: 0,
-        fileData: '',
-    },
-    additionals: [
-    ],
-    credentials: [],
-    accessLevels: [],
-    uuid: '',
-    locationId: 1,
-    locationName: 'Main Location',
-    isActive: true,
-    identification: '',
-    dateOfBirth: '',
-    address: '',
-    flag: 0
-}
+const CARDHOLDER_HEAD: string[] = ["Id", "Title", "First Name", "Middle Name", "Last Name", "Status", "Action"];
+const CARDHOLDER_KEY: string[] = ["userId", "title", "firstName", "middleName", "lastName", "holderStatus"];
+
 
 const CardHolder = () => {
-
-
-    
+    const { locationId } = useLocation();
+    const { filterPermission } = useAuth();
     const { toggleToast } = useToast();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     const [cardHoldersDto, setCardHoldersDto] = useState<CardHolderDto[]>([]);
+
+    const defaultDto: CardHolderDto = {
+        userId: '',
+        title: '',
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        gender: '',
+        email: '',
+        phone: '',
+        company: '',
+        position: '',
+        department: '',
+        image: {
+            fileName: "",
+            contentType: '',
+            fileSize: 0,
+            fileData: '',
+        },
+        additionals: [
+        ],
+        credentials: [],
+        accessLevels: [],
+        uuid: '',
+        locationId: locationId,
+        isActive: true,
+        identification: '',
+        dateOfBirth: '',
+        address: '',
+        flag: 0
+    }
+
     const [cardHolderDto, setCardHolderDto] = useState<CardHolderDto>(defaultDto)
     {/* Modal */ }
     const [deleteModal, setRemoveModal] = useState<boolean>(false);
     const [createModal, setCreateModal] = useState<boolean>(false);
     const [updateModal, setUpdateModal] = useState<boolean>(false);
 
-        const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         console.log(e.currentTarget.name);
         console.log(e.currentTarget.value)
         switch (e.currentTarget.name) {
@@ -86,7 +91,7 @@ const CardHolder = () => {
         }
     }
 
-    {/* Form */}
+    {/* Form */ }
     const tabContent: FormContent[] = [
         {
             icon: <CamIcon />,
@@ -128,7 +133,7 @@ const CardHolder = () => {
 
     }
     const fetchData = async () => {
-        const res = await HttpRequest.send(HttpMethod.GET, CardHolderEndpoint.GET_CARDHOLDERS)
+        const res = await send.get(CardHolderEndpoint.GET_CARDHOLDERS(locationId));
         if (res && res.data.data) {
             setCardHoldersDto(res.data.data)
             console.log(res.data.data)
@@ -137,7 +142,7 @@ const CardHolder = () => {
     };
 
     const removeCardHolder = async (UserId: string) => {
-        const res = await HttpRequest.send(HttpMethod.DELETE, CardHolderEndpoint.DELETE_CARDHOLDER + UserId)
+        const res = await send.delete(CardHolderEndpoint.DELETE_CARDHOLDER(UserId));
         if (Helper.handleToastByResCode(res, ToastMessage.DELETE_CARDHOLDER, toggleToast)) {
             setRemoveModal(false);
             toggleRefresh();
@@ -146,7 +151,7 @@ const CardHolder = () => {
 
 
     const createCardHolder = async (data: CardHolderDto) => {
-        const res = await HttpRequest.send(HttpMethod.POST, CardHolderEndpoint.CREATE_CARDHOLDER, data)
+        const res = await send.post(CardHolderEndpoint.CREATE_CARDHOLDER, data);
         if (Helper.handleToastByResCode(res, ToastMessage.CREATE_CARDHOLDER, toggleToast)) {
             setUpdateModal(false)
             setCreateModal(false)
@@ -188,6 +193,23 @@ const CardHolder = () => {
         }
     }
 
+    const action: ActionButton[] = [
+        {
+            lable: "deactivate",
+            buttonName: "Deactivate",
+            icon: <AddIcon />
+        }, {
+            lable: "activate",
+            buttonName: "Activate",
+            icon: <AddIcon />
+        },
+        {
+            lable: "reset",
+            buttonName: "Reset Anti-Passback",
+            icon: <AddIcon />
+        }
+    ]
+
     return (
         <>
             <PageBreadcrumb pageTitle="Credentials" />
@@ -198,53 +220,9 @@ const CardHolder = () => {
 
                 :
 
-                <div className="space-y-6">
-                    <div className="flex gap-4">
-                        <Button
-                            name='add'
-                            onClickWithEvent={handleClick}
-                            size="sm"
-                            variant="primary"
-                            startIcon={<AddIcon className="size-5" />}
-                        >
-                            Create
-                        </Button>
-                        <Button
-                            name='deactivate'
-                            onClickWithEvent={handleClick}
-                            size="sm"
-                            variant="primary"
-                            startIcon={<AddIcon className="size-5" />}
-                        >
-                            Deactivate
-                        </Button>
-                        <Button
-                            name='activate'
-                            onClickWithEvent={handleClick}
-                            size="sm"
-                            variant="primary"
-                            startIcon={<AddIcon className="size-5" />}
-                        >
-                            Activate
-                        </Button>
-                        <Button
-                            name='reset'
-                            onClickWithEvent={handleClick}
-                            size="sm"
-                            variant="primary"
-                            startIcon={<AddIcon className="size-5" />}
-                        >
-                            Reset Anti-Passback
-                        </Button>
+                <BaseTable<CardHolderDto> headers={CARDHOLDER_HEAD} keys={CARDHOLDER_KEY} data={cardHoldersDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleClick={handleClick} handleRemove={handleRemove} handleEdit={handleEdit} permission={filterPermission(FeatureId.CARDHODLER)} action={action} />
 
-                    </div>
-                    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                        <div className="max-w-full overflow-x-auto">
-                            <CardHolderTable handleCheck={handleChecked} handleCheckAll={handleCheckedAll} data={cardHoldersDto} selectedObject={selectedObjects} handleEdit={handleEdit} handleRemove={handleRemove} />
-                        </div>
-                    </div>
 
-                </div>
             }
 
 

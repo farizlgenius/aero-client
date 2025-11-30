@@ -14,6 +14,8 @@ import { HttpMethod } from "../../enum/HttpMethod";
 import { ModuleEndpoint } from "../../endpoint/ModuleEndpoint";
 import { MonitorPointEndpoint } from "../../endpoint/MonitorPointEndpoint";
 import { HardwareEndpoint } from "../../endpoint/HardwareEndpoint";
+import { send } from "../../api/api";
+import { useLocation } from "../../context/LocationContext";
 
 
 
@@ -26,7 +28,7 @@ interface MonitorPointForm {
 
 
 const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handleClick, data, setMonitorPointDto }) => {
-
+  const {locationId} = useLocation();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMonitorPointDto((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
@@ -35,14 +37,14 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
   const [moduleOption, setModuleOption] = useState<Options[]>([]);
   const [controllerOption, setControllerOption] = useState<Options[]>([]);
   const [inputOption, setInputOption] = useState<Options[]>([]);
-    const [inputModeOption, setInputModeOption] = useState<Options[]>([]);
-        const [monitorPointModeOption, setMonitorPointModeOption] = useState<Options[]>([]);
+  const [inputModeOption, setInputModeOption] = useState<Options[]>([]);
+  const [monitorPointModeOption, setMonitorPointModeOption] = useState<Options[]>([]);
 
   const handleSelectChange = async (value: string, e: React.ChangeEvent<HTMLSelectElement>) => {
     setMonitorPointDto((prev) => ({ ...prev, [e.target.name]: value }))
     switch (e.target.name) {
       case "macAddress":
-        const res1 = await HttpRequest.send(HttpMethod.GET, ModuleEndpoint.GET_SIO_BY_MAC + value);
+        const res1 = await send.get(ModuleEndpoint.GET_MODULE_BY_MAC(value))
         if (res1?.data.data) {
           res1.data.data.map((a: ModuleDto) => {
             setModuleOption((prev) => [...prev, { label: `${a.model} ( ${a.address} )`, value: a.componentId }])
@@ -70,7 +72,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
 
   {/* Controller Data */ }
   const fetchController = async () => {
-    let res = await HttpRequest.send(HttpMethod.GET, HardwareEndpoint.GET_SCP_LIST);
+    let res = await send.get(HardwareEndpoint.GET_SCP_LIST(locationId))
     if (res?.data.data) {
       res.data.data.map((a: HardwareDto) => {
         setControllerOption((prev) => [...prev, { label: a.name, value: a.macAddress }])
@@ -78,7 +80,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
     }
   }
 
-    const fetchInputMode = async () => {
+  const fetchInputMode = async () => {
     let res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.GET_IP_MODE);
     if (res?.data.data) {
       res.data.data.map((a: ModeDto) => {
@@ -87,7 +89,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
     }
   }
 
-      const fetchMonitorPointMode = async () => {
+  const fetchMonitorPointMode = async () => {
     let res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.GET_MP_MODE);
     if (res?.data.data) {
       res.data.data.map((a: ModeDto) => {
@@ -105,8 +107,9 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
   }, []);
 
   return (
-    <ComponentCard title="Add Monitor Point">
-      <div className="space-y-6 max-h-[60vh] overflow-y-auto overflow-y-auto hidden-scroll">
+
+    <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+      <div className="space-y-6">
         <div>
           <Label htmlFor="name">Monitor Point Name</Label>
           <Input value={data.name} name="name" type="text" id="name" onChange={handleChange} />
@@ -114,7 +117,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
         <div>
           <Label>Controller</Label>
           <Select
-          isString={true}
+            isString={true}
             name="macAddress"
             options={controllerOption}
             placeholder="Select Option"
@@ -146,22 +149,22 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
           />
         </div>
         <div>
-        <div>
-          <Label>Input Mode</Label>
-          <Select
-            name="inputMode"
-            options={inputModeOption}
-            placeholder="Select Option"
-            onChangeWithEvent={handleSelectChange}
-            className="dark:bg-dark-900"
-            defaultValue={data.inputMode}
-          />
-        </div>
+          <div>
+            <Label>Input Mode</Label>
+            <Select
+              name="inputMode"
+              options={inputModeOption}
+              placeholder="Select Option"
+              onChangeWithEvent={handleSelectChange}
+              className="dark:bg-dark-900"
+              defaultValue={data.inputMode}
+            />
+          </div>
 
         </div>
         <div>
           <Label className="pb-3">Monitor Point Mode</Label>
-                    <Select
+          <Select
             name="monitorPointMode"
             options={monitorPointModeOption}
             placeholder="Select Option"
@@ -185,7 +188,9 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
           <Button name="cancle" onClickWithEvent={handleClick} variant="danger" className="w-50" size="sm">Cancle</Button>
         </div>
       </div>
-    </ComponentCard>
+    </div>
+
+
   );
 }
 

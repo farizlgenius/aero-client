@@ -24,30 +24,7 @@ export const DOOR_KEY: string[] = ["name"];
 export const DoorTable: React.FC<PropsWithChildren<TableContent>> = ({ selectedObject, data, statusDto, handleEdit, handleRemove, handleCheck, handleCheckAll,setStatus }) => {
         const [refresh, setRefresh] = useState(false);
         const toggleRefresh = () => setRefresh(!refresh);
-    useEffect(() => {
-        var connection = SignalRService.getConnection();
-                connection.on(
-                    "AcrStatus",
-                    (ScpMac: string, AcrNo: number, AcrMode: string, AccessPointStatus: string) => {
-                        console.log(ScpMac)
-                        console.log(AcrNo)
-                        console.log(AcrMode)
-                        console.log(AccessPointStatus)
-                        setStatus((prev) =>
-                            prev.map((a) =>
-                                a.macAddress == ScpMac && a.componentId == AcrNo ? {
-                                    ...a,
-                                    status: AccessPointStatus == "" ? a.status : AccessPointStatus,
-                                    tamper: AcrMode == "" ? a.tamper : AcrMode
-                                } : {
-                                    ...a
-                                }
-                            )
-                        )
-                        toggleRefresh();
-                    }
-                );
-    },[refresh])
+
     return (
         <>
             <div className="max-h-[70vh] overflow-y-auto hidden-scroll">

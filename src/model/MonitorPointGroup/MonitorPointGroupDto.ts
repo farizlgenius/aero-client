@@ -1,5 +1,5 @@
 import { BaseDto } from "../BaseDto";
 
-export interface MonitorPointDto extends BaseDto{
+export interface MonitorPointGroupDto extends BaseDto{
 
 }

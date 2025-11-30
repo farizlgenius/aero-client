@@ -1,49 +1,58 @@
 import React, { useEffect, useState } from 'react'
-import { AddIcon } from '../../icons';
-import Button from '../../components/ui/button/Button';
+import {  CalenderIcon } from '../../icons';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import DangerModal from '../UiElements/DangerModal';
 import HttpRequest from '../../utility/HttpRequest';
 import HolidayForm from './HolidayForm';
 import Helper from '../../utility/Helper';
 import { HolidayDto } from '../../model/Holiday/HolidayDto';
-import { HolidayTable } from './HolidayTable';
 import { useToast } from '../../context/ToastContext';
 import { CreateHolidayDto } from '../../model/Holiday/CreateHolidayDto';
 import { ToastMessage } from '../../model/ToastMessage';
 import { HolidayEndpoint } from '../../endpoint/HolidayEndpoint';
 import { HttpMethod } from '../../enum/HttpMethod';
+import { send } from '../../api/api';
+import { useLocation } from '../../context/LocationContext';
+import { useAuth } from '../../context/AuthContext';
+import { BaseTable } from '../UiElements/BaseTable';
+import { FeatureId } from '../../enum/FeatureId';
+import { BaseForm } from '../UiElements/BaseForm';
+import { FormContent } from '../../model/Form/FormContent';
 
 // Define Global Variable
 let removeTarget: number;
-const defaultDto: HolidayDto = {
-    uuid:"",
-    locationId:1,
-    locationName:"Main Location",
-    isActive:true,
-    componentId: -1,
-    year: 0,
-    month: 0,
-    day: 0,
-    extend:0,
-    typeMask: 0
-}
+// Holiday Page 
+export const Hol_TABLE_HEAD: string[] = ["Day", "Month", "Year", "Action"]
+export const Hol_KEY: string[] = ["day", "month", "year"];
 
 const Holiday = () => {
     const { toggleToast } = useToast();
+    const { locationId } = useLocation();
+    const { filterPermission } = useAuth();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
-    const [holidatDto,setHolidayDto] = useState<HolidayDto>(defaultDto)
+    const defaultDto: HolidayDto = {
+        uuid: "",
+        locationId: locationId,
+        isActive: true,
+        componentId: -1,
+        year: 0,
+        month: 0,
+        day: 0,
+        extend: 0,
+        typeMask: 0
+    }
+    const [holidatDto, setHolidayDto] = useState<HolidayDto>(defaultDto)
     {/* Modal */ }
-    const [isRemoveModal, setIsRemoveModal] = useState(false);
-    const [createModal, setCreateModal] = useState<boolean>(false);
-    const [updateModal, setUpdateModal] = useState<boolean>(false);
+    const [remove, setRemove] = useState(false);
+    const [create, setCreate] = useState<boolean>(false);
+    const [update, setUpdate] = useState<boolean>(false);
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
-                setCreateModal(true);
+                setCreate(true);
                 break;
             case "create":
                 createHoliday(holidatDto)
@@ -52,8 +61,8 @@ const Holiday = () => {
                 updateHoliday(holidatDto);
                 break;
             case "close":
-                setCreateModal(false);
-                setUpdateModal(false);
+                setCreate(false);
+                setUpdate(false);
                 break;
             default:
                 break;
@@ -61,33 +70,33 @@ const Holiday = () => {
     }
 
     {/* handle Table Action */ }
-    const handleEdit = (data:HolidayDto) => {
+    const handleEdit = (data: HolidayDto) => {
         setHolidayDto(data)
-        setUpdateModal(true);
+        setUpdate(true);
     }
 
     const handleRemove = (data: HolidayDto) => {
         console.log(data);
         removeTarget = data.componentId;
-        setIsRemoveModal(true);
+        setRemove(true);
     }
     const handleOnClickCloseRemove = () => {
-        setIsRemoveModal(false);
+        setRemove(false);
     }
     const handleOnClickConfirmRemove = () => {
-        setIsRemoveModal(false);
+        setRemove(false);
         removeHoliday();
     }
 
     const createHoliday = async (data: CreateHolidayDto) => {
-        const res = await HttpRequest.send(HttpMethod.POST, HolidayEndpoint.POST_HOL, data)
-        if(Helper.handleToastByResCode(res,ToastMessage.CREATE_HOL,toggleToast)) setCreateModal(false);
+        const res = await send.post(HolidayEndpoint.POST_HOL, data);
+        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_HOL, toggleToast)) setCreate(false);
         toggleRefresh();
     }
 
-    const updateHoliday = async (data:HolidayDto) => {
-        const res = await HttpRequest.send(HttpMethod.PUT,HolidayEndpoint.PUT_HOL,data)
-         if(Helper.handleToastByResCode(res,ToastMessage.UPDATE_HOL,toggleToast)) setUpdateModal(false);
+    const updateHoliday = async (data: HolidayDto) => {
+        const res = await send.put(HolidayEndpoint.POST_HOL, data);
+        if (Helper.handleToastByResCode(res, ToastMessage.UPDATE_HOL, toggleToast)) setUpdate(false);
         toggleRefresh();
     }
 
@@ -103,8 +112,8 @@ const Holiday = () => {
 
     const removeHoliday = async () => {
         const res = await HttpRequest.send(HttpMethod.DELETE, HolidayEndpoint.DELETE_HOL + removeTarget)
-        if(Helper.handleToastByResCode(res,ToastMessage.DELETE_HOL,toggleToast))
-        toggleRefresh();
+        if (Helper.handleToastByResCode(res, ToastMessage.DELETE_HOL, toggleToast))
+            toggleRefresh();
 
 
     }
@@ -143,38 +152,24 @@ const Holiday = () => {
             }
         }
     }
+    const content: FormContent[] = [
+        {
+            label: "Holiday",
+            icon: <CalenderIcon />,
+            content: <HolidayForm isUpdate={update} setHolidayDto={setHolidayDto} handleClickWithEvent={handleClick} data={holidatDto} />
+        }
+    ]
     return (
         <>
-            {isRemoveModal && <DangerModal header='Remove Holiday' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {remove && <DangerModal header='Remove Holiday' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             <PageBreadcrumb pageTitle="Holiday" />
-            {createModal || updateModal ?
-             
-             <HolidayForm isUpdate={updateModal} setHolidayDto={setHolidayDto} handleClickWithEvent={handleClick} data={holidatDto} />
-             :
-                         <div className="space-y-6">
-                <div className="flex gap-4">
-                    <Button
-                        name='add'
-                        size="sm"
-                        variant="primary"
-                        startIcon={<AddIcon className="size-5" />}
-                        onClickWithEvent={handleClick}
-                    >
-                        Add
-                    </Button>
+            {create || update ?
+                <BaseForm tabContent={content} />
+                :
+                <BaseTable headers={Hol_TABLE_HEAD} keys={Hol_KEY} data={holidaysDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} permission={filterPermission(FeatureId.TIME)} />
 
-                </div>
-                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                    <div className="max-w-full overflow-x-auto">
 
-                        <HolidayTable selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} data={holidaysDto}/>
-
-                    </div>
-                </div>
-
-            </div>
-             
-             }
+            }
 
         </>
     )

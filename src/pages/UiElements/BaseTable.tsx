@@ -3,8 +3,6 @@ import Search from "../../components/ui/table/Search";
 import { TableProp } from "../../model/TableProp";
 import { PaginationNew } from "../../components/ui/table/PaginationNew";
 import { EditIcon, Info2Icon, TrashBinIcon } from "../../icons";
-import React, { JSX } from "react";
-import { StatusDto } from "../../model/StatusDto";
 
 interface PageProp {
     pageNumber: number;

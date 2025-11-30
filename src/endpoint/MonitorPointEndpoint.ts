@@ -1,11 +1,14 @@
-export enum MonitorPointEndpoint {
-    GET_MP_LIST = '/api/v1/MonitorPoint',
-    POST_ADD_MP = '/api/v1/MonitorPoint',
-    GET_MP_STATUS = '/api/v1/MonitorPoint/status/',
-    DELETE_MP = '/api/v1/MonitorPoint/',
-    GET_IP_LIST = "/api/v1/MonitorPoint/ip/",
-    POST_MASK = "/api/v1/MonitorPoint/mask",
-    POST_UNMASK = "/api/v1/MonitorPoint/unmask",
-    GET_IP_MODE = "/api/v1/MonitorPoint/input/mode",
-    GET_MP_MODE = "/api/v1/MonitorPoint/mode"
-}
+const API_VERSION = import.meta.env.VITE_API_VERSION;
+const CONTROLLER = `MonitorPoint`;
+
+export const MonitorPointEndpoint = {
+    GET_MP_LIST:(locationId:number)=> `/api/${API_VERSION}/${locationId}/${CONTROLLER}`,
+    POST_ADD_MP : `/api/${API_VERSION}/${CONTROLLER}`,
+    GET_MP_STATUS : `/api/${API_VERSION}/${CONTROLLER}/status/`,
+    DELETE_MP : `/api/${API_VERSION}/${CONTROLLER}/`,
+    GET_IP_LIST : `/api/${API_VERSION}/${CONTROLLER}/ip/`,
+    POST_MASK : `/api/${API_VERSION}/${CONTROLLER}/mask`,
+    POST_UNMASK : `/api/${API_VERSION}/${CONTROLLER}/unmask`,
+    GET_IP_MODE : `/api/${API_VERSION}/${CONTROLLER}/input/mode`,
+    GET_MP_MODE : `/api/${API_VERSION}/${CONTROLLER}/mode`
+} as const;

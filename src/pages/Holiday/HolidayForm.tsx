@@ -1,7 +1,5 @@
 import React, { PropsWithChildren } from 'react'
 
-import ComponentCard from '../../components/common/ComponentCard';
-
 import DatePicker from '../../components/form/date-picker';
 import Button from '../../components/ui/button/Button';
 import { HolidayDto } from '../../model/Holiday/HolidayDto';
@@ -22,7 +20,8 @@ interface AddHolodayProps {
 const HolidayForm: React.FC<PropsWithChildren<AddHolodayProps>> = ({ isUpdate, setHolidayDto, handleClickWithEvent, data }) => {
   // Alert Modal 
   return (
-    <ComponentCard>
+
+    <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="flex flex-col gap-6 items-center">
         <div>
           <div className='w-100'>
@@ -52,8 +51,9 @@ const HolidayForm: React.FC<PropsWithChildren<AddHolodayProps>> = ({ isUpdate, s
           </div>
         </div >
       </div >
+    </div>
 
-    </ComponentCard >
+
   )
 }
 

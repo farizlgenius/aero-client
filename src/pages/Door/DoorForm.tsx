@@ -32,6 +32,8 @@ import { MonitorPointEndpoint } from '../../endpoint/MonitorPointEndpoint';
 import { ControlPointEndpoint } from '../../endpoint/ControlPointEndpoint';
 import { TimeZoneEndPoint } from '../../endpoint/TimezoneEndpoint';
 import { CardFormatEndpoint } from '../../endpoint/CardFormatEndpoint';
+import { useLocation } from '../../context/LocationContext';
+import { send } from '../../api/api';
 
 
 
@@ -45,13 +47,23 @@ enum FormTab {
   General, Inside, Outside, Strike, Antipassback, Monitor, Advance, Mode
 }
 
-var defaultRequestExit: RequestExitDto = {
+
+
+const active = "inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 ease-in-out sm:p-3 text-brand-500 dark:bg-brand-400/20 dark:text-brand-400 bg-brand-50 text-brand-500 dark:bg-brand-400/20 dark:text-brand-400 bg-brand-50";
+const inactive = "inline-flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200 ease-in-out sm:p-3 bg-transparent text-gray-500 border-transparent hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+
+const DoorForm: React.FC<PropsWithChildren<DoorFormProps>> = ({ handleClick, data, setDoorDto }) => {
+  {/* In */ }
+  const [insideType, setInsideType] = useState<string>(DeviceType.None);
+  const [readerInFlag, setReaderInFlag] = useState<boolean>(false);
+  const [readerInType, setReaderInType] = useState<string>(ReaderType.Wiegand)
+  const {locationId} = useLocation();
+  var defaultRequestExit: RequestExitDto = {
   // base 
   uuid: "",
   componentId: -1,
   macAddress: "",
-  locationId: 1,
-  locationName: "Main Location",
+  locationId: locationId,
   isActive: true,
 
   // Detail
@@ -67,8 +79,7 @@ var defaultReader: ReaderDto = {
   uuid: "",
   componentId: -1,
   macAddress: "",
-  locationId: 1,
-  locationName: "Main Location",
+  locationId: locationId,
   isActive: true,
 
   // Detail
@@ -84,15 +95,6 @@ var defaultReader: ReaderDto = {
   osdpBaudrate: 0x00,
   osdpSecureChannel: 0x00
 }
-
-const active = "inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 ease-in-out sm:p-3 text-brand-500 dark:bg-brand-400/20 dark:text-brand-400 bg-brand-50 text-brand-500 dark:bg-brand-400/20 dark:text-brand-400 bg-brand-50";
-const inactive = "inline-flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200 ease-in-out sm:p-3 bg-transparent text-gray-500 border-transparent hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-
-const DoorForm: React.FC<PropsWithChildren<DoorFormProps>> = ({ handleClick, data, setDoorDto }) => {
-  {/* In */ }
-  const [insideType, setInsideType] = useState<string>(DeviceType.None);
-  const [readerInFlag, setReaderInFlag] = useState<boolean>(false);
-  const [readerInType, setReaderInType] = useState<string>(ReaderType.Wiegand)
   const handleInsideDeviceType = (value: string) => {
     setInsideType(value);
     if (value == DeviceType.Reader) {
@@ -157,7 +159,7 @@ const DoorForm: React.FC<PropsWithChildren<DoorFormProps>> = ({ handleClick, dat
   {/* Reader Module */ }
   const [moduleOption, setModuleOption] = useState<Options[]>([]);
   const fetchModule = async (value: string) => {
-    const res = await HttpRequest.send(HttpMethod.GET, ModuleEndpoint.GET_SIO_BY_MAC + value);
+    const res = await send.get(ModuleEndpoint.GET_MODULE_BY_MAC(value));
     if (res && res.data.data) {
       res.data.data.map((a: ModuleDto) => {
         setModuleOption((prev) => [...prev, {
@@ -173,7 +175,7 @@ const DoorForm: React.FC<PropsWithChildren<DoorFormProps>> = ({ handleClick, dat
   const [controllerOption, setControllerOption] = useState<Options[]>([]);
 
   const fetchScp = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET, HardwareEndpoint.GET_SCP_LIST)
+    const res = await send.get(HardwareEndpoint.GET_SCP_LIST(locationId));
     Logger.info(res)
     if (res && res.data.data) {
       setController(res.data.data);
@@ -445,7 +447,7 @@ const DoorForm: React.FC<PropsWithChildren<DoorFormProps>> = ({ handleClick, dat
   };
 
   const fetchCardFormat = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET, CardFormatEndpoint.GET_ALL_CARDFORMAT)
+    const res = await send.get(CardFormatEndpoint.GET_CARDFORMAT);
     if (res && res.data.data) {
       res.data.data.map((a: CardFormatDto) => {
         setFormatsOption(prev => [...prev, {
@@ -499,9 +501,9 @@ const DoorForm: React.FC<PropsWithChildren<DoorFormProps>> = ({ handleClick, dat
   }, [])
 
   return (
-    <ComponentCard title="Add Doors">
 
-      <div className="flex flex-col gap-6 sm:flex-row sm:gap-8">
+    <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+      <div className="flex flex-col gap-6 sm:flex-row sm:gap-8 w-3/4">
         <div className="flex-1 overflow-x-auto pb-2 sm:w-[200px]">
           <nav className="flex w-full flex-row sm:flex-col sm:space-y-2">
             <button value={FormTab.General} className={activeTab === FormTab.General ? active : inactive} onClick={handleOnTabClick}>
@@ -1184,7 +1186,7 @@ const DoorForm: React.FC<PropsWithChildren<DoorFormProps>> = ({ handleClick, dat
                             defaultChecked={false}
                             onChange={(checked: boolean) => setDoorDto(prev => ({ ...prev, accessControlFlags: checked ? prev.accessControlFlags | d.value : prev.accessControlFlags & (~d.value) }))}
                           />
-                          
+
                         </div>)}
                       </div>
                       <div className='flex-1'>
@@ -1208,7 +1210,10 @@ const DoorForm: React.FC<PropsWithChildren<DoorFormProps>> = ({ handleClick, dat
           </div>
         </div>
       </div>
-    </ComponentCard>
+
+    </div>
+
+
   )
 }
 

@@ -15,12 +15,12 @@ import { TableCell } from "../../components/ui/table";
 import Badge from "../../components/ui/badge/Badge";
 
 const MODULE_TABLE_HEADER: string[] = [
-  "Address", "Model", "Tamper", "AC", "Battery", "Status", "Action"
+  "Model","Address", "Tamper", "AC", "Battery", "Status", "Action"
 ]
 
 // Define Keys
 const MODULE_KEY: string[] = [
-  "address", "model",
+   "model","address"
 ]
 
 

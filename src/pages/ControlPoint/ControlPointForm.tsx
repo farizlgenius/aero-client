@@ -14,6 +14,8 @@ import { HardwareEndpoint } from "../../endpoint/HardwareEndpoint";
 import { HttpMethod } from "../../enum/HttpMethod";
 import { ControlPointEndpoint } from "../../endpoint/ControlPointEndpoint";
 import { ModuleEndpoint } from "../../endpoint/ModuleEndpoint";
+import api, { send } from "../../api/api";
+import { useLocation } from "../../context/LocationContext";
 
 
 interface AddCpformProp {
@@ -24,6 +26,7 @@ interface AddCpformProp {
 
 
 const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleClick, data, setOutputDto }) => {
+  const {locationId} = useLocation();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setOutputDto(prev => ({ ...prev, [e.target.name]: e.target.value }))
   }
@@ -51,21 +54,21 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
 
   {/* Controller Data */ }
   const fetchController = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET, HardwareEndpoint.GET_SCP_LIST);
-    if (res) {
+    const res = await send.get(HardwareEndpoint.GET_SCP_LIST(locationId));
+    if (res && res.data.data) {
       res.data.data.map((a: HardwareDto) => {
         setControllerOption(prev => [...prev, {
           label: a.name,
           value: a.macAddress
         }])
       })
-
     }
   }
 
   const fetchRelayMode = async () => {
-    let res = await HttpRequest.send(HttpMethod.GET, ControlPointEndpoint.GET_RELAY_OP_MODE);
-    if (res) {
+
+    let res = await api.get(ControlPointEndpoint.GET_RELAY_OP_MODE);
+    if (res && res.data.data) {
       res.data.data.map((a: ModeDto) => {
         setRelyModeOption((prev) => [...prev, {
           label: a.description,
@@ -73,8 +76,9 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
         }]);
       });
     }
-    res = await HttpRequest.send(HttpMethod.GET, ControlPointEndpoint.GET_OFFLINE_OP_MODE);
-    if (res) {
+
+    res = await send.get(ControlPointEndpoint.GET_OFFLINE_OP_MODE);
+    if (res && res.data.data) {
       res.data.data.map((a: ModeDto) => {
         setOfflineModeOption((prev) => [...prev, {
           label: a.description,
@@ -86,7 +90,7 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
   }
 
   const fetchModuleByMac = async (value: string) => {
-    var res = await HttpRequest.send(HttpMethod.GET, ModuleEndpoint.GET_SIO_BY_MAC + value);
+    const res = await send.get(ModuleEndpoint.GET_MODULE_BY_MAC(value));
     if (res) {
       res.data.data.map((a: ModuleDto) => {
         setModuleOption((prev) => [...prev, {
@@ -116,7 +120,7 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
   }, []);
 
   return (
-    <ComponentCard title="Add Control Point">
+    <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       <div className="space-y-6">
         <div>
           <Label htmlFor="name">Control Point Name</Label>
@@ -191,7 +195,8 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
           <Button name="close" className="w-50" variant="danger" size="sm" onClickWithEvent={handleClick}>Cancle </Button>
         </div>
       </div>
-    </ComponentCard>
+    </div>
+
   );
 }
 

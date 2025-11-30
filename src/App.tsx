@@ -52,6 +52,7 @@ import { useAuth } from "./context/AuthContext";
 import { LocationModal } from "./components/form/location/LocationModal";
 import { useLoading } from "./context/LoadingContext";
 import { useLocation } from "./context/LocationContext";
+import { MonitorPointGroup } from "./pages/MonitorPointGroup/MonitorPointGroup";
 
 
 export default function App() {
@@ -208,7 +209,7 @@ export default function App() {
             <Route path="/led" element={<Led />} />
             <Route path="/holiday" element={<Holiday />} />
             <Route path="/interval" element={<Interval />} />
-            <Route path="/monitorgroup" element={<Interval />} />
+            <Route path="/monitorgroup" element={<MonitorPointGroup />} />
             <Route path="/role" element={<Role />} />
             <Route path="/operator" element={<Operator />} />
 
