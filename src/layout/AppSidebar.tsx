@@ -109,7 +109,7 @@ const navItems: NavItem[] = [
     componentId: 12,
     icon: <TriggerIcon />,
     name: "Trigger & Procedure",
-    subItems: [{ name: "Time Zone", path: "/timezone", }, { name: "Holiday", path: "/holiday", }, { name: "Interval", path: "/interval", }],
+    subItems: [{ name: "Trigger", path: "/trigger", }, { name: "Procedure", path: "/procedure", }],
   },
   {
     componentId: 13,

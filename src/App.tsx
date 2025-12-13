@@ -19,12 +19,11 @@ import Home from "./pages/Dashboard/Home";
 
 // ACS
 import Module from "./pages/Module/Module";
-import Event from "./pages/Event/Event";
+import Transaction from "./pages/Transaction/Transaction";
 import ControlPoint from "./pages/ControlPoint/ControlPoint";
 import MonitorPoint from "./pages/MonitorPoint/MonitorPoint";
 import Hardware from "./pages/Hardware/Hardware";
 import PopupExample from "./pages/UiElements/PopupExample";
-import AccessGroup from "./pages/AccessGroup/AccessGroup";
 import Door from "./pages/Door/Door";
 import CardHolder from "./pages/CardHolder/CardHolder";
 import TimeZone from "./pages/TimeZone/TimeZone";
@@ -52,7 +51,10 @@ import { useAuth } from "./context/AuthContext";
 import { LocationModal } from "./components/form/location/LocationModal";
 import { useLoading } from "./context/LoadingContext";
 import { useLocation } from "./context/LocationContext";
-import { MonitorPointGroup } from "./pages/MonitorPointGroup/MonitorPointGroup";
+import { MonitorGroup } from "./pages/MonitorGroup/MonitorGroup";
+import AccessLevel from "./pages/AccessGroup/AccessLevel";
+import { Procedure } from "./pages/Procedure/Procedure";
+import { Trigger } from "./pages/Trigger/Trigger";
 
 
 export default function App() {
@@ -60,7 +62,7 @@ export default function App() {
   const { signIn } = useAuth();
   const { show,locationId } = useLocation();
   const { showAlertFlag, alertSuccessFlag, alertMessage } = useAlert();
-  const { showToast, setShowToast, toastMessage, toastType } = useToast();
+  const { showToast ,ToastContainer } = useToast();
   const { loading, Loading } = useLoading();
   const [isResetShow, setIsResetShow] = useState<boolean>(false);
   const [isUploadShow, setIsUploadShow] = useState<boolean>(false);
@@ -116,10 +118,6 @@ export default function App() {
       navigate("/license")
     }
 
-    SignalRService.getConnection();
-    return () => {
-      SignalRService.stopConnection();
-    };
   }, [])
 
   return (
@@ -133,12 +131,13 @@ export default function App() {
         }
         {showToast && (
           <>
-            <Toast
+            {/* <Toast
               type={toastType}
               message={toastMessage}
-              duration={3000}
+              duration={300000}
               onClose={() => setShowToast(false)}
-            />
+            /> */}
+            <ToastContainer/>
           </>
 
         )}
@@ -194,14 +193,14 @@ export default function App() {
             <Route index path="/" element={<Home />} />
             {/* ACS */}
             <Route path="/location" element={<Location />} />
-            <Route path="/hardware" element={<Hardware onUploadClick={toggleIsUploadShow} />} />
+            <Route path="/hardware" element={<Hardware />} />
             <Route path="/module" element={<Module />} />
-            <Route path="/event" element={<Event />} />
+            <Route path="/event" element={<Transaction />} />
             <Route path="/control" element={<ControlPoint />} />
             <Route path="/monitor" element={<MonitorPoint />} />
             <Route path="/popup" element={<PopupExample />} />
             <Route path="/door" element={<Door />} />
-            <Route path="/level" element={<AccessGroup />} />
+            <Route path="/level" element={<AccessLevel />} />
             <Route path="/area" element={<Area />} />
             <Route path="/timezone" element={<TimeZone />} />
             <Route path="/cardholder" element={<CardHolder />} />
@@ -209,9 +208,11 @@ export default function App() {
             <Route path="/led" element={<Led />} />
             <Route path="/holiday" element={<Holiday />} />
             <Route path="/interval" element={<Interval />} />
-            <Route path="/monitorgroup" element={<MonitorPointGroup />} />
+            <Route path="/monitorgroup" element={<MonitorGroup/>} />
             <Route path="/role" element={<Role />} />
             <Route path="/operator" element={<Operator />} />
+            <Route path="/procedure" element={<Procedure />} />
+            <Route path="/trigger" element={<Trigger />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />

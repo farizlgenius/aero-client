@@ -14,6 +14,7 @@ import { NotificationProvider } from "./context/NotificationContext.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { LoadingProvider } from "./context/LoadingContext.tsx";
 import { LocationProvider } from "./context/LocationContext.tsx";
+import { SocketProvider } from "./context/SocketContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   // <StrictMode>
@@ -26,21 +27,24 @@ createRoot(document.getElementById("root")!).render(
   <ThemeProvider>
     <BrowserRouter>
       <AppWrapper>
-        <LoadingProvider>
-          <ToastProvider>
-            <LocationProvider>
-              <AuthProvider>
-                <NotificationProvider>
-                  <PopupProvider>
-                    <AlertProvider>
-                      <App />
-                    </AlertProvider>
-                  </PopupProvider>
-                </NotificationProvider>
-              </AuthProvider>
-            </LocationProvider>
-          </ToastProvider>
-        </LoadingProvider>
+        <SocketProvider>
+          <LoadingProvider>
+            <ToastProvider>
+              <LocationProvider>
+                <AuthProvider>
+                  <NotificationProvider>
+                    <PopupProvider>
+                      <AlertProvider>
+                        <App />
+                      </AlertProvider>
+                    </PopupProvider>
+                  </NotificationProvider>
+                </AuthProvider>
+              </LocationProvider>
+            </ToastProvider>
+          </LoadingProvider>
+        </SocketProvider>
+
       </AppWrapper>
     </BrowserRouter>
   </ThemeProvider>

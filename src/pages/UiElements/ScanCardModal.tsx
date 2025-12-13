@@ -14,6 +14,8 @@ import { HttpMethod } from '../../enum/HttpMethod';
 import { HardwareEndpoint } from '../../endpoint/HardwareEndpoint';
 import { DoorEndpoint } from '../../endpoint/DoorEndpoint';
 import { CredentialEndpoint } from '../../endpoint/CredentialEndpoint';
+import { send } from '../../api/api';
+import { useLocation } from '../../context/LocationContext';
 
 
 
@@ -29,6 +31,7 @@ interface ScanCardProps {
 
 
 const ScanCardModal:React.FC<PropsWithChildren<ScanCardProps>> = ({onStartScan}) => {
+    const {locationId} = useLocation();
     const [doorOption, setDoorOption] = useState<Options[]>([]);
     const [controllerOption, setControllerOption] = useState<Options[]>([]);
     const [spinner,setSpinner] = useState<boolean>(false);
@@ -38,7 +41,7 @@ const ScanCardModal:React.FC<PropsWithChildren<ScanCardProps>> = ({onStartScan})
     })
 
     const fetchController = async () => {
-        const res = await HttpRequest.send(HttpMethod.GET,HardwareEndpoint.GET_SCP_LIST)
+        const res = await send.get(HardwareEndpoint.GET(locationId))
         if(res && res.data.data){
             res.data.data.map((a:HardwareDto) => {
                 setControllerOption(prev => ([...prev,{
@@ -52,7 +55,7 @@ const ScanCardModal:React.FC<PropsWithChildren<ScanCardProps>> = ({onStartScan})
     }
 
     const fetchDoor = async (macAddress:string) => {
-        const res = await HttpRequest.send(HttpMethod.GET,DoorEndpoint.GET_ACR_BY_MAC+macAddress)
+        const res = await send.get(DoorEndpoint.GET_ACR_BY_MAC(macAddress))
         if(res && res.data.data){
             res.data.data.map((a:DoorDto) => {
                 setDoorOption(prev => ([...prev,{

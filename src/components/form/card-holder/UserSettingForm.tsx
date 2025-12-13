@@ -5,10 +5,16 @@ import Label from "../Label"
 import Switch from "../switch/Switch"
 import Button from "../../ui/button/Button"
 import { ModeDto } from "../../../model/ModeDto"
+import { send } from "../../../api/api"
+import { CredentialEndpoint } from "../../../endpoint/CredentialEndpoint"
 
 export const UserSettingForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({ handleClick: handleClickWithEvent,dto, setDto }) => {
       const [userFlag, setUserFlag] = useState<ModeDto[]>([])
-    const fetchUserFlag = () => {
+    const fetchUserFlag = async () => {
+        const res = await send.get(CredentialEndpoint.GET_FLAG);
+        if(res && res.data.data){
+            setUserFlag(res.data.data)
+        }
     }
     useEffect(() => {
         fetchUserFlag();
@@ -22,7 +28,7 @@ export const UserSettingForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>
                     <Switch
                         key={i}
                         label={d.name}
-                        defaultChecked={false}
+                        defaultChecked={d.value == 1 ? true : false}
                         onChange={(checked: boolean) => setDto(prev => ({ ...prev, flag: checked ? prev.flag | d.value : prev.flag & (~d.value) }))}
                     />
                 </div>)}

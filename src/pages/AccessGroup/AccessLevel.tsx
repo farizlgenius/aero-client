@@ -1,40 +1,51 @@
 import Button from '../../components/ui/button/Button';
-import { AddIcon } from '../../icons';
+import { AddIcon, GroupIcon } from '../../icons';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
 import DangerModal from '../UiElements/DangerModal';
-import AccessGroupForm from './AccessGroupForm';
-import { AccessGroupDto } from '../../model/AccessGroup/AccessGroupDto';
+import AccessLevelForm from './AccessLevelForm';
+import { AccessLevelDto } from '../../model/AccessGroup/AccessLevelDto';
 import { AccessGroupTable } from './AccessGroupTable';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import HttpRequest from '../../utility/HttpRequest';
 import Helper from '../../utility/Helper';
 import { ToastMessage } from '../../model/ToastMessage';
 import { useToast } from '../../context/ToastContext';
-import { HttpMethod } from '../../enum/HttpMethod';
-import { AccessLevelEndPoint } from '../../constants/constant';
-import { CreateUpdateAccessGroupDto } from '../../model/AccessGroup/CreateUpdateAccessGroupDto';
+import { CreateUpdateAccessLevelDto } from '../../model/AccessGroup/CreateUpdateAccessLevelDto';
+import { useLocation } from '../../context/LocationContext';
+import { send } from '../../api/api';
+import { AccessLevelEndPoint } from '../../endpoint/AccessLevelEndpoint';
+import { BaseTable } from '../UiElements/BaseTable';
+import { useAuth } from '../../context/AuthContext';
+import { FeatureId } from '../../enum/FeatureId';
+import { BaseForm } from '../UiElements/BaseForm';
+import { FormContent } from '../../model/Form/FormContent';
 
 // Define Global Variable
 let removeTarget: number;
 
+// Access Group Page 
+export const HEADER: string[] = [
+    "Name","Action"
+]
 
-const defaultDto: CreateUpdateAccessGroupDto = {
+export const KEY: string[] = [
+    "name"
+];
+
+const AccessLevel = () => {
+    const {toggleToast} = useToast();
+    const {locationId} = useLocation();
+    const {filterPermission} = useAuth();
+    const defaultDto: CreateUpdateAccessLevelDto = {
     // Detail
     name: "",
     createUpdateAccessLevelDoorTimeZoneDto: [],
     componentId: 0,
     uuid: '',
-    locationId: 1,
-    locationName: 'Main Location',
+    locationId: locationId,
     isActive: false
 }
-
-
-const AccessGroup = () => {
-    const {toggleToast} = useToast();
-    const [accessGroupDto, setAccessGroupDto] = useState<CreateUpdateAccessGroupDto>(defaultDto);
-    const [accessGroupDtos, setAccessGroupDtos] = useState<AccessGroupDto[]>([]);
+    const [accesLevelDto, setAccessLevelDto] = useState<CreateUpdateAccessLevelDto>(defaultDto);
+    const [accessLevelDtos, setAccessLevelDtos] = useState<AccessLevelDto[]>([]);
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     {/* Modal */ }
@@ -69,7 +80,7 @@ const AccessGroup = () => {
 
     }
 
-    const handleRemove = (data: AccessGroupDto) => {
+    const handleRemove = (data: AccessLevelDto) => {
         removeTarget = data.componentId;
         setIsRemoveModal(true);
     }
@@ -83,15 +94,15 @@ const AccessGroup = () => {
 
     {/* Group Data */ }
     const fetchData = async () => {
-        const res = await HttpRequest.send(HttpMethod.GET, AccessLevelEndPoint.GET_ACCESS_LEVEL)
+        const res = await send.get(AccessLevelEndPoint.GET_ACCESS_LEVEL(locationId))
         if (res && res.data.data) {
             console.log(res.data.data)
-            setAccessGroupDtos(res.data.data);
+            setAccessLevelDtos(res.data.data);
         }
     };
 
     const createAccessGroup = async () => {
-        const res = await HttpRequest.send(HttpMethod.POST,AccessLevelEndPoint.CREATE_ACCESS_LEVEL,accessGroupDto)
+        const res = await send.post(AccessLevelEndPoint.CREATE_ACCESS_LEVLE,accesLevelDto)
         if(Helper.handleToastByResCode(res,ToastMessage.CREATE_ACCESS_LEVEL,toggleToast)){
             setCreateModal(false)
             toggleRefresh();
@@ -99,7 +110,7 @@ const AccessGroup = () => {
     }
 
     const removeAccessLevel = async (ComponentId:number) => {
-        const res = await HttpRequest.send(HttpMethod.DELETE,AccessLevelEndPoint.DELETE_ACCESS_LEVEL+ComponentId)
+        const res = await send.delete(AccessLevelEndPoint.DELETE_ACCESS_LEVEL(ComponentId));
         if(Helper.handleToastByResCode(res,ToastMessage.DELETE_ACCESS_LEVEL,toggleToast)){
             setIsRemoveModal(false)
             toggleRefresh()
@@ -115,8 +126,8 @@ const AccessGroup = () => {
     }, [refresh]);
 
     {/* checkBox */ }
-    const [selectedObjects, setSelectedObjects] = useState<AccessGroupDto[]>([]);
-    const handleCheckedAll = (data: AccessGroupDto[], e: React.ChangeEvent<HTMLInputElement>) => {
+    const [selectedObjects, setSelectedObjects] = useState<AccessLevelDto[]>([]);
+    const handleCheckedAll = (data: AccessLevelDto[], e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(data)
         console.log(e.target.checked)
         if (setSelectedObjects) {
@@ -128,7 +139,7 @@ const AccessGroup = () => {
         }
     }
 
-    const handleChecked = (data: AccessGroupDto, e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChecked = (data: AccessLevelDto, e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(data)
         console.log(e.target.checked)
         if (setSelectedObjects) {
@@ -142,38 +153,26 @@ const AccessGroup = () => {
         }
     }
 
+    const tabContent:FormContent[] = [
+        {
+            label: "Access Level",
+            icon: <GroupIcon />,
+            content: <AccessLevelForm data={accesLevelDto} isUpdate={updateModal} handleClickWithEvent={handleClick} setAccessGroupDto={setAccessLevelDto} />
+        }
+    ]
+
     return (
         <>
             <PageBreadcrumb pageTitle="Access Group" />
             {isRemoveModal && <DangerModal header='Remove Control Point' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             {createModal || updateModal ?
-                <AccessGroupForm data={accessGroupDto} isUpdate={updateModal} handleClickWithEvent={handleClick} setAccessGroupDto={setAccessGroupDto} />
+                <BaseForm tabContent={tabContent} />
                 :
-                <div className="space-y-6">
-                    <div className="flex gap-4">
-                        <Button
-                            name="add"
-                            onClickWithEvent={handleClick}
-                            size="sm"
-                            variant="primary"
-                            startIcon={<AddIcon className="size-5" />}
-                        >
-                            Create
-                        </Button>
-
-                    </div>
-                    <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
-                        <div className="max-w-full overflow-x-auto">
-                            <AccessGroupTable data={accessGroupDtos} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} selectedObject={selectedObjects} />
-
-                        </div>
-                    </div>
-
-                </div>
+                 <BaseTable<AccessLevelDto> headers={HEADER} keys={KEY} data={accessLevelDtos} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} selectedObject={selectedObjects} permission={filterPermission(FeatureId.ACCESSLEVEL)}/>
             }
 
         </>
     )
 }
 
-export default AccessGroup
+export default AccessLevel

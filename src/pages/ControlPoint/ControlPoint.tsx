@@ -60,13 +60,8 @@ const ControlPoint = () => {
         };
         setRemoveModal(true);
     }
-    const handleOnClickCloseRemove = () => {
-        setRemoveModal(false);
-    }
-    const handleOnClickConfirmRemove = () => {
-        removeControlPoint();
 
-    }
+
     {/* Output Data */ }
     const defaultDto: ControlPointDto = {
         name: "",
@@ -145,7 +140,6 @@ const ControlPoint = () => {
 
     {/* UseEffect */ }
     useEffect(() => {
-        fetchData();
         // Initialize SignalR as soon as app starts
         var connection = SignalRService.getConnection();
         connection.on("CpStatus",
@@ -174,7 +168,11 @@ const ControlPoint = () => {
             //SignalRService.stopConnection()
         };
 
-    }, [refresh]);
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+    }, [refresh])
 
 
 
@@ -193,8 +191,11 @@ const ControlPoint = () => {
                 setCreate(false);
                 setUpdate(false);
                 break;
-            case "remove":
-                console.log(status);
+            case "remove-cancel":
+                setRemoveModal(false);
+                break;
+            case "remove-confirm":
+                removeControlPoint();
                 break;
             case "on":
                 console.log(selectedObjects);
@@ -245,8 +246,6 @@ const ControlPoint = () => {
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<ControlPointDto[]>([]);
     const handleCheckedAll = (data: ControlPointDto[], e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
         if (setSelectedObjects) {
             if (e.target.checked) {
                 setSelectedObjects(data);
@@ -318,7 +317,7 @@ const ControlPoint = () => {
 
     return (
         <>
-            {removeModal && <DangerModal header='Remove Control Point' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {removeModal && <DangerModal header='Remove Control Point' body='Please Click Confirm if you want to remove this Control Point' handleClick={handleClick} />}
             <PageBreadcrumb pageTitle="Control Point" />
             {
                 create || update

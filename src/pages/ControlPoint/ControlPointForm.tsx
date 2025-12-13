@@ -54,7 +54,7 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
 
   {/* Controller Data */ }
   const fetchController = async () => {
-    const res = await send.get(HardwareEndpoint.GET_SCP_LIST(locationId));
+    const res = await send.get(HardwareEndpoint.GET(locationId));
     if (res && res.data.data) {
       res.data.data.map((a: HardwareDto) => {
         setControllerOption(prev => [...prev, {

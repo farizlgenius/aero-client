@@ -1,4 +1,4 @@
-export interface CreateUpdateAccessGroupDoorTimezone{
+export interface CreateUpdateAccessLevelDoorTimezone{
     doorId:number;
     doorName:string;
     doorMacAddress:string;

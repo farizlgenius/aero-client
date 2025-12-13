@@ -52,12 +52,9 @@ const MonitorPoint = () => {
         removeTarget = { componentId: data.componentId, macAddress: data.macAddress };
         setIsRemoveModal(true);
     }
-    const handleOnClickCloseRemove = () => {
-        setIsRemoveModal(false);
-    }
+
     const handleOnClickConfirmRemove = () => {
-        removeMonitorPoint();
-        toggleRefresh();
+
     }
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         let res;
@@ -92,11 +89,20 @@ const MonitorPoint = () => {
                     }
                 })
                 break;
+            case "remove-confirm":
+                        removeMonitorPoint();
+        toggleRefresh();
+                break;
+                            case "remove-cancel":
+                                setIsRemoveModal(false);
+                break;
+            default:
+                break;
         }
     }
 
     const createMonitorPoint = async () => {
-        const res = await send.post(MonitorPointEndpoint.POST_ADD_MP);
+        const res = await send.post(MonitorPointEndpoint.POST_ADD_MP,monitorPointDto);
         if (Helper.handleToastByResCode(res, ToastMessage.CREATE_MP, toggleToast)) {
             setUpdate(false);
             setCreate(false);
@@ -201,7 +207,6 @@ const MonitorPoint = () => {
 
     {/* UseEffect */ }
     useEffect(() => {
-        fetchData();
         // Initialize SignalR as soon as app starts
         var connection = SignalRService.getConnection();
         connection.on("MpStatus",
@@ -226,10 +231,14 @@ const MonitorPoint = () => {
                 );
                 toggleRefresh();
             });
-        return () => {
+                    return () => {
             //SignalRService.stopConnection()
         };
-    }, [refresh]);
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+    },[refresh])
 
     const renderOptionalComponent = (data: any, statusDto: StatusDto[]) => {
         return [
@@ -273,7 +282,7 @@ const MonitorPoint = () => {
 
     return (
         <>
-            {isRemoveModal && <DangerModal header='Remove Monitor Point' body='Please Click Confirm if you want to remove this Monitor Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {isRemoveModal && <DangerModal header='Remove Monitor Point' body='Please Click Confirm if you want to remove this Monitor Point' handleClick={handleClick}/>}
             <PageBreadcrumb pageTitle="Monitor Point" />
             {create || update ?
                 <BaseForm tabContent={tabContent} />

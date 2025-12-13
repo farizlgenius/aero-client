@@ -46,12 +46,6 @@ export enum IdReportEndPoint {
 // SIO
 
 
-// Access Level
-export enum AccessLevelEndPoint {
-    GET_ACCESS_LEVEL = '/api/v1/AccessLevel',
-    CREATE_ACCESS_LEVEL = '/api/v1/AccessLevel',
-    DELETE_ACCESS_LEVEL = '/api/v1/AccessLevel/'
-}
 
 
 

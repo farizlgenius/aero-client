@@ -1,7 +1,13 @@
 import React, { createContext, useContext, useState } from "react";
-import { PopupContextInterface } from "../constants/types";
 
-
+interface PopupContextInterface {
+  showPopupFlag:boolean;
+  setShowPopupFlag:React.Dispatch<React.SetStateAction<boolean>>;
+  popupSuccessFlag:boolean;
+  setPopupSuccessFlag:React.Dispatch<React.SetStateAction<boolean>>;
+  popUpMessage:string[];
+  setPopUpMessage:React.Dispatch<React.SetStateAction<string[]>>;
+};
 
 // Create context
 const PopupContext = createContext<PopupContextInterface | null>(null);

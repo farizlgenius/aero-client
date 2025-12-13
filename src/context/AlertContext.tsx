@@ -1,8 +1,14 @@
 import { createContext, useContext, useState } from "react"
-import { AlertContextInterface } from "../constants/types";
 
 
-
+interface AlertContextInterface {
+  showAlertFlag:boolean;
+  setShowAlertFlag:React.Dispatch<React.SetStateAction<boolean>>;
+  alertSuccessFlag:boolean;
+  setAlertSuccessFlag:React.Dispatch<React.SetStateAction<boolean>>;
+  alertMessage?:string;
+  setAlertMessage?:React.Dispatch<React.SetStateAction<string>>;
+}
 
 // Create Context 
 const AlertContext = createContext<AlertContextInterface | null>(null);

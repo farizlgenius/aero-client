@@ -10,31 +10,36 @@ import { CredentialDto } from "../../../model/CardHolder/CredentialDto";
 import ScanCardModal from "../../../pages/UiElements/ScanCardModal";
 import Modals from "../../../pages/UiElements/Modals";
 import SignalRService from "../../../services/SignalRService";
+import { useLocation } from "../../../context/LocationContext";
 
 
-var defaultCredential: CredentialDto = {
+
+export const CredentialForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({ dto, setDto }) => {
+    const {locationId} = useLocation();    
+    var defaultCredential: CredentialDto = {
     componentId: 0,
     bits: 0,
     issueCode: 0,
     facilityCode: -1,
     cardNo: 0,
-    pin: 0,
+    pin: "",
     activeDate: new Date().toISOString(),
     deactiveDate: new Date(new Date().setFullYear(new Date().getFullYear() + 10)).toISOString(),
-    accessLevels: [],
     uuid: '',
-    locationId: 1,
-    locationName: 'Main Location',
+    locationId: locationId,
     isActive: true
 }
 
-export const CredentialForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({ dto, setDto }) => {
     const [addCardForm, setAddCardForm] = useState<boolean>(false);
     const [scanCard, setScanCard] = useState<boolean>(false);
     const [credentialDto, setCredentialDto] = useState<CredentialDto>(defaultCredential);
     const handleCredentialChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if(e.currentTarget.name == "pin"){
+            setCredentialDto(prev => ({ ...prev, [e.target.name]: String(e.target.value) }))
+        }
         setCredentialDto(prev => ({ ...prev, [e.target.name]: e.target.value }))
     }
+    
     const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         switch (e.currentTarget.name) {
             case "addCard":
@@ -46,6 +51,11 @@ export const CredentialForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>
                 setCredentialDto(defaultCredential)
                 setAddCardForm(false);
                 break;
+            case "close":
+                setScanCard(false)
+                break;
+                default:
+                    break;
 
         }
 
@@ -154,6 +164,7 @@ export const CredentialForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>
                                             <Label>Pin</Label>
                                             <Input
                                                 name="pin"
+                                                type="number"
                                                 onChange={handleCredentialChange}
                                                 value={credentialDto.pin}
                                             />

@@ -2,29 +2,32 @@ import { PropsWithChildren, useEffect, useState } from "react";
 import { FormProp } from "../../../model/Form/FormProp";
 import { CardHolderDto } from "../../../model/CardHolder/CardHolderDto";
 import ActionElement from "../../../pages/UiElements/ActionElement";
-import { AccessGroupDto } from "../../../model/AccessGroup/AccessGroupDto";
+import { AccessLevelDto } from "../../../model/AccessGroup/AccessLevelDto";
 import Button from "../../ui/button/Button";
 import Select from "../Select";
 import Label from "../Label";
 import HttpRequest from "../../../utility/HttpRequest";
 import { HttpMethod } from "../../../enum/HttpMethod";
-import { AccessLevelEndPoint } from "../../../constants/constant";
 import { Options } from "../../../model/Options";
+import { useLocation } from "../../../context/LocationContext";
+import { send } from "../../../api/api";
+import { AccessLevelEndPoint } from "../../../endpoint/AccessLevelEndpoint";
 
-var defaultAccessLevel: AccessGroupDto = {
+
+export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({ dto, setDto }) => {
+    const {locationId} = useLocation();
+    var defaultAccessLevel: AccessLevelDto = {
     name: '',
     componentId: -1,
     accessLevelDoorTimeZoneDto: [],
     uuid: '',
-    locationId: 1,
-    locationName: 'Main Location',
+    locationId: locationId,
     isActive: true
 }
 
-export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({ dto, setDto }) => {
     const [addAccessLeveForm, setAddAccessLeveForm] = useState<boolean>(false);
     const [accessLevelOption, setAccessLevelOption] = useState<Options[]>([]);
-    const [accessGroupDto, setAccessGroupDto] = useState<AccessGroupDto>(defaultAccessLevel);
+    const [accessGroupDto, setAccessGroupDto] = useState<AccessLevelDto>(defaultAccessLevel);
 
     const handleClickAccessLevel = () => {
         setAddAccessLeveForm(true);
@@ -54,9 +57,9 @@ export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>
     }
 
     const fetchAccessLevel = async () => {
-        const res = await HttpRequest.send(HttpMethod.GET, AccessLevelEndPoint.GET_ACCESS_LEVEL)
+        const res = await send.get(AccessLevelEndPoint.GET_ACCESS_LEVEL(locationId))
         if (res && res.data.data) {
-            res.data.data.map((a: AccessGroupDto) => {
+            res.data.data.map((a: AccessLevelDto) => {
                 setAccessLevelOption(prev => ([...prev, {
                     label: a.name,
                     value: a.componentId,
@@ -119,7 +122,7 @@ export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>
 
                                 <div className='flex flex-col gap-1'>
                                     {/* Card */}
-                                    {dto.accessLevels.map((a: AccessGroupDto, i: number) => (
+                                    {dto.accessLevels.map((a: AccessLevelDto, i: number) => (
                                         <div key={i} className="p-3 bg-white border border-gray-200 task rounded-xl shadow-theme-sm dark:border-gray-800 dark:bg-white/5">
                                             <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
                                                 <div className="flex items-start w-full gap-4">

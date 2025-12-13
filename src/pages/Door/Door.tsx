@@ -23,6 +23,8 @@ import { useAuth } from '../../context/AuthContext';
 import { FeatureId } from '../../enum/FeatureId';
 import { BaseForm } from '../UiElements/BaseForm';
 import { FormContent } from '../../model/Form/FormContent';
+import { TableCell } from '../../components/ui/table';
+import Badge from '../../components/ui/badge/Badge';
 
 // Define Global Variable
 let removeTarget: DoorDto;
@@ -237,6 +239,12 @@ const Door = () => {
                     changeDoorMode(a.macAddress, a.componentId, 1);
                 })
                 break;
+            case "remove-confirm":
+                removeDoors(removeTarget.macAddress, removeTarget.componentId);
+                break;
+            case "remove-cancel":
+                setIsRemoveModal(false);
+                break;
             default:
                 break;
         }
@@ -261,13 +269,6 @@ const Door = () => {
         console.log(data);
         removeTarget = data;
         setIsRemoveModal(true);
-    }
-    const handleOnClickCloseRemove = () => {
-        setIsRemoveModal(false);
-    }
-    const handleOnClickConfirmRemove = () => {
-        removeDoors(removeTarget.macAddress, removeTarget.componentId);
-
     }
 
     {/* Door Data */ }
@@ -325,8 +326,6 @@ const Door = () => {
     }
     {/* UseEffect */ }
     useEffect(() => {
-
-        fetchData();
         var connection = SignalRService.getConnection();
         connection.on(
             "AcrStatus",
@@ -350,7 +349,11 @@ const Door = () => {
             }
         );
 
-    }, [refresh]);
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+    },[refresh])
 
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<DoorDto[]>([]);
@@ -413,15 +416,38 @@ const Door = () => {
         }
     ]
 
+    const filterComponet = (data:any,statusDto:StatusDto[]) => {
+        return [
+            <>
+                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                    <>
+                        <Badge size="sm" color="dark">{statusDto.find(b => b.componentId == data.componentId)?.tamper}</Badge>
+                    </>
+                </TableCell>
+                <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                    <>
+                        {statusDto.find(b => b.componentId == data.componentId)?.status === "Secure" ? (
+                            <Badge size="sm" color="success">{statusDto.find(b => b.componentId == data.componentId)?.status}</Badge>
+                        ) : statusDto.find(b => b.componentId == data.componentId)?.status === "Forced Open" || statusDto.find(b => b.componentId == data.componentId)?.status === "Locked" ? (
+                            <Badge size="sm" color="error">{statusDto.find(b => b.componentId == data.componentId)?.status}</Badge>
+                        ) : (
+                            <Badge size="sm" color="warning">{statusDto.find(b => b.componentId == data.componentId)?.status === 0 ? "Error" : statusDto.find(b => b.componentId == data.componentId)?.status}</Badge>
+                        )}
+                    </>
+                </TableCell>
+            </>
+        ]
+    }
+
     return (
         <>
-            {isRemoveModal && <DangerModal header='Remove Door' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {isRemoveModal && <DangerModal header='Remove Door' body='Please Click Confirm if you want to remove this Control Point' handleClick={handleClick} />}
             <PageBreadcrumb pageTitle="Doors" />
             {createModal || updateModal ?
                 <BaseForm tabContent={content} />
 
                 :
-                <BaseTable<DoorDto> headers={DOOR_TABLE_HEADER} keys={DOOR_KEY} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleClick={handleClick} handleEdit={handleEdit} handleRemove={handleRemove} data={doorsDto} status={status} action={action} permission={filterPermission(FeatureId.DOOR)} />
+                <BaseTable<DoorDto> headers={DOOR_TABLE_HEADER} keys={DOOR_KEY} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleClick={handleClick} handleEdit={handleEdit} handleRemove={handleRemove} data={doorsDto} status={status} action={action} permission={filterPermission(FeatureId.DOOR)} renderOptionalComponent={filterComponet}/>
 
             }
 

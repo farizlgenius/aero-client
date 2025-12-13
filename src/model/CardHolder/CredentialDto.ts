@@ -1,4 +1,3 @@
-import { AccessGroupDto } from "../AccessGroup/AccessGroupDto";
 import { NoMacBaseDto } from "../NoMacBaseDto";
 
 export interface CredentialDto extends NoMacBaseDto{
@@ -7,8 +6,7 @@ export interface CredentialDto extends NoMacBaseDto{
     issueCode:number;
     facilityCode:number;
     cardNo:number;
-    pin:number;
+    pin:string;
     activeDate:string;
     deactiveDate:string;
-    accessLevels:AccessGroupDto[];
 }

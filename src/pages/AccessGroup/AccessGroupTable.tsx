@@ -1,7 +1,17 @@
 import { PropsWithChildren } from "react";
-import { AccessGroupDto } from "../../model/AccessGroup/AccessGroupDto";
+import { AccessLevelDto } from "../../model/AccessGroup/AccessLevelDto";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../components/ui/table";
 
+
+
+interface TableContent {
+    data: AccessLevelDto[]
+    handleEdit: (data: AccessLevelDto) => void
+    handleRemove: (data: AccessLevelDto) => void
+    handleCheck: (data: AccessLevelDto, e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleCheckAll: (data: AccessLevelDto[], e: React.ChangeEvent<HTMLInputElement>) => void;
+    selectedObject: AccessLevelDto[];
+}
 // Access Group Page 
 export const ACCESSGROUP_TABLE_HEAD: string[] = [
     "Name","Action"
@@ -10,16 +20,6 @@ export const ACCESSGROUP_TABLE_HEAD: string[] = [
 export const ACCESSGROUP_KEY: string[] = [
     "name"
 ];
-
-interface TableContent {
-    data: AccessGroupDto[]
-    handleEdit: (data: AccessGroupDto) => void
-    handleRemove: (data: AccessGroupDto) => void
-    handleCheck: (data: AccessGroupDto, e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleCheckAll: (data: AccessGroupDto[], e: React.ChangeEvent<HTMLInputElement>) => void;
-    selectedObject: AccessGroupDto[];
-}
-
 
 export const AccessGroupTable: React.FC<PropsWithChildren<TableContent>> = ({ data,handleEdit,handleCheckAll,handleCheck,handleRemove,selectedObject }) => {
     return (
@@ -44,7 +44,7 @@ export const AccessGroupTable: React.FC<PropsWithChildren<TableContent>> = ({ da
                         </TableRow>
                     </TableHeader>
                     <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                        {data && data.map((data: AccessGroupDto, i: number) => (
+                        {data && data.map((data: AccessLevelDto, i: number) => (
                             <TableRow key={i}>
                                 <TableCell className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                                     <input checked={selectedObject?.includes(data)} type="checkbox" onChange={(e) => handleCheck(data, e)} />

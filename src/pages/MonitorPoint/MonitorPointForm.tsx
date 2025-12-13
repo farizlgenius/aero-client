@@ -72,7 +72,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
 
   {/* Controller Data */ }
   const fetchController = async () => {
-    let res = await send.get(HardwareEndpoint.GET_SCP_LIST(locationId))
+    let res = await send.get(HardwareEndpoint.GET(locationId))
     if (res?.data.data) {
       res.data.data.map((a: HardwareDto) => {
         setControllerOption((prev) => [...prev, { label: a.name, value: a.macAddress }])

@@ -8,7 +8,7 @@ export const DoorEndpoint = {
     POST_ACR_UNLOCK:(mac:string,acrNo:number) => `/api/${API_VERSION}/${CONTROLLER}/unlock/${mac}/${acrNo}`,
     POST_ADD_ACR : `/api/${API_VERSION}/${CONTROLLER}`,
     GET_ACCESS_READER_MODE : `/api/${API_VERSION}/${CONTROLLER}/reader/mode`,
-    GET_ACR_BY_MAC : `/api/${API_VERSION}/${CONTROLLER}/`,
+    GET_ACR_BY_MAC :(mac:string)=> `/api/${API_VERSION}/${CONTROLLER}/${mac}`,
     GET_ACR_STATUS:(mac:string,acrNo:number) => `/api/${API_VERSION}/${CONTROLLER}/status/${mac}/${acrNo}`,
     GET_ACR_READER : `/api/${API_VERSION}/${CONTROLLER}/reader/`,
     GET_STRK_MODE : `/api/${API_VERSION}/${CONTROLLER}/strike/mode`,

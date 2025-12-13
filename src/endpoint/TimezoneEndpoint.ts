@@ -1,8 +1,11 @@
-// Time Zone
-export enum TimeZoneEndPoint {
-    GET_TZ_LIST = "/api/v1/TimeZone",
-    GET_TZ_BY_ID = "/api/v1/TimeZone/",
-    DELETE_TZ = "/api/v1/TimeZone/",
-    POST_ADD_TZ = "/api/v1/TimeZone",
-    GET_MODE_TZ = "/api/v1/TimeZone/mode"
-}
+const API_VERSION = import.meta.env.VITE_API_VERSION;
+const CONTROLLER = 'TimeZone'
+
+
+export const TimeZoneEndPoint = {
+    GET_TZ_LIST : `/api/${API_VERSION}/${CONTROLLER}`,
+    GET_TZ_BY_ID : `/api/${API_VERSION}/${CONTROLLER}/`,
+    DELETE_TZ : `/api/${API_VERSION}/${CONTROLLER}/`,
+    POST_ADD_TZ : `/api/${API_VERSION}/${CONTROLLER}`,
+    GET_MODE_TZ : `/api/${API_VERSION}/${CONTROLLER}/mode`
+} as const;

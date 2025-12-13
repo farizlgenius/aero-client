@@ -63,7 +63,7 @@ const CardHolder = () => {
         identification: '',
         dateOfBirth: '',
         address: '',
-        flag: 0
+        flag: 1
     }
 
     const [cardHolderDto, setCardHolderDto] = useState<CardHolderDto>(defaultDto)
@@ -86,6 +86,12 @@ const CardHolder = () => {
                 setUpdateModal(false)
                 setCreateModal(false)
                 break;
+            case "remove-confirm":
+                removeCardHolder(removeTarget);
+                break;
+                case "remove-cancel":
+                    setRemoveModal(false);
+                    break;
             default:
                 break;
         }
@@ -124,13 +130,6 @@ const CardHolder = () => {
         console.log(data);
         removeTarget = data.userId;
         setRemoveModal(true);
-    }
-    const handleOnClickCloseRemove = () => {
-        setRemoveModal(false);
-    }
-    const handleOnClickConfirmRemove = () => {
-        removeCardHolder(removeTarget);
-
     }
     const fetchData = async () => {
         const res = await send.get(CardHolderEndpoint.GET_CARDHOLDERS(locationId));
@@ -213,7 +212,7 @@ const CardHolder = () => {
     return (
         <>
             <PageBreadcrumb pageTitle="Credentials" />
-            {deleteModal && <DangerModal header='Remove Credentials' body='Please Click Confirm if you want to remove this users' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {deleteModal && <DangerModal header='Remove Credentials' body='Please Click Confirm if you want to remove this users' handleClick={handleClick} />}
             {createModal || updateModal ?
 
                 <BaseForm tabContent={tabContent} />

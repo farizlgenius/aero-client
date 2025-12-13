@@ -5,6 +5,7 @@ export enum ToastMessage{
     UPLOAD_SCP = "Upload Hardware",
     GET_SCP_STATUS = "Get Hardware Status",
     GET_SCP_LIST = "Get Hardware List",
+    GET_SCP_STRUCTURE = "Get Hardware Structure",
     CREATE_HARDWARE = "Create Hardware",
     GET_ID_REPORT_LIST = "Get Id Report List",
     CREATE_CP = "Control Point Created",
@@ -44,4 +45,7 @@ export enum ToastMessage{
     CREATE_AREA = "Create Area",
     CREATE_LOCATION = "Create Location",
     LOGIN = "Login",
+    CREATE_MP_GROUP = "Create Monitor Group",
+    DELETE_PROCEDURE = "Delete Procedure",
+    POST_MONITOR_GROUP_COMMAND = "Monitor Group Command",
 }

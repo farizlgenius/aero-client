@@ -175,7 +175,7 @@ var defaultReader: ReaderDto = {
   const [controllerOption, setControllerOption] = useState<Options[]>([]);
 
   const fetchScp = async () => {
-    const res = await send.get(HardwareEndpoint.GET_SCP_LIST(locationId));
+    const res = await send.get(HardwareEndpoint.GET(locationId));
     Logger.info(res)
     if (res && res.data.data) {
       setController(res.data.data);

@@ -4,34 +4,33 @@ import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Button from "../../components/ui/button/Button";
 import Select from "../../components/form/Select";
-import { AccessGroupDto } from "../../model/AccessGroup/AccessGroupDto";
 import { Options } from "../../model/Options";
-import HttpRequest from "../../utility/HttpRequest";
 import { DoorDto } from "../../model/Door/DoorDto";
 import { TimeZoneDto } from "../../model/TimeZone/TimeZoneDto";
-import { AccessLevelDoorTimeZoneDto } from "../../model/AccessGroup/AccessLevelDoorTimeZoneDto";
-import { HttpMethod } from "../../enum/HttpMethod";
 import { TimeZoneEndPoint } from "../../endpoint/TimezoneEndpoint";
 import { DoorEndpoint } from "../../endpoint/DoorEndpoint";
-import { CreateUpdateAccessGroupDto } from "../../model/AccessGroup/CreateUpdateAccessGroupDto";
-import { CreateUpdateAccessGroupDoorTimezone } from "../../model/AccessGroup/CreateUpdateAccessGroupDoorTimezone";
+import { CreateUpdateAccessLevelDto } from "../../model/AccessGroup/CreateUpdateAccessLevelDto";
+import { CreateUpdateAccessLevelDoorTimezone } from "../../model/AccessGroup/CreateUpdateAccessLevelDoorTimezone";
 import Helper from "../../utility/Helper";
+import { send } from "../../api/api";
+import { useLocation } from "../../context/LocationContext";
 
 
 
 interface AccessGroupFormProp {
   isUpdate: boolean,
   handleClickWithEvent: (e: React.MouseEvent<HTMLButtonElement>) => void,
-  setAccessGroupDto: React.Dispatch<React.SetStateAction<CreateUpdateAccessGroupDto>>;
-  data: CreateUpdateAccessGroupDto
+  setAccessGroupDto: React.Dispatch<React.SetStateAction<CreateUpdateAccessLevelDto>>;
+  data: CreateUpdateAccessLevelDto
 }
 
 
-const AccessGroupForm: React.FC<PropsWithChildren<AccessGroupFormProp>> = ({ isUpdate, handleClickWithEvent, setAccessGroupDto, data }) => {
+const AccessLevelForm: React.FC<PropsWithChildren<AccessGroupFormProp>> = ({ isUpdate, handleClickWithEvent, setAccessGroupDto, data }) => {
+  const { locationId } = useLocation();
   const [doorOption, setDoorOption] = useState<Options[]>([]);
   const [timeZoneOption, setTimeZoneOption] = useState<Options[]>([]);
   const [addDoorForm, setAddDoorForm] = useState<boolean>(false);
-  const [doorTimezone, setDoorTimezone] = useState<CreateUpdateAccessGroupDoorTimezone>({
+  const [doorTimezone, setDoorTimezone] = useState<CreateUpdateAccessLevelDoorTimezone>({
     doorId: -1,
     doorName: "",
     doorMacAddress: "",
@@ -45,7 +44,7 @@ const AccessGroupForm: React.FC<PropsWithChildren<AccessGroupFormProp>> = ({ isU
     console.log(e.target.name)
     switch (e.target.name) {
       case "door":
-        setDoorTimezone(prev => ({ ...prev, doorId: Number(value), doorName: doorOption.find(a => a.value === Number(value))?.label ?? "",doorMacAddress:doorOption.find(a => a.value === Number(value))?.description ?? "" }))
+        setDoorTimezone(prev => ({ ...prev, doorId: Number(value), doorName: doorOption.find(a => a.value === Number(value))?.label ?? "", doorMacAddress: doorOption.find(a => a.value === Number(value))?.description ?? "" }))
         break;
       case "timezone":
         setDoorTimezone(prev => ({ ...prev, timeZoneId: Number(value), timeZoneName: timeZoneOption.find(a => a.value === Number(value))?.label ?? "" }))
@@ -67,7 +66,7 @@ const AccessGroupForm: React.FC<PropsWithChildren<AccessGroupFormProp>> = ({ isU
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     switch (e.currentTarget.name) {
       case "addDoor":
-        setAccessGroupDto(prev => ({...prev,createUpdateAccessLevelDoorTimeZoneDto:[...prev.createUpdateAccessLevelDoorTimeZoneDto,doorTimezone]}))
+        setAccessGroupDto(prev => ({ ...prev, createUpdateAccessLevelDoorTimeZoneDto: [...prev.createUpdateAccessLevelDoorTimeZoneDto, doorTimezone] }))
         setDoorTimezone({
           doorId: -1,
           doorName: "",
@@ -75,7 +74,7 @@ const AccessGroupForm: React.FC<PropsWithChildren<AccessGroupFormProp>> = ({ isU
           timeZoneName: "",
           timeZoneId: -1,
         })
-        setDoorOption(Helper.updateOptionByValue(doorOption,doorTimezone.doorId,true))
+        setDoorOption(Helper.updateOptionByValue(doorOption, doorTimezone.doorId, true))
         setAddDoorForm(false)
         break;
       case "cancelDoor":
@@ -95,13 +94,13 @@ const AccessGroupForm: React.FC<PropsWithChildren<AccessGroupFormProp>> = ({ isU
 
   // Fetch Data
   const fetchDoor = async () => {
-    let res = await HttpRequest.send(HttpMethod.GET, DoorEndpoint.GET_ACR_LIST)
+    let res = await send.get(DoorEndpoint.GET_ACR_LIST(locationId))
     if (res && res.data.data) {
       res.data.data.map((a: DoorDto) => {
         setDoorOption(prev => ([...prev, {
           value: a.componentId,
           label: a.name,
-          description:a.macAddress,
+          description: a.macAddress,
           isTaken: false
         }]))
       })
@@ -109,7 +108,7 @@ const AccessGroupForm: React.FC<PropsWithChildren<AccessGroupFormProp>> = ({ isU
   }
 
   const fetchTimeZone = async () => {
-    let res = await HttpRequest.send(HttpMethod.GET, TimeZoneEndPoint.GET_TZ_LIST)
+    let res = await send.get(TimeZoneEndPoint.GET_TZ_LIST)
     if (res && res.data.data) {
       res.data.data.map((a: TimeZoneDto) => {
         setTimeZoneOption(prev => ([...prev, {
@@ -127,13 +126,12 @@ const AccessGroupForm: React.FC<PropsWithChildren<AccessGroupFormProp>> = ({ isU
   }, [])
 
   return (
-    <ComponentCard title="Add Access Level">
-
+    <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
       {/*sm:flex-row sm:gap-8 */}
       <div className="flex flex-col justify-center items-center gap-6 ">
         {addDoorForm ?
-          <div className='flex flex-col items-center gap-2 w-1/2'>
-            <div className="flex gap-5 w-3/4">
+          <div className='flex flex-col items-center gap-2'>
+            <div className="flex gap-5">
               <div className='flex-1'>
                 <Label>Door</Label>
                 <Select
@@ -158,7 +156,7 @@ const AccessGroupForm: React.FC<PropsWithChildren<AccessGroupFormProp>> = ({ isU
                 />
               </div>
             </div>
-            <div className="flex  flex-col w-1/5 gap-2">
+            <div className="flex gap-2">
               <Button onClickWithEvent={handleClick} name='addDoor' size='sm'>Add</Button>
               <Button onClickWithEvent={handleClick} name='cancelDoor' size='sm' variant='danger' >Cancel</Button>
 
@@ -168,7 +166,7 @@ const AccessGroupForm: React.FC<PropsWithChildren<AccessGroupFormProp>> = ({ isU
 
           :
           <>
-            <div className="flex flex-col w-1/2 gap-6">
+            <div className="flex flex-col gap-6 w-full">
               <div className='flex flex-col gap-1'>
                 <Label htmlFor="name">Name</Label>
                 <Input name="name" type="text" id="name" onChange={handleChange} value={data.name} />
@@ -184,7 +182,7 @@ const AccessGroupForm: React.FC<PropsWithChildren<AccessGroupFormProp>> = ({ isU
               </div>
 
               <div className='flex flex-col gap-1'>
-                {data.createUpdateAccessLevelDoorTimeZoneDto.map((a: CreateUpdateAccessGroupDoorTimezone, i: number) => (
+                {data.createUpdateAccessLevelDoorTimeZoneDto.map((a: CreateUpdateAccessLevelDoorTimezone, i: number) => (
                   <div key={i} className="p-3 bg-white border border-gray-200 task rounded-xl shadow-theme-sm dark:border-gray-800 dark:bg-white/5">
                     <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
                       <div className="flex items-start w-full gap-4">
@@ -216,9 +214,10 @@ const AccessGroupForm: React.FC<PropsWithChildren<AccessGroupFormProp>> = ({ isU
         }
 
       </div >
+    </div>
 
-    </ComponentCard >
+
   )
 }
 
-export default AccessGroupForm
+export default AccessLevelForm

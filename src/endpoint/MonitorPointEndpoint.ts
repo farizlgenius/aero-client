@@ -3,6 +3,7 @@ const CONTROLLER = `MonitorPoint`;
 
 export const MonitorPointEndpoint = {
     GET_MP_LIST:(locationId:number)=> `/api/${API_VERSION}/${locationId}/${CONTROLLER}`,
+    GET_MP_BY_MAC:(mac:string) =>  `/api/${API_VERSION}/${CONTROLLER}/${mac}`,
     POST_ADD_MP : `/api/${API_VERSION}/${CONTROLLER}`,
     GET_MP_STATUS : `/api/${API_VERSION}/${CONTROLLER}/status/`,
     DELETE_MP : `/api/${API_VERSION}/${CONTROLLER}/`,

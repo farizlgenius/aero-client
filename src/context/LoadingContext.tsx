@@ -1,8 +1,8 @@
 import { createContext, JSX, useContext, useState } from "react";
-import Spinner from "../pages/UiElements/Spinner";
 
 interface LoadingContextInterface {
     Loading: () => JSX.Element;
+    FlashLoading: () => JSX.Element;
     loading: boolean;
     setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -11,6 +11,18 @@ const LoadingContext = createContext<LoadingContextInterface | null>(null);
 
 export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [loading, setLoading] = useState<boolean>(true);
+    const FlashLoading = () => {
+        return (
+            <>
+                <div className="loading">
+                    <svg width="64px" height="48px">
+                        <polyline points="0.157 23.954, 14 23.954, 21.843 48, 43 0, 50 24, 64 24" id="back"></polyline>
+                        <polyline points="0.157 23.954, 14 23.954, 21.843 48, 43 0, 50 24, 64 24" id="front"></polyline>
+                    </svg>
+                </div>
+            </>
+        )
+    }
     const Loading = () => {
         return (
             <>
@@ -29,7 +41,7 @@ export const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
 
     return (
-        <LoadingContext.Provider value={{ Loading, loading, setLoading }}>
+        <LoadingContext.Provider value={{ Loading, loading, setLoading,FlashLoading }}>
             {children}
         </LoadingContext.Provider>
     )
