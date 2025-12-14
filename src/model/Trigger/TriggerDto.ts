@@ -1,4 +1,5 @@
 import { BaseDto } from "../BaseDto";
+import { TransactionCodeDto } from "../Transaction/TransactionCodeDto";
 
 export interface TriggerDto extends BaseDto {
     command:number;
@@ -6,6 +7,6 @@ export interface TriggerDto extends BaseDto {
     sourceType:number;
     sourceNumber:number;
     tranType:number;
-    codeMap:number;
+    codeMap:TransactionCodeDto[];
     timeZone:number;
 }

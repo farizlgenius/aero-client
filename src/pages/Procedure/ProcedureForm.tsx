@@ -30,7 +30,6 @@ import { MonitorGroupCommandForm } from "../../components/form/command/MonitorGr
 import { MonitorGroupEndpoint } from "../../endpoint/MonitorGroupEndpoint"
 import { MonitorGroupDto } from "../../model/MonitorGroup/MonitorGroupDto"
 import { TempDoorModeForm } from "../../components/form/command/TempDoorModeForm"
-import { DelayCommandForm } from "../../components/form/command/DelayCommandForm"
 
 export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> = ({ handleClick, dto, setDto, isUpdate }) => {
     const defaultDto: ActionDto = {
@@ -45,6 +44,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
         arg6: 0,
         arg7: 0,
         strArg: "",
+        delayTime:0,
         uuid: "",
         componentId: 0,
         macAddress: "",
@@ -153,8 +153,6 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
                 return <MonitorGroupCommandForm options={mpg} handleClickIn={handleClickIn} action={action} setAction={setAction}/>
             case 24:
                 return <TempDoorModeForm options={door} handleClickIn={handleClickIn} action={action} setAction={setAction}/>
-            case 127:
-                return <DelayCommandForm options={[]} handleClickIn={handleClickIn} action={action} setAction={setAction}/>
                 default:
                 return <></>
         }
@@ -284,7 +282,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
                 <>
                     <div>
                         <Label>Name</Label>
-                        <Input type="text" placeholder="Procedure name" onChange={handleChange} />
+                        <Input name="name" type="text" placeholder="Procedure name" onChange={handleChange} />
                     </div>
                     <div className="flex flex-col gap-2">
                         <div className="flex justify-end">

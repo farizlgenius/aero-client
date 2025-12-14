@@ -12,4 +12,5 @@ export interface ActionDto extends BaseDto {
     arg6:number;
     arg7:number;
     strArg:string;
+    delayTime:number;
 }

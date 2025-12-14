@@ -8,6 +8,7 @@ import Label from "../Label";
 import Select from "../Select";
 import { DoorIcon } from "../../../icons";
 import Button from "../../ui/button/Button";
+import Input from "../input/InputField";
 
 export const DoorModeForm:React.FC<PropsWithChildren<CommandFormInterface>> = ({action,setAction,handleClickIn,options}) => {
     const [doorMode,setDoorMode] = useState<Options[]>([]);
@@ -40,6 +41,10 @@ export const DoorModeForm:React.FC<PropsWithChildren<CommandFormInterface>> = ({
             <div>
                 <Label htmlFor='mode'>Mode</Label>
                 <Select name="arg2" options={doorMode} onChange={(value:string) => setAction(prev => ({...prev,arg2:Number(value)}))} />
+            </div>
+            <div>
+                <Label htmlFor='time'>Time Delay (Second)</Label>
+                <Input min="0" name="time" type="number" defaultValue={action.delayTime} onChange={(e) => setAction(prev => ({ ...prev, delayTime: Number(e.target.value) }))} />
             </div>
             <div className="flex justify-center gap-3">
                 <Button name="add" onClick={handleClickIn} className="flex-1" variant="primary" >Add</Button>

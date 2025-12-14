@@ -4,6 +4,7 @@ import Label from "../Label";
 import Select from "../Select";
 import { DoorIcon } from "../../../icons";
 import Button from "../../ui/button/Button";
+import Input from "../input/InputField";
 
 export const MomentUnlockForm:React.FC<PropsWithChildren<CommandFormInterface>> = ({action,setAction,options,handleClickIn}) => {
     return (
@@ -12,6 +13,11 @@ export const MomentUnlockForm:React.FC<PropsWithChildren<CommandFormInterface>> 
                 <Label>Doors</Label>
                 <Select icon={<DoorIcon />} options={options} name={"arg1"} defaultValue={action.arg1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),macAddress:options.find(x => x.value == Number(value))?.description ?? ""}))} />
             </div>
+            <div>
+                <Label htmlFor='time'>Time Delay (Second)</Label>
+                <Input min="0" name="time" type="number" defaultValue={action.delayTime} onChange={(e) => setAction(prev => ({ ...prev, delayTime: Number(e.target.value) }))} />
+            </div>
+            
             <div className="flex justify-center gap-3">
                 <Button name="add" onClick={handleClickIn} className="flex-1" variant="primary" >Add</Button>
                 <Button name="close" onClick={handleClickIn} className="flex-1" variant="danger">Cancel</Button>

@@ -18,16 +18,11 @@ import { ProcedureForm } from "./ProcedureForm";
 
 let removeObject:number = 0;
 
+const HEADERS:string[] = ["Name","Action"];
+const KEYS:string[] = ["name"];
+
 export const Procedure = () => {
-    const defaultDto:ProcedureDto = {
-        name: "",
-        Actions: [],
-        uuid: "",
-        componentId: 0,
-        macAddress: "",
-        locationId: 0,
-        isActive: false
-    }
+
     const {toggleToast} = useToast();
     const {locationId} = useLocation();
     const { filterPermission } = useAuth();
@@ -37,7 +32,17 @@ export const Procedure = () => {
     const [selectedObject,setSelectedObjects] = useState<ProcedureDto[]>([]);
     const [procedureDtos,setProcedureDtos] = useState<ProcedureDto[]>([]);
     const [refresh,setRefresh] = useState<boolean>(false);
+        const defaultDto:ProcedureDto = {
+        name: "",
+        Actions: [],
+        uuid: "",
+        componentId: 0,
+        macAddress: "",
+        locationId: locationId,
+        isActive: false
+    }
     const [dto,setDto] = useState<ProcedureDto>(defaultDto);
+    
     const toggleRefresh = () => setRefresh(prev => !prev)
 
     const handleEdit = (data:ProcedureDto) => {
@@ -61,6 +66,9 @@ export const Procedure = () => {
         switch(e.currentTarget.name){
             case "add":
                 setCreate(true)
+                break;
+            case "create":
+                createProcedure();
                 break;
             case "close":
                 setDto(defaultDto)
@@ -94,6 +102,14 @@ export const Procedure = () => {
         }
     }
 
+    const createProcedure = async () => {
+        const res = await send.post(ProcedureEndpoint.CREATE,dto)
+         if(Helper.handleToastByResCode(res,ToastMessage.DELETE_PROCEDURE,toggleToast)){
+            setCreate(false);
+            toggleRefresh();
+        }
+    }
+
     useEffect(() => {
         fetchData();
     },[])
@@ -115,7 +131,7 @@ export const Procedure = () => {
         create || update ? 
         <BaseForm tabContent={tabContent}/>
         :
-        <BaseTable<ProcedureDto> data={procedureDtos} handleEdit={handleEdit} handleRemove={handleRemove} handleCheck={handleCheck} handleCheckAll={handleCheckAll} handleClick={handleClick} selectedObject={selectedObject} permission={filterPermission(FeatureId.TRIGGER)} />
+        <BaseTable<ProcedureDto> keys={KEYS} headers={HEADERS} data={procedureDtos} handleEdit={handleEdit} handleRemove={handleRemove} handleCheck={handleCheck} handleCheckAll={handleCheckAll} handleClick={handleClick} selectedObject={selectedObject} permission={filterPermission(FeatureId.TRIGGER)} />
 
     }
 

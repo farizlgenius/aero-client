@@ -66,8 +66,8 @@ export const TempDoorModeForm:React.FC<PropsWithChildren<CommandFormInterface>> 
                 <Select name="arg3" options={unit} onChange={(value:string) => setAction(prev => ({...prev,arg3: Number(value) << 14}))} />
             </div>
             <div>
-                <Label htmlFor='time'>Time</Label>
-                <Input name="time" type="number" onChange={(e) => setAction(prev => ({...prev,arg3:prev.arg3+Number(e.target.value)}))}/>
+                <Label htmlFor='time'>Time Delay (Second)</Label>
+                <Input min="0" name="time" type="number" defaultValue={action.delayTime} onChange={(e) => setAction(prev => ({ ...prev, delayTime: Number(e.target.value) }))} />
             </div>
             <div className="flex justify-center gap-3">
                 <Button name="add" onClick={handleClickIn} className="flex-1" variant="primary" >Add</Button>

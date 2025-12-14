@@ -92,6 +92,10 @@ export const ControlCommandForm: React.FC<PropsWithChildren<CommandFormInterface
                 
             </div>
             {render(action.arg2)}
+            <div>
+                <Label htmlFor='time'>Time Delay (Second)</Label>
+                <Input min="0" name="time" type="number" defaultValue={action.delayTime} onChange={(e) => setAction(prev => ({ ...prev, delayTime: Number(e.target.value) }))} />
+            </div>
             <div className="flex justify-center gap-3">
                 <Button name="add" onClick={handleClickIn} className="flex-1" variant="primary" >Add</Button>
                 <Button name="close" onClick={handleClickIn} className="flex-1" variant="danger">Cancel</Button>

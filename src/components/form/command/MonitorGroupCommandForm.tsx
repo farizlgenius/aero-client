@@ -8,6 +8,7 @@ import { Options } from "../../../model/Options";
 import api from "../../../api/api";
 import { MonitorGroupEndpoint } from "../../../endpoint/MonitorGroupEndpoint";
 import { ModeDto } from "../../../model/ModeDto";
+import Input from "../input/InputField";
 
 export const MonitorGroupCommandForm:React.FC<PropsWithChildren<CommandFormInterface>> = ({action,setAction,handleClickIn,options}) => {
     const [command,setCommand] = useState<Options[]>([]);
@@ -36,6 +37,10 @@ export const MonitorGroupCommandForm:React.FC<PropsWithChildren<CommandFormInter
             <div>
                 <Label htmlFor='mode' >Command</Label>
                 <Select options={command} name="arg2" defaultValue={action.arg2} onChange={(value:string) => setAction(prev => ({...prev,arg2:Number(value)}))} />
+            </div>
+            <div>
+                <Label htmlFor='time'>Time Delay (Second)</Label>
+                <Input min="0" name="time" type="number" defaultValue={action.delayTime} onChange={(e) => setAction(prev => ({ ...prev, delayTime: Number(e.target.value) }))} />
             </div>
             <div className="flex justify-center gap-3">
                 <Button name="add" onClick={handleClickIn} className="flex-1" variant="primary" >Add</Button>

@@ -5,6 +5,7 @@ import Radio from "../input/Radio"
 import Label from "../Label"
 import Select from "../Select"
 import { CommandFormInterface } from "../../../model/CommandForm"
+import Input from "../input/InputField"
 
 
 export const MonitorMaskForm:React.FC<PropsWithChildren<CommandFormInterface>> = ({options,action,handleClickIn,setAction}) => {
@@ -41,6 +42,10 @@ export const MonitorMaskForm:React.FC<PropsWithChildren<CommandFormInterface>> =
                         />
                     </div>
                 </div>
+            </div>
+           <div>
+                <Label htmlFor='time'>Time Delay (Second)</Label>
+                <Input min="0" name="time" type="number" defaultValue={action.delayTime} onChange={(e) => setAction(prev => ({ ...prev, delayTime: Number(e.target.value) }))} />
             </div>
             <div className="flex justify-center gap-3">
                 <Button name="add" onClick={handleClickIn} className="flex-1" variant="primary" >Add</Button>

@@ -48,4 +48,5 @@ export enum ToastMessage{
     CREATE_MP_GROUP = "Create Monitor Group",
     DELETE_PROCEDURE = "Delete Procedure",
     POST_MONITOR_GROUP_COMMAND = "Monitor Group Command",
+    CREATE_TRIGGER = "Create Trigger",
 }
