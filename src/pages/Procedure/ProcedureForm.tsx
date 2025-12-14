@@ -13,19 +13,32 @@ import { ActionDto } from "../../model/Procedure/ActionDto"
 import { HardwareEndpoint } from "../../endpoint/HardwareEndpoint"
 import { useLocation } from "../../context/LocationContext"
 import { HardwareDto } from "../../model/Hardware/HardwareDto"
-import Radio from "../../components/form/input/Radio"
 import Button from "../../components/ui/button/Button"
 import { MonitorPointEndpoint } from "../../endpoint/MonitorPointEndpoint"
 import { MonitorPointDto } from "../../model/MonitorPoint/MonitorPointDto"
-import { MonitorIcon } from "../../icons"
+import { ControlPointEndpoint } from "../../endpoint/ControlPointEndpoint"
+import { ControlPointDto } from "../../model/ControlPoint/ControlPointDto"
+import { MonitorMaskForm } from "../../components/form/command/MonitorMaskForm"
+import { ControlCommandForm } from "../../components/form/command/ControlCommandForm"
+import { DoorModeForm } from "../../components/form/command/DoorModeForm"
+import { DoorEndpoint } from "../../endpoint/DoorEndpoint"
+import { MomentUnlockForm } from "../../components/form/command/MomentUnlockForm"
+import { TimezoneControlForm } from "../../components/form/command/TimezoneControlForm"
+import { TimeZoneEndPoint } from "../../endpoint/TimezoneEndpoint"
+import { TimeZoneDto } from "../../model/TimeZone/TimeZoneDto"
+import { MonitorGroupCommandForm } from "../../components/form/command/MonitorGroupCommandForm"
+import { MonitorGroupEndpoint } from "../../endpoint/MonitorGroupEndpoint"
+import { MonitorGroupDto } from "../../model/MonitorGroup/MonitorGroupDto"
+import { TempDoorModeForm } from "../../components/form/command/TempDoorModeForm"
+import { DelayCommandForm } from "../../components/form/command/DelayCommandForm"
 
 export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> = ({ handleClick, dto, setDto, isUpdate }) => {
     const defaultDto: ActionDto = {
         scpId: -1,
         actionType: -1,
         actionTypeDesc: "",
-        arg1: 0,
-        arg2: 0,
+        arg1: -1,
+        arg2: -1,
         arg3: 0,
         arg4: 0,
         arg5: 0,
@@ -42,17 +55,23 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
     const [action, setAction] = useState<ActionDto>(defaultDto);
     const [add, setAdd] = useState<boolean>(false);
     const [actionType, setActionType] = useState<Options[]>([]);
+
+    {/* Component */}
     const [hardware, setHardware] = useState<Options[]>([]);
     const [mp, setMp] = useState<Options[]>([]);
+    const [cp,setCp] = useState<Options[]>([]);
+    const [door,setDoor] = useState<Options[]>([]);
+    const [tz,setTz] = useState<Options[]>([]);
+    const [mpg,setMpg] = useState<Options[]>([]);
+
+    {/* Handle Function */}
     const handleClickAddAction = () => {
         setAdd(true);
     }
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setDto(prev => ({ ...prev, [e.target.name]: e.target.value }))
     }
-    const handleRatioSelect = (value: string) => {
-        setAction(prev => ({ ...prev, arg2: Number(value) }))
-    }
+
     const handleClickIn = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         switch (e.currentTarget.name) {
             case "add":
@@ -62,6 +81,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
                 break;
             case "close":
                 setAction(defaultDto)
+                setAdd(false)
                 break;
             default:
                 break;
@@ -69,12 +89,36 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
     }
 
     const handleSelect = (value: string, e: React.ChangeEvent<HTMLSelectElement>) => {
+        switch(Number(value)){
+            case 1:
+                break;
+            case 2:
+                break;
+            default:
+                break;
+        }
         switch (e.target.name) {
             case "actionType":
                 setAction(prev => ({ ...prev, actionType: Number(value),actionTypeDesc:actionType.find(a => a.value == Number(value))?.label ?? "" }))
                 switch (Number(value)) {
                     case 1:
                         fetchMp();
+                        break;
+                    case 2:
+                        fetchCp();
+                        break;
+                    case 3:
+                    case 6:
+                    case 24:
+                        fetchDoor();
+                        break;
+                    case 9:
+                        fetchTz();
+                        break;
+                    case 14:
+                        fetchMonitorGroup();
+                        break;
+                    default:
                         break;
                 }
                 break;
@@ -96,46 +140,27 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
             case 1:
                 // Always Mask
                 // setAction(prev => ({...prev,arg2:1}))
-                return <>
-                    <div>
-                        <Label>Monitor Point</Label>
-                        <Select icon={<MonitorIcon />} options={mp} name={"arg1"} defaultValue={-1} onChangeWithEvent={handleSelect} />
-                    </div>
-                    <div>
-                        <Label htmlFor='mode' >Mask Option</Label>
-                        <div className="flex justify-around gap-3 pb-3">
-                            <div className="flex flex-col flex-wrap gap-8">
-                                <Radio
-                                    id="insideType1"
-                                    name="mask"
-                                    value="1"
-                                    checked={action.arg2 === 1}
-                                    onChange={handleRatioSelect}
-                                    label="Mask"
-                                />
-                            </div>
-                            <div className="flex flex-col flex-wrap gap-8">
-                                <Radio
-                                    id="insideType2"
-                                    name="unmask"
-                                    value="0"
-                                    checked={action.arg2 === 0}
-                                    onChange={handleRatioSelect}
-                                    label="Unmask"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex justify-center gap-3">
-                        <Button name="add" onClick={handleClickIn} className="flex-1" variant="primary" >Add</Button>
-                        <Button name="close" onClick={handleClickIn} className="flex-1" variant="danger">Cancel</Button>
-                    </div>
-                </>
-            default:
+                return <MonitorMaskForm options={mp} handleClickIn={handleClickIn}  action={action} setAction={setAction}  />
+            case 2:
+                return <ControlCommandForm options={cp} handleClickIn={handleClickIn}  action={action} setAction={setAction}  />
+            case 3:
+                return <DoorModeForm options={door} handleClickIn={handleClickIn} action={action} setAction={setAction} />
+            case 6:
+                return <MomentUnlockForm options={door} handleClickIn={handleClickIn} action={action} setAction={setAction} />
+            case 9:
+            return <TimezoneControlForm options={tz} handleClickIn={handleClickIn} action={action} setAction={setAction} />
+            case 14:
+                return <MonitorGroupCommandForm options={mpg} handleClickIn={handleClickIn} action={action} setAction={setAction}/>
+            case 24:
+                return <TempDoorModeForm options={door} handleClickIn={handleClickIn} action={action} setAction={setAction}/>
+            case 127:
+                return <DelayCommandForm options={[]} handleClickIn={handleClickIn} action={action} setAction={setAction}/>
+                default:
                 return <></>
         }
     }
 
+    {/* API Function */}
     const fetchHardware = async () => {
         var res = await api.get(HardwareEndpoint.GET(locationId))
         if (res && res.data.data) {
@@ -162,6 +187,19 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
         }
     }
 
+    const fetchCp = async () => {
+        var res = await api.get(ControlPointEndpoint.GET_CP(locationId));
+        if(res && res.data.data){
+            res.data.data.map((a:ControlPointDto) => {
+                setCp(prev => ([...prev,{
+                    label:a.name,
+                    value:a.componentId,
+                    description:a.macAddress
+                }]))
+            })
+        }
+    }
+
     const fetchActionType = async () => {
         var res = await api.get(ProcedureEndpoint.ACTION_TYPE);
         if (res && res.data.data) {
@@ -170,6 +208,45 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
                     label: a.name,
                     value: a.value,
                     description: a.description
+                }]))
+            })
+        }
+    }
+
+    const fetchDoor = async () => {
+        var res = await api.get(DoorEndpoint.GET_ACR_LIST(locationId));
+        if (res && res.data.data) {
+            res.data.data.map((a: ModeDto) => {
+                setDoor(prev => ([...prev, {
+                    label: a.name,
+                    value: a.value,
+                    description: a.description
+                }]))
+            })
+        }
+    }
+
+    const fetchTz = async () => {
+        var res = await api.get(TimeZoneEndPoint.GET_TZ_LIST);
+                if (res && res.data.data) {
+            res.data.data.map((a: TimeZoneDto) => {
+                setTz(prev => ([...prev, {
+                    label: a.name,
+                    value: a.componentId,
+                    description: ""
+                }]))
+            })
+        }
+    }
+
+    const fetchMonitorGroup = async () => {
+        var res = await api.get(MonitorGroupEndpoint.GET_MPG(locationId));
+        if(res && res.data.data){
+            res.data.data.map((a:MonitorGroupDto) => {
+                setMpg(prev => ([...prev,{
+                    label:a.name,
+                    value:a.componentId,
+                    description:a.macAddress
                 }]))
             })
         }
@@ -220,7 +297,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
                                         No.
                                     </TableCell>
                                     <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">
-                                        Scp Id
+                                        Hardware
                                     </TableCell>
                                     <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">
                                         Action Type
@@ -258,7 +335,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
                                             {i + 1}
                                         </TableCell>
                                         <TableCell className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">
-                                            {a.scpId}
+                                            {a.macAddress}
                                         </TableCell>
                                         <TableCell className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">
                                             {a.actionTypeDesc}

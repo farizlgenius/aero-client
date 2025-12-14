@@ -1,0 +1,50 @@
+import { PropsWithChildren, useEffect, useState } from "react";
+import { CommandFormInterface } from "../../../model/CommandForm";
+import { Options } from "../../../model/Options";
+import api from "../../../api/api";
+import { DoorEndpoint } from "../../../endpoint/DoorEndpoint";
+import { ModeDto } from "../../../model/ModeDto";
+import Label from "../Label";
+import Select from "../Select";
+import { DoorIcon } from "../../../icons";
+import Button from "../../ui/button/Button";
+
+export const DoorModeForm:React.FC<PropsWithChildren<CommandFormInterface>> = ({action,setAction,handleClickIn,options}) => {
+    const [doorMode,setDoorMode] = useState<Options[]>([]);
+
+    
+    const fetchDoorMode = async () => {
+        var res = await api.get(DoorEndpoint.GET_ACR_MODE);
+        if (res && res.data.data) {
+            res.data.data.map((a: ModeDto) => {
+                setDoorMode(prev => ([...prev, {
+                    label: a.name,
+                    value: a.value,
+                    description: a.description
+                }]))
+            })
+        }   
+    }
+
+
+    useEffect(() => {
+        fetchDoorMode();
+    },[])
+
+    return (
+                <>
+            <div>
+                <Label>Doors</Label>
+                <Select icon={<DoorIcon />} options={options} name={"arg1"} defaultValue={action.arg1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),macAddress:options.find(x => x.value == Number(value))?.description ?? ""}))} />
+            </div>
+            <div>
+                <Label htmlFor='mode'>Mode</Label>
+                <Select name="arg2" options={doorMode} onChange={(value:string) => setAction(prev => ({...prev,arg2:Number(value)}))} />
+            </div>
+            <div className="flex justify-center gap-3">
+                <Button name="add" onClick={handleClickIn} className="flex-1" variant="primary" >Add</Button>
+                <Button name="close" onClick={handleClickIn} className="flex-1" variant="danger">Cancel</Button>
+            </div>
+        </>
+    )
+}
