@@ -55,17 +55,18 @@ import { MonitorGroup } from "./pages/MonitorGroup/MonitorGroup";
 import AccessLevel from "./pages/AccessGroup/AccessLevel";
 import { Procedure } from "./pages/Procedure/Procedure";
 import { Trigger } from "./pages/Trigger/Trigger";
+import { usePopup } from "./context/PopupContext";
 
 
 export default function App() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
-  const { show,locationId } = useLocation();
+  const { create, remove, update, createModal, removeModal, updateModal } = usePopup();
+  const { show, locationId } = useLocation();
   const { showAlertFlag, alertSuccessFlag, alertMessage } = useAlert();
-  const { showToast ,ToastContainer } = useToast();
+  const { showToast, ToastContainer } = useToast();
   const { loading, Loading } = useLoading();
-  const [isResetShow, setIsResetShow] = useState<boolean>(false);
-  const [isUploadShow, setIsUploadShow] = useState<boolean>(false);
+
   const [license, setLicense] = useState<boolean>(true);
   const [loginDto, setLoginDto] = useState<LoginDto>({
     username: "",
@@ -78,7 +79,7 @@ export default function App() {
       case "login":
         const res = await signIn(loginDto.username, loginDto.password);
         console.log(res)
-        if (res){
+        if (res) {
           navigate("/")
         }
         break;
@@ -88,10 +89,7 @@ export default function App() {
         break;
     }
   }
-  const toggleIsUploadShow = () => {
-    setIsResetShow(false);
-    setIsUploadShow(false);
-  }
+
   const [message, setMessage] = useState<string>("");
   {/* License Check */ }
   const checkLicense = async () => {
@@ -123,9 +121,18 @@ export default function App() {
   return (
     <>
       <div>
-         { show &&
-          <LocationModal/>
-         }
+        {create &&
+          createModal
+        }
+        {remove &&
+          removeModal
+        }
+        {update &&
+          updateModal
+        }
+        {show &&
+          <LocationModal />
+        }
         {loading &&
           <Loading />
         }
@@ -137,7 +144,7 @@ export default function App() {
               duration={300000}
               onClose={() => setShowToast(false)}
             /> */}
-            <ToastContainer/>
+            <ToastContainer />
           </>
 
         )}
@@ -156,31 +163,7 @@ export default function App() {
 
         }
 
-        {isUploadShow &&
-          <div onClick={() => navigate("/hardware")} className="cursor-pointer transition-opacity duration-500 opacity-100">
-            <Alert
-              isFixed={true}
-              variant="warning"
-              title="Data Mismatch (Sync Require)"
-              message={message}
-              showLink={false}
-              isTop={false}
-            />
-          </div>
-        }
 
-        {isResetShow &&
-          <div onClick={() => navigate("/hardware")} className="cursor-pointer transition-opacity duration-500 opacity-100">
-            <Alert
-              isFixed={true}
-              variant="warning"
-              title="Reset (Reset Require)"
-              message={message}
-              showLink={false}
-              isTop={false}
-            />
-          </div>
-        }
         <ScrollToTop />
         <Routes>
           {/* Dashboard Layout */}
@@ -208,7 +191,7 @@ export default function App() {
             <Route path="/led" element={<Led />} />
             <Route path="/holiday" element={<Holiday />} />
             <Route path="/interval" element={<Interval />} />
-            <Route path="/monitorgroup" element={<MonitorGroup/>} />
+            <Route path="/monitorgroup" element={<MonitorGroup />} />
             <Route path="/role" element={<Role />} />
             <Route path="/operator" element={<Operator />} />
             <Route path="/procedure" element={<Procedure />} />

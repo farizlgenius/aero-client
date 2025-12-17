@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import DangerModal from '../UiElements/DangerModal';
+import RemoveModal from '../UiElements/RemoveModal';
 import CardFormatForm from './CardFormatForm';
 import { CardFormatDto } from '../../model/CardFormat/CardFormatDto';
 import HttpRequest from '../../utility/HttpRequest';
@@ -172,7 +172,7 @@ const CardFormat = () => {
     ]
     return (
         <>
-            {isRemoveModal && <DangerModal header='Remove Card Format' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {isRemoveModal && <RemoveModal header='Remove Card Format' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             <PageBreadcrumb pageTitle="Card Format Configuration" />
             {create || update ?
                 <BaseForm tabContent={content}/>

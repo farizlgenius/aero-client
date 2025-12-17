@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { AddIcon, CamIcon } from '../../icons';
 import Button from '../../components/ui/button/Button';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import DangerModal from '../UiElements/DangerModal';
+import RemoveModal from '../UiElements/RemoveModal';
 import HttpRequest from '../../utility/HttpRequest';
 import Helper from '../../utility/Helper';
 import { IntervalDto } from '../../model/Interval/IntervalDto';
@@ -122,6 +122,13 @@ const Interval = () => {
                 setCreateModal(false);
                 setUpdateModal(false);
                 break;
+            case "remove-confirm":
+                setIsRemoveModal(false);
+        removeInterval();
+                break;
+            case "remove-cancel":
+                setIsRemoveModal(false);
+                break;
             default:
                 break;
         }
@@ -138,13 +145,6 @@ const Interval = () => {
     const handleRemove = (data: IntervalDto) => {
         removeTarget = data.componentId;
         setIsRemoveModal(true);
-    }
-    const handleOnClickCloseRemove = () => {
-        setIsRemoveModal(false);
-    }
-    const handleOnClickConfirmRemove = () => {
-        setIsRemoveModal(false);
-        removeInterval();
     }
 
     {/* Group Data */ }
@@ -232,7 +232,7 @@ const Interval = () => {
 
     return (
         <>
-            {isRemoveModal && <DangerModal header='Remove Interval' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {isRemoveModal && <RemoveModal header='Remove Interval' body='Please Click Confirm if you want to remove this Control Point'  handleClick={handleClickWithEvent} />}
             <PageBreadcrumb pageTitle="Interval" />
             {createModal || updateModal ?
                 <>

@@ -2,7 +2,7 @@ import React, { JSX, useEffect, useState } from 'react'
 import Button from '../../components/ui/button/Button'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb'
 import { AddIcon, MaskIcon, MonitorIcon, UnmaskIcon } from '../../icons'
-import DangerModal from '../UiElements/DangerModal';
+import RemoveModal from '../UiElements/RemoveModal';
 import HttpRequest from '../../utility/HttpRequest';
 import Logger from '../../utility/Logger';
 import MonitorPointForm from './MonitorPointForm';
@@ -90,11 +90,11 @@ const MonitorPoint = () => {
                 })
                 break;
             case "remove-confirm":
-                        removeMonitorPoint();
-        toggleRefresh();
+                removeMonitorPoint();
+                toggleRefresh();
                 break;
-                            case "remove-cancel":
-                                setIsRemoveModal(false);
+            case "remove-cancel":
+                setIsRemoveModal(false);
                 break;
             default:
                 break;
@@ -102,7 +102,7 @@ const MonitorPoint = () => {
     }
 
     const createMonitorPoint = async () => {
-        const res = await send.post(MonitorPointEndpoint.POST_ADD_MP,monitorPointDto);
+        const res = await send.post(MonitorPointEndpoint.POST_ADD_MP, monitorPointDto);
         if (Helper.handleToastByResCode(res, ToastMessage.CREATE_MP, toggleToast)) {
             setUpdate(false);
             setCreate(false);
@@ -231,14 +231,14 @@ const MonitorPoint = () => {
                 );
                 toggleRefresh();
             });
-                    return () => {
+        return () => {
             //SignalRService.stopConnection()
         };
     }, []);
 
     useEffect(() => {
         fetchData();
-    },[refresh])
+    }, [refresh])
 
     const renderOptionalComponent = (data: any, statusDto: StatusDto[]) => {
         return [
@@ -271,18 +271,18 @@ const MonitorPoint = () => {
         }
     ];
 
-    const tabContent:FormContent[] = [
+    const tabContent: FormContent[] = [
         {
-            label:"Monitor Point",
-            icon:<MonitorIcon/>,
-            content:<MonitorPointForm handleClick={handleClick} data={monitorPointDto} setMonitorPointDto={setMonitorPointDto}/>
+            label: "Monitor Point",
+            icon: <MonitorIcon />,
+            content: <MonitorPointForm handleClick={handleClick} data={monitorPointDto} setMonitorPointDto={setMonitorPointDto} />
 
         }
     ]
 
     return (
         <>
-            {isRemoveModal && <DangerModal header='Remove Monitor Point' body='Please Click Confirm if you want to remove this Monitor Point' handleClick={handleClick}/>}
+            {isRemoveModal && <RemoveModal handleClick={handleClick} />}
             <PageBreadcrumb pageTitle="Monitor Point" />
             {create || update ?
                 <BaseForm tabContent={tabContent} />

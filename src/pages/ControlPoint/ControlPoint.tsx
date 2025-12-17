@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb'
 import { AddIcon, ControlIcon, OffIcon, OnIcon, ToggleIcon } from '../../icons';
-import DangerModal from '../UiElements/DangerModal';
+import RemoveModal from '../UiElements/RemoveModal';
 import HttpRequest from '../../utility/HttpRequest';
 import ControlPointForm from './ControlPointForm';
 import Logger from '../../utility/Logger';
@@ -317,7 +317,7 @@ const ControlPoint = () => {
 
     return (
         <>
-            {removeModal && <DangerModal header='Remove Control Point' body='Please Click Confirm if you want to remove this Control Point' handleClick={handleClick} />}
+            {removeModal && <RemoveModal header='Remove Control Point' body='Please Click Confirm if you want to remove this Control Point' handleClick={handleClick} />}
             <PageBreadcrumb pageTitle="Control Point" />
             {
                 create || update

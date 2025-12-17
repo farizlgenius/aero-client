@@ -44,9 +44,13 @@ export enum ToastMessage{
     CREATE_CARDHOLDER = "Create Card Holder",
     CREATE_AREA = "Create Area",
     CREATE_LOCATION = "Create Location",
+    DELETE_LOCATION = "Delete Location",
     LOGIN = "Login",
     CREATE_MP_GROUP = "Create Monitor Group",
     DELETE_PROCEDURE = "Delete Procedure",
     POST_MONITOR_GROUP_COMMAND = "Monitor Group Command",
     CREATE_TRIGGER = "Create Trigger",
+    GET_COMPONENT = "Hardware Component",
+    DELETE_TRIGGER = "Delete Trigger",
+    DELETE_MPG = "Delete Monitor Group"
 }

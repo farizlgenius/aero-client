@@ -6,7 +6,7 @@ import HttpRequest from "../../utility/HttpRequest";
 import { HttpMethod } from "../../enum/HttpMethod";
 import { ToastMessage } from "../../model/ToastMessage";
 import { FormContent } from "../../model/Form/FormContent";
-import DangerModal from "../UiElements/DangerModal";
+import RemoveModal from "../UiElements/RemoveModal";
 import Button from "../../components/ui/button/Button";
 import { BaseForm } from "../UiElements/BaseForm";
 import { AddIcon, RoleIcon } from "../../icons";
@@ -166,7 +166,7 @@ export const Role = () => {
 
         <>
             <PageBreadcrumb pageTitle="Roles" />
-            {remove && <DangerModal header='Remove Role' body='Please Click Confirm if you want to remove role' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {remove && <RemoveModal header='Remove Role' body='Please Click Confirm if you want to remove role' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             {create || update ?
 
                 <BaseForm tabContent={tabContent} />

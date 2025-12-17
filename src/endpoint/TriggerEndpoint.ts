@@ -8,5 +8,6 @@ export const TriggerEndpoint = {
     TRAN:(source:number) => `/api/${API_VERSION}/${CONTROLLER}/tran/${source}`,
     CODE:(type:number) => `/api/${API_VERSION}/${CONTROLLER}/code/${type}`,
     DEVICE:(location:number,source:number) => `/api/${API_VERSION}/${location}/${CONTROLLER}/device/${source}`,
-    CREATE:`/api/${API_VERSION}/${CONTROLLER}`
+    CREATE:`/api/${API_VERSION}/${CONTROLLER}`,
+    DELETE:(id:number) => `/api/${API_VERSION}/${CONTROLLER}/${id}`
 } as const;

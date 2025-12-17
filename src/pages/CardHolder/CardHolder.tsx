@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import DangerModal from '../UiElements/DangerModal';
+import RemoveModal from '../UiElements/RemoveModal';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import { AddIcon, BoxIcon, CamIcon } from '../../icons';
 import { CardHolderDto } from '../../model/CardHolder/CardHolderDto';
@@ -212,7 +212,7 @@ const CardHolder = () => {
     return (
         <>
             <PageBreadcrumb pageTitle="Credentials" />
-            {deleteModal && <DangerModal header='Remove Credentials' body='Please Click Confirm if you want to remove this users' handleClick={handleClick} />}
+            {deleteModal && <RemoveModal header='Remove Credentials' body='Please Click Confirm if you want to remove this users' handleClick={handleClick} />}
             {createModal || updateModal ?
 
                 <BaseForm tabContent={tabContent} />

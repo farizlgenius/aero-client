@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { PropsWithChildren, useEffect, useState } from "react"
 import Badge from "../../ui/badge/Badge"
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../ui/table"
 import SignalRService from "../../../services/SignalRService"
@@ -8,13 +8,18 @@ import { HardwareEndpoint } from "../../../endpoint/HardwareEndpoint"
 import Helper from "../../../utility/Helper"
 import { ToastMessage } from "../../../model/ToastMessage"
 import { useToast } from "../../../context/ToastContext"
+import { HardwareDto } from "../../../model/Hardware/HardwareDto"
 
-export const HardwareMemAllocForm = () => {
+interface HardwareMemAllocFormInterface {
+    data:HardwareDto;
+}
+
+export const HardwareMemAllocForm:React.FC<PropsWithChildren<HardwareMemAllocFormInterface>> = ({data}) => {
     const {toggleToast} = useToast();
     const [memAllocs, setMemAllocs] = useState<MemoryAllocateDto[]>([]);
 
     const fetchData = async () => {
-        const res = await send.post(HardwareEndpoint.VERIFY_MEM("00-18-9E-61-57-F8"))
+        const res = await send.post(HardwareEndpoint.VERIFY_MEM(data.macAddress))
         if(Helper.handleToastByResCode(res,ToastMessage.GET_SCP_STRUCTURE,toggleToast)){}
     }
 

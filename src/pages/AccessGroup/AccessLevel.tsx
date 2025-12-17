@@ -1,7 +1,7 @@
 import Button from '../../components/ui/button/Button';
 import { AddIcon, GroupIcon } from '../../icons';
 import { useEffect, useState } from 'react';
-import DangerModal from '../UiElements/DangerModal';
+import RemoveModal from '../UiElements/RemoveModal';
 import AccessLevelForm from './AccessLevelForm';
 import { AccessLevelDto } from '../../model/AccessGroup/AccessLevelDto';
 import { AccessGroupTable } from './AccessGroupTable';
@@ -164,7 +164,7 @@ const AccessLevel = () => {
     return (
         <>
             <PageBreadcrumb pageTitle="Access Group" />
-            {isRemoveModal && <DangerModal header='Remove Control Point' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {isRemoveModal && <RemoveModal header='Remove Control Point' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             {createModal || updateModal ?
                 <BaseForm tabContent={tabContent} />
                 :

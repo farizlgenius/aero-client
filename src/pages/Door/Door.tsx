@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import Button from '../../components/ui/button/Button';
 import { AddIcon, ControlIcon, DisableIcon, DoorIcon, LockedIcon, LockIcon, MomentIcon, UnlockIcon } from '../../icons';
-import DangerModal from '../UiElements/DangerModal';
+import RemoveModal from '../UiElements/RemoveModal';
 import HttpRequest from '../../utility/HttpRequest';
 import Logger from '../../utility/Logger';
 import DoorForm from './DoorForm';
@@ -441,7 +441,7 @@ const Door = () => {
 
     return (
         <>
-            {isRemoveModal && <DangerModal header='Remove Door' body='Please Click Confirm if you want to remove this Control Point' handleClick={handleClick} />}
+            {isRemoveModal && <RemoveModal header='Remove Door' body='Please Click Confirm if you want to remove this Control Point' handleClick={handleClick} />}
             <PageBreadcrumb pageTitle="Doors" />
             {createModal || updateModal ?
                 <BaseForm tabContent={content} />

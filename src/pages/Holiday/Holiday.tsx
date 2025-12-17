@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {  CalenderIcon } from '../../icons';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import DangerModal from '../UiElements/DangerModal';
+import RemoveModal from '../UiElements/RemoveModal';
 import HttpRequest from '../../utility/HttpRequest';
 import HolidayForm from './HolidayForm';
 import Helper from '../../utility/Helper';
@@ -161,7 +161,7 @@ const Holiday = () => {
     ]
     return (
         <>
-            {remove && <DangerModal header='Remove Holiday' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {remove && <RemoveModal header='Remove Holiday' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             <PageBreadcrumb pageTitle="Holiday" />
             {create || update ?
                 <BaseForm tabContent={content} />

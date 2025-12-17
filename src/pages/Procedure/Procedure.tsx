@@ -4,7 +4,7 @@ import { BaseTable } from "../UiElements/BaseTable";
 import { ProcedureDto } from "../../model/Procedure/ProcedureDto";
 import { BaseForm } from "../UiElements/BaseForm";
 import { FormContent } from "../../model/Form/FormContent";
-import DangerModal from "../UiElements/DangerModal";
+import RemoveModal from "../UiElements/RemoveModal";
 import { send } from "../../api/api";
 import { ProcedureEndpoint } from "../../endpoint/ProcedureEndpoint";
 import Helper from "../../utility/Helper";
@@ -124,7 +124,7 @@ export const Procedure = () => {
 
     return (
     <>
-    {remove && <DangerModal header='Remove Procedure' body='Please Click Confirm if you want to remove this Procedure' handleClick={handleClick} />}
+    {remove && <RemoveModal header='Remove Procedure' body='Please Click Confirm if you want to remove this Procedure' handleClick={handleClick} />}
     <PageBreadcrumb pageTitle="Procedure"/>
     
     {

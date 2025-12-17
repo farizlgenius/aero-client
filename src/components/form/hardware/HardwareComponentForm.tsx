@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { PropsWithChildren, useEffect, useState } from "react"
 import Badge from "../../ui/badge/Badge"
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../ui/table"
 import SignalRService from "../../../services/SignalRService";
@@ -8,14 +8,19 @@ import { send } from "../../../api/api";
 import Helper from "../../../utility/Helper";
 import { ToastMessage } from "../../../model/ToastMessage";
 import { VerifyHardwareDeviceConfigDto } from "../../../model/Hardware/VerifyHardwareDeviceConfigDto";
+import { HardwareDto } from "../../../model/Hardware/HardwareDto";
 
-export const HardwareComponentForm = () => {
+interface HardwareComponentFormInterface {
+    data: HardwareDto;
+}
+
+export const HardwareComponentForm:React.FC<PropsWithChildren<HardwareComponentFormInterface>> = ({data}) => {
     const { toggleToast } = useToast();
     const [deviceConfig, setDeviceConfig] = useState<VerifyHardwareDeviceConfigDto[]>([]);
 
     const fetchData = async () => {
-        const res = await send.post(HardwareEndpoint.VERIFY_COM("00-18-9E-61-57-F8"))
-        if (Helper.handleToastByResCode(res, ToastMessage.API_ERROR, toggleToast)) {
+        const res = await send.post(HardwareEndpoint.VERIFY_COM(data.macAddress))
+        if (Helper.handleToastByResCode(res, ToastMessage.GET_COMPONENT, toggleToast)) {
             setDeviceConfig(res.data.data)
         }
     }

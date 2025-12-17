@@ -57,8 +57,6 @@ export default function Module() {
       res.data.data.forEach((a: ModuleDto) => {
         fetchStatus(a.macAddress, a.componentId);
       });
-
-
     }
 
   }

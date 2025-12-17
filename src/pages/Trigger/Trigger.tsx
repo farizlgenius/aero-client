@@ -14,9 +14,11 @@ import { TriggerEndpoint } from "../../endpoint/TriggerEndpoint";
 import Helper from "../../utility/Helper";
 import { ToastMessage } from "../../model/ToastMessage";
 import { useToast } from "../../context/ToastContext";
+import RemoveModal from "../UiElements/RemoveModal";
 
-const KEYS: string[] = ["Name", "Action"];
-const HEADERS: string[] = ["name"];
+const KEYS: string[] = ["name"];
+const HEADERS: string[] = ["Name","Action"];
+let removeTarget:number = 0;
 
 export const Trigger = () => {
     const { locationId } = useLocation();
@@ -24,8 +26,11 @@ export const Trigger = () => {
     const { filterPermission } = useAuth();
     const [create, setCreate] = useState<boolean>(false);
     const [update, setUpdate] = useState<boolean>(false);
+    const [remove,setRemove] = useState<boolean>(false);
     const [selectedObject, setSelectedObjects] = useState<TriggerDto[]>([]);
     const [triggerDtos, setTriggerDtos] = useState<TriggerDto[]>([]);
+    const [refresh,setRefresh] = useState<boolean>(false);
+    const toggleRefresh = () => setRefresh(prev => !prev)
     const defaultDto: TriggerDto = {
         command: -1,
         procedureId: -1,
@@ -48,15 +53,34 @@ export const Trigger = () => {
     }
 
     const handleCheck = (data: TriggerDto, e: React.ChangeEvent<HTMLInputElement>) => {
-
+        console.log(data)
+        console.log(e.target.checked)
+        if (setSelectedObjects) {
+            if (e.target.checked) {
+                setSelectedObjects((prev) => [...prev, data]);
+            } else {
+                setSelectedObjects((prev) =>
+                    prev.filter((item) => item.componentId !== data.componentId)
+                );
+            }
+        }
     }
 
     const handleCheckAll = (data: TriggerDto[], e: React.ChangeEvent<HTMLInputElement>) => {
-
+                console.log(data)
+        console.log(e.target.checked)
+        if (setSelectedObjects) {
+            if (e.target.checked) {
+                setSelectedObjects(data);
+            } else {
+                setSelectedObjects([]);
+            }
+        }
     }
 
     const handleRemove = (data: TriggerDto) => {
-
+        removeTarget = data.componentId;
+        setRemove(true);
     }
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -70,6 +94,13 @@ export const Trigger = () => {
             case "close":
                 setCreate(false)
                 setUpdate(false);
+                break;
+            case "remove-confirm":
+                removeTrigger();
+                break;  
+            case "remove-cancel":
+                setRemove(false);
+                removeTarget = 0;
                 break;
             default:
                 break;
@@ -89,6 +120,14 @@ export const Trigger = () => {
         if(Helper.handleToastByResCode(res,ToastMessage.CREATE_TRIGGER,toggleToast)){}
     }
 
+    const removeTrigger = async () => {
+        var res = await send.delete(TriggerEndpoint.DELETE(removeTarget))
+        if(Helper.handleToastByResCode(res,ToastMessage.DELETE_TRIGGER,toggleToast)){
+            setRemove(false);
+            toggleRefresh();
+        }
+    }
+
     const fetchData = async () => {
         var res = await send.get(TriggerEndpoint.GET(locationId))
         if(res && res.data.data){
@@ -98,10 +137,11 @@ export const Trigger = () => {
 
     useEffect(() => {
         fetchData();
-    },[])
+    },[refresh])
 
     return (
         <>
+         {remove && <RemoveModal header='Remove Time Zone' body='Please Click Confirm if you want to remove this Control Point' handleClick={handleClick} />}
             <PageBreadcrumb pageTitle="Trigger" />
             {
                 create || update ?

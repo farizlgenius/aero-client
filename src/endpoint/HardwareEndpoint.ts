@@ -10,4 +10,7 @@ export const HardwareEndpoint = {
     CREATE : `/api/${API_VERSION}/${CONTROLLER}`,
     VERIFY_MEM:(mac:string) => `/api/${API_VERSION}/${CONTROLLER}/verify/mem/${mac}`,
     VERIFY_COM:(mac:string) => `/api/${API_VERSION}/${CONTROLLER}/verify/com/${mac}`,
+    TRAN:(mac:string) => `/api/${API_VERSION}/${CONTROLLER}/tran/${mac}`,
+    ID_REPORT: `/api/${API_VERSION}/IdReport`
 } as const
+

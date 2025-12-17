@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { AddIcon, TimezonIcon } from '../../icons';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import DangerModal from '../UiElements/DangerModal';
+import RemoveModal from '../UiElements/RemoveModal';
 import HttpRequest from '../../utility/HttpRequest';
 import TimeZoneForm from './TimeZoneForm';
 import Helper from '../../utility/Helper';
@@ -69,6 +69,12 @@ const TimeZone = () => {
                 break;
             case "update":
                 break;
+            case "remove-confirm":
+                removeTimeZone();
+                break;
+            case "remove-cancel":
+                setRemoveModal(false);
+                break;
             default:
                 break;
         }
@@ -95,13 +101,8 @@ const TimeZone = () => {
         removeTarget = data.componentId;
         setRemoveModal(true);
     }
-    const handleOnClickCloseRemove = () => {
-        setRemoveModal(false);
-    }
-    const handleOnClickConfirmRemove = () => {
-        removeTimeZone();
 
-    }
+
 
     {/* Group Data */ }
     const [timeZonesDto, setTimeZonesDto] = useState<TimeZoneDto[]>([]);
@@ -165,7 +166,7 @@ const TimeZone = () => {
     ]
     return (
         <>
-            {removeModal && <DangerModal header='Remove Time Zone' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {removeModal && <RemoveModal header='Remove Time Zone' body='Please Click Confirm if you want to remove this Control Point' handleClick={handleClick} />}
             <PageBreadcrumb pageTitle="Time Zone" />
             {createModal || updateModal ?
                 <BaseForm tabContent={tabContent} />

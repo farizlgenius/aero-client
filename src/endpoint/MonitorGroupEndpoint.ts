@@ -6,5 +6,6 @@ export const MonitorGroupEndpoint = {
     GET_TYPE: `/api/${API_VERSION}/${CONTROLLER}/type`,
     POST_CREATE: `/api/${API_VERSION}/${CONTROLLER}`,
     POST_COMMAND: `/api/${API_VERSION}/${CONTROLLER}/command`,
-    COMMAND: `/api/${API_VERSION}/${CONTROLLER}/command`
+    COMMAND: `/api/${API_VERSION}/${CONTROLLER}/command`,
+    DELETE:(mac:string,component:number) => `/api/${API_VERSION}/${CONTROLLER}/${mac}/${component}`
 } as const;

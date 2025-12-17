@@ -16,9 +16,14 @@ import { ToastMessage } from "../../model/ToastMessage";
 import { useToast } from "../../context/ToastContext";
 import { ActionButton } from "../../model/ActionButton";
 import { MonitorGroupCommandDto } from "../../model/MonitorGroup/MonitorGroupCommandDto";
+import RemoveModal from "../UiElements/RemoveModal";
 
 export const MP_GP_HEADER: string[] = ["Name", "Main Controller", "Action"]
 export const MP_GP_KEY: string[] = ["name", "macAddress",];
+var removeElement = {
+    mac: "",
+    component: 0
+};
 
 export const MonitorGroup = () => {
     const { toggleToast } = useToast();
@@ -36,6 +41,7 @@ export const MonitorGroup = () => {
     const { filterPermission } = useAuth();
     const [create, setCreate] = useState<boolean>(false);
     const [update, setUpdate] = useState<boolean>(false);
+    const [remove, setRemove] = useState<boolean>(false);
     const [mpGroupsDto, setMpGroupsDto] = useState<MonitorGroupDto[]>([]);
     const [mpGroupDto, setMpGroupDto] = useState<MonitorGroupDto>(defaultDto);
     const [selectedObject, setSelectedObjects] = useState<MonitorGroupDto[]>([]);
@@ -58,68 +64,74 @@ export const MonitorGroup = () => {
                 setCreate(false)
                 setUpdate(false)
                 break;
+            case "remove-confirm":
+                removeMonitorGroup();
+                break;
+            case "remove-cancel":
+                setRemove(false);
+                break;
             case "access":
-                selectedObject.map(async (a:MonitorGroupDto) => {
-                    let object:MonitorGroupCommandDto={
+                selectedObject.map(async (a: MonitorGroupDto) => {
+                    let object: MonitorGroupCommandDto = {
                         macAddress: a.macAddress,
                         componentId: a.componentId,
                         command: 1,
                         arg: 0
                     };
-                    var res = await send.post(MonitorGroupEndpoint.POST_COMMAND,object);
-                    if(Helper.handleToastByResCode(res,ToastMessage.POST_MONITOR_GROUP_COMMAND,toggleToast)){}
+                    var res = await send.post(MonitorGroupEndpoint.POST_COMMAND, object);
+                    if (Helper.handleToastByResCode(res, ToastMessage.POST_MONITOR_GROUP_COMMAND, toggleToast)) { }
                 })
                 console.log(selectedObject)
                 break;
             case "override":
-                selectedObject.map(async (a:MonitorGroupDto) => {
-                    let object:MonitorGroupCommandDto={
+                selectedObject.map(async (a: MonitorGroupDto) => {
+                    let object: MonitorGroupCommandDto = {
                         macAddress: a.macAddress,
                         componentId: a.componentId,
                         command: 2,
                         arg: 0
                     };
-                    var res = await send.post(MonitorGroupEndpoint.POST_COMMAND,object);
-                    if(Helper.handleToastByResCode(res,ToastMessage.POST_MONITOR_GROUP_COMMAND,toggleToast)){}
+                    var res = await send.post(MonitorGroupEndpoint.POST_COMMAND, object);
+                    if (Helper.handleToastByResCode(res, ToastMessage.POST_MONITOR_GROUP_COMMAND, toggleToast)) { }
                 })
                 console.log(selectedObject)
                 break;
             case "force":
-                selectedObject.map(async (a:MonitorGroupDto) => {
-                    let object:MonitorGroupCommandDto={
+                selectedObject.map(async (a: MonitorGroupDto) => {
+                    let object: MonitorGroupCommandDto = {
                         macAddress: a.macAddress,
                         componentId: a.componentId,
                         command: 3,
                         arg: 0
                     };
-                    var res = await send.post(MonitorGroupEndpoint.POST_COMMAND,object);
-                    if(Helper.handleToastByResCode(res,ToastMessage.POST_MONITOR_GROUP_COMMAND,toggleToast)){}
+                    var res = await send.post(MonitorGroupEndpoint.POST_COMMAND, object);
+                    if (Helper.handleToastByResCode(res, ToastMessage.POST_MONITOR_GROUP_COMMAND, toggleToast)) { }
                 })
                 console.log(selectedObject)
                 break;
             case "arm":
-                selectedObject.map(async (a:MonitorGroupDto) => {
-                    let object:MonitorGroupCommandDto={
+                selectedObject.map(async (a: MonitorGroupDto) => {
+                    let object: MonitorGroupCommandDto = {
                         macAddress: a.macAddress,
                         componentId: a.componentId,
                         command: 4,
                         arg: 0
                     };
-                    var res = await send.post(MonitorGroupEndpoint.POST_COMMAND,object);
-                    if(Helper.handleToastByResCode(res,ToastMessage.POST_MONITOR_GROUP_COMMAND,toggleToast)){}
+                    var res = await send.post(MonitorGroupEndpoint.POST_COMMAND, object);
+                    if (Helper.handleToastByResCode(res, ToastMessage.POST_MONITOR_GROUP_COMMAND, toggleToast)) { }
                 })
                 console.log(selectedObject)
                 break;
             case "override-arm":
-                selectedObject.map(async (a:MonitorGroupDto) => {
-                    let object:MonitorGroupCommandDto={
+                selectedObject.map(async (a: MonitorGroupDto) => {
+                    let object: MonitorGroupCommandDto = {
                         macAddress: a.macAddress,
                         componentId: a.componentId,
                         command: 5,
                         arg: 0
                     };
-                    var res = await send.post(MonitorGroupEndpoint.POST_COMMAND,object);
-                    if(Helper.handleToastByResCode(res,ToastMessage.POST_MONITOR_GROUP_COMMAND,toggleToast)){}
+                    var res = await send.post(MonitorGroupEndpoint.POST_COMMAND, object);
+                    if (Helper.handleToastByResCode(res, ToastMessage.POST_MONITOR_GROUP_COMMAND, toggleToast)) { }
                 })
                 console.log(selectedObject)
                 break;
@@ -127,30 +139,38 @@ export const MonitorGroup = () => {
                 break;
         }
     }
-    const handleEdit = (data: MonitorGroupDto) => { }
+    const handleEdit = (data: MonitorGroupDto) => {
+        setMpGroupDto(data)
+    }
 
-    const handleRemove = (data: MonitorGroupDto) => { }
+    const handleRemove = (data: MonitorGroupDto) => {
+        removeElement = {
+            mac: data.macAddress,
+            component: data.componentId
+        };
+        setRemove(true);
+    }
 
     const handleCheck = (data: MonitorGroupDto, e: React.ChangeEvent<HTMLInputElement>) => {
-            if (setSelectedObjects) {
-      if (e.target.checked) {
-        setSelectedObjects((prev) => [...prev, data]);
-      } else {
-        setSelectedObjects((prev) =>
-          prev.filter((item) => item.componentId !== data.componentId)
-        );
-      }
-    }
+        if (setSelectedObjects) {
+            if (e.target.checked) {
+                setSelectedObjects((prev) => [...prev, data]);
+            } else {
+                setSelectedObjects((prev) =>
+                    prev.filter((item) => item.componentId !== data.componentId)
+                );
+            }
+        }
     }
 
     const handleCheckAll = (data: MonitorGroupDto[], e: React.ChangeEvent<HTMLInputElement>) => {
-            if (setSelectedObjects) {
-      if (e.target.checked) {
-        setSelectedObjects(data);
-      } else {
-        setSelectedObjects([]);
-      }
-    }
+        if (setSelectedObjects) {
+            if (e.target.checked) {
+                setSelectedObjects(data);
+            } else {
+                setSelectedObjects([]);
+            }
+        }
     }
 
     const fetchData = async () => {
@@ -168,6 +188,14 @@ export const MonitorGroup = () => {
             toggleRefresh();
         }
 
+    }
+
+    const removeMonitorGroup = async () => {
+        const res = await send.delete(MonitorGroupEndpoint.DELETE(removeElement.mac, removeElement.component))
+        if (Helper.handleToastByResCode(res, ToastMessage.DELETE_MPG, toggleToast)) {
+            setRemove(false);
+            toggleRefresh();
+        }
     }
 
     const tabContent: FormContent[] = [
@@ -204,10 +232,11 @@ export const MonitorGroup = () => {
 
     useEffect(() => {
         fetchData();
-    }, [])
+    }, [refresh])
 
     return (
         <>
+            {remove && <RemoveModal handleClick={handleClick} />}
             <PageBreadcrumb pageTitle="Monitor Point Group" />
             {update || create ?
 

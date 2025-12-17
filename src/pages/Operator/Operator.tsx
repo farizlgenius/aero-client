@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb"
 import { useToast } from "../../context/ToastContext";
-import DangerModal from "../UiElements/DangerModal";
+import RemoveModal from "../UiElements/RemoveModal";
 import { BaseForm } from "../UiElements/BaseForm";
 import Button from "../../components/ui/button/Button";
 import { BaseTable } from "../UiElements/BaseTable";
@@ -179,7 +179,7 @@ export const Operator = () => {
 
         <>
             <PageBreadcrumb pageTitle="Operators" />
-            {remove && <DangerModal header='Remove Operator' body='Please Click Confirm if you want to remove operator' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {remove && <RemoveModal header='Remove Operator' body='Please Click Confirm if you want to remove operator' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             {create || update ?
 
                 <BaseForm tabContent={tabContent} />

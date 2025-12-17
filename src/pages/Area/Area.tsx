@@ -5,7 +5,7 @@ import HttpRequest from "../../utility/HttpRequest";
 import { AreaEndPoint } from "../../constants/constant";
 import Helper from "../../utility/Helper";
 import { ToastMessage } from "../../model/ToastMessage";
-import DangerModal from "../UiElements/DangerModal";
+import RemoveModal from "../UiElements/RemoveModal";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import Button from "../../components/ui/button/Button";
 import { AddIcon, AreaIcon } from "../../icons";
@@ -167,7 +167,7 @@ export const Area = () => {
 
     return (
         <>
-            {isRemoveModal && <DangerModal header='Remove Card Format' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
+            {isRemoveModal && <RemoveModal header='Remove Card Format' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             <PageBreadcrumb pageTitle="Access Area" />
             {create || update ?
                 <BaseForm tabContent={createContent} />
