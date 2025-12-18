@@ -10,13 +10,13 @@ import { HttpMethod } from "../../enum/HttpMethod";
 import { LocationEndpoint } from "../../endpoint/LocationEndpoint";
 import { useToast } from "../../context/ToastContext";
 import Helper from "../../utility/Helper";
-import { ToastMessage } from "../../model/ToastMessage";
+import { LocationToast } from "../../model/ToastMessage";
 import { BaseTable } from "../UiElements/BaseTable";
 import { send } from "../../api/api";
-import { FeatureEndpoint } from "../../endpoint/FeatureEndpoint";
 import { useAuth } from "../../context/AuthContext";
-import { FeatureDto } from "../../model/Role/FeatureDto";
 import { usePopup } from "../../context/PopupContext";
+import { FeatureId } from "../../enum/FeatureId";
+import { FormType } from "../../model/Form/FormProp";
 
 var removeTarget: number = 0;
 
@@ -33,32 +33,39 @@ export const LOCATION_KEY: string[] = ["locationName"];
 
 export const Location = () => {
     const { toggleToast } = useToast();
-    const { user } = useAuth();
-    const { setRemove, setConfirmRemove,setConfirmCreate ,setCreate,setUpdate,setConfirmUpdate,edit,setEdit} = usePopup();
+    const { user,filterPermission } = useAuth();
+    const { setRemove, setConfirmRemove,setConfirmCreate,setInfo,setMessage ,setCreate,setUpdate,setConfirmUpdate} = usePopup();
     const [form, setForm] = useState<boolean>(false);
     const [refresh, setRefresh] = useState<boolean>(false);
     const [locationDto, setLocationDto] = useState<LocationDto>(defaultDto);
     const [locationsDto, setLocationsDto] = useState<LocationDto[]>([]);
-    const [permission, setPermission] = useState<FeatureDto | undefined>(undefined);
+    const [select,setSelect] = useState<LocationDto[]>([])
+    const [formType,setFormType] = useState<FormType>(FormType.Create);
     const toggleRefresh = () => setRefresh(!refresh)
 
     const handleRemove = (data: LocationDto) => {
         removeTarget = data.componentId;
         setRemove(true);
         setConfirmRemove(() => async () => {
-            const res = await HttpRequest.send(HttpMethod.DELETE, LocationEndpoint.DELETE_LOC(removeTarget))
-            if (Helper.handleToastByResCode(res, ToastMessage.DELETE_LOCATION, toggleToast)) {
+            const res = await HttpRequest.send(HttpMethod.DELETE, LocationEndpoint.DELETE(removeTarget))
+            if (Helper.handleToastByResCode(res, LocationToast.DELETE, toggleToast)) {
                 toggleRefresh();
                 removeTarget = 0;
             }
         })
     }
 
-    {/* handle Table Action */ }
-    const handleEdit = (data: LocationDto) => {
+    const handleInfo = (data:LocationDto) => {
+        setFormType(FormType.Info);
         setLocationDto(data);
         setForm(true);
-        setEdit(true);
+    }
+
+    {/* handle Table Action */ }
+    const handleEdit = (data: LocationDto) => {
+        setFormType(FormType.Update);
+        setLocationDto(data);
+        setForm(true);
     }
 
 
@@ -66,25 +73,44 @@ export const Location = () => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
+                setFormType(FormType.Create);
                 setForm(true);
+                break;
+            case "delete":
+                if(select.length == 0){            
+                    setMessage("Please select object")
+                    setInfo(true);
+                }
+                setConfirmRemove(() => async () => {
+                    var data:number[] = [];
+                    select.map(async (a:LocationDto) => {
+                        data.push(a.componentId)
+                    })
+                    var res = await send.post(LocationEndpoint.DELETE_RANGE,data)
+                    if(Helper.handleToastByResCode(res,LocationToast.DELETE_RANGE,toggleToast)){
+                        setRemove(false);
+                        toggleRefresh();
+                    }
+                })
+                setRemove(true);
                 break;
             case "create":
                 setConfirmCreate(() => async () => {
-                    const res = await send.post(LocationEndpoint.CREATE_LOC, locationDto);
-                    if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
+                    const res = await send.post(LocationEndpoint.CREATE, locationDto);
+                    if (Helper.handleToastByResCode(res, LocationToast.CREATE, toggleToast)) {
                         setForm(false)
                         toggleRefresh();
+                        setLocationDto(defaultDto)
                     }
                 })
                 setCreate(true);
                 break;
             case "update":
                 setConfirmUpdate(() => async () => {
-                    const res = await HttpRequest.send(HttpMethod.PUT, LocationEndpoint.UPDATE_LOC, true, locationDto)
-                    if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
+                    const res = await HttpRequest.send(HttpMethod.PUT, LocationEndpoint.UPDATE, true, locationDto)
+                    if (Helper.handleToastByResCode(res, LocationToast.UPDATE, toggleToast)) {
                         setForm(false)
                         toggleRefresh();
-                        setEdit(false);
                     }
                     
                 })     
@@ -101,48 +127,14 @@ export const Location = () => {
     }
 
 
-    const [selectedObjects, setSelectedObjects] = useState<LocationDto[]>([]);
-    const handleCheckedAll = (data: LocationDto[], e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects(data);
-            } else {
-                setSelectedObjects([]);
-            }
-        }
-    }
-
-    const handleChecked = (data: LocationDto, e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects((prev) => [...prev, data]);
-            } else {
-                setSelectedObjects((prev) =>
-                    prev.filter((item) => item.componentId !== data.componentId)
-                );
-            }
-        }
-    }
-
     const fetchDate = async () => {
-        const res = await HttpRequest.send(HttpMethod.GET, LocationEndpoint.GET_LOC)
+        const res = await send.get(LocationEndpoint.GET);
         console.log(res?.data.data)
         if (res && res.data.data) {
             setLocationsDto(res.data.data);
         }
     }
 
-    const fetchPermission = async () => {
-        if (user?.role?.roleNo) {
-            const res = await send.get(FeatureEndpoint.GET_BY_ROLE_FEATURE(user.role.roleNo, 3))
-            setPermission(res.data.data)
-        }
-
-    }
 
 
     {/* Form */ }
@@ -150,7 +142,7 @@ export const Location = () => {
         {
             icon: <LocationIcon />,
             label: "Intevals",
-            content: <LocationForm isUpdate={edit} dto={locationDto} setDto={setLocationDto} handleClick={handleClickWithEvent} />
+            content: <LocationForm type={formType} dto={locationDto} setDto={setLocationDto} handleClick={handleClickWithEvent} />
         }
     ];
 
@@ -158,7 +150,6 @@ export const Location = () => {
 
 
     useEffect(() => {
-        fetchPermission();
         fetchDate();
     }, [refresh])
 
@@ -172,7 +163,7 @@ export const Location = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <BaseTable<LocationDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={locationsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClickWithEvent} permission={permission} />
+                    <BaseTable<LocationDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={locationsDto} select={select} setSelect={setSelect} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClickWithEvent} permission={filterPermission(FeatureId.LOCATION)} onInfo={handleInfo} />
                 </div>
 
             }

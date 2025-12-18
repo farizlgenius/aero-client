@@ -67,7 +67,7 @@ export const send = {
             Logger.error(e)
             return e.response;
         }
-    }
+    },
 }
 
 

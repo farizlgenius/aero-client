@@ -35,7 +35,8 @@ createRoot(document.getElementById("root")!).render(
                   <NotificationProvider>
                     <PopupProvider>
                       <AlertProvider>
-                        <App />
+                        <App/>
+                      
                       </AlertProvider>
                     </PopupProvider>
                   </NotificationProvider>

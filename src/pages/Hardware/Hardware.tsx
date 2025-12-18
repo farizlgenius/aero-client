@@ -563,7 +563,7 @@ const Hardware = () => {
           </>
 
           :
-          <BaseTable<HardwareDto> headers={HARDWARE_TABLE_HEADER} keys={HARDWARE_TABLE_KEY} data={data} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClickWithEvent} selectedObject={selectedObjects} permission={filterPermission(FeatureId.DEVICE)} action={actionBtn} renderOptionalComponent={renderOptional} status={status} specialDisplay={[
+          <BaseTable<HardwareDto> headers={HARDWARE_TABLE_HEADER} keys={HARDWARE_TABLE_KEY} data={data} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClickWithEvent} selectedObject={selectedObjects} permission={filterPermission(FeatureId.DEVICE)} action={actionBtn} renderOptionalComponent={renderOptional} status={status} specialDisplay={[
             {
               key: "tranStatus",
               content: (a, i) => <TableCell key={i} className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">

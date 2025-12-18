@@ -219,7 +219,7 @@ const CardHolder = () => {
 
                 :
 
-                <BaseTable<CardHolderDto> headers={CARDHOLDER_HEAD} keys={CARDHOLDER_KEY} data={cardHoldersDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleClick={handleClick} handleRemove={handleRemove} handleEdit={handleEdit} permission={filterPermission(FeatureId.CARDHODLER)} action={action} />
+                <BaseTable<CardHolderDto> headers={CARDHOLDER_HEAD} keys={CARDHOLDER_KEY} data={cardHoldersDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onClick={handleClick} onRemove={handleRemove} onEdit={handleEdit} permission={filterPermission(FeatureId.CARDHODLER)} action={action} />
 
 
             }

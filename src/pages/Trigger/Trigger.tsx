@@ -147,7 +147,7 @@ export const Trigger = () => {
                 create || update ?
                     <BaseForm tabContent={tabContent} />
                     :
-                    <BaseTable<TriggerDto> keys={KEYS} headers={HEADERS} data={triggerDtos} handleEdit={handleEdit} handleRemove={handleRemove} handleCheck={handleCheck} handleCheckAll={handleCheckAll} handleClick={handleClick} selectedObject={selectedObject} permission={filterPermission(FeatureId.TRIGGER)} />
+                    <BaseTable<TriggerDto> keys={KEYS} headers={HEADERS} data={triggerDtos} onEdit={handleEdit} onRemove={handleRemove} handleCheck={handleCheck} handleCheckAll={handleCheckAll} onClick={handleClick} selectedObject={selectedObject} permission={filterPermission(FeatureId.TRIGGER)} />
 
             }
 

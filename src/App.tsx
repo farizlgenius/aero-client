@@ -61,7 +61,7 @@ import { usePopup } from "./context/PopupContext";
 export default function App() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
-  const { create, remove, update, createModal, removeModal, updateModal } = usePopup();
+  const { create, remove, update, createModal, removeModal, updateModal,info,infoModal } = usePopup();
   const { show, locationId } = useLocation();
   const { showAlertFlag, alertSuccessFlag, alertMessage } = useAlert();
   const { showToast, ToastContainer } = useToast();
@@ -129,6 +129,9 @@ export default function App() {
         }
         {update &&
           updateModal
+        }
+        {info &&
+        infoModal
         }
         {show &&
           <LocationModal />

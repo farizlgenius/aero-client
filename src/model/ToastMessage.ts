@@ -54,3 +54,91 @@ export enum ToastMessage{
     DELETE_TRIGGER = "Delete Trigger",
     DELETE_MPG = "Delete Monitor Group"
 }
+
+
+export enum HardwareToast {
+    DELETE = "Delete Hardware",
+    RESET = "Reset Hardware",
+    UPLOAD = "Upload Hardware",
+    STATUS = "Get Hardware Status",
+    LIST = "Get Hardware List",
+    STRUCTURE = "Get Hardware Structure",
+    CREATE = "Create Hardware",
+    COMPONENT = "Hardware Component"
+}
+
+export enum ControlPointToast {
+    CREATE_CP = "Control Point Created",
+    GET_CP_STATUS = "Retrive Control Point Status",
+    DELETE_CP = "Delete Control Point",
+    TRIGGER_CP = "Trigger Control Point"
+}
+
+export enum MonitorPointToast {
+    CREATE_MP = "Monitor Point Created",
+    DELETE_MP = "Delete Monitor Point",
+    MASK_MP = "Masked Monitor Point",
+    UNMASK_MP = "Unmasked Monitor Point",
+    CREATE_MP_GROUP = "Create Monitor Group",
+    DELETE_MPG = "Delete Monitor Group",
+    POST_MONITOR_GROUP_COMMAND = "Monitor Group Command"
+}
+
+export enum DoorToast {
+        GET_ACR = "Get Doors",
+    GET_ACR_STATUS = "Get Door Status",
+    CREATE_ACR = "Create Doors",
+    DELETE_DOOR = "Delete Door",
+}
+
+export enum AccessLevelToast {
+    CREATE_ACCESS_LEVEL = "Create Access Level",
+    DELETE_ACCESS_LEVEL = "Delete Access Leve"
+}
+
+
+export enum CardToast {
+    CREATE_CARDHOLDER = "Create Card Holder",
+    DELETE_CARDHOLDER = "Delete Card Holder",
+}
+
+export enum CardFormatToast {
+        CREATE_CARD_FORMAT = "Create CardFormat",
+    DELETE_CARDFORMAT = "Delete CardFormat"
+}
+
+
+export enum LocationToast {
+    CREATE = "Create Location",
+    DELETE = "Delete Location",
+    UPDATE = "Update Location",
+    DELETE_RANGE = "Delete Range Location"
+}
+
+export enum AccessAreaToast {
+    CREATE = "Create Area",
+}
+
+
+export enum TimeToast {
+    GET_HOL = "Get Holiday",
+    CREATE_HOL = "Create Holiday",
+    UPDATE_HOL = "Update Holiday",
+    DELETE_HOL = "Delete Holiday",
+    GET_TZ = "Get TimeZone",
+    CREATE_TZ = "Create TimeZone",
+    DELETE_TZ = "Delete TimeZone",
+    GET_TZ_MODE = "Get TimeZone Mode",
+    GET_INTERVAL = "Get Interval",
+    CREATE_INTERVAL = "Create Interval",
+    UPDATE_INTERVAL = "Update Interval",
+    REMOVE_INTERVAL = "Remove Interval"
+}
+
+
+export enum RoleToast {
+    CREATE = "Create Role",
+    UPDATE = "Update Role",
+    DELETE = "Delete Role",
+    GET = "Get Role"
+}

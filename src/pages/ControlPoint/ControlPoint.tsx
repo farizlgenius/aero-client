@@ -327,7 +327,7 @@ const ControlPoint = () => {
                     </>
 
                     :
-                    <BaseTable<ControlPointDto> headers={OUTPUT_TABLE_HEADER} keys={OUTPUT_KEY} status={status} data={outputsDto} handleEdit={handleEdit} handleRemove={handleRemove} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} selectedObject={selectedObjects} handleClick={handleClick} permission={filterPermission(FeatureId.DEVICE)} renderOptionalComponent={renderOptionalComponent} action={action} />
+                    <BaseTable<ControlPointDto> headers={OUTPUT_TABLE_HEADER} keys={OUTPUT_KEY} status={status} data={outputsDto} onEdit={handleEdit} onRemove={handleRemove} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} selectedObject={selectedObjects} onClick={handleClick} permission={filterPermission(FeatureId.DEVICE)} renderOptionalComponent={renderOptionalComponent} action={action} />
 
 
             }

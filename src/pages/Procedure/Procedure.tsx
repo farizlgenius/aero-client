@@ -131,7 +131,7 @@ export const Procedure = () => {
         create || update ? 
         <BaseForm tabContent={tabContent}/>
         :
-        <BaseTable<ProcedureDto> keys={KEYS} headers={HEADERS} data={procedureDtos} handleEdit={handleEdit} handleRemove={handleRemove} handleCheck={handleCheck} handleCheckAll={handleCheckAll} handleClick={handleClick} selectedObject={selectedObject} permission={filterPermission(FeatureId.TRIGGER)} />
+        <BaseTable<ProcedureDto> keys={KEYS} headers={HEADERS} data={procedureDtos} onEdit={handleEdit} onRemove={handleRemove} handleCheck={handleCheck} handleCheckAll={handleCheckAll} onClick={handleClick} selectedObject={selectedObject} permission={filterPermission(FeatureId.TRIGGER)} />
 
     }
 

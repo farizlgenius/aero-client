@@ -173,7 +173,7 @@ export const Area = () => {
                 <BaseForm tabContent={createContent} />
                 :
                 <div className="space-y-6">
-                    <BaseTable<AreaDto> headers={AREA_HEADERS} keys={AREA_KEY} data={areasDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} permission={filterPermission(FeatureId.ACCESSAREA)} />
+                    <BaseTable<AreaDto> headers={AREA_HEADERS} keys={AREA_KEY} data={areasDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.ACCESSAREA)} />
 
                 </div>
             }

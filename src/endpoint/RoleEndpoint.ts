@@ -1,7 +1,10 @@
-export enum RoleEndpoint{
-    GET_ROLE = '/api/v1/Role',
-    CREATE_ROLE = '/api/v1/Role',
-    DELETE_ROLE = '/api/v1/Role/',
-    UPDATE_ROLE = '/api/v1/Role/',
-    GET_FEATURE_LIST = '/api/v1/Feature/list'
-}
+const API_VERSION = import.meta.env.VITE_API_VERSION;
+const CONTROLLER = `Role`;
+
+export const RoleEndpoint = {
+    GET:`/api/${API_VERSION}/${CONTROLLER}`,
+    CREATE:`/api/${API_VERSION}/${CONTROLLER}`,
+    DELETE :(component:number) => `/api/${API_VERSION}/${CONTROLLER}/${component}`,
+    UPDATE :`/api/${API_VERSION}/${CONTROLLER}/`,
+    GET_FEATURE_LIST :`/api/${API_VERSION}/Feature/list`
+} as const;

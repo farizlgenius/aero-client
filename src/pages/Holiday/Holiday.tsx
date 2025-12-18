@@ -166,7 +166,7 @@ const Holiday = () => {
             {create || update ?
                 <BaseForm tabContent={content} />
                 :
-                <BaseTable headers={Hol_TABLE_HEAD} keys={Hol_KEY} data={holidaysDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} permission={filterPermission(FeatureId.TIME)} />
+                <BaseTable headers={Hol_TABLE_HEAD} keys={Hol_KEY} data={holidaysDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.TIME)} />
 
 
             }

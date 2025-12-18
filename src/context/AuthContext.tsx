@@ -75,7 +75,7 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
         var dto = {
             locationIds:locationIds
         }
-        const res = await send.post(LocationEndpoint.POST_GET_LOC_RANGE,dto)
+        const res = await send.post(LocationEndpoint.GET_RANGE,dto)
         let locs:LocationDto[] = res.data.data;
         setLocationList(locs)
         if(locs.length > 0){

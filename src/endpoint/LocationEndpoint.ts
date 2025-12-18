@@ -3,9 +3,10 @@ const CONTROLLER = `Location`;
 
 
 export const LocationEndpoint = {
-    CREATE_LOC: `/api/${API_VERSION}/${CONTROLLER}`,
-    GET_LOC : `/api/${API_VERSION}/${CONTROLLER}`,
-    UPDATE_LOC : `/api/${API_VERSION}/${CONTROLLER}`,
-    DELETE_LOC :(component:number) => `/api/${API_VERSION}/${CONTROLLER}/${component}`,
-    POST_GET_LOC_RANGE : `/api/${API_VERSION}/${CONTROLLER}/range`
+    CREATE: `/api/${API_VERSION}/${CONTROLLER}`,
+    GET : `/api/${API_VERSION}/${CONTROLLER}`,
+    UPDATE : `/api/${API_VERSION}/${CONTROLLER}`,
+    DELETE :(component:number) => `/api/${API_VERSION}/${CONTROLLER}/${component}`,
+    GET_RANGE : `/api/${API_VERSION}/${CONTROLLER}/range`,
+    DELETE_RANGE: `/api/${API_VERSION}/${CONTROLLER}/delete/range`
 } as const;

@@ -2,6 +2,7 @@ import React, { createContext, JSX, useContext, useState } from "react";
 import RemoveModal from "../pages/UiElements/RemoveModal";
 import CreateModal from "../pages/UiElements/CreateModal";
 import UpdateModal from "../pages/UiElements/UpdateModal";
+import InfoModal from "../pages/UiElements/InfoModal";
 
 interface PopupContextInterface {
   create:boolean;
@@ -13,11 +14,13 @@ interface PopupContextInterface {
   removeModal:JSX.Element;
   createModal:JSX.Element;
   updateModal:JSX.Element;
+  infoModal:JSX.Element;
   setConfirmCreate: (fn: () => void) => void;
   setConfirmUpdate: (fn: () => void) => void;
   setConfirmRemove: (fn: () => void) => void;
-  edit:boolean;
-  setEdit:React.Dispatch<React.SetStateAction<boolean>>;
+  info:boolean;
+  setInfo:React.Dispatch<React.SetStateAction<boolean>>;
+  setMessage:React.Dispatch<React.SetStateAction<string>>;
 };
 
 type RemovePayload = {
@@ -33,7 +36,8 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [create,setCreate] = useState<boolean>(false);
   const [update,setUpdate] = useState<boolean>(false);
   const [remove,setRemove] = useState<boolean>(false);
-  const [edit,setEdit] = useState<boolean>(false);
+  const [info,setInfo] = useState<boolean>(false);
+  const [message,setMessage] = useState<string>("")
 
   const [confirmCreate, setConfirmCreate] = useState<() => void>(() => () => {});
   const [confirmUpdate, setConfirmUpdate] = useState<() => void>(() => () => {});
@@ -62,6 +66,9 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       case "remove-cancel":
         setRemove(false);
         break;
+      case "info-ok":
+        setInfo(false);
+        break;
       default:
         break;
     }
@@ -70,6 +77,7 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const removeModal = <RemoveModal  handleClick={handleClick} />
   const createModal = <CreateModal handleClick={handleClick} />
   const updateModal = <UpdateModal handleClick={handleClick} />
+  const infoModal =  <InfoModal handleClick={handleClick} message={message}/>
 
 
 
@@ -87,8 +95,10 @@ export const PopupProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setConfirmCreate,
         setConfirmUpdate,
         setConfirmRemove,
-        edit,
-        setEdit
+        info,
+        setInfo,
+        infoModal,
+        setMessage
       }}>
       {children}
     </PopupContext.Provider>

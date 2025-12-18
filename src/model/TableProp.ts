@@ -8,12 +8,12 @@ export interface TableProp<T> {
     headers?:string[];
     keys?:string[];
     data: T[]
-    handleEdit: (data: T) => void
-    handleRemove: (data: T) => void
-    handleCheck: (data: T, e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleCheckAll: (data: T[], e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleClick:(e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-    selectedObject: T[];
+    onInfo:(data:T) => void;
+    onEdit: (data: T) => void
+    onRemove: (data: T) => void
+    onClick:(e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+    select:T[];
+    setSelect:React.Dispatch<React.SetStateAction<T[]>>
     renderOptionalComponent?:(data: any, statusDto: StatusDto[]) => JSX.Element[];
     specialDisplay?:TableSpecialDisplay<T>[];
     permission?:FeatureDto;

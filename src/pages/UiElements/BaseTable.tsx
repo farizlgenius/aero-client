@@ -3,6 +3,7 @@ import Search from "../../components/ui/table/Search";
 import { TableProp } from "../../model/TableProp";
 import { PaginationNew } from "../../components/ui/table/PaginationNew";
 import { EditIcon, Info2Icon, TrashBinIcon } from "../../icons";
+import { useState } from "react";
 
 interface PageProp {
     pageNumber: number;
@@ -12,15 +13,32 @@ interface PageProp {
 }
 
 
-export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, handleCheck, handleCheckAll, handleEdit, handleRemove, selectedObject, renderOptionalComponent, specialDisplay, handleClick, permission, action,status }: TableProp<T>) => {
-
+export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, onEdit,onInfo,onRemove,setSelect, renderOptionalComponent, specialDisplay, onClick: handleClick, permission, action, status,select }: TableProp<T>) => {
     const handlePageSizeSelect = (data: string) => {
         // setPageSize(Number(data));
     }
-   
 
-    console.log(status)
-    console.log(data)
+
+    const handleCheckAll = (data: T[], e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.checked) {
+            setSelect(data);
+        } else {
+            setSelect([]);
+        }
+
+    }
+
+    const handleCheck = (data: T, e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.checked) {
+            setSelect((prev) => [...prev, data]);
+        } else {
+            setSelect((prev) =>
+                prev.filter((item) => item.componentId !== data.componentId)
+            );
+        }
+
+    }
+
     return (
         <>
             <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
@@ -49,7 +67,7 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
                                 {data && data.map((data: T, i: number) => (
                                     <TableRow key={i}>
                                         <TableCell className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
-                                            <input checked={selectedObject?.includes(data)} type="checkbox" onChange={(e) => handleCheck(data, e)} />
+                                            <input checked={select?.includes(data)} type="checkbox" onChange={(e) => handleCheck(data, e)} />
                                         </TableCell >
                                         {keys && keys.map((key: string, i: number) =>
                                             specialDisplay?.some(a => a.key == key) ?
@@ -59,18 +77,18 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
                                                     {String(data[key as keyof typeof data])}
                                                 </TableCell>
                                         )}
-                                        {status && renderOptionalComponent && renderOptionalComponent(data,status)}
+                                        {status && renderOptionalComponent && renderOptionalComponent(data, status)}
 
 
                                         {/* Action */}
                                         <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                                             <div className="flex gap-2">
 
-                                                <a id="detail" onClick={() => handleEdit(data)} className="cursor-pointer font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                                <a id="detail" onClick={() => onInfo(data)} className="cursor-pointer font-medium text-blue-600 dark:text-blue-500 hover:underline">
                                                     <Info2Icon className="w-10 h-5" />
                                                 </a>
                                                 {permission?.isModify &&
-                                                    <a id="edit" onClick={() => handleEdit(data)} className="cursor-pointer font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                                    <a id="edit" onClick={() => onEdit(data)} className="cursor-pointer font-medium text-blue-600 dark:text-blue-500 hover:underline">
                                                         <EditIcon className="w-10 h-5" />
 
                                                     </a>
@@ -78,7 +96,7 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
                                                 {
                                                     permission?.isDelete &&
 
-                                                    <a id="remove" onClick={() => handleRemove(data)} className="cursor-pointer font-medium text-red-600 dark:text-red-500 hover:underline"><TrashBinIcon className="w-10 h-5" /></a>
+                                                    <a id="remove" onClick={() => onRemove(data)} className="cursor-pointer font-medium text-red-600 dark:text-red-500 hover:underline"><TrashBinIcon className="w-10 h-5" /></a>
                                                 }
 
 
@@ -86,8 +104,6 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
                                         </TableCell>
                                     </TableRow>
                                 ))}
-                                {/* <TableRow>23</TableRow> */}
-                                {/* <hr/> */}
                             </TableBody>
                         </Table>
                     </div>

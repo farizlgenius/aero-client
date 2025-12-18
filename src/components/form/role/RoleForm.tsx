@@ -1,5 +1,5 @@
 import { PropsWithChildren, useEffect, useState } from "react";
-import { FormProp } from "../../../model/Form/FormProp";
+import { FormProp, FormType } from "../../../model/Form/FormProp";
 import { RoleDto } from "../../../model/Role/RoleDto";
 import Button from "../../ui/button/Button";
 import Label from "../Label";
@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../ui/tab
 import { FeatureDto } from "../../../model/Role/FeatureDto";
 import Checkbox from "../input/Checkbox";
 
-export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ isUpdate, handleClick: handleClickWithEvent, dto, setDto }) => {
+export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type, handleClick: handleClickWithEvent, dto, setDto }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setDto(prev => ({ ...prev, [e.target.name]: e.target.value }))
     }
@@ -21,15 +21,12 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ isUpd
         console.log(res?.data.data)
         if (res && res.data.data) {
             // setList(res.data.data)
-            if (!isUpdate) {
+            if (type == FormType.Create) {
                 setDto(prev => ({ ...prev, features: res.data.data }))
             }
         }
     }
 
-    const handleCheck = (e: React.ChangeEvent<HTMLInputElement>) => {
-
-    }
 
     useEffect(() => {
         fetchFeatureList();
@@ -40,7 +37,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ isUpd
                 <div className='flex gap-2 mb-3 w-1/2'>
                     <div className='flex-1'>
                         <Label htmlFor="name">Name</Label>
-                        <Input name="name" type="text" id="name" onChange={handleChange} value={dto.name} />
+                        <Input disabled={type==FormType.Info} name="name" type="text" id="name" onChange={handleChange} value={dto.name} />
                     </div>
                 </div>
                 <div className='flex gap-2 mb-3 w-3/4'>
@@ -53,7 +50,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ isUpd
                                     <TableRow>
                                         <TableCell isHeader className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                                             <div className="flex gap-2 justify-center item-center">
-                                                <Switch label={""} onChange={(checked) => {
+                                                <Switch disabled={type==FormType.Info} label={""} onChange={(checked) => {
                                                     setDto(prev => ({
                                                         ...prev,
                                                         features: prev.features.map(a => ({
@@ -102,7 +99,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ isUpd
                                             </TableCell > */}
                                             <TableCell className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                                                 <div className="flex gap-2 justify-center item-center">
-                                                    <Switch defaultChecked={data.isAllow} label={""} onChange={(checked) => {
+                                                    <Switch disabled={type==FormType.Info} defaultChecked={data.isAllow} label={""} onChange={(checked) => {
                                                         setDto(prev => ({
                                                             ...prev,
                                                             features: prev.features.map(a => (
@@ -132,7 +129,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ isUpd
                                                 <>
                                                     <TableCell className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                                                         <div className="flex justify-center item-center gap-2">
-                                                            <Checkbox name="isCreate" checked={data.isCreate} onChange={(e) => {
+                                                            <Checkbox disabled={type==FormType.Info} name="isCreate" checked={data.isCreate} onChange={(e) => {
                                                                 setDto(prev => ({
                                                                     ...prev,
                                                                     features: prev.features.map(a => (
@@ -154,7 +151,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ isUpd
                                                     </TableCell >
                                                     <TableCell className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                                                         <div className="flex justify-center item-center gap-2">
-                                                            <Checkbox name="isModify" checked={data.isModify} onChange={(e) => {
+                                                            <Checkbox disabled={type==FormType.Info} name="isModify" checked={data.isModify} onChange={(e) => {
                                                                 setDto(prev => ({
                                                                     ...prev,
                                                                     features: prev.features.map(a => (
@@ -177,7 +174,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ isUpd
                                                     </TableCell >
                                                     <TableCell className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                                                         <div className="flex justify-center item-center gap-2">
-                                                            <Checkbox name="isDelete" checked={data.isDelete} onChange={(e) => {
+                                                            <Checkbox disabled={type==FormType.Info} name="isDelete" checked={data.isDelete} onChange={(e) => {
                                                                 setDto(prev => ({
                                                                     ...prev,
                                                                     features: prev.features.map(a => (
@@ -198,7 +195,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ isUpd
                                                     </TableCell >
                                                                                                         <TableCell className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                                                         <div className="flex justify-center item-center gap-2">
-                                                            <Checkbox name="isAction" checked={data.isAction} onChange={(e) => {
+                                                            <Checkbox disabled={type==FormType.Info} name="isAction" checked={data.isAction} onChange={(e) => {
                                                                 setDto(prev => ({
                                                                     ...prev,
                                                                     features: prev.features.map(a => (
@@ -229,7 +226,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ isUpd
                     </div>
                 </div>
                 <div className='mt-3 flex gap-2'>
-                    <Button onClickWithEvent={handleClickWithEvent} name={isUpdate ? "update" : "create"} size='sm'>{isUpdate ? "Update" : "Create"}</Button>
+                    <Button disabled={type == FormType.Info} onClickWithEvent={handleClickWithEvent} name={type == FormType.Update ? "update" : "create"} size='sm'>{type == FormType.Update ? "Update" : "Create"}</Button>
                     <Button variant='danger' onClickWithEvent={handleClickWithEvent} name='cancel' size='sm'>Cancel</Button>
                 </div>
             </div>

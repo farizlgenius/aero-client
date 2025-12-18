@@ -40,7 +40,7 @@ export const OperatorForm: React.FC<PropsWithChildren<FormProp<OperatorDto>>> = 
     }
 
     const fetchLocation = async () => {
-        const res = await HttpRequest.send(HttpMethod.GET, LocationEndpoint.GET_LOC)
+        const res = await HttpRequest.send(HttpMethod.GET, LocationEndpoint.GET)
         console.log(res?.data.data)
         if (res && res.data.data) {
             res.data.data.map((a: LocationDto) => {

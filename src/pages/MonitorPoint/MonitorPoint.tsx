@@ -287,7 +287,7 @@ const MonitorPoint = () => {
             {create || update ?
                 <BaseForm tabContent={tabContent} />
                 :
-                <BaseTable<MonitorPointDto> headers={MP_TABLE_HEADER} keys={MP_KEY} data={monitorPointsDto} status={status} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} selectedObject={selectedObjects} handleClick={handleClick} action={action} renderOptionalComponent={renderOptionalComponent} permission={filterPermission(FeatureId.DEVICE)} />
+                <BaseTable<MonitorPointDto> headers={MP_TABLE_HEADER} keys={MP_KEY} data={monitorPointsDto} status={status} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onEdit={handleEdit} onRemove={handleRemove} selectedObject={selectedObjects} onClick={handleClick} action={action} renderOptionalComponent={renderOptionalComponent} permission={filterPermission(FeatureId.DEVICE)} />
 
             }
 

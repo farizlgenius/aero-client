@@ -172,7 +172,7 @@ const TimeZone = () => {
                 <BaseForm tabContent={tabContent} />
 
                 :
-                <BaseTable<TimeZoneDto> keys={TIMEZONE_KEY} headers={TIMEZONE_TABLE_HEAD} data={timeZonesDto} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleRemove={handleRemove} handleEdit={handleEdit} handleClick={handleClick} selectedObject={selectedObjects} permission={filterPermission(FeatureId.TIME)} />
+                <BaseTable<TimeZoneDto> keys={TIMEZONE_KEY} headers={TIMEZONE_TABLE_HEAD} data={timeZonesDto} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onRemove={handleRemove} onEdit={handleEdit} onClick={handleClick} selectedObject={selectedObjects} permission={filterPermission(FeatureId.TIME)} />
 
             }
 

@@ -222,7 +222,7 @@ export default function Module() {
         <Modals header="Edit Module" body={<EditModuleInputs data={moduleDto[0]} />} handleClickWithEvent={closeModalToggle} />
       }
       <PageBreadcrumb pageTitle="Module" />
-      <BaseTable<ModuleDto> headers={MODULE_TABLE_HEADER} keys={MODULE_KEY} data={moduleDto} status={status} handleCheck={handleCheck} handleCheckAll={handleCheckedAll} selectedObject={selectedObjects} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} permission={filterPermission(FeatureId.DEVICE)} renderOptionalComponent={filterComponent} />
+      <BaseTable<ModuleDto> headers={MODULE_TABLE_HEADER} keys={MODULE_KEY} data={moduleDto} status={status} handleCheck={handleCheck} handleCheckAll={handleCheckedAll} selectedObject={selectedObjects} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.DEVICE)} renderOptionalComponent={filterComponent} />
     </>
   );
 }

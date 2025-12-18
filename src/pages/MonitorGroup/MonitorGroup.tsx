@@ -242,7 +242,7 @@ export const MonitorGroup = () => {
 
                 <BaseForm tabContent={tabContent} />
                 :
-                <BaseTable<MonitorGroupDto> headers={MP_GP_HEADER} keys={MP_GP_KEY} handleClick={handleClick} data={mpGroupsDto} handleCheck={handleCheck} handleCheckAll={handleCheckAll} handleEdit={handleEdit} handleRemove={handleRemove} selectedObject={selectedObject} permission={filterPermission(FeatureId.DEVICE)} action={action} />
+                <BaseTable<MonitorGroupDto> headers={MP_GP_HEADER} keys={MP_GP_KEY} onClick={handleClick} data={mpGroupsDto} handleCheck={handleCheck} handleCheckAll={handleCheckAll} onEdit={handleEdit} onRemove={handleRemove} selectedObject={selectedObject} permission={filterPermission(FeatureId.DEVICE)} action={action} />
 
             }
         </>

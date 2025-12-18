@@ -20,7 +20,7 @@ export const POST_ADD_SCP = SERVER + '/api/v1/Hardware';
 export const POST_UPCONFIG_SCP = SERVER + '/api/v1/Hardware/upload';
 
 export enum IdReportEndPoint {
-    GET_ID_REPORT_LIST = "/api/v1/IdReport"
+    
 }
 
 
@@ -75,9 +75,7 @@ export const ModalDetail = {
 
 export type ModalDetail = typeof ModalDetail[keyof typeof ModalDetail];
 
-// Hardware Page
-export const ID_REPORT_KEY = [ "deviceId",'macAddress','scpId','ip'];
-export const ID_REPORT_TABLE_HEADER = ["Model", "Mac address", "Id", "Ip address", "Action"];
+
 
 
 

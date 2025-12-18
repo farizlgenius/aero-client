@@ -19,6 +19,7 @@ import { useLocation } from "../../context/LocationContext";
 import api, { send } from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import { FeatureId } from "../../enum/FeatureId";
+import { usePopup } from "../../context/PopupContext";
 
 
 var removeTarget: number = 0;
@@ -46,9 +47,9 @@ export const Operator = () => {
     const { locationId } = useLocation();
     const { filterPermission } = useAuth();
     const { toggleToast } = useToast();
-    const [create, setCreate] = useState<boolean>(false);
-    const [update, setUpdate] = useState<boolean>(false);
-    const [remove, setRemove] = useState(false);
+    const { setRemove, setConfirmRemove,setConfirmCreate ,setCreate,setUpdate,setConfirmUpdate,edit,setEdit} = usePopup();
+    
+    const [form,setForm] = useState<boolean>(false);
     const [refresh, setRefresh] = useState<boolean>(false);
     const [operatorDto, setOperatorDto] = useState<OperatorDto>(defaultDto);
     const [operatorsDto, setOperatorsDto] = useState<OperatorDto[]>([]);
@@ -56,20 +57,23 @@ export const Operator = () => {
 
     const handleRemove = (data: OperatorDto) => {
         removeTarget = data.componentId;
+        setConfirmRemove(() => async () => {
+            const res = await HttpRequest.send(HttpMethod.DELETE, RoleEndpoint.DELETE(removeTarget))
+        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
+            setRemove(false)
+            toggleRefresh();
+            removeTarget = 0;
+        }
+        })
         setRemove(true);
     }
-    const handleOnClickCloseRemove = () => {
-        setRemove(false);
-    }
-    const handleOnClickConfirmRemove = () => {
-        setRemove(false);
-        removeLocation(removeTarget);
-    }
+
 
     {/* handle Table Action */ }
     const handleEdit = (data: OperatorDto) => {
+        setEdit(true)
         setOperatorDto(data);
-        setUpdate(true);
+        setForm(true);
     }
 
 
@@ -80,10 +84,25 @@ export const Operator = () => {
                 setCreate(true);
                 break;
             case "create":
-                createLocation(operatorDto);
+                setConfirmCreate(() => async () => {
+                    const res = await HttpRequest.send(HttpMethod.POST, OpearatorEndpoint.CREATE_OPER, false, operatorDto)
+                    if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
+                        setCreate(false)
+                        setUpdate(false)
+                        toggleRefresh();
+                    }
+                })
                 break;
             case "update":
-                updateLocation(operatorDto)
+                setConfirmUpdate(() => async () => {
+                    const res = await HttpRequest.send(HttpMethod.PUT, OpearatorEndpoint.UPDATE_OPER, false, operatorDto)
+                    if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
+                        setForm(false)
+                        setUpdate(false)
+                        toggleRefresh();
+                        setEdit(false)
+                    }
+                });
                 break;
             case "close":
             case "cancel":
@@ -96,31 +115,6 @@ export const Operator = () => {
         }
     }
 
-    const createLocation = async (dto: OperatorDto) => {
-        const res = await HttpRequest.send(HttpMethod.POST, OpearatorEndpoint.CREATE_OPER,false,dto)
-        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
-            setCreate(false)
-            setUpdate(false)
-            toggleRefresh();
-        }
-    }
-
-    const updateLocation = async (dto: OperatorDto) => {
-        const res = await HttpRequest.send(HttpMethod.PUT, OpearatorEndpoint.UPDATE_OPER,false,dto)
-        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
-            setCreate(false)
-            setUpdate(false)
-            toggleRefresh();
-        }
-    }
-
-    const removeLocation = async (id: number) => {
-        const res = await HttpRequest.send(HttpMethod.DELETE, RoleEndpoint.DELETE_ROLE + id)
-        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
-            setRemove(false)
-            toggleRefresh();
-        }
-    }
 
     const [selectedObjects, setSelectedObjects] = useState<OperatorDto[]>([]);
     const handleCheckedAll = (data: OperatorDto[], e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,7 +157,7 @@ export const Operator = () => {
         {
             icon: <OperatorIcon />,
             label: "Operator",
-            content: <OperatorForm isUpdate={update} dto={operatorDto} setDto={setOperatorDto} handleClick={handleClick} />
+            content: <OperatorForm isUpdate={edit} dto={operatorDto} setDto={setOperatorDto} handleClick={handleClick} />
         }
     ];
 
@@ -179,13 +173,12 @@ export const Operator = () => {
 
         <>
             <PageBreadcrumb pageTitle="Operators" />
-            {remove && <RemoveModal header='Remove Operator' body='Please Click Confirm if you want to remove operator' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
-            {create || update ?
+            {form ?
 
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <BaseTable<OperatorDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={operatorsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} permission={filterPermission(FeatureId.OPERATOR)} />
+                    <BaseTable<OperatorDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={operatorsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.OPERATOR)} />
                 </div>
 
             }

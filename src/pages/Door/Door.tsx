@@ -447,7 +447,7 @@ const Door = () => {
                 <BaseForm tabContent={content} />
 
                 :
-                <BaseTable<DoorDto> headers={DOOR_TABLE_HEADER} keys={DOOR_KEY} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleClick={handleClick} handleEdit={handleEdit} handleRemove={handleRemove} data={doorsDto} status={status} action={action} permission={filterPermission(FeatureId.DOOR)} renderOptionalComponent={filterComponet}/>
+                <BaseTable<DoorDto> headers={DOOR_TABLE_HEADER} keys={DOOR_KEY} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onClick={handleClick} onEdit={handleEdit} onRemove={handleRemove} data={doorsDto} status={status} action={action} permission={filterPermission(FeatureId.DOOR)} renderOptionalComponent={filterComponet}/>
 
             }
 

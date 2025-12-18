@@ -168,7 +168,7 @@ const AccessLevel = () => {
             {createModal || updateModal ?
                 <BaseForm tabContent={tabContent} />
                 :
-                 <BaseTable<AccessLevelDto> headers={HEADER} keys={KEY} data={accessLevelDtos} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} handleClick={handleClick} selectedObject={selectedObjects} permission={filterPermission(FeatureId.ACCESSLEVEL)}/>
+                 <BaseTable<AccessLevelDto> headers={HEADER} keys={KEY} data={accessLevelDtos} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} selectedObject={selectedObjects} permission={filterPermission(FeatureId.ACCESSLEVEL)}/>
             }
 
         </>

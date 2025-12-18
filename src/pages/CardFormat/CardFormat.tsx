@@ -177,7 +177,7 @@ const CardFormat = () => {
             {create || update ?
                 <BaseForm tabContent={content}/>
                 :
-                <BaseTable<CardFormatDto> headers={CARDFORMAT_TABLE_HEAD} keys={CARDFORMAT_KEY} data={cardFormatsDto} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} selectedObject={selectedObjects} handleClick={handleClick} permission={filterPermission(FeatureId.SETTING)} />
+                <BaseTable<CardFormatDto> headers={CARDFORMAT_TABLE_HEAD} keys={CARDFORMAT_KEY} data={cardFormatsDto} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onEdit={handleEdit} onRemove={handleRemove} selectedObject={selectedObjects} onClick={handleClick} permission={filterPermission(FeatureId.SETTING)} />
 
             }
 

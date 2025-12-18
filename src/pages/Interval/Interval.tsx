@@ -241,7 +241,7 @@ const Interval = () => {
 
                 :
                 <div className="space-y-6">
-                        <BaseTable<IntervalDto> headers={INTERVAL_TABLE_HEAD} keys={INTERVAL_KEY} data={intervalsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} handleEdit={handleEdit} handleRemove={handleRemove} specialDisplay={[
+                        <BaseTable<IntervalDto> headers={INTERVAL_TABLE_HEAD} keys={INTERVAL_KEY} data={intervalsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onEdit={handleEdit} onRemove={handleRemove} specialDisplay={[
                         {
                             key: "days",
                             content: (d, i) => <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
@@ -270,7 +270,7 @@ const Interval = () => {
                                 </div>
                             </TableCell>
                         }
-                    ]} handleClick={handleClickWithEvent} permission={filterPermission(FeatureId.TIME)} />
+                    ]} onClick={handleClickWithEvent} permission={filterPermission(FeatureId.TIME)} />
                 </div>
             }
 

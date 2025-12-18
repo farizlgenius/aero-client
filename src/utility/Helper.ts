@@ -55,6 +55,9 @@ class Helper {
                     toggleToast("error", res.data.message)
                     //showPopup(false,[res.data.detail,res.data.message])
                     return false;
+                case HttpCode.NOT_ACCEPT:
+                    toggleToast("error",res.data.message)
+                    return false;
                 default:
                     toggleToast("error", "error with code : " + res.data.code)
                     return false;
