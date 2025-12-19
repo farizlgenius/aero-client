@@ -34,7 +34,7 @@ export const LOCATION_KEY: string[] = ["name"];
 export const Role = () => {
     const { toggleToast } = useToast();
     const {filterPermission} = useAuth();
-    const { setCreate,setConfirmCreate,setUpdate,setConfirmUpdate,setRemove,setConfirmRemove,setInfo } = usePopup();
+    const { setCreate,setConfirmCreate,setUpdate,setConfirmUpdate,setRemove,setConfirmRemove,setInfo,setMessage } = usePopup();
     const [form, setForm] = useState<boolean>(false);
     const [refresh, setRefresh] = useState<boolean>(false);
     const [roleDto, setRoleDto] = useState<RoleDto>(defaultDto);
@@ -77,6 +77,22 @@ export const Role = () => {
                 setForm(true);
                 break;
             case "delete":
+                if(selectedObjects.length == 0){            
+                    setMessage("Please select object")
+                    setInfo(true);
+                }
+                setConfirmRemove(() => async () => {
+                    var data:number[] = [];
+                    selectedObjects.map(async (a:RoleDto) => {
+                        data.push(a.componentId)
+                    })
+                    var res = await send.post(RoleEndpoint.DELETE_RANGE,data)
+                    if(Helper.handleToastByResCode(res,RoleToast.DELETE_RANGE,toggleToast)){
+                        setRemove(false);
+                        toggleRefresh();
+                    }
+                })
+                setRemove(true);
                 break;
             case "create":
                 setConfirmCreate(() => async () => {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb"
 import { useToast } from "../../context/ToastContext";
 import RemoveModal from "../UiElements/RemoveModal";
@@ -10,16 +10,17 @@ import { OperatorDto } from "../../model/Operator/OperatorDto";
 import { HttpMethod } from "../../enum/HttpMethod";
 import HttpRequest from "../../utility/HttpRequest";
 import Helper from "../../utility/Helper";
-import { ToastMessage } from "../../model/ToastMessage";
+import { OperatorToast, ToastMessage } from "../../model/ToastMessage";
 import { FormContent } from "../../model/Form/FormContent";
 import { RoleEndpoint } from "../../endpoint/RoleEndpoint";
-import { OpearatorEndpoint } from "../../endpoint/OperatorEndpoint";
+import { OperatorEndpoint } from "../../endpoint/OperatorEndpoint";
 import { OperatorForm } from "../../components/form/operator/OperatorForm";
 import { useLocation } from "../../context/LocationContext";
 import api, { send } from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import { FeatureId } from "../../enum/FeatureId";
 import { usePopup } from "../../context/PopupContext";
+import { FormType } from "../../model/Form/FormProp";
 
 
 var removeTarget: number = 0;
@@ -39,17 +40,16 @@ const defaultDto: OperatorDto = {
     locationIds:[],
 }
 
-export const LOCATION_HEADER: string[] = ["Username", "Action"]
-export const LOCATION_KEY: string[] = ["username"];
-
+export const HEADER: string[] = ["Username", "Action"]
+export const KEY: string[] = ["username"];
 
 export const Operator = () => {
     const { locationId } = useLocation();
     const { filterPermission } = useAuth();
     const { toggleToast } = useToast();
-    const { setRemove, setConfirmRemove,setConfirmCreate ,setCreate,setUpdate,setConfirmUpdate,edit,setEdit} = usePopup();
-    
+    const { setRemove, setConfirmRemove,setConfirmCreate ,setCreate,setUpdate,setConfirmUpdate,setInfo,setMessage} = usePopup();
     const [form,setForm] = useState<boolean>(false);
+    const [formType,setFormType] = useState<FormType>(FormType.Create);
     const [refresh, setRefresh] = useState<boolean>(false);
     const [operatorDto, setOperatorDto] = useState<OperatorDto>(defaultDto);
     const [operatorsDto, setOperatorsDto] = useState<OperatorDto[]>([]);
@@ -58,8 +58,8 @@ export const Operator = () => {
     const handleRemove = (data: OperatorDto) => {
         removeTarget = data.componentId;
         setConfirmRemove(() => async () => {
-            const res = await HttpRequest.send(HttpMethod.DELETE, RoleEndpoint.DELETE(removeTarget))
-        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
+            const res = await send.delete(OperatorEndpoint.DELETE(removeTarget))
+        if (Helper.handleToastByResCode(res, OperatorToast.DELETE, toggleToast)) {
             setRemove(false)
             toggleRefresh();
             removeTarget = 0;
@@ -71,8 +71,14 @@ export const Operator = () => {
 
     {/* handle Table Action */ }
     const handleEdit = (data: OperatorDto) => {
-        setEdit(true)
         setOperatorDto(data);
+        setFormType(FormType.Update)
+        setForm(true);
+    }
+
+    const handleInfo = (data:OperatorDto) => {
+        setOperatorDto(data);
+        setFormType(FormType.Info)
         setForm(true);
     }
 
@@ -81,34 +87,53 @@ export const Operator = () => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
-                setCreate(true);
+                setFormType(FormType.Create)
+                setForm(true);
                 break;
-            case "create":
-                setConfirmCreate(() => async () => {
-                    const res = await HttpRequest.send(HttpMethod.POST, OpearatorEndpoint.CREATE_OPER, false, operatorDto)
-                    if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
-                        setCreate(false)
-                        setUpdate(false)
+            case "delete":
+                if(selectedObjects.length == 0){            
+                    setMessage("Please select object")
+                    setInfo(true);
+                }
+                setConfirmRemove(() => async () => {
+                    var data:number[] = [];
+                    selectedObjects.map(async (a:OperatorDto) => {
+                        data.push(a.componentId)
+                    })
+                    var res = await send.post(OperatorEndpoint.DELETE_RANGE,data)
+                    if(Helper.handleToastByResCode(res,OperatorToast.DELETE_RANGE,toggleToast)){
+                        setRemove(false);
                         toggleRefresh();
                     }
                 })
+                setRemove(true);
+                break;
+            case "create":
+                setConfirmCreate(() => async () => {
+                    const res = await send.post(OperatorEndpoint.CREATE,operatorDto);
+                    if (Helper.handleToastByResCode(res, OperatorToast.CREATE, toggleToast)) {
+                        setForm(false)
+                        setOperatorDto(defaultDto)
+                        toggleRefresh();
+                    }
+                })
+                setCreate(true);
                 break;
             case "update":
                 setConfirmUpdate(() => async () => {
-                    const res = await HttpRequest.send(HttpMethod.PUT, OpearatorEndpoint.UPDATE_OPER, false, operatorDto)
-                    if (Helper.handleToastByResCode(res, ToastMessage.CREATE_LOCATION, toggleToast)) {
+                    const res = await send.put(OperatorEndpoint.UPDATE,operatorDto)
+                    if (Helper.handleToastByResCode(res, OperatorToast.UPDATE, toggleToast)) {
                         setForm(false)
-                        setUpdate(false)
+                        setOperatorDto(defaultDto)
                         toggleRefresh();
-                        setEdit(false)
                     }
                 });
+                setUpdate(true)
                 break;
             case "close":
             case "cancel":
                 setOperatorDto(defaultDto)
-                setCreate(false);
-                setUpdate(false);
+                setForm(false);
                 break;
             default:
                 break;
@@ -117,53 +142,23 @@ export const Operator = () => {
 
 
     const [selectedObjects, setSelectedObjects] = useState<OperatorDto[]>([]);
-    const handleCheckedAll = (data: OperatorDto[], e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects(data);
-            } else {
-                setSelectedObjects([]);
-            }
-        }
-    }
-
-    const handleChecked = (data: OperatorDto, e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects((prev) => [...prev, data]);
-            } else {
-                setSelectedObjects((prev) =>
-                    prev.filter((item) => item.componentId !== data.componentId)
-                );
-            }
-        }
-    }
-
+  
     const fetchDate = async () => {
-        const res = await send.get(OpearatorEndpoint.GET_OPER(String(locationId)));
+        const res = await send.get(OperatorEndpoint.GET(String(locationId)));
         console.log(res?.data.data)
         if (res && res.data.data) {
             setOperatorsDto(res.data.data);
         }
     }
 
-
     {/* Form */ }
     const tabContent: FormContent[] = [
         {
             icon: <OperatorIcon />,
             label: "Operator",
-            content: <OperatorForm isUpdate={edit} dto={operatorDto} setDto={setOperatorDto} handleClick={handleClick} />
+            content: <OperatorForm type={formType} dto={operatorDto} setDto={setOperatorDto} handleClick={handleClick} />
         }
     ];
-
-    
-
-
     useEffect(() => {
         fetchDate();
     }, [refresh])
@@ -178,7 +173,7 @@ export const Operator = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <BaseTable<OperatorDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={operatorsDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.OPERATOR)} />
+                    <BaseTable<OperatorDto> headers={HEADER} keys={KEY} data={operatorsDto} select={selectedObjects} onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} onClick={handleClick} permission={filterPermission(FeatureId.OPERATOR)} setSelect={setSelectedObjects} />
                 </div>
 
             }

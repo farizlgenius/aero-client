@@ -45,6 +45,9 @@ class Helper {
                 case HttpCode.CREATED:
                     toggleToast("success", message)
                     return true;
+                case HttpCode.UNAUTHORIZED:
+                    toggleToast("error",res.data.message)
+                    return false;
                 case HttpCode.BAD_REQUEST:
                     toggleToast("error", res.data.message)
                     return false;

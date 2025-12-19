@@ -55,6 +55,13 @@ export enum ToastMessage{
     DELETE_MPG = "Delete Monitor Group"
 }
 
+export enum OperatorToast {
+    CREATE = "Create Operator",
+    UPDATE = "Update Operator",
+    UPDATE_PASS = "Update Password",
+    DELETE = "Delete Operator",
+    DELETE_RANGE = "Delete Range Operator"
+}
 
 export enum HardwareToast {
     DELETE = "Delete Hardware",
@@ -140,5 +147,6 @@ export enum RoleToast {
     CREATE = "Create Role",
     UPDATE = "Update Role",
     DELETE = "Delete Role",
-    GET = "Get Role"
+    GET = "Get Role",
+    DELETE_RANGE = "Delete Roles"
 }

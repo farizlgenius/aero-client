@@ -37,7 +37,8 @@ export function clearAccessToken() {
 export const send = {
     get: async (endpoint: string) => {
         try {
-            return await api.get(endpoint);
+            const res = await api.get(endpoint);
+            return res;
         } catch (e: any) {
             Logger.error(e)
             return e.response;
@@ -46,7 +47,8 @@ export const send = {
 
     post: async (endpoint: string, payload?: Object) => {
         try {
-            return await api.post(endpoint, payload);
+            const res = await api.post(endpoint, payload);
+            return res;
         } catch (e: any) {
             Logger.error(e)
             return e;
@@ -54,7 +56,8 @@ export const send = {
     },
     put: async (endpoint: string, payload: Object) => {
         try {
-            return await api.put(endpoint, payload);
+            const res = await api.put(endpoint, payload);
+            return res
         } catch (e: any) {
             Logger.error(e)
             return e.response;
@@ -62,7 +65,8 @@ export const send = {
     },
     delete: async (endpoint: string) => {
         try {
-            return await api.delete(endpoint);
+            const res = await api.delete(endpoint);
+            return res;
         } catch (e: any) {
             Logger.error(e)
             return e.response;

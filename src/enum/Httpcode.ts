@@ -6,4 +6,5 @@ export enum HttpCode {
     NOT_FOUND = 404,
     INTERNAL_ERROR = 500,
     NOT_ACCEPT = 406,
+    UNAUTHORIZED = 401,
 }

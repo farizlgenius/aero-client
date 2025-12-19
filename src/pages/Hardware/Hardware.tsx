@@ -33,8 +33,8 @@ import { HardwareComponentForm } from "../../components/form/hardware/HardwareCo
 import { TranStatusDto } from "../../model/Hardware/TranStatusDto";
 
 
-const HARDWARE_TABLE_HEADER = ["Name", "Model", "Mac address", "Ip address", "Transction Report", "Configuration", "Status", "Action"];
-const HARDWARE_TABLE_KEY = ["name", "model", "macAddress", "ipAddress", "tranStatus"];
+const HEADER = ["Name", "Model", "Mac","Firmware", "IP","Port", "Transction", "Configuration", "Status", "Action"];
+const KEY = ["name", "model", "macAddress","fw", "ipAddress","port", "tranStatus"];
 // Hardware Page
 const ID_REPORT_KEY = [ "deviceId",'macAddress','scpId','ip'];
 const ID_REPORT_TABLE_HEADER = ["Model", "Mac address", "Id", "Ip address", "Action"];
@@ -293,6 +293,9 @@ const Hardware = () => {
   const handleRemove = (data: HardwareDto) => {
     removeTarget = data.macAddress;
     SetIsRemoveClick(true);
+  }
+  const handleInfo = (data:HardwareDto) => {
+
   }
   {/* Handle Click */ }
   const handleClickWithEvent = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -563,14 +566,12 @@ const Hardware = () => {
           </>
 
           :
-          <BaseTable<HardwareDto> headers={HARDWARE_TABLE_HEADER} keys={HARDWARE_TABLE_KEY} data={data} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClickWithEvent} selectedObject={selectedObjects} permission={filterPermission(FeatureId.DEVICE)} action={actionBtn} renderOptionalComponent={renderOptional} status={status} specialDisplay={[
+          <BaseTable<HardwareDto> headers={HEADER} keys={KEY} data={data} onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} onClick={handleClickWithEvent} select={selectedObjects} setSelect={setSelectedObjects} permission={filterPermission(FeatureId.DEVICE)} action={actionBtn} renderOptionalComponent={renderOptional} status={status} specialDisplay={[
             {
               key: "tranStatus",
               content: (a, i) => <TableCell key={i} className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">
                 <Badge size="sm" color={tranStatus.find(x => x.macAddress == a.macAddress)?.disabled == 0 ? "success" : "error"}>
-                  {
-                    tranStatus.find(x => x.macAddress == a.macAddress)?.status
-                  }
+                  {tranStatus.find(x => x.macAddress == a.macAddress)?.status}
                 </Badge>
               </TableCell>
             }
