@@ -8,7 +8,7 @@ import Helper from '../../utility/Helper';
 import { TimeZoneDto } from '../../model/TimeZone/TimeZoneDto';
 import { useToast } from '../../context/ToastContext';
 import { CreateTimeZoneDto } from '../../model/TimeZone/CreateTimeZone';
-import { ToastMessage } from '../../model/ToastMessage';
+import { TimeZoneToast } from '../../model/ToastMessage';
 import { TimeZoneEndPoint } from '../../endpoint/TimezoneEndpoint';
 import { HttpMethod } from '../../enum/HttpMethod';
 import { useLocation } from '../../context/LocationContext';
@@ -18,24 +18,24 @@ import { BaseTable } from '../UiElements/BaseTable';
 import { FeatureId } from '../../enum/FeatureId';
 import { BaseForm } from '../UiElements/BaseForm';
 import { FormContent } from '../../model/Form/FormContent';
+import { usePopup } from '../../context/PopupContext';
+import { FormType } from '../../model/Form/FormProp';
 
-// Define Global Variable
-let removeTarget: Number;
 
 
-const TIMEZONE_TABLE_HEAD: string[] = ["Name", "Active Date", "Deactive Date", "Action"]
-const TIMEZONE_KEY: string[] = ["name", "activeTime", "deactiveTime"];
+const TIMEZONE_TABLE_HEAD: string[] = ["Name", "Active Date", "Deactive Date","Mode","Interval", "Action"]
+const TIMEZONE_KEY: string[] = ["name", "activeTime", "deactiveTime","mode","intervals"];
 
 const TimeZone = () => {
     const { locationId } = useLocation();
     const { filterPermission } = useAuth();
     const { toggleToast } = useToast();
+    const [formType,setFormType] = useState<FormType>(FormType.Create);
+    const { setConfirmRemove,setConfirmCreate,setConfirmUpdate,setUpdate,setRemove,setCreate } = usePopup();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     {/* Modal */ }
-    const [removeModal, setRemoveModal] = useState<boolean>(false);
-    const [createModal, setCreateModal] = useState<boolean>(false);
-    const [updateModal, setUpdateModal] = useState<boolean>(false);
+    const [form,setForm] = useState<boolean>(false);
     {/* Data */ }
     const defaultDto: TimeZoneDto = {
         uuid: "",
@@ -57,49 +57,63 @@ const TimeZone = () => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
-                setCreateModal(true);
+                setForm(true);
+                break;
+            case "delete":
                 break;
             case "create":
-                createTimeZone(timeZoneDto);
+                setConfirmCreate(() => async () => {
+                    const res = await send.post(TimeZoneEndPoint.CREATE, timeZoneDto)
+                    if (Helper.handleToastByResCode(res, TimeZoneToast.CREATE, toggleToast)) {
+                        setForm(false);
+                        toggleRefresh();
+                        setTimeZoneDto(defaultDto)
+                    }
+                })
+                setCreate(true);
                 break;
             case "close":
-                setCreateModal(false);
-                setUpdateModal(false);
+                setForm(false);
                 setTimeZoneDto(defaultDto)
                 break;
             case "update":
-                break;
-            case "remove-confirm":
-                removeTimeZone();
-                break;
-            case "remove-cancel":
-                setRemoveModal(false);
+                setConfirmUpdate(() => async () => {
+                    const res = await send.put(TimeZoneEndPoint.UPDATE, timeZoneDto)
+                    if (Helper.handleToastByResCode(res, TimeZoneToast.UPDATE, toggleToast)) {
+                        setForm(false);
+                        toggleRefresh();
+                    }
+                })
+                setUpdate(true)
                 break;
             default:
                 break;
         }
     }
 
-    const createTimeZone = async (data: CreateTimeZoneDto) => {
-        const res = await send.post(TimeZoneEndPoint.POST_ADD_TZ, data)
-        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_TZ, toggleToast)) {
-            setUpdateModal(false);
-            setCreateModal(false);
-            toggleRefresh();
-        }
-    }
-
     {/* handle Table Action */ }
     const handleEdit = (data: TimeZoneDto) => {
-        console.log(data)
+        setFormType(FormType.Update)
         setTimeZoneDto(data)
-        setUpdateModal(true)
+        setForm(true)
     }
 
-    const handleRemove = (data: TimeZoneDto) => {
-        console.log(data);
-        removeTarget = data.componentId;
-        setRemoveModal(true);
+    const handleRemove = async (data: TimeZoneDto) => {
+        
+        setConfirmRemove(() => async () => {
+            const res = await send.delete(TimeZoneEndPoint.DELETE(data.componentId));
+            console.log(res)
+            if (Helper.handleToastByResCode(res, TimeZoneToast.DELETE, toggleToast)) {
+                toggleRefresh();
+            }
+        })
+        setRemove(true);
+    }
+
+    const handleInfo = (data:TimeZoneDto) => {
+        setFormType(FormType.Info)
+        setTimeZoneDto(data)
+        setForm(true);
     }
 
 
@@ -107,22 +121,12 @@ const TimeZone = () => {
     {/* Group Data */ }
     const [timeZonesDto, setTimeZonesDto] = useState<TimeZoneDto[]>([]);
     const fetchData = async () => {
-        const res = await HttpRequest.send(HttpMethod.GET, TimeZoneEndPoint.GET_TZ_LIST)
+        const res = await send.get(TimeZoneEndPoint.LOCATION(locationId))
         if (res) {
             setTimeZonesDto(res.data.data);
             console.log(res.data.data)
         }
     };
-
-    const removeTimeZone = async () => {
-        const res = await HttpRequest.send(HttpMethod.DELETE, TimeZoneEndPoint.DELETE_TZ + removeTarget);
-        console.log(res)
-        if (Helper.handleToastByResCode(res, ToastMessage.DELETE_TZ, toggleToast)) {
-            setRemoveModal(false);
-            toggleRefresh();
-        }
-
-    }
 
 
     {/* UseEffect */ }
@@ -132,47 +136,22 @@ const TimeZone = () => {
 
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<TimeZoneDto[]>([]);
-    const handleCheckedAll = (data: TimeZoneDto[], e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects(data);
-            } else {
-                setSelectedObjects([]);
-            }
-        }
-    }
-
-    const handleChecked = (data: TimeZoneDto, e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects((prev) => [...prev, data]);
-            } else {
-                setSelectedObjects((prev) =>
-                    prev.filter((item) => item.componentId !== data.componentId)
-                );
-            }
-        }
-    }
+   
     const tabContent: FormContent[] = [
         {
             label: "Time Zone",
             icon: <TimezonIcon />,
-            content: <TimeZoneForm handleClick={handleClick} data={timeZoneDto} setTimeZoneDto={setTimeZoneDto} />
+            content: <TimeZoneForm handleClick={handleClick} dto={timeZoneDto} setDto={setTimeZoneDto} type={formType}  />
         }
     ]
     return (
         <>
-            {removeModal && <RemoveModal header='Remove Time Zone' body='Please Click Confirm if you want to remove this Control Point' handleClick={handleClick} />}
             <PageBreadcrumb pageTitle="Time Zone" />
-            {createModal || updateModal ?
+            {form ?
                 <BaseForm tabContent={tabContent} />
 
                 :
-                <BaseTable<TimeZoneDto> keys={TIMEZONE_KEY} headers={TIMEZONE_TABLE_HEAD} data={timeZonesDto} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onRemove={handleRemove} onEdit={handleEdit} onClick={handleClick} selectedObject={selectedObjects} permission={filterPermission(FeatureId.TIME)} />
+                <BaseTable<TimeZoneDto> keys={TIMEZONE_KEY} headers={TIMEZONE_TABLE_HEAD} data={timeZonesDto} onRemove={handleRemove} onEdit={handleEdit} onInfo={handleInfo} onClick={handleClick} select={selectedObjects} setSelect={setSelectedObjects}  permission={filterPermission(FeatureId.TIME)} />
 
             }
 

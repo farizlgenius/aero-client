@@ -5,11 +5,11 @@ import { useToast } from "./ToastContext";
 import { LocationEndpoint } from "../endpoint/LocationEndpoint";
 import { clearAccessToken, getAccessToken, send, setAccessToken } from "../api/api";
 import Helper from "../utility/Helper";
-import { ToastMessage } from "../model/ToastMessage";
 import { useLocation } from "./LocationContext";
 import { LocationDto } from "../model/Location/LocationDto";
 import { FeatureDto } from "../model/Role/FeatureDto";
 import { FeatureEndpoint } from "../endpoint/FeatureEndpoint";
+import { AuthToast } from "../model/ToastMessage";
 
 type User = { id: string; name?: string; info?: Info; location?: number[];role?:Role  } | null;
 type Info = { title?:string; firstname?:string; middlename?:string; lastname?:string; }
@@ -119,7 +119,7 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
         setLoading(true);
         const res = await send.post(AuthEndpoint.LOGIN,{username,password})
         setLoading(false);
-        if(!Helper.handleToastByResCode(res,ToastMessage.LOGIN,toggleToast)){
+        if(!Helper.handleToastByResCode(res,AuthToast.LOGIN,toggleToast)){
             return false;
         }
         setAccessToken(res.data.data.accessToken)

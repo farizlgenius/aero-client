@@ -372,7 +372,7 @@ var defaultReader: ReaderDto = {
   const [timeZoneOption, setTimeZoneOption] = useState<Options[]>([])
   const fetchTimeZone = async () => {
     if (timeZoneOption.length !== 0) return;
-    const res = await HttpRequest.send(HttpMethod.GET, TimeZoneEndPoint.GET_TZ_LIST)
+    const res = await HttpRequest.send(HttpMethod.GET, TimeZoneEndPoint.GET)
     Logger.info(res)
     if (res && res.data.data) {
       res.data.data.map((a: TimeZoneDto) => {

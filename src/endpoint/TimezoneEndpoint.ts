@@ -3,10 +3,12 @@ const CONTROLLER = 'TimeZone'
 
 
 export const TimeZoneEndPoint = {
-    GET_TZ_LIST : `/api/${API_VERSION}/${CONTROLLER}`,
-    GET_TZ_BY_ID : `/api/${API_VERSION}/${CONTROLLER}/`,
-    DELETE_TZ : `/api/${API_VERSION}/${CONTROLLER}/`,
-    POST_ADD_TZ : `/api/${API_VERSION}/${CONTROLLER}`,
-    GET_MODE_TZ : `/api/${API_VERSION}/${CONTROLLER}/mode`,
+    GET : `/api/${API_VERSION}/${CONTROLLER}`,
+    LOCATION:(location:number) => `/api/${API_VERSION}/${location}/${CONTROLLER}`,
+    GET_ID :(component:number) => `/api/${API_VERSION}/${CONTROLLER}/${component}`,
+    DELETE :(component:number) => `/api/${API_VERSION}/${CONTROLLER}/${component}`,
+    UPDATE: `/api/${API_VERSION}/${CONTROLLER}`,
+    CREATE : `/api/${API_VERSION}/${CONTROLLER}`,
+    GET_MODE : `/api/${API_VERSION}/${CONTROLLER}/mode`,
     COMMAND: `/api/${API_VERSION}/${CONTROLLER}/command`
 } as const;

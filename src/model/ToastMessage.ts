@@ -1,4 +1,4 @@
-// Popup Message
+
 export enum ToastMessage{
     DELETE_SCP = "Delete Hardware",
     RESET_SCP = "Reset Hardware",
@@ -53,6 +53,14 @@ export enum ToastMessage{
     GET_COMPONENT = "Hardware Component",
     DELETE_TRIGGER = "Delete Trigger",
     DELETE_MPG = "Delete Monitor Group"
+}
+
+export enum AuthToast {
+    LOGIN = "Login"
+}
+
+export enum APIToast {
+    API_ERROR = "Restful Api Exception no response"
 }
 
 export enum SettingToast {
@@ -131,19 +139,24 @@ export enum AccessAreaToast {
 }
 
 
-export enum TimeToast {
-    GET_HOL = "Get Holiday",
-    CREATE_HOL = "Create Holiday",
-    UPDATE_HOL = "Update Holiday",
-    DELETE_HOL = "Delete Holiday",
-    GET_TZ = "Get TimeZone",
-    CREATE_TZ = "Create TimeZone",
-    DELETE_TZ = "Delete TimeZone",
-    GET_TZ_MODE = "Get TimeZone Mode",
-    GET_INTERVAL = "Get Interval",
-    CREATE_INTERVAL = "Create Interval",
-    UPDATE_INTERVAL = "Update Interval",
-    REMOVE_INTERVAL = "Remove Interval"
+export enum HolidayToast {
+    CREATE = "Create Holiday",
+    UPDATE = "Update Holiday",
+    DELETE = "Delete Holiday",
+
+}
+
+export enum TimeZoneToast {
+    CREATE = "Create Timezone",
+    DELETE = "Delete Timezone",
+    UPDATE = "Update Timezone"
+}
+
+export enum IntervalToast {
+    CREATE = "Create Interval",
+    DELETE = "Delete Interval",
+    UPDATE = "Update Interval",
+    DELETE_RANGE = "Delete Intervals"
 }
 
 

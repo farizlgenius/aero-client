@@ -108,7 +108,7 @@ const AccessLevelForm: React.FC<PropsWithChildren<AccessGroupFormProp>> = ({ isU
   }
 
   const fetchTimeZone = async () => {
-    let res = await send.get(TimeZoneEndPoint.GET_TZ_LIST)
+    let res = await send.get(TimeZoneEndPoint.GET)
     if (res && res.data.data) {
       res.data.data.map((a: TimeZoneDto) => {
         setTimeZoneOption(prev => ([...prev, {

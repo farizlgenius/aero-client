@@ -225,7 +225,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
     }
 
     const fetchTz = async () => {
-        var res = await api.get(TimeZoneEndPoint.GET_TZ_LIST);
+        var res = await api.get(TimeZoneEndPoint.GET);
                 if (res && res.data.data) {
             res.data.data.map((a: TimeZoneDto) => {
                 setTz(prev => ([...prev, {

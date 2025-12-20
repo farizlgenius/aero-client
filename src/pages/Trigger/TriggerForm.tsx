@@ -132,7 +132,7 @@ export const TriggerForm: React.FC<PropsWithChildren<FormProp<TriggerDto>>> = ({
     }
 
     const fetchTimeZone = async () => {
-        var res = await send.get(TimeZoneEndPoint.GET_TZ_LIST);
+        var res = await send.get(TimeZoneEndPoint.GET);
         if (res && res.data.data) {
             res.data.data.map((a: TimeZoneDto) => {
                 setTz(prev => ([...prev, {

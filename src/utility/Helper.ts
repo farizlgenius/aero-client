@@ -1,8 +1,8 @@
 import axios, { AxiosResponse } from "axios";
 import { DaysInWeekDto } from "../model/Interval/DaysInWeekDto";
-import { ToastMessage } from "../model/ToastMessage";
 import { Options } from "../model/Options";
 import { HttpCode } from "../enum/Httpcode";
+import { APIToast, OperatorToast } from "../model/ToastMessage";
 
 type ToastType = "success" | "error" | 'warning';
 
@@ -27,7 +27,7 @@ class Helper {
                     return false;
             }
         } else {
-            showPopup(false, [ToastMessage.API_ERROR]);
+            showPopup(false, [APIToast.API_ERROR]);
             return false;
         }
     }
@@ -66,7 +66,8 @@ class Helper {
                     return false;
             }
         } else {
-            toggleToast("error", ToastMessage.API_ERROR)
+            OperatorToast
+            toggleToast("error", APIToast.API_ERROR)
             return false;
         }
     }

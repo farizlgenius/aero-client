@@ -18,19 +18,14 @@ import { HttpMethod } from '../../enum/HttpMethod';
 import { TimeZoneEndPoint } from '../../endpoint/TimezoneEndpoint';
 import { IntervalEndpoint } from '../../endpoint/IntervalEndpoint';
 import { useLocation } from '../../context/LocationContext';
-
-
-export interface TimeZoneFormProp {
-  isUpdate?: boolean;
-  data: TimeZoneDto
-  setTimeZoneDto: React.Dispatch<React.SetStateAction<TimeZoneDto>>;
-  handleClick: (e: React.MouseEvent<HTMLButtonElement>) => void
-}
+import { FormProp, FormType } from '../../model/Form/FormProp';
+import { send } from '../../api/api';
+import { CalenderIcon, TimeIcon } from '../../icons';
+import TextArea from '../../components/form/input/TextArea';
 
 
 
-
-const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ isUpdate = false, setTimeZoneDto, data, handleClick }) => {
+const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type, setDto, dto, handleClick }) => {
   const { showPopup } = usePopupActions();
   const { locationId } = useLocation();
   const [modeDetail, setModeDetail] = useState<string>("");
@@ -82,7 +77,7 @@ const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ isUpdate 
 
 
   const fetchMode = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET, TimeZoneEndPoint.GET_MODE_TZ)
+    const res = await send.get(TimeZoneEndPoint.GET_MODE);
     if (res) {
       if (res.data.code == 200) {
         res.data.data.map((a: ModeDto) => {
@@ -97,7 +92,7 @@ const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ isUpdate 
   }
 
   const fetchInterval = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET, IntervalEndpoint.GET_INTERVAL)
+    const res = await send.get(IntervalEndpoint.LOCATION(locationId))
     if (res) {
       if (res.data.code == 200) {
         setAllIntervals(res.data.data)
@@ -118,7 +113,7 @@ const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ isUpdate 
 
   const handleClickWithData = (data: IntervalDto) => {
     setIntervalOption(prev => Helper.updateOptionByValue(prev, data.componentId, false));
-    setTimeZoneDto((prev: TimeZoneDto) => ({ ...prev, intervals: [...prev.intervals.filter(a => a.componentId !== data.componentId)] }));
+    setDto((prev: TimeZoneDto) => ({ ...prev, intervals: [...prev.intervals.filter(a => a.componentId !== data.componentId)] }));
   };
   const handleClickWithEvent = (e: React.MouseEvent<HTMLButtonElement>) => {
     console.log(e)
@@ -127,16 +122,15 @@ const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ isUpdate 
         setModeDetailPopup(false);
         break;
       case "detail":
-        setModeDetail(modeOption.filter(a => a.value == data.mode)[0].description ?? "")
-        console.log(e.currentTarget.name);
-        setModeDetailPopup(true);
+        setModeDetail(modeOption.filter(a => a.value == dto.mode)[0].description ?? "")
+        // setModeDetailPopup(true);
         break;
       case "interval":
         if (interval.componentId == -1) {
           showPopup(false, ["Please select interval"])
         }
         else {
-          setTimeZoneDto((prev: TimeZoneDto) => ({ ...prev, intervals: [...prev.intervals, interval] }))
+          setDto((prev: TimeZoneDto) => ({ ...prev, intervals: [...prev.intervals, interval] }))
           setIntervalOption((prev) => Helper.updateOptionByValue(prev, interval.componentId, true))
           setIntervalForm(false);
           setInterval(defaultIntervalDto)
@@ -158,66 +152,70 @@ const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ isUpdate 
       {modeDetailPopup && <Modals isWide={false} header='Details' body={modeDetail} handleClickWithEvent={handleClickWithEvent} />}
 
       <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-        <div className="flex flex-col gap-6 sm:flex-row sm:gap-8">
+        <div className="flex w-full p-7 flex-col sm:flex-row sm:gap-8">
 
+          {/* Normal Form */}
+          <div className='flex-1'>
+            <div className='flex flex-col gap-3'>
+              <div>
+                <Label htmlFor="name">Name</Label>
+                <Input disabled={type == FormType.Info} name="name" type="text" id="name" onChange={(e) => setDto((prev: TimeZoneDto) => ({ ...prev, name: e.target.value }))} value={dto.name} />
+              </div>
 
-          <div className="flex flex-1 gap-6">
-            {/* Normal Form */}
-            <div className='flex-1'>
-              <div className='flex flex-col gap-3'>
-                <div>
-                  <Label htmlFor="name">Name</Label>
-                  <Input name="name" type="text" id="name" onChange={(e) => setTimeZoneDto((prev: TimeZoneDto) => ({ ...prev, name: e.target.value }))} value={data.name} />
-                </div>
-
-                <div>
-                  <DatePicker
-                    id="activeTime"
-                    label="Activate Date"
-                    placeholder="Select a date"
-                    value={data.activeTime}
-                    onChange={(dates, currentDateString) => {
-                      // Handle your logic
-                      console.log({ dates, currentDateString });
-                      setTimeZoneDto((prev: TimeZoneDto) => ({ ...prev, activeTime: toLocalISOWithOffset(dates[0]) }))
+              <div>
+                <DatePicker
+                  id="activeTime"
+                  label="Activate Date"
+                  placeholder="Select a date"
+                  value={dto.activeTime}
+                  onChange={(dates, currentDateString) => {
+                    // Handle your logic
+                    console.log({ dates, currentDateString });
+                    setDto((prev: TimeZoneDto) => ({ ...prev, activeTime: toLocalISOWithOffset(dates[0]) }))
+                  }}
+                />
+              </div>
+              <div>
+                <DatePicker
+                  id="deactiveTime"
+                  label="Deactive Date"
+                  placeholder="Select a date"
+                  value={dto.deactiveTime}
+                  onChange={(dates, currentDateString) => {
+                    // Handle your logic
+                    console.log({ dates, currentDateString });
+                    setDto((prev: TimeZoneDto) => ({ ...prev, deactiveTime: toLocalISOWithOffset(dates[0]) }))
+                  }}
+                />
+              </div>
+              <div >
+                <Label>TimeZone Mode</Label>
+                <div className='flex gap-2'>
+                  <Select
+                    name="mode"
+                    options={modeOption}
+                    placeholder="Select Option"
+                    onChangeWithEvent={(e) => {
+                      setDto((prev: TimeZoneDto) => ({ ...prev, mode: Number(e) }));
+                      setModeDetail(modeOption.filter(a => a.value == dto.mode)[0].description ?? "")
                     }}
+                    className="dark:bg-dark-900"
+                    defaultValue={dto.mode == -1 ? -1 : dto.mode}
                   />
-                </div>
-                <div>
-                  <DatePicker
-                    id="deactiveTime"
-                    label="Deactive Date"
-                    placeholder="Select a date"
-                    value={data.deactiveTime}
-                    onChange={(dates, currentDateString) => {
-                      // Handle your logic
-                      console.log({ dates, currentDateString });
-                      setTimeZoneDto((prev: TimeZoneDto) => ({ ...prev, deactiveTime: toLocalISOWithOffset(dates[0]) }))
-                    }}
-                  />
-                </div>
-                <div >
-                  <Label>TimeZone Mode</Label>
-                  <div className='flex gap-2'>
-                    <Select
-                      name="mode"
-                      options={modeOption}
-                      placeholder="Select Option"
-                      onChangeWithEvent={(e) => setTimeZoneDto((prev: TimeZoneDto) => ({ ...prev, mode: Number(e) }))}
-                      className="dark:bg-dark-900"
-                      defaultValue={data.mode == -1 ? -1 : data.mode}
-                    />
-                    <Button name='detail' onClickWithEvent={handleClickWithEvent}>Info</Button>
-                  </div>
-                </div>
-                <div className='flex gap-4'>
-                  <Button onClickWithEvent={handleClick} name='create' className='w-50'>Create</Button>
-                  <Button onClickWithEvent={handleClick} name='close' className='w-50 danger'>Cancel</Button>
                 </div>
               </div>
+              <div>
+                <TextArea disabled={true} value={modeDetail} placeholder='Detail info will show here'/>
+              </div>
+              <div className='flex gap-4'>
+                <Button disabled={type == FormType.Info} onClickWithEvent={handleClick} name={type == FormType.Update ? "update" : "create"} className='w-50'>{type == FormType.Update ? "Update" : "Create"}</Button>
+                <Button variant='danger' onClickWithEvent={handleClick} name='close' className='w-50 danger'>Cancel</Button>
+              </div>
             </div>
-            {/* Interval */}
-            <div className='flex-1'>
+          </div>
+          {/* Interval */}
+          <div className="flex-1 flex flex-col gap-5 items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+            <div className='w-full'>
               {intervalForm ?
                 <>
                   {/* Interval Form */}
@@ -225,6 +223,7 @@ const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ isUpdate 
                     <div className='flex flex-col gap-2'>
                       <Label>Intervals</Label>
                       <Select
+
                         isString={true}
                         name="intervals"
                         options={intervalOption.filter(a => a.isTaken != true)}
@@ -234,8 +233,8 @@ const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ isUpdate 
                       />
                     </div>
                     <div className='mt-3 flex gap-2'>
-                      <Button onClickWithEvent={handleClickWithEvent} name='interval' size='sm'>Add Interval</Button>
-                      <Button variant='danger' onClick={() => setIntervalForm(false)} name='cancelInterval' size='sm'>Cancel</Button>
+                      <Button disabled={type == FormType.Info} onClickWithEvent={handleClickWithEvent} name='interval' size='sm'>Add</Button>
+                      <Button disabled={type == FormType.Info} variant='danger' onClick={() => setIntervalForm(false)} name='cancelInterval' size='sm'>Cancel</Button>
                     </div>
                   </div>
                 </>
@@ -244,7 +243,7 @@ const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ isUpdate 
                   <div className="flex flex-col gap-4 swim-lane">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className="flex items-center gap-3 text-base font-medium text-gray-800 dark:text-white/90">
-                        Intervals {data.intervals.length}/12
+                        Intervals {dto.intervals.length}/12
                         <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-theme-xs font-medium text-gray-700 dark:bg-white/[0.03] dark:text-white/80">
                           {/* {createIntervalDtoList.length}/12 */}
                         </span>
@@ -254,15 +253,25 @@ const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ isUpdate 
                   </div>
 
                   <div className='flex flex-col gap-1'>
-                    {data.intervals.map((a: IntervalDto, i: number) => (
+                    {dto.intervals.map((a: IntervalDto, i: number) => (
                       <div key={i} className="p-3 bg-white border border-gray-200 task rounded-xl shadow-theme-sm dark:border-gray-800 dark:bg-white/5">
                         <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
                           <div className="flex items-start w-full gap-4">
                             <label className="w-full cursor-pointer">
-                              <div className="relative flex items-start">
-                                <p className="-mt-0.5 text-base text-gray-800 dark:text-white/90">
-                                  {a.startTime} - {a.endTime} : {a.daysDesc}
-                                </p>
+                              <div className="relative flex flex-col items-start gap-3">
+                                <div className='flex justify-center items-center gap-5'>
+                                  <TimeIcon fontSize={25}/>
+                                  <p className="-mt-0.5 text-base text-gray-800 dark:text-white/90">
+                                    {a.startTime} - {a.endTime}
+                                  </p>
+                                </div>
+                                <div className='flex justify-center items-center gap-5'>
+                                  <CalenderIcon fontSize={25}/>
+                                  <p className="-mt-0.5 text-base text-gray-800 dark:text-white/90">
+                                    {a.daysDesc}
+                                  </p>
+                                </div>
+
                               </div>
                             </label>
                           </div>
@@ -279,8 +288,8 @@ const TimeZoneForm: React.FC<PropsWithChildren<TimeZoneFormProp>> = ({ isUpdate 
 
             </div>
           </div>
-        </div >
 
+        </div >
       </div>
 
 
