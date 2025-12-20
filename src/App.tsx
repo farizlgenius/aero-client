@@ -56,6 +56,7 @@ import AccessLevel from "./pages/AccessGroup/AccessLevel";
 import { Procedure } from "./pages/Procedure/Procedure";
 import { Trigger } from "./pages/Trigger/Trigger";
 import { usePopup } from "./context/PopupContext";
+import { PasswordRule } from "./pages/Settings/PasswordRule";
 
 
 export default function App() {
@@ -199,6 +200,7 @@ export default function App() {
             <Route path="/operator" element={<Operator />} />
             <Route path="/procedure" element={<Procedure />} />
             <Route path="/trigger" element={<Trigger />} />
+            <Route path="/pass" element={<PasswordRule />}/>
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />

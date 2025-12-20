@@ -55,6 +55,10 @@ export enum ToastMessage{
     DELETE_MPG = "Delete Monitor Group"
 }
 
+export enum SettingToast {
+    UPDATE_PASSWORD = "Update Password Rule"
+}
+
 export enum OperatorToast {
     CREATE = "Create Operator",
     UPDATE = "Update Operator",

@@ -121,7 +121,7 @@ const navItems: NavItem[] = [
     componentId: 14,
     icon: <SettingIcon />,
     name: "Settings",
-    subItems: [{ name: "Card Format", path: "/cardformat", }, { name: "Reader LED", path: "/led", }],
+    subItems: [{ name: "Card Format", path: "/cardformat", }, { name: "Reader LED", path: "/led", },{name:"Password Rule",path:"/pass"}],
   },
   {
     icon: <CalenderIcon />,
