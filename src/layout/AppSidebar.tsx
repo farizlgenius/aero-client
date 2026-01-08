@@ -25,7 +25,10 @@ import {
   LocationIcon,
   TriggerIcon,
   OperatorIcon,
-  NotiIcon
+  NotiIcon,
+  ControlIcon,
+  MonitorIcon,
+  OnIcon
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
@@ -76,8 +79,22 @@ const navItems: NavItem[] = [
     componentId: 6,
     name: "Devices",
     icon: <ModuleIcon />,
-    subItems: [{ name: "Hardware", path: "/hardware", }, { name: "Module", path: "/module", }, { name: "Ouputs", path: "/control", }, { name: "Inputs", path: "/monitor", }, { name: "Monitor Point Group", path: "/monitorgroup", }],
-  },
+    subItems: [{ name: "Hardware", path: "/hardware", }, { name: "Module", path: "/module", }],
+  },{
+    componentId: 16,
+    name:"Control Point",
+    icon:<ControlIcon />,
+    path:"/control"
+  },{
+    componentId:17,
+    name:"Monitor Point",
+    icon:<MonitorIcon/>,
+    path:"/monitor"
+  },{ 
+    componentId:18,
+    name: "Monitor Point Group",
+    icon:<GroupIcon/>, 
+    path: "/monitorgroup", },
   {
     componentId: 7,
     icon: <DoorIcon />,
@@ -110,6 +127,11 @@ const navItems: NavItem[] = [
     icon: <TriggerIcon />,
     name: "Trigger & Procedure",
     subItems: [{ name: "Trigger", path: "/trigger", }, { name: "Procedure", path: "/procedure", }],
+  },{
+    componentId:15,
+    name:"Map",
+    icon:<OnIcon/>,
+    path:"/map"
   },
   {
     componentId: 13,

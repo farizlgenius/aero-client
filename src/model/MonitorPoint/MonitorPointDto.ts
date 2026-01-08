@@ -6,10 +6,13 @@ export interface MonitorPointDto extends BaseDto
     moduleId:number;
     inputNo:number;
     inputMode:number;
+    inputModeDescription:string;
     debouce:number;
     holdTime:number;
     logFunction:number;
+    logFunctionDescription:string;
     monitorPointMode:number;
+    monitorPointModeDescription:string;
     delayEntry:number;
     delayExit:number;
     isMask:boolean;

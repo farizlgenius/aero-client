@@ -80,8 +80,8 @@ export const Location = () => {
                 if(select.length == 0){            
                     setMessage("Please select object")
                     setInfo(true);
-                }
-                setConfirmRemove(() => async () => {
+                }else{
+                    setConfirmRemove(() => async () => {
                     var data:number[] = [];
                     select.map(async (a:LocationDto) => {
                         data.push(a.componentId)
@@ -93,6 +93,8 @@ export const Location = () => {
                     }
                 })
                 setRemove(true);
+                }
+                
                 break;
             case "create":
                 setConfirmCreate(() => async () => {

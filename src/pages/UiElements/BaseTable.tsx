@@ -13,7 +13,9 @@ interface PageProp {
 }
 
 
-export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, onEdit,onInfo,onRemove,setSelect, renderOptionalComponent, specialDisplay, onClick: handleClick, permission, action, status,select }: TableProp<T>) => {
+export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, onEdit, onInfo, onRemove, setSelect, renderOptionalComponent, specialDisplay, onClick: handleClick, permission, action, status, select, subTable }: TableProp<T>) => {
+
+    const [show ,setShow] = useState<number>(-1)
     const handlePageSizeSelect = (data: string) => {
         // setPageSize(Number(data));
     }
@@ -38,6 +40,7 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
         }
 
     }
+
 
     return (
         <>
@@ -65,44 +68,56 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
                             </TableHeader>
                             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
                                 {data && data.map((data: T, i: number) => (
-                                    <TableRow key={i}>
-                                        <TableCell className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
-                                            <input checked={select?.includes(data)} type="checkbox" onChange={(e) => handleCheck(data, e)} />
-                                        </TableCell >
-                                        {keys && keys.map((key: string, i: number) =>
-                                            specialDisplay?.some(a => a.key == key) ?
-                                                specialDisplay.find(a => a.key == key)?.content(data, i)
-                                                :
-                                                <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                                                    {String(data[key as keyof typeof data])}
-                                                </TableCell>
-                                        )}
-                                        {status && renderOptionalComponent && renderOptionalComponent(data, status)}
+                                    <>
+                                        <TableRow key={i} className="cursor-pointer hover:bg-gray-900 active:bg-gray-800" onClickWithEvent={() => {
+                                            if(show !== i){
+                                                setShow(i);
+                                            }else{
+                                                setShow(-1);
+                                            }
+                                            
+                                            }}>
+                                            <TableCell className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                                                <input checked={select?.includes(data)} type="checkbox" onChange={(e) => handleCheck(data, e)} />
+                                            </TableCell >
+                                            {keys && keys.map((key: string, i: number) =>
+                                                specialDisplay?.some(a => a.key == key) ?
+                                                    specialDisplay.find(a => a.key == key)?.content(data, i)
+                                                    :
+                                                    <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                                        {String(data[key as keyof typeof data])}
+                                                    </TableCell>
+                                            )}
+                                            {status && renderOptionalComponent && renderOptionalComponent(data, status,i)}
 
 
-                                        {/* Action */}
-                                        <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                                            <div className="flex gap-2">
+                                            {/* Action */}
+                                            <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                                                <div className="flex gap-2">
 
-                                                <a id="detail" onClick={() => onInfo(data)} className="cursor-pointer font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                                                    <Info2Icon className="w-10 h-5" />
-                                                </a>
-                                                {permission?.isModify &&
-                                                    <a id="edit" onClick={() => onEdit(data)} className="cursor-pointer font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                                                        <EditIcon className="w-10 h-5" />
-
+                                                    <a id="detail" onClick={() => onInfo(data)} className="cursor-pointer font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                                        <Info2Icon className="w-10 h-5" />
                                                     </a>
-                                                }
-                                                {
-                                                    permission?.isDelete &&
+                                                    {permission?.isModify &&
+                                                        <a id="edit" onClick={() => onEdit(data)} className="cursor-pointer font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                                            <EditIcon className="w-10 h-5" />
 
-                                                    <a id="remove" onClick={() => onRemove(data)} className="cursor-pointer font-medium text-red-600 dark:text-red-500 hover:underline"><TrashBinIcon className="w-10 h-5" /></a>
-                                                }
+                                                        </a>
+                                                    }
+                                                    {
+                                                        permission?.isDelete &&
+
+                                                        <a id="remove" onClick={() => onRemove(data)} className="cursor-pointer font-medium text-red-600 dark:text-red-500 hover:underline"><TrashBinIcon className="w-10 h-5" /></a>
+                                                    }
 
 
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                        {show == i && subTable && subTable(i+1)}
+                                    </>
+
+
                                 ))}
                             </TableBody>
                         </Table>

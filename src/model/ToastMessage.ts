@@ -83,21 +83,25 @@ export enum HardwareToast {
     LIST = "Get Hardware List",
     STRUCTURE = "Get Hardware Structure",
     CREATE = "Create Hardware",
-    COMPONENT = "Hardware Component"
+    COMPONENT = "Hardware Component",
+    UPDATE = "Hardware Update",
+    DELETE_RANGE = "Delete Hardwares",
+    TOGGLE_TRAN = "Set Transaction"
 }
 
-export enum ControlPointToast {
-    CREATE_CP = "Control Point Created",
-    GET_CP_STATUS = "Retrive Control Point Status",
-    DELETE_CP = "Delete Control Point",
-    TRIGGER_CP = "Trigger Control Point"
-}
 
 export enum MonitorPointToast {
-    CREATE_MP = "Monitor Point Created",
-    DELETE_MP = "Delete Monitor Point",
-    MASK_MP = "Masked Monitor Point",
-    UNMASK_MP = "Unmasked Monitor Point",
+    CREATE = "Monitor Point Created",
+    UPDATE = "Monitor Point Updated",
+    DELETE = "Delete Monitor Point",
+    MASK = "Masked Monitor Point",
+    UNMASK = "Unmasked Monitor Point",
+    DELETE_RANGE = "Delete Monitor Points"
+    
+}
+
+export enum MonitorGroupToast 
+{
     CREATE_MP_GROUP = "Create Monitor Group",
     DELETE_MPG = "Delete Monitor Group",
     POST_MONITOR_GROUP_COMMAND = "Monitor Group Command"
@@ -143,6 +147,7 @@ export enum HolidayToast {
     CREATE = "Create Holiday",
     UPDATE = "Update Holiday",
     DELETE = "Delete Holiday",
+    DELETE_RANGE = "Delete Holidays"
 
 }
 
@@ -166,4 +171,11 @@ export enum RoleToast {
     DELETE = "Delete Role",
     GET = "Get Role",
     DELETE_RANGE = "Delete Roles"
+}
+
+export enum ControlPointToast {
+    CREATE = "Create Control Point",
+    UPDATE = "Update Control Point",
+    DELETE = "Delete Control Point",
+    DELETE_RANGE = "Delete Control Points"
 }

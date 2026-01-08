@@ -173,7 +173,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
     }
 
     const fetchMp = async () => {
-        var res = await api.get(MonitorPointEndpoint.GET_MP_LIST(locationId));
+        var res = await api.get(MonitorPointEndpoint.MPS(locationId));
         if (res && res.data.data) {
             res.data.data.map((a: MonitorPointDto) => {
                 setMp(prev => ([...prev, {
@@ -186,7 +186,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
     }
 
     const fetchCp = async () => {
-        var res = await api.get(ControlPointEndpoint.GET_CP(locationId));
+        var res = await api.get(ControlPointEndpoint.GET(locationId));
         if(res && res.data.data){
             res.data.data.map((a:ControlPointDto) => {
                 setCp(prev => ([...prev,{

@@ -1,12 +1,10 @@
 export interface IdReport {
-  deviceId: number;
+  componentId: number;
   serialNumber: number;
-  scpId: number;
-  configFlag: number;
   macAddress: string;
+  firmware:string;
   ip: string;
-  model: string;
-  port:number;
-  isReset:boolean;
-  isUpload:boolean;
+  hardwareTypeDescription: string;
+  hardwareType:number;
+  port:string;
 }

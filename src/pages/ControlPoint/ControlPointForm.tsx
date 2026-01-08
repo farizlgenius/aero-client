@@ -16,19 +16,14 @@ import { ControlPointEndpoint } from "../../endpoint/ControlPointEndpoint";
 import { ModuleEndpoint } from "../../endpoint/ModuleEndpoint";
 import api, { send } from "../../api/api";
 import { useLocation } from "../../context/LocationContext";
+import { FormProp, FormType } from "../../model/Form/FormProp";
 
 
-interface AddCpformProp {
-  handleClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
-  data: ControlPointDto;
-  setOutputDto: React.Dispatch<React.SetStateAction<ControlPointDto>>
-}
 
-
-const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleClick, data, setOutputDto }) => {
+const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> = ({ handleClick, dto, setDto,type }) => {
   const {locationId} = useLocation();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setOutputDto(prev => ({ ...prev, [e.target.name]: e.target.value }))
+    setDto(prev => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
   {/* Select */ }
@@ -39,15 +34,23 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
   const [offlineModeOption, setOfflineModeOption] = useState<Options[]>([]);
 
   const handleSelect = async (value: string, e: React.ChangeEvent<HTMLSelectElement>) => {
-    setOutputDto((prev) => ({ ...prev, [e.target.name]: value }));
     switch (e.target.name) {
       case "macAddress":
         fetchModuleByMac(value)
+        setDto((prev) => ({...prev,macAddress:value,macAddressDescription:controllerOption.find(a => a.value == value)?.label ?? ""}))
         break;
       case "moduleId":
         fetchOutput(value);
+        setDto((prev) => ({...prev,moduleId:Number(value),moduleDescription:moduleOption.find(a => a.value == Number(value))?.label ?? ""}))
+        break;
+      case "relayMode":
+        setDto(prev => ({...prev,relayMode:Number(value),relayModeDescription:relayModeOption.find(a => a.value == Number(value))?.label ?? ""}))
+        break;
+      case "offlineMode":
+        setDto(prev => ({...prev,offlineMode:Number(value),offlineModeDescription:offlineModeOption.find(a => a.value == Number(value))?.label ?? ""}))
         break;
       default:
+        setDto((prev) => ({ ...prev, [e.target.name]: value }));
         break;
     }
   }
@@ -90,7 +93,7 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
   }
 
   const fetchModuleByMac = async (value: string) => {
-    const res = await send.get(ModuleEndpoint.GET_MODULE_BY_MAC(value));
+    const res = await send.get(ModuleEndpoint.GET_MAC(value));
     if (res) {
       res.data.data.map((a: ModuleDto) => {
         setModuleOption((prev) => [...prev, {
@@ -102,7 +105,7 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
   }
 
   const fetchOutput = async (value: string) => {
-    var res = await HttpRequest.send(HttpMethod.GET, ControlPointEndpoint.GET_CP_OUTPUT + data.macAddress + "/" + value);
+    var res = await send.get(ControlPointEndpoint.OUTPUT(dto.macAddress,Number(value)));
     if (res) {
       res.data.data.map((a: number) => {
         setRelayOption((prev) => [...prev, {
@@ -117,6 +120,10 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
   useEffect(() => {
     fetchController();
     fetchRelayMode();
+    if(type == FormType.Info || type == FormType.Update){
+      fetchModuleByMac(dto.macAddress);
+      fetchOutput(String(dto.moduleId));
+    }
   }, []);
 
   return (
@@ -124,7 +131,7 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
       <div className="space-y-6">
         <div>
           <Label htmlFor="name">Control Point Name</Label>
-          <Input name="name" value={data.name} type="text" id="name" onChange={handleChange} />
+          <Input disabled={type == FormType.Info} name="name" value={dto.name} type="text" id="name" onChange={handleChange} />
         </div>
         <div>
           <Label>Controller</Label>
@@ -135,18 +142,21 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
             placeholder="Select Option"
             onChangeWithEvent={handleSelect}
             className="dark:bg-dark-900"
-            defaultValue={data.macAddress}
+            defaultValue={dto.macAddress}
+            disabled={type == FormType.Info}
           />
         </div>
         <div>
           <Label>Module</Label>
           <Select
+          isString={false}
             name="moduleId"
             options={moduleOption}
             placeholder="Select Option"
             onChangeWithEvent={handleSelect}
             className="dark:bg-dark-900"
-            defaultValue={data.moduleId}
+            defaultValue={dto.moduleId}
+            disabled={type == FormType.Info}
           />
         </div>
         <div>
@@ -157,7 +167,8 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
             placeholder="Select Option"
             onChangeWithEvent={handleSelect}
             className="dark:bg-dark-900"
-            defaultValue={data.outputNo}
+            defaultValue={dto.outputNo}
+            disabled={type == FormType.Info}
           />
         </div>
         <div className="flex gap-2">
@@ -169,7 +180,8 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
               placeholder="Select Option"
               onChangeWithEvent={handleSelect}
               className="dark:bg-dark-900"
-              defaultValue={data.relayMode}
+              defaultValue={dto.relayMode}
+              disabled={type == FormType.Info}
             />
           </div>
           <div className="w-full">
@@ -180,7 +192,8 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
               placeholder="Select Option"
               onChangeWithEvent={handleSelect}
               className="dark:bg-dark-900"
-              defaultValue={data.offlineMode}
+              defaultValue={dto.offlineMode}
+              disabled={type == FormType.Info}
             />
           </div>
 
@@ -188,11 +201,11 @@ const ControlPointForm: React.FC<PropsWithChildren<AddCpformProp>> = ({ handleCl
 
         <div>
           <Label htmlFor="defaultPulseTime">Pulse Time (second)</Label>
-          <Input defaultValue={0} value={data.defaultPulse} min="0" max="500" name="defaultPulseTime" type="number" id="defaultPulseTime" onChange={handleChange} />
+          <Input disabled={type == FormType.Info} defaultValue={0} value={dto.defaultPulse} min="0" max="500" name="defaultPulse" type="number" id="defaultPulse" onChange={handleChange} />
         </div>
         <div className="flex justify-center gap-4">
-          <Button name="create" className="w-50" size="sm" onClickWithEvent={handleClick}>Submit </Button>
-          <Button name="close" className="w-50" variant="danger" size="sm" onClickWithEvent={handleClick}>Cancle </Button>
+          <Button disabled={type == FormType.Info} name={type == FormType.Create ? "create" : "update"} className="w-50" size="sm" onClickWithEvent={handleClick}>{type == FormType.Update ? "Update" : "Create"}</Button>
+          <Button name="close" className="w-50" variant="danger" size="sm" onClickWithEvent={handleClick}>Cancel </Button>
         </div>
       </div>
     </div>

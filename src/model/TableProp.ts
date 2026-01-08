@@ -14,9 +14,10 @@ export interface TableProp<T> {
     onClick:(e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     select:T[];
     setSelect:React.Dispatch<React.SetStateAction<T[]>>
-    renderOptionalComponent?:(data: any, statusDto: StatusDto[]) => JSX.Element[];
+    renderOptionalComponent?:(data: any, statusDto: StatusDto[],index:number) => JSX.Element[];
     specialDisplay?:TableSpecialDisplay<T>[];
     permission?:FeatureDto;
     status?:StatusDto[];
     action?:ActionButton[];
+    subTable?:(index:number) => JSX.Element;
 }

@@ -1,15 +1,13 @@
 import React, { JSX, useEffect, useState } from 'react'
-import Button from '../../components/ui/button/Button'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb'
 import { AddIcon, MaskIcon, MonitorIcon, UnmaskIcon } from '../../icons'
-import RemoveModal from '../UiElements/RemoveModal';
 import HttpRequest from '../../utility/HttpRequest';
 import Logger from '../../utility/Logger';
 import MonitorPointForm from './MonitorPointForm';
 import { MonitorPointDto } from '../../model/MonitorPoint/MonitorPointDto';
 import { StatusDto } from '../../model/StatusDto';
 import { RemoveInput } from '../../model/MonitorPoint/RemoveInput';
-import { ToastMessage } from '../../model/ToastMessage';
+import { MonitorPointToast, ToastMessage } from '../../model/ToastMessage';
 import { useToast } from '../../context/ToastContext';
 import Helper from '../../utility/Helper';
 import { HttpMethod } from '../../enum/HttpMethod';
@@ -25,57 +23,101 @@ import { useAuth } from '../../context/AuthContext';
 import { FeatureId } from '../../enum/FeatureId';
 import { BaseForm } from '../UiElements/BaseForm';
 import { FormContent } from '../../model/Form/FormContent';
+import { usePopup } from '../../context/PopupContext';
+import { FormType } from '../../model/Form/FormProp';
 
 // Define Global Variable
-let removeTarget: RemoveInput;
-export const MP_TABLE_HEADER: string[] = ["Name", "Main Controller", "Module", "Mode", "Masked", "Status", "Action"]
-export const MP_KEY: string[] = ["name", "macAddress", "moduleId", "monitorPointMode", "isMask"];
+export const MP_TABLE_HEADER: string[] = ["Name", "Main Controller", "Module", "Mode","Input Mode", "Masked", "Status", "Action"]
+export const MP_KEY: string[] = ["name", "macAddressDescription", "moduleDescription", "monitorPointModeDescription","inputModeDescription", "isMask"];
 
 const MonitorPoint = () => {
     const { filterPermission } = useAuth();
     const { toggleToast } = useToast();
     const { locationId } = useLocation();
+    const { setCreate,setRemove,setUpdate,setConfirmCreate,setConfirmRemove,setConfirmUpdate,setInfo,setMessage } = usePopup();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     {/* Modal */ }
-    const [isRemoveModal, setIsRemoveModal] = useState<boolean>(false);
-    const [create, setCreate] = useState<boolean>(false);
-    const [update, setUpdate] = useState<boolean>(false);
+    const [form,setForm] = useState<boolean>(false);
+    const [formType,setFormType] = useState<FormType>(FormType.Create);
 
     {/* handle Table Action */ }
-    const handleEdit = () => {
+    const handleEdit = (data:MonitorPointDto) => {
+        setMonitorPointDto(data);
+        setFormType(FormType.Update)
+        setForm(true)
+    }
 
+    const handleInfo = (data:MonitorPointDto) => {
+        setMonitorPointDto(data)
+        setFormType(FormType.Info)
+        setForm(true);
     }
 
     const handleRemove = (data: MonitorPointDto) => {
-        console.log(data);
-        removeTarget = { componentId: data.componentId, macAddress: data.macAddress };
-        setIsRemoveModal(true);
+        setConfirmRemove(() => async () => {
+            const res = await send.delete(MonitorPointEndpoint.DELETE(data.componentId));
+            if (Helper.handleToastByResCode(res, MonitorPointToast.DELETE, toggleToast)) {
+                toggleRefresh();
+            }
+        })
+        setRemove(true);
     }
 
-    const handleOnClickConfirmRemove = () => {
-
-    }
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         let res;
         switch (e.currentTarget.name) {
             case "add":
-                setCreate(true);
+                setFormType(FormType.Create)
+                setForm(true);
+                break;
+            case "delete":
+                if(selectedObjects.length == 0){            
+                    setMessage("Please select object")
+                    setInfo(true);
+                }
+                setConfirmRemove(() => async () => {
+                    var data:number[] = [];
+                    selectedObjects.map(async (a:MonitorPointDto) => {
+                        data.push(a.componentId)
+                    })
+                    var res = await send.post(MonitorPointEndpoint.DELETE_RANGE,data)
+                    if(Helper.handleToastByResCode(res,MonitorPointToast.DELETE_RANGE,toggleToast)){
+                        setRemove(false);
+                        toggleRefresh();
+                    }
+                })
+                setRemove(true);
                 break;
             case "create":
-                createMonitorPoint();
+                setConfirmCreate(() => async () => {
+                    const res = await send.post(MonitorPointEndpoint.CREATE, monitorPointDto);
+                    if (Helper.handleToastByResCode(res, ToastMessage.CREATE_MP, toggleToast)) {
+                        setForm(false);
+                        toggleRefresh();
+                    }
+                })
+                setCreate(true)
                 break;
-            case "cancle":
-                setCreate(false);
-                setUpdate(false);
+            case "update":
+                setConfirmUpdate(() => async () => {
+                    const res = await send.put(MonitorPointEndpoint.UPDATE,monitorPointDto)
+                    if(Helper.handleToastByResCode(res,MonitorPointToast.UPDATE,toggleToast)){
+                        setForm(false)
+                        toggleRefresh();
+                    }
+                })
+                setUpdate(true)
                 break;
-            case "remove":
-
+            case "cancel":
+            case "close":
+                setMonitorPointDto(defaultDto)
+                setForm(false);
                 break;
             case "mask":
                 selectedObjects.forEach(async (a: MonitorPointDto) => {
-                    res = await send.post(MonitorPointEndpoint.POST_MASK, a);
-                    if (Helper.handleToastByResCode(res, ToastMessage.CREATE_MP, toggleToast)) {
+                    res = await send.post(MonitorPointEndpoint.MASK, a);
+                    if (Helper.handleToastByResCode(res, MonitorPointToast.MASK, toggleToast)) {
                         toggleRefresh();
                     }
                 })
@@ -83,30 +125,14 @@ const MonitorPoint = () => {
                 break;
             case "unmask":
                 selectedObjects.forEach(async (a: MonitorPointDto) => {
-                    res = await send.post(MonitorPointEndpoint.POST_UNMASK, a)
-                    if (Helper.handleToastByResCode(res, ToastMessage.CREATE_MP, toggleToast)) {
+                    res = await send.post(MonitorPointEndpoint.UNMASK, a)
+                    if (Helper.handleToastByResCode(res, MonitorPointToast.UNMASK, toggleToast)) {
                         toggleRefresh();
                     }
                 })
                 break;
-            case "remove-confirm":
-                removeMonitorPoint();
-                toggleRefresh();
-                break;
-            case "remove-cancel":
-                setIsRemoveModal(false);
-                break;
             default:
                 break;
-        }
-    }
-
-    const createMonitorPoint = async () => {
-        const res = await send.post(MonitorPointEndpoint.POST_ADD_MP, monitorPointDto);
-        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_MP, toggleToast)) {
-            setUpdate(false);
-            setCreate(false);
-            toggleRefresh();
         }
     }
 
@@ -127,13 +153,17 @@ const MonitorPoint = () => {
         componentId: -1,
         macAddress: '',
         locationId: locationId,
-        isActive: false
+        isActive: false,
+        macAddressDescription: '',
+        inputModeDescription: '',
+        logFunctionDescription: '',
+        monitorPointModeDescription: ''
     }
     const [monitorPointsDto, setMonitorPointsDto] = useState<MonitorPointDto[]>([]);
     const [monitorPointDto, setMonitorPointDto] = useState<MonitorPointDto>(defaultDto);
     const [status, setStatus] = useState<StatusDto[]>([]);
     const fetchData = async () => {
-        const res = await send.get(MonitorPointEndpoint.GET_MP_LIST(locationId));
+        const res = await send.get(MonitorPointEndpoint.MPS(locationId));
         console.log(res)
         if (res?.data.data) {
             setMonitorPointsDto(res.data.data);
@@ -161,49 +191,10 @@ const MonitorPoint = () => {
         Logger.info(res);
     };
 
-    const removeMonitorPoint = async () => {
-        const res = await HttpRequest.send(HttpMethod.DELETE, MonitorPointEndpoint.DELETE_MP + removeTarget.macAddress + "/" + removeTarget.componentId);
-        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_MP, toggleToast)) {
-            setIsRemoveModal(false);
-            toggleRefresh();
-        }
-        removeTarget = {
-            componentId: -1,
-            macAddress: "",
-        };
-
-    }
 
 
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<MonitorPointDto[]>([]);
-    const handleCheckedAll = (data: MonitorPointDto[], e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects(data);
-            } else {
-                setSelectedObjects([]);
-            }
-        }
-    }
-
-
-
-    const handleChecked = (data: MonitorPointDto, e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects((prev) => [...prev, data]);
-            } else {
-                setSelectedObjects((prev) =>
-                    prev.filter((item) => item.componentId !== data.componentId)
-                );
-            }
-        }
-    }
 
     {/* UseEffect */ }
     useEffect(() => {
@@ -275,19 +266,18 @@ const MonitorPoint = () => {
         {
             label: "Monitor Point",
             icon: <MonitorIcon />,
-            content: <MonitorPointForm handleClick={handleClick} data={monitorPointDto} setMonitorPointDto={setMonitorPointDto} />
+            content: <MonitorPointForm handleClick={handleClick} dto={monitorPointDto} setDto={setMonitorPointDto} type={formType} />
 
         }
     ]
 
     return (
         <>
-            {isRemoveModal && <RemoveModal handleClick={handleClick} />}
             <PageBreadcrumb pageTitle="Monitor Point" />
-            {create || update ?
+            {form ?
                 <BaseForm tabContent={tabContent} />
                 :
-                <BaseTable<MonitorPointDto> headers={MP_TABLE_HEADER} keys={MP_KEY} data={monitorPointsDto} status={status} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onEdit={handleEdit} onRemove={handleRemove} selectedObject={selectedObjects} onClick={handleClick} action={action} renderOptionalComponent={renderOptionalComponent} permission={filterPermission(FeatureId.DEVICE)} />
+                <BaseTable<MonitorPointDto> headers={MP_TABLE_HEADER} keys={MP_KEY} data={monitorPointsDto} status={status}  onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} select={selectedObjects} setSelect={setSelectedObjects} onClick={handleClick} action={action} renderOptionalComponent={renderOptionalComponent} permission={filterPermission(FeatureId.MONITOR)} />
 
             }
 

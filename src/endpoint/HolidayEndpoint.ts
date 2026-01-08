@@ -3,8 +3,9 @@ const CONTROLLER = `Holiday`;
 
 
 export const HolidayEndpoint = {
-    GET_HOL_LIST : `/api/${API_VERSION}/${CONTROLLER}`,
-    DELETE_HOL : `/api/${API_VERSION}/${CONTROLLER}/`,
-    POST_HOL : `/api/${API_VERSION}/${CONTROLLER}`,
-    PUT_HOL : `/api/${API_VERSION}/${CONTROLLER}`
+    GET :(location:number) => `/api/${API_VERSION}/${location}/${CONTROLLER}`,
+    DELETE_RANGE: `/api/${API_VERSION}/${CONTROLLER}/delete/range`,
+    DELETE :(component:number) => `/api/${API_VERSION}/${CONTROLLER}/${component}`,
+    CREATE : `/api/${API_VERSION}/${CONTROLLER}`,
+    UPDATE : `/api/${API_VERSION}/${CONTROLLER}`
 } as const;

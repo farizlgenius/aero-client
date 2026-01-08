@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb'
 import { AddIcon, ControlIcon, OffIcon, OnIcon, ToggleIcon } from '../../icons';
-import RemoveModal from '../UiElements/RemoveModal';
 import HttpRequest from '../../utility/HttpRequest';
 import ControlPointForm from './ControlPointForm';
 import Logger from '../../utility/Logger';
 import { ControlPointDto } from '../../model/ControlPoint/ControlPointDto';
 import { StatusDto } from '../../model/StatusDto';
 import { OutputTrigger } from '../../model/ControlPoint/OutputTrigger';
-import { RemoveOutput } from '../../model/ControlPoint/RemoveOutput';
 import Helper from '../../utility/Helper';
 import { useToast } from '../../context/ToastContext';
-import { ToastMessage } from '../../model/ToastMessage';
+import { ControlPointToast, ToastMessage } from '../../model/ToastMessage';
 import { HttpMethod } from '../../enum/HttpMethod';
 import { ControlPointEndpoint } from '../../endpoint/ControlPointEndpoint';
 import { send } from '../../api/api';
@@ -25,40 +23,49 @@ import { ActionButton } from '../../model/ActionButton';
 import { BaseForm } from '../UiElements/BaseForm';
 import { FormContent } from '../../model/Form/FormContent';
 import SignalRService from '../../services/SignalRService';
+import { usePopup } from '../../context/PopupContext';
+import { FormType } from '../../model/Form/FormProp';
 
 // Define Global Variable
-let removeTarget: RemoveOutput;
 
 
 
-export const OUTPUT_TABLE_HEADER: string[] = ["Name", "Main Controller", "Module", "Mode", "Status", "Action"]
-export const OUTPUT_KEY: string[] = ["name", "macAddress", "componentId", "relayMode"];
+export const OUTPUT_TABLE_HEADER: string[] = ["Name", "Main Controller", "Module", "Mode","Offline","Pulse Time", "Status", "Action"]
+export const OUTPUT_KEY: string[] = ["name", "macAddressDescription", "moduleDescription", "relayModeDescription","offlineModeDescription","defaultPulse"];
 
 const ControlPoint = () => {
     const { toggleToast } = useToast();
     const { locationId } = useLocation();
     const { filterPermission } = useAuth();
+    const { setCreate,setRemove,setMessage,setUpdate,setInfo,setConfirmCreate,setConfirmRemove,setConfirmUpdate } = usePopup();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
-    {/* Modal */ }
-    const [removeModal, setRemoveModal] = useState(false);
-    const [create, setCreate] = useState<boolean>(false);
-    const [update, setUpdate] = useState<boolean>(false);
+    const [form,setForm] = useState<boolean>(false);
+    const [formType,setFormType] = useState<FormType>(FormType.Create)
+
 
     {/* handle Table Action */ }
     const handleEdit = (data: ControlPointDto) => {
-        console.log(data);
-        setOutputDto(data)
-        setUpdate(true)
+        setControlPointDto(data)
+        setFormType(FormType.Update)
+        setForm(true)
+    }
+
+    const handleInfo = (data:ControlPointDto) => {
+        console.log(data)
+        setControlPointDto(data);
+        setFormType(FormType.Info);
+        setForm(true);
     }
 
     const handleRemove = (data: ControlPointDto) => {
-        console.log(data);
-        removeTarget = {
-            macAddress: data.macAddress,
-            componentId: data.componentId
-        };
-        setRemoveModal(true);
+        setConfirmRemove(() => async () => {
+            const res = await send.delete(ControlPointEndpoint.DELETE(data.componentId))
+            if(Helper.handleToastByResCode(res,ControlPointToast.DELETE,toggleToast)){
+                toggleRefresh();
+            }
+        })
+        setRemove(true);
     }
 
 
@@ -76,13 +83,17 @@ const ControlPoint = () => {
         componentId: -1,
         macAddress: '',
         locationId: locationId,
-        isActive: true
+        isActive: true,
+        relayModeDescription: '',
+        offlineModeDescription: '',
+        macAddressDescription: '',
+        moduleDescription: ''
     }
-    const [outputDto, setOutputDto] = useState<ControlPointDto>(defaultDto);
+    const [controlPointDto, setControlPointDto] = useState<ControlPointDto>(defaultDto);
     const [outputsDto, setOutputsDto] = useState<ControlPointDto[]>([]);
     const [status, setStatus] = useState<StatusDto[]>([]);
     const fetchData = async () => {
-        const res = await send.get(ControlPointEndpoint.GET_CP(locationId));
+        const res = await send.get(ControlPointEndpoint.GET(locationId));
         if (res && res.data.data) {
             console.log(res.data.data)
             setOutputsDto(res.data.data);
@@ -107,33 +118,10 @@ const ControlPoint = () => {
     };
 
     const fetchStatus = async (scpMac: string, cpNo: number) => {
-        const res = await HttpRequest.send(HttpMethod.GET, ControlPointEndpoint.GET_CP_STATUS + scpMac + "/" + cpNo);
+        const res = await HttpRequest.send(HttpMethod.GET, ControlPointEndpoint.STATUS + scpMac + "/" + cpNo);
         Logger.info(res);
     };
 
-    const createControlPoint = async () => {
-        const res = await send.post(ControlPointEndpoint.CREATE_CP, outputDto)
-        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_CP, toggleToast)) {
-            setUpdate(false);
-            setCreate(false);
-            toggleRefresh();
-        }
-    }
-
-    const removeControlPoint = async () => {
-        const res = await HttpRequest.send(HttpMethod.DELETE, ControlPointEndpoint.DELETE_CP + removeTarget.macAddress + "/" + removeTarget.componentId);
-        if (Helper.handleToastByResCode(res, ToastMessage.DELETE_CP, toggleToast)) {
-            setRemoveModal(false);
-            toggleRefresh();
-        } else {
-            setRemoveModal(false);
-        }
-        removeTarget = {
-            macAddress: "",
-            componentId: -1
-        }
-
-    }
 
 
 
@@ -181,21 +169,51 @@ const ControlPoint = () => {
         console.log(e.currentTarget.name)
         switch (e.currentTarget.name) {
             case "add":
-                setCreate(true)
+                setFormType(FormType.Create)
+                setForm(true)
+                break;
+            case "delete":
+                if(selectedObjects.length == 0){            
+                    setMessage("Please select object")
+                    setInfo(true);
+                }
+                setConfirmRemove(() => async () => {
+                    var data:number[] = [];
+                    selectedObjects.map(async (a:ControlPointDto) => {
+                        data.push(a.componentId)
+                    })
+                    var res = await send.post(ControlPointEndpoint.DELETE_RANGE,data)
+                    if(Helper.handleToastByResCode(res,ControlPointToast.DELETE_RANGE,toggleToast)){
+                        setRemove(false);
+                        toggleRefresh();
+                    }
+                })
+                setRemove(true);
                 break;
             case "create":
-                createControlPoint();
+                setConfirmCreate(() => async () => {
+                    const res = await send.post(ControlPointEndpoint.CREATE, controlPointDto)
+                    if (Helper.handleToastByResCode(res, ControlPointToast.CREATE, toggleToast)) {
+                        setForm(false);
+                        toggleRefresh();
+                    }
+                })
+                setCreate(true);
                 break;
+            case "update":
+                setConfirmUpdate(() => async () => {
+                    const res = await send.put(ControlPointEndpoint.UPDATE,controlPointDto)
+                    if(Helper.handleToastByResCode(res,ControlPointToast.UPDATE,toggleToast)){
+                        setForm(false);
+                        toggleRefresh();
+                    }
+                })
+                setUpdate(true);
+                break;
+            case "cancel":
             case "close":
-                setOutputDto(defaultDto)
-                setCreate(false);
-                setUpdate(false);
-                break;
-            case "remove-cancel":
-                setRemoveModal(false);
-                break;
-            case "remove-confirm":
-                removeControlPoint();
+                setControlPointDto(defaultDto)
+                setForm(false);
                 break;
             case "on":
                 console.log(selectedObjects);
@@ -206,7 +224,7 @@ const ControlPoint = () => {
                             componentId: a.componentId,
                             command: 2
                         }
-                        const res = await send.post(ControlPointEndpoint.CP_TRIGGER, data);
+                        const res = await send.post(ControlPointEndpoint.TRIGGER, data);
                         Helper.handleToastByResCode(res, ToastMessage.TOGGLE_OUTPUT, toggleToast)
                     });
                 }
@@ -220,7 +238,7 @@ const ControlPoint = () => {
                             componentId: a.componentId,
                             command: 1
                         }
-                        const res = await send.post(ControlPointEndpoint.CP_TRIGGER, data);
+                        const res = await send.post(ControlPointEndpoint.TRIGGER, data);
                         Helper.handleToastByResCode(res, ToastMessage.TOGGLE_OUTPUT, toggleToast)
                     });
                 }
@@ -233,7 +251,7 @@ const ControlPoint = () => {
                             componentId: a.componentId,
                             command: 3
                         }
-                        const res = await send.post(ControlPointEndpoint.CP_TRIGGER, data);
+                        const res = await send.post(ControlPointEndpoint.TRIGGER, data);
                         Helper.handleToastByResCode(res, ToastMessage.TOGGLE_OUTPUT, toggleToast)
                     });
                 }
@@ -245,29 +263,7 @@ const ControlPoint = () => {
 
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<ControlPointDto[]>([]);
-    const handleCheckedAll = (data: ControlPointDto[], e: React.ChangeEvent<HTMLInputElement>) => {
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects(data);
-            } else {
-                setSelectedObjects([]);
-            }
-        }
-    }
-
-    const handleChecked = (data: ControlPointDto, e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects((prev) => [...prev, data]);
-            } else {
-                setSelectedObjects((prev) =>
-                    prev.filter((item) => item.componentId !== data.componentId)
-                );
-            }
-        }
-    }
+   
 
     const action: ActionButton[] = [
         {
@@ -310,24 +306,23 @@ const ControlPoint = () => {
         {
             icon: <ControlIcon />,
             label: "Control Point",
-            content: <ControlPointForm data={outputDto} setOutputDto={setOutputDto} handleClick={handleClick} />
+            content: <ControlPointForm dto={controlPointDto} setDto={setControlPointDto} handleClick={handleClick} type={formType} />
         }
     ]
 
 
     return (
         <>
-            {removeModal && <RemoveModal header='Remove Control Point' body='Please Click Confirm if you want to remove this Control Point' handleClick={handleClick} />}
             <PageBreadcrumb pageTitle="Control Point" />
             {
-                create || update
+                form
                     ?
                     <>
                         <BaseForm tabContent={formContent} />
                     </>
 
                     :
-                    <BaseTable<ControlPointDto> headers={OUTPUT_TABLE_HEADER} keys={OUTPUT_KEY} status={status} data={outputsDto} onEdit={handleEdit} onRemove={handleRemove} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} selectedObject={selectedObjects} onClick={handleClick} permission={filterPermission(FeatureId.DEVICE)} renderOptionalComponent={renderOptionalComponent} action={action} />
+                    <BaseTable<ControlPointDto> headers={OUTPUT_TABLE_HEADER} keys={OUTPUT_KEY} status={status} data={outputsDto} onEdit={handleEdit} onRemove={handleRemove} select={selectedObjects} setSelect={setSelectedObjects} onClick={handleClick} permission={filterPermission(FeatureId.CONTROL)} renderOptionalComponent={renderOptionalComponent} action={action} onInfo={handleInfo} />
 
 
             }

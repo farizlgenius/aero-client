@@ -2,14 +2,17 @@ const API_VERSION = import.meta.env.VITE_API_VERSION;
 const CONTROLLER = `MonitorPoint`;
 
 export const MonitorPointEndpoint = {
-    GET_MP_LIST:(locationId:number)=> `/api/${API_VERSION}/${locationId}/${CONTROLLER}`,
-    GET_MP_BY_MAC:(mac:string) =>  `/api/${API_VERSION}/${CONTROLLER}/${mac}`,
-    POST_ADD_MP : `/api/${API_VERSION}/${CONTROLLER}`,
+    MPS:(locationId:number)=> `/api/${API_VERSION}/${locationId}/${CONTROLLER}`,
+    MP_BY_MAC:(mac:string) =>  `/api/${API_VERSION}/${CONTROLLER}/${mac}`,
+    CREATE : `/api/${API_VERSION}/${CONTROLLER}`,
+    UPDATE:  `/api/${API_VERSION}/${CONTROLLER}`,
     GET_MP_STATUS : `/api/${API_VERSION}/${CONTROLLER}/status/`,
-    DELETE_MP : `/api/${API_VERSION}/${CONTROLLER}/`,
-    GET_IP_LIST : `/api/${API_VERSION}/${CONTROLLER}/ip/`,
-    POST_MASK : `/api/${API_VERSION}/${CONTROLLER}/mask`,
-    POST_UNMASK : `/api/${API_VERSION}/${CONTROLLER}/unmask`,
-    GET_IP_MODE : `/api/${API_VERSION}/${CONTROLLER}/input/mode`,
-    GET_MP_MODE : `/api/${API_VERSION}/${CONTROLLER}/mode`
+    DELETE :(component:number) => `/api/${API_VERSION}/${CONTROLLER}/${component}`,
+    DELETE_RANGE: `/api/${API_VERSION}/${CONTROLLER}/delete/range`,
+    IP_LIST :(mac:string,component:number) => `/api/${API_VERSION}/${CONTROLLER}/ip/${mac}/${component}`,
+    MASK : `/api/${API_VERSION}/${CONTROLLER}/mask`,
+    UNMASK : `/api/${API_VERSION}/${CONTROLLER}/unmask`,
+    IP_MODE : `/api/${API_VERSION}/${CONTROLLER}/input/mode`,
+    MP_MODE : `/api/${API_VERSION}/${CONTROLLER}/mode`,
+    LOG_FUNCTION : `/api/${API_VERSION}/${CONTROLLER}/lf`
 } as const;

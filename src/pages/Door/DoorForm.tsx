@@ -159,7 +159,7 @@ var defaultReader: ReaderDto = {
   {/* Reader Module */ }
   const [moduleOption, setModuleOption] = useState<Options[]>([]);
   const fetchModule = async (value: string) => {
-    const res = await send.get(ModuleEndpoint.GET_MODULE_BY_MAC(value));
+    const res = await send.get(ModuleEndpoint.GET_MAC(value));
     if (res && res.data.data) {
       res.data.data.map((a: ModuleDto) => {
         setModuleOption((prev) => [...prev, {
@@ -263,7 +263,7 @@ var defaultReader: ReaderDto = {
   const [inputModeOption, setInputModeOption] = useState<Options[]>([])
   const fetchInputRex0 = async (mac: string, sio: number) => {
     if (inputRex0Option.length !== 0) return;
-    const res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.GET_IP_LIST + mac + "/" + sio)
+    const res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.IP_LIST + mac + "/" + sio)
     if (res && res.data.data) {
       res.data.data.map((a: number) => {
         setInputRex0Option(prev => [...prev, {
@@ -281,7 +281,7 @@ var defaultReader: ReaderDto = {
       setInputRex1Option(inputRex0Option.filter((a) => a.isTaken === false));
       return;
     }
-    const res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.GET_IP_LIST + mac + "/" + sio)
+    const res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.IP_LIST + mac + "/" + sio)
     if (res && res.data.data) {
       res.data.data.map((a: number) => {
         setInputRex1Option(prev => [...prev, {
@@ -301,7 +301,7 @@ var defaultReader: ReaderDto = {
       setInputSensorOption(inputRex0Option.filter(a => a.isTaken == false));
       return;
     }
-    const res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.GET_IP_LIST + mac + "/" + sio)
+    const res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.IP_LIST + mac + "/" + sio)
     if (res && res.data.data) {
       res.data.data.map((a: number) => {
         setInputSensorOption(prev => [...prev, {
@@ -314,7 +314,7 @@ var defaultReader: ReaderDto = {
   }
   const fetchInputMode = async () => {
     if (inputModeOption.length !== 0) return;
-    const res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.GET_IP_MODE)
+    const res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.IP_MODE)
     if (res && res.data.data) {
       res.data.data.map((a: ModeDto) => {
         setInputModeOption(prev => [...prev, {
@@ -331,7 +331,7 @@ var defaultReader: ReaderDto = {
   const [strikeModeOption, setStrikeModeOption] = useState<Options[]>([])
   const fetchOutput = async (mac: string, sio: number) => {
     if (outputOption.length !== 0) return;
-    const res = await HttpRequest.send(HttpMethod.GET, ControlPointEndpoint.GET_CP_OUTPUT + mac + "/" + sio)
+    const res = await HttpRequest.send(HttpMethod.GET, ControlPointEndpoint.OUTPUT + mac + "/" + sio)
     if (res && res.data.data) {
       res.data.data.map((a: number) => {
         setOutputOption(prev => [...prev, {

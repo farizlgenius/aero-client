@@ -11,15 +11,16 @@ import { BaseTable } from "../UiElements/BaseTable";
 import { useAuth } from "../../context/AuthContext";
 import { FeatureId } from "../../enum/FeatureId";
 import SignalRService from "../../services/SignalRService";
-import { TableCell } from "../../components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "../../components/ui/table";
 import Badge from "../../components/ui/badge/Badge";
+import ResponsiveImage from "../../components/ui/images/ResponsiveImage";
 
-const MODULE_TABLE_HEADER: string[] = [
+const HEADER: string[] = [
   "Model","Address", "Tamper", "AC", "Battery", "Status", "Action"
 ]
 
 // Define Keys
-const MODULE_KEY: string[] = [
+const KEY: string[] = [
    "model","address"
 ]
 
@@ -35,7 +36,7 @@ export default function Module() {
   const toggleRefresh = () => setRefresh(prev => !prev)
   const fetchModule = async () => {
     console.log(locationId)
-    const res = await send.get(ModuleEndpoint.GET_MODULE(locationId))
+    const res = await send.get(ModuleEndpoint.GET(locationId))
     if (res && res.data.data) {
       //Helper.handlePopup(res, PopUpMsg.GET_MODULE_STATUS, showPopup)
       console.log(res.data.data)
@@ -69,7 +70,7 @@ export default function Module() {
 
   {/* Module Status */ }
   const fetchStatus = async (ScpMac: string, SioNo: number) => {
-    await send.get(ModuleEndpoint.GET_MODULE_STATUS(ScpMac, SioNo))
+    await send.get(ModuleEndpoint.STATUS(ScpMac, SioNo))
     //Helper.handlePopup(res, PopUpMsg.GET_MODULE_STATUS, showPopup)
   };
 
@@ -79,6 +80,10 @@ export default function Module() {
   }
 
   const handleRemove = (data: ModuleDto) => {
+
+  }
+
+  const handleInfo = (data:ModuleDto) => {
 
   }
 
@@ -215,6 +220,20 @@ export default function Module() {
     ]
   }
 
+  const subTable = () => {
+    return <TableRow >
+      <TableCell colspan={8} >
+        {/* <img src="https://www.dfsme.ae/wp-content/uploads/2023/11/HID-Aero%C2%AE-X100.png" width={40}/> */}
+        <div className="flex w-1/2">
+          <ResponsiveImage/>
+        </div>
+
+      </TableCell>
+
+    </TableRow>
+    
+  }
+
 
   return (
     <>
@@ -222,7 +241,7 @@ export default function Module() {
         <Modals header="Edit Module" body={<EditModuleInputs data={moduleDto[0]} />} handleClickWithEvent={closeModalToggle} />
       }
       <PageBreadcrumb pageTitle="Module" />
-      <BaseTable<ModuleDto> headers={MODULE_TABLE_HEADER} keys={MODULE_KEY} data={moduleDto} status={status} handleCheck={handleCheck} handleCheckAll={handleCheckedAll} selectedObject={selectedObjects} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.DEVICE)} renderOptionalComponent={filterComponent} />
+      <BaseTable<ModuleDto> subTable={subTable} headers={HEADER} keys={KEY} data={moduleDto} status={status} select={selectedObjects} setSelect={setSelectedObjects} onEdit={handleEdit} onInfo={handleInfo} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.DEVICE)} renderOptionalComponent={filterComponent} />
     </>
   );
 }

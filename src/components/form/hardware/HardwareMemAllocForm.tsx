@@ -20,7 +20,7 @@ export const HardwareMemAllocForm:React.FC<PropsWithChildren<HardwareMemAllocFor
 
     const fetchData = async () => {
         const res = await send.post(HardwareEndpoint.VERIFY_MEM(data.macAddress))
-        if(Helper.handleToastByResCode(res,ToastMessage.GET_SCP_STRUCTURE,toggleToast)){}
+        // if(Helper.handleToastByResCode(res,ToastMessage.GET_SCP_STRUCTURE,toggleToast)){}
     }
 
     useEffect(() => {
@@ -36,7 +36,9 @@ export const HardwareMemAllocForm:React.FC<PropsWithChildren<HardwareMemAllocFor
     return (
 
         <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-            <div className="space-y-6">
+            {
+                data.hardware_type == 1 ?
+                <div className="space-y-6">
                 <Table>
                     <TableHeader className="border-b border-gray-100 dark:border-white/[0.05] bg-white dark:bg-gray-900 sticky top-0 z-10">
                         <TableRow>
@@ -92,6 +94,15 @@ export const HardwareMemAllocForm:React.FC<PropsWithChildren<HardwareMemAllocFor
                     </TableBody>
                 </Table>
             </div>
+            
+        :
+        <div className="space-y-6">
+
+            <h1>Only Aero</h1>
+
+        </div>
+        
+        }
 
         </div>
     )

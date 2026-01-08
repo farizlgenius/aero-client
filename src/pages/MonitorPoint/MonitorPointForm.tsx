@@ -1,6 +1,5 @@
 import { PropsWithChildren, useEffect, useState } from "react";
 import HttpRequest from "../../utility/HttpRequest";
-import ComponentCard from "../../components/common/ComponentCard";
 import Label from "../../components/form/Label";
 import Input from "../../components/form/input/InputField";
 import Select from "../../components/form/Select";
@@ -16,35 +15,32 @@ import { MonitorPointEndpoint } from "../../endpoint/MonitorPointEndpoint";
 import { HardwareEndpoint } from "../../endpoint/HardwareEndpoint";
 import { send } from "../../api/api";
 import { useLocation } from "../../context/LocationContext";
+import { FormProp } from "../../model/Form/FormProp";
 
 
 
 
-interface MonitorPointForm {
-  handleClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
-  data: MonitorPointDto;
-  setMonitorPointDto: React.Dispatch<React.SetStateAction<MonitorPointDto>>
-}
 
-
-const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handleClick, data, setMonitorPointDto }) => {
+const MonitorPointForm: React.FC<PropsWithChildren<FormProp<MonitorPointDto>>> = ({ handleClick,  dto, setDto,type }) => {
   const {locationId} = useLocation();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMonitorPointDto((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+    setDto((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
   {/* Select */ }
   const [moduleOption, setModuleOption] = useState<Options[]>([]);
   const [controllerOption, setControllerOption] = useState<Options[]>([]);
+  const [logFunctionOption,setLogFunctionOption] = useState<Options[]>([]);
   const [inputOption, setInputOption] = useState<Options[]>([]);
   const [inputModeOption, setInputModeOption] = useState<Options[]>([]);
   const [monitorPointModeOption, setMonitorPointModeOption] = useState<Options[]>([]);
 
   const handleSelectChange = async (value: string, e: React.ChangeEvent<HTMLSelectElement>) => {
-    setMonitorPointDto((prev) => ({ ...prev, [e.target.name]: value }))
+   
     switch (e.target.name) {
       case "macAddress":
-        const res1 = await send.get(ModuleEndpoint.GET_MODULE_BY_MAC(value))
+        setDto(prev => ({...prev,macAddress:value,macAddressDescription:controllerOption.find(x => x.value == value)?.label ?? ""}))
+        const res1 = await send.get(ModuleEndpoint.GET_MAC(value))
         if (res1?.data.data) {
           res1.data.data.map((a: ModuleDto) => {
             setModuleOption((prev) => [...prev, { label: `${a.model} ( ${a.address} )`, value: a.componentId }])
@@ -52,7 +48,8 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
         }
         break;
       case "moduleId":
-        const res2 = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.GET_IP_LIST + data.macAddress + "/" + value)
+        setDto(prev => ({...prev,moduleId:Number(value)}))
+        const res2 = await send.get(MonitorPointEndpoint.IP_LIST(dto.macAddress,Number(value)))
         if (res2?.data.data) {
           res2.data.data.map((a: number) => {
             setInputOption((prev) => [...prev, {
@@ -62,7 +59,17 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
           })
         }
         break;
+      case "monitorPointMode":
+        setDto(prev => ({...prev,monitorPointMode:Number(value),monitorPointModeDescription: monitorPointModeOption.find(x => x.value == Number(value))?.label ?? "" }))
+        break;
+      case "inputMode":
+        setDto(prev => ({...prev,inputMode:Number(value),inputModeDescription: inputModeOption.find(x => x.value == Number(value))?.label ?? "" }))
+      break;
+      case "logFunction":
+        setDto(prev => ({...prev,logFunction:Number(value),logFunctionDescription:logFunctionOption.find(x => x.value == Number(value))?.label ?? ""}))
+        break;
       default:
+         setDto((prev) => ({ ...prev, [e.target.name]: value }))
         break;
     }
 
@@ -81,7 +88,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
   }
 
   const fetchInputMode = async () => {
-    let res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.GET_IP_MODE);
+    let res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.IP_MODE);
     if (res?.data.data) {
       res.data.data.map((a: ModeDto) => {
         setInputModeOption((prev) => [...prev, { label: a.name, value: a.value }])
@@ -90,10 +97,23 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
   }
 
   const fetchMonitorPointMode = async () => {
-    let res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.GET_MP_MODE);
+    let res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.MP_MODE);
     if (res?.data.data) {
       res.data.data.map((a: ModeDto) => {
         setMonitorPointModeOption((prev) => [...prev, { label: a.name, value: a.value }])
+      })
+    }
+  }
+
+  const fetchLFMode = async () => {
+    let res = await send.get(MonitorPointEndpoint.LOG_FUNCTION);
+    if(res.data.data){
+      res.data.data.map((a:ModeDto) => {
+        setLogFunctionOption(prev => [...prev,{
+          label:a.name,
+          value:a.value,
+          description:a.description
+        }])
       })
     }
   }
@@ -104,6 +124,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
     fetchController();
     fetchInputMode();
     fetchMonitorPointMode();
+    fetchLFMode();
   }, []);
 
   return (
@@ -112,7 +133,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
       <div className="space-y-6">
         <div>
           <Label htmlFor="name">Monitor Point Name</Label>
-          <Input value={data.name} name="name" type="text" id="name" onChange={handleChange} />
+          <Input value={dto.name} name="name" type="text" id="name" onChange={handleChange} />
         </div>
         <div>
           <Label>Controller</Label>
@@ -123,7 +144,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
             placeholder="Select Option"
             onChangeWithEvent={handleSelectChange}
             className="dark:bg-dark-900"
-            defaultValue={data.macAddress}
+            defaultValue={dto.macAddress}
           />
         </div>
         <div>
@@ -134,7 +155,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
             placeholder="Select Option"
             onChangeWithEvent={handleSelectChange}
             className="dark:bg-dark-900"
-            defaultValue={data.moduleId}
+            defaultValue={dto.moduleId}
           />
         </div>
         <div>
@@ -145,7 +166,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
             placeholder="Select Option"
             onChangeWithEvent={handleSelectChange}
             className="dark:bg-dark-900"
-            defaultValue={data.inputNo}
+            defaultValue={dto.inputNo}
           />
         </div>
         <div>
@@ -157,7 +178,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
               placeholder="Select Option"
               onChangeWithEvent={handleSelectChange}
               className="dark:bg-dark-900"
-              defaultValue={data.inputMode}
+              defaultValue={dto.inputMode}
             />
           </div>
 
@@ -170,22 +191,34 @@ const MonitorPointForm: React.FC<PropsWithChildren<MonitorPointForm>> = ({ handl
             placeholder="Select Option"
             onChangeWithEvent={handleSelectChange}
             className="dark:bg-dark-900"
-            defaultValue={data.monitorPointMode}
+            defaultValue={dto.monitorPointMode}
+          />
+
+        </div>
+        <div>
+          <Label className="pb-3">Log Function Mode</Label>
+          <Select
+            name="logFunction"
+            options={logFunctionOption}
+            placeholder="Select Option"
+            onChangeWithEvent={handleSelectChange}
+            className="dark:bg-dark-900"
+            defaultValue={dto.logFunction}
           />
 
         </div>
 
-        <div className={data.monitorPointMode == 1 || data.monitorPointMode == 2 ? "" : "hidden"}>
+        <div className={dto.monitorPointMode == 1 || dto.monitorPointMode == 2 ? "" : "hidden"}>
           <Label htmlFor="delayEntry">Delay Entry(s)</Label>
-          <Input value={data.delayEntry} min="0" max="65535" name="delayEntry" type="number" id="delayEntry" onChange={handleChange} />
+          <Input value={dto.delayEntry} min="0" max="65535" name="delayEntry" type="number" id="delayEntry" onChange={handleChange} />
         </div>
-        <div className={data.monitorPointMode == 1 || data.monitorPointMode == 2 ? "" : "hidden"}>
+        <div className={dto.monitorPointMode == 1 || dto.monitorPointMode == 2 ? "" : "hidden"}>
           <Label htmlFor="delayExit">Delay Exit(s)</Label>
-          <Input value={data.delayExit} min="0" max="65535" name="delayExit" type="number" id="delayExit" onChange={handleChange} />
+          <Input value={dto.delayExit} min="0" max="65535" name="delayExit" type="number" id="delayExit" onChange={handleChange} />
         </div>
         <div className="flex justify-center gap-4">
           <Button name="create" onClickWithEvent={handleClick} className="w-50" size="sm">Submit </Button>
-          <Button name="cancle" onClickWithEvent={handleClick} variant="danger" className="w-50" size="sm">Cancle</Button>
+          <Button name="cancel" onClickWithEvent={handleClick} variant="danger" className="w-50" size="sm">Cancle</Button>
         </div>
       </div>
     </div>

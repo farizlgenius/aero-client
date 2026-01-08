@@ -1,10 +1,8 @@
-import { PropsWithChildren, ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import Button from "../../components/ui/button/Button";
-import { HardwareIcon, ResetIcon, ScanIcon, UploadIcon } from "../../icons";
+import { HardwareIcon, ResetIcon, ScanIcon, ToggleTranIcon, TransferIcon, UploadIcon } from "../../icons";
 import Modals from "../UiElements/Modals";
-import RemoveModal from "../UiElements/RemoveModal";
-import SelectDeviceForm from "../../components/form/form-elements/SelectDeviceForm";
 import HttpRequest from "../../utility/HttpRequest";
 import Helper from "../../utility/Helper";
 import HardwareForm from "../../components/form/hardware/HardwareForm";
@@ -24,28 +22,31 @@ import { ActionButton } from "../../model/ActionButton";
 import { BaseForm } from "../UiElements/BaseForm";
 import { FormContent } from "../../model/Form/FormContent";
 import { useToast } from "../../context/ToastContext";
-import { ToastMessage } from "../../model/ToastMessage";
+import { HardwareToast, ToastMessage } from "../../model/ToastMessage";
 import Badge from "../../components/ui/badge/Badge";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../components/ui/table";
 import { HardwareMemAllocForm } from "../../components/form/hardware/HardwareMemAllocForm";
 import { useLoading } from "../../context/LoadingContext";
 import { HardwareComponentForm } from "../../components/form/hardware/HardwareComponentForm";
 import { TranStatusDto } from "../../model/Hardware/TranStatusDto";
+import { FormType } from "../../model/Form/FormProp";
+import { usePopup } from "../../context/PopupContext";
+import { SetTranDto } from "../../model/Hardware/SetTranDto";
 
 
-const HEADER = ["Name", "Model", "Mac","Firmware", "IP","Port", "Transction", "Configuration", "Status", "Action"];
-const KEY = ["name", "model", "macAddress","fw", "ipAddress","port", "tranStatus"];
+const HEADER = ["Name", "Type", "Mac","Firmware", "IP","Port", "Transction", "Configuration", "Status", "Action"];
+const KEY = ["name", "hardwareTypeDescription", "macAddress","firmware", "ip","port", "tranStatus"];
 // Hardware Page
-const ID_REPORT_KEY = [ "deviceId",'macAddress','scpId','ip'];
-const ID_REPORT_TABLE_HEADER = ["Model", "Mac address", "Id", "Ip address", "Action"];
+const ID_REPORT_KEY = [ "componentId",'macAddress','port','ip','serialNumber'];
+const ID_REPORT_TABLE_HEADER = ["Id", "Mac", "Port", "Ip","Serial No", "Action"];
 
-let removeTarget = "";
 
 const Hardware = () => {
   const { FlashLoading } = useLoading();
   const { locationId } = useLocation();
   const { toggleToast } = useToast();
   const { filterPermission } = useAuth();
+  const { setCreate,setRemove,setUpdate,setConfirmCreate,setConfirmRemove,setConfirmUpdate,setMessage,setInfo  } = usePopup();
   const [refresh, setRefresh] = useState(false);
   const toggleRefresh = () => setRefresh(!refresh);
 
@@ -61,28 +62,37 @@ const Hardware = () => {
 
     // Define
     name: "",
-    model: "",
-    ipAddress: "",
-    modules: [],
+    ip: "",
     serialNumber: "",
     isUpload: false,
-    isReset: false
+    isReset: false,
+    hardware_type: 0,
+    hardwareTypeDescription: "",
+    firmware: "",
+    port: "",
+    modules: [],
+    portOne: false,
+    portTwo: false,
+    protocolOne: 0,
+    protocolOneDescription: "",
+    baudRateOne: -1,
+    protocolTwo: 0,
+    protocolTwoDescription: "",
+    baudRateTwo: -1,
+    macAddressDescription: ""
   }
 
 
   {/* Modal Handler */ }
   const [scan, setScan] = useState<boolean>(false)
-  const [create, setCreate] = useState<boolean>(false);
-  const [edit, setEdit] = useState<boolean>(false);
-  const [select, setSelect] = useState<boolean>(false);
-  const [isRemoveClick, SetIsRemoveClick] = useState<boolean>(false);
-  const [hardwareType, setHardwareType] = useState<number>(-1);
+  const [form,setForm] = useState<boolean>(false);
+  const [formType,setFormType] = useState<FormType>(FormType.Create);
 
   // Upload Modal
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadMessage, setUploadMessage] = useState<string>("");
   const handleCloseModal = () => setScan(false);
-  const handleCloseSelectDevice = () => setSelect(false);
+
 
 
   {/* IdReport */ }
@@ -91,23 +101,35 @@ const Hardware = () => {
     setHardwareDto({
       // Base
       uuid: "",
-      componentId: data.scpId,
+      componentId: data.componentId,
       macAddress: data.macAddress,
+      macAddressDescription:'',
       locationId: locationId,
       isActive: true,
 
       // Define
       name: "",
-      model: data.model,
-      ipAddress: data.ip,
+      hardware_type:data.hardwareType,
+      hardwareTypeDescription: data.hardwareTypeDescription,
+      ip: data.ip,
+      firmware:data.firmware,
       modules: [],
+      port:data.port,
       serialNumber: data.serialNumber.toString(),
+      portOne: false,
+      portTwo: false,
+      protocolOne:0,
+      baudRateOne:-1,
+      protocolOneDescription:"",
+      protocolTwo:0,
+      protocolTwoDescription:"",
+      baudRateTwo:-1,
       isUpload: false,
       isReset: false
     });
     console.log(data);
     setScan(false);
-    setCreate(true);
+    setForm(true);
   }
   const fetchIdReport = async () => {
     const res = await HttpRequest.send(HttpMethod.GET, HardwareEndpoint.ID_REPORT)
@@ -203,6 +225,13 @@ const Hardware = () => {
     }
 
   }
+
+  const setTran = async (data:SetTranDto[]) => {
+    var res = await send.post(HardwareEndpoint.TRAN_RANGE,data);
+    if(Helper.handleToastByResCode(res,HardwareToast.TOGGLE_TRAN,toggleToast)){
+      toggleRefresh();
+    }
+  }
   const fetchStatus = async (mac: string) => {
     const res = await send.get(HardwareEndpoint.STATUS(mac));
     console.log(res)
@@ -248,80 +277,142 @@ const Hardware = () => {
     }
   }
 
-  const removeScp = async (mac: string) => {
-    const res = await send.delete(HardwareEndpoint.DELETE(mac))
-    if (Helper.handleToastByResCode(res, ToastMessage.DELETE_SCP, toggleToast)) {
-      toggleRefresh();
-    }
-
-  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHardwareDto((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  const createHardware = async () => {
-    const res = await send.post(HardwareEndpoint.CREATE, hardwareDto)
-    setCreate(false);
-    if (Helper.handleToastByResCode(res, ToastMessage.CREATE_HARDWARE, toggleToast)) {
-      toggleRefresh()
-    }
-  }
+
 
   {/* Handle Action Table*/ }
   const handleEdit = (data: HardwareDto) => {
-    console.log(data);
+    setFormType(FormType.Update)
     setHardwareDto({
       // Base
       uuid: data.uuid,
       componentId: data.componentId,
+      macAddressDescription:data.macAddressDescription,
       macAddress: data.macAddress,
       locationId: data.locationId,
       isActive: true,
       // detail
 
       name: data.name,
-      model: data.model,
-      ipAddress: data.ipAddress,
+      hardware_type: data.hardware_type,
+      hardwareTypeDescription: data.hardwareTypeDescription,
+      ip: data.ip,
+      firmware: data.firmware,
+      port: data.port,
       modules: data.modules,
       serialNumber: data.serialNumber,
+      portOne: data.portOne,
+      portTwo: data.portTwo,
+      protocolOne:data.protocolOne,
+      baudRateOne:data.baudRateOne,
+      protocolOneDescription:data.protocolOneDescription,
+      protocolTwo:data.protocolTwo,
+      protocolTwoDescription:data.protocolTwoDescription,
+      baudRateTwo:data.baudRateTwo,
       isUpload: data.isUpload,
       isReset: data.isReset
     })
-    setEdit(true);
+    setForm(true);
   }
+
   const handleRemove = (data: HardwareDto) => {
-    removeTarget = data.macAddress;
-    SetIsRemoveClick(true);
+    setConfirmRemove(() => async () => {
+      const res = await send.delete(HardwareEndpoint.DELETE(data.macAddress));
+      if(Helper.handleToastByResCode(res,HardwareToast.DELETE,toggleToast)){
+        setHardwareDto(defaultDto)
+        toggleRefresh();
+      }
+    })
+    setRemove(true);
+
   }
   const handleInfo = (data:HardwareDto) => {
-
+    setFormType(FormType.Info);
+    setHardwareDto(data);
+    setForm(true);
   }
   {/* Handle Click */ }
   const handleClickWithEvent = (e: React.MouseEvent<HTMLButtonElement>) => {
     console.log(e.currentTarget.name);
     switch (e.currentTarget.name) {
       case "add":
-        setSelect(true);
+        setFormType(FormType.Create);
+        setForm(true);
+        break;
+      case "report":
+        if (select.length == 0) {
+          setMessage("Please select object")
+          setInfo(true);
+        } else {
+          let data:SetTranDto[] = []
+          select.map((a:HardwareDto) => {
+            data.push({
+              macAddress:a.macAddress,
+              param:1
+            });
+          })
+          setTran(data);
+          
+        }
+        break;
+      case "delete":
+        if (select.length == 0) {
+          setMessage("Please select object")
+          setInfo(true);
+        } else {
+          setConfirmRemove(() => async () => {
+            var data: number[] = [];
+            select.map(async (a: HardwareDto) => {
+              data.push(a.componentId)
+            })
+            var res = await send.post(HardwareEndpoint.DELETE_RANGE, data)
+            if (Helper.handleToastByResCode(res, HardwareToast.DELETE_RANGE, toggleToast)) {
+              setRemove(false);
+              toggleRefresh();
+            }
+          })
+          setRemove(true);
+        }
+        break;
+      case "update":
+        setConfirmUpdate(() => async () => {
+          const res = await send.put(HardwareEndpoint.UPDATE,hardwareDto);
+          if(Helper.handleToastByResCode(res,HardwareToast.UPDATE,toggleToast)){
+            setForm(false);
+            toggleRefresh();
+            setHardwareDto(defaultDto);
+          }
+        })
+        setUpdate(true);
+        break;
+      case "create":
+        setConfirmCreate(() => async () => {
+          const res = await send.post(HardwareEndpoint.CREATE,hardwareDto);
+          if(Helper.handleToastByResCode(res,HardwareToast.CREATE,toggleToast)){
+            toggleRefresh();
+            setForm(false);
+            setHardwareDto(defaultDto);
+          }
+        })
+        setCreate(true);
         break;
       case "type":
-        setCreate(true)
-        setSelect(false)
-        break;
-      case "submit":
-        createHardware()
+        setForm(true)
         break;
       case "scan":
         setScan(true);
         fetchIdReport();
         break;
       case "close":
-        setCreate(false)
-        setEdit(false)
+        setForm(false)
         break;
       case "reset":
-        if (selectedObjects.length != 0) {
-          selectedObjects.map((a: HardwareDto) => {
+        if (select.length != 0) {
+          select.map((a: HardwareDto) => {
             resetDevice(a.macAddress);
           })
 
@@ -330,8 +421,8 @@ const Hardware = () => {
         }
         break;
       case "upload":
-        if (selectedObjects.length != 0) {
-          selectedObjects.map((a: HardwareDto) => {
+        if (select.length != 0) {
+          select.map((a: HardwareDto) => {
             uploadConfig(a.macAddress);
           })
 
@@ -339,45 +430,14 @@ const Hardware = () => {
           alert("No selected object")
         }
         break;
-      case "remove-cancel":
-        SetIsRemoveClick(false);
-        break;
-      case "remove-confirm":
-        removeScp(removeTarget);
-        SetIsRemoveClick(false);
-        break;
       default:
         break;
     }
   }
 
   {/* checkBox */ }
-  const [selectedObjects, setSelectedObjects] = useState<HardwareDto[]>([]);
-  const handleCheckedAll = (data: HardwareDto[], e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(data)
-    console.log(e.target.checked)
-    if (setSelectedObjects) {
-      if (e.target.checked) {
-        setSelectedObjects(data);
-      } else {
-        setSelectedObjects([]);
-      }
-    }
-  }
+  const [select, setSelect] = useState<HardwareDto[]>([]);
 
-  const handleChecked = (data: HardwareDto, e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(data)
-    console.log(e.target.checked)
-    if (setSelectedObjects) {
-      if (e.target.checked) {
-        setSelectedObjects((prev) => [...prev, data]);
-      } else {
-        setSelectedObjects((prev) =>
-          prev.filter((item) => item.componentId !== data.componentId)
-        );
-      }
-    }
-  }
 
   {/* UseEffect */ }
   useEffect(() => {
@@ -450,7 +510,11 @@ const Hardware = () => {
     {
       buttonName: "Transfer",
       lable: "transfer",
-      icon: <UploadIcon />
+      icon: <TransferIcon />
+    },{
+      buttonName:"Report Toggle",
+      lable:"report",
+      icon:<ToggleTranIcon/>
     },
     {
       buttonName: "Scan",
@@ -460,12 +524,12 @@ const Hardware = () => {
       </>
     }
   ];
-  const renderOptional = (data: HardwareDto, statusDto: StatusDto[]) => {
+  const renderOptional = (data: HardwareDto, statusDto: StatusDto[],index:number) => {
     console.log(data)
     console.log(statusDto)
     console.log(statusDto.find(b => b.macAddress == data.macAddress)?.status)
     return [
-      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+      <TableCell key={index} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
         <>
           {
             data.isReset == true && statusDto.find(b => b.macAddress == data.macAddress)?.status == 0 ?
@@ -499,7 +563,7 @@ const Hardware = () => {
 
         </>
       </TableCell>,
-      <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+      <TableCell key={index+1} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
         {data.isReset || data.isUpload ?
           <Badge
             size="sm"
@@ -531,7 +595,7 @@ const Hardware = () => {
     {
       icon: <HardwareIcon />,
       label: "Hardware",
-      content: <HardwareForm handleClickWithEvent={handleClickWithEvent} handleChange={handleChange} data={hardwareDto} isDetail={false} />
+      content: <HardwareForm handleClick={handleClickWithEvent}  dto={hardwareDto} setDto={setHardwareDto} type={formType} />
     }, {
       icon: <HardwareIcon />,
       label: "Memory Allocate",
@@ -547,31 +611,28 @@ const Hardware = () => {
   return (
     <>
 
-      {isRemoveClick &&
-        <RemoveModal  handleClick={handleClickWithEvent} />
-      }
-      {select &&
+      {/* {select &&ด
         <Modals header="Hardware Select" body={<SelectDeviceForm setDto={setHardwareType} handleClick={handleClickWithEvent} />} handleClickWithEvent={handleCloseSelectDevice} />
-      }
+      } */}
       {scan &&
         <Modals header="Host List" body={ScanTableTemplate} handleClickWithEvent={handleCloseModal} />
       }
 
       <PageBreadcrumb pageTitle="Hardware" />
       <div className="space-y-6">
-        {create || edit ?
+        {form ?
           <>
             <BaseForm tabContent={tabContent} />
             {/* <HardwareForm handleClickWithEvent={handleClickWithEvent} handleChange={handleChange} data={hardwareDto} isDetail={false} /> */}
           </>
 
           :
-          <BaseTable<HardwareDto> headers={HEADER} keys={KEY} data={data} onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} onClick={handleClickWithEvent} select={selectedObjects} setSelect={setSelectedObjects} permission={filterPermission(FeatureId.DEVICE)} action={actionBtn} renderOptionalComponent={renderOptional} status={status} specialDisplay={[
+          <BaseTable<HardwareDto> headers={HEADER} keys={KEY} data={data} onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} onClick={handleClickWithEvent} select={select} setSelect={setSelect} permission={filterPermission(FeatureId.DEVICE)} action={actionBtn} renderOptionalComponent={renderOptional} status={status} specialDisplay={[
             {
               key: "tranStatus",
               content: (a, i) => <TableCell key={i} className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">
-                <Badge size="sm" color={tranStatus.find(x => x.macAddress == a.macAddress)?.disabled == 0 ? "success" : "error"}>
-                  {tranStatus.find(x => x.macAddress == a.macAddress)?.status}
+                <Badge size="sm" color={tranStatus.find(x => x.macAddress == a.macAddress)?.disabled == 0 && tranStatus.find(x => x.macAddress == a.macAddress)?.status ? "success" : "error"}>
+                  {tranStatus.find(x => x.macAddress == a.macAddress)?.status ?? "Unknown"}
                 </Badge>
               </TableCell>
             }

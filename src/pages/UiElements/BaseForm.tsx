@@ -36,9 +36,9 @@ export const BaseForm: React.FC<PropsWithChildren<FormProp>> = ({ tabContent }) 
             <div key={i}>
               {activeTab == a.label &&
                 <div>
-                  <h3 className="mb-1 text-xl font-medium text-gray-800 dark:text-white/90">
+                  {/* <h3 className="mb-1 text-xl font-medium text-gray-800 dark:text-white/90">
                     {a.label}
-                  </h3>
+                  </h3> */}
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     {a.content}
                   </div>

@@ -128,8 +128,7 @@ export const Role = () => {
     const [selectedObjects, setSelectedObjects] = useState<RoleDto[]>([]);
 
     const fetchDate = async () => {
-        const res = await HttpRequest.send(HttpMethod.GET, RoleEndpoint.GET)
-        console.log(res?.data.data)
+        const res = await send.get(RoleEndpoint.GET)
         if (res && res.data.data) {
             setRolesDto(res.data.data);
         }

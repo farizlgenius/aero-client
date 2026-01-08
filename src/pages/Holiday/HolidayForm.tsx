@@ -1,23 +1,13 @@
-import React, { PropsWithChildren } from 'react'
+import React, { PropsWithChildren, useState } from 'react'
 
 import DatePicker from '../../components/form/date-picker';
 import Button from '../../components/ui/button/Button';
 import { HolidayDto } from '../../model/Holiday/HolidayDto';
+import { FormProp, FormType } from '../../model/Form/FormProp';
 
 
-
-// interface 
-
-interface AddHolodayProps {
-  isUpdate: boolean,
-  handleClickWithEvent: (e: React.MouseEvent<HTMLButtonElement>) => void,
-  setHolidayDto: React.Dispatch<React.SetStateAction<HolidayDto>>;
-  data: HolidayDto
-}
-
-
-
-const HolidayForm: React.FC<PropsWithChildren<AddHolodayProps>> = ({ isUpdate, setHolidayDto, handleClickWithEvent, data }) => {
+const HolidayForm: React.FC<PropsWithChildren<FormProp<HolidayDto>>> = ({ type, setDto, handleClick,dto }) => {
+  const [date,setDate] = useState<Date>();
   // Alert Modal 
   return (
 
@@ -32,6 +22,8 @@ const HolidayForm: React.FC<PropsWithChildren<AddHolodayProps>> = ({ isUpdate, s
                   id="Date"
                   label="Selected Date"
                   placeholder="Select a date"
+                  defaultDate={new Date(dto.year,dto.month -1,dto.day)}
+                  value={`${dto.year}-${dto.month}-${dto.day} ${"00"}:${"00"}`}
                   //value={createTimeZoneDto.activeTime}
                   // onChange={(dates, currentDateString) => {
                   //   // Handle your logic
@@ -39,12 +31,16 @@ const HolidayForm: React.FC<PropsWithChildren<AddHolodayProps>> = ({ isUpdate, s
                   //   //handleChange((prev) => ({ ...prev, day: dates[0].getDate(), month: dates[0].getMonth() + 1, year: dates[0].getFullYear() }))
                   //   //handleChange
                   // }}
-                  onChange={(date) => setHolidayDto((prev) => ({ ...prev, day: date[0].getDate(), month: date[0].getMonth() + 1, year: date[0].getFullYear() }))}
+                  onChange={(date) => {
+                    setDto((prev) => ({ ...prev, day: date[0].getDate(), month: date[0].getMonth() + 1, year: date[0].getFullYear() }));
+                    setDate(date[0])
+                    console.log(date[0])
+                  }}
                 />
               </div>
               <div className='flex gap-4'>
-                <Button onClickWithEvent={handleClickWithEvent} name={isUpdate ? "update" : "create"} className="w-50" size="sm">{isUpdate ? "Update" : "Create"}</Button>
-                <Button onClickWithEvent={handleClickWithEvent} variant='danger' name='close' className="w-50" size="sm">Cancle</Button>
+                <Button disabled={type == FormType.Info} onClickWithEvent={handleClick} name={type == FormType.Update ? "update" : "create"} className="w-50" size="sm">{type == FormType.Update ? "Update" : "Create"}</Button>
+                <Button onClickWithEvent={handleClick} variant='danger' name='close' className="w-50" size="sm">Cancel</Button>
               </div>
 
             </div>

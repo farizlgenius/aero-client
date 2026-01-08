@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import {  CalenderIcon } from '../../icons';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import RemoveModal from '../UiElements/RemoveModal';
-import HttpRequest from '../../utility/HttpRequest';
 import HolidayForm from './HolidayForm';
 import Helper from '../../utility/Helper';
 import { HolidayDto } from '../../model/Holiday/HolidayDto';
 import { useToast } from '../../context/ToastContext';
-import { CreateHolidayDto } from '../../model/Holiday/CreateHolidayDto';
-import { ToastMessage } from '../../model/ToastMessage';
+import { HolidayToast, ToastMessage } from '../../model/ToastMessage';
 import { HolidayEndpoint } from '../../endpoint/HolidayEndpoint';
-import { HttpMethod } from '../../enum/HttpMethod';
 import { send } from '../../api/api';
 import { useLocation } from '../../context/LocationContext';
 import { useAuth } from '../../context/AuthContext';
@@ -18,19 +14,21 @@ import { BaseTable } from '../UiElements/BaseTable';
 import { FeatureId } from '../../enum/FeatureId';
 import { BaseForm } from '../UiElements/BaseForm';
 import { FormContent } from '../../model/Form/FormContent';
+import { FormType } from '../../model/Form/FormProp';
+import { usePopup } from '../../context/PopupContext';
 
-// Define Global Variable
-let removeTarget: number;
 // Holiday Page 
-export const Hol_TABLE_HEAD: string[] = ["Day", "Month", "Year", "Action"]
-export const Hol_KEY: string[] = ["day", "month", "year"];
+export const HEADER: string[] = ["Day", "Month", "Year", "Action"]
+export const KEY: string[] = ["day", "month", "year"];
 
 const Holiday = () => {
     const { toggleToast } = useToast();
     const { locationId } = useLocation();
     const { filterPermission } = useAuth();
+    const {setCreate,setUpdate,setRemove,setConfirmCreate,setConfirmRemove,setConfirmUpdate,setInfo,setMessage} = usePopup();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
+    const [formType,setFormType] = useState<FormType>(FormType.Create);
     const defaultDto: HolidayDto = {
         uuid: "",
         locationId: locationId,
@@ -44,25 +42,58 @@ const Holiday = () => {
     }
     const [holidatDto, setHolidayDto] = useState<HolidayDto>(defaultDto)
     {/* Modal */ }
-    const [remove, setRemove] = useState(false);
-    const [create, setCreate] = useState<boolean>(false);
-    const [update, setUpdate] = useState<boolean>(false);
+    const [form,setForm] = useState<boolean>(false);
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
-                setCreate(true);
+                setFormType(FormType.Create)
+                setForm(true);
+                break;
+            case "delete":
+                if(selectedObjects.length == 0){            
+                    setMessage("Please select object")
+                    setInfo(true);
+                }
+                setConfirmRemove(() => async () => {
+                    var data:number[] = [];
+                    selectedObjects.map(async (a:HolidayDto) => {
+                        data.push(a.componentId)
+                    })
+                    var res = await send.post(HolidayEndpoint.DELETE_RANGE,data)
+                    if(Helper.handleToastByResCode(res,HolidayToast.DELETE_RANGE,toggleToast)){
+                        setSelectedObjects([])                  
+                        toggleRefresh();
+                    }
+                })
+                setRemove(true);
                 break;
             case "create":
-                createHoliday(holidatDto)
+                setConfirmCreate(() => async() => {
+                    const res = await send.post(HolidayEndpoint.CREATE,holidatDto);
+                    if(Helper.handleToastByResCode(res,HolidayToast.CREATE,toggleToast)){
+                        setHolidayDto(defaultDto);
+                        setForm(false);
+                        toggleRefresh();
+                    }
+                })
+                setCreate(true);
                 break;
             case "update":
-                updateHoliday(holidatDto);
+                setConfirmUpdate(() => async () => {
+                    const res = await send.put(HolidayEndpoint.CREATE, holidatDto);
+                    if (Helper.handleToastByResCode(res,HolidayToast.UPDATE, toggleToast)) {
+                        setHolidayDto(defaultDto)
+                        setForm(false);
+                        toggleRefresh();
+                    }
+                })
+                setUpdate(true)
                 break;
             case "close":
-                setCreate(false);
-                setUpdate(false);
+                setForm(false);
+                setHolidayDto(defaultDto)
                 break;
             default:
                 break;
@@ -71,52 +102,37 @@ const Holiday = () => {
 
     {/* handle Table Action */ }
     const handleEdit = (data: HolidayDto) => {
+        setFormType(FormType.Update)
         setHolidayDto(data)
-        setUpdate(true);
+        setForm(true);
     }
 
     const handleRemove = (data: HolidayDto) => {
-        console.log(data);
-        removeTarget = data.componentId;
+        setConfirmRemove(() => async () => {
+            const res = await send.delete(HolidayEndpoint.DELETE(data.componentId))
+            if (Helper.handleToastByResCode(res, ToastMessage.DELETE_HOL, toggleToast))
+                toggleRefresh();
+        })
         setRemove(true);
     }
-    const handleOnClickCloseRemove = () => {
-        setRemove(false);
-    }
-    const handleOnClickConfirmRemove = () => {
-        setRemove(false);
-        removeHoliday();
+
+    const handleInfo = (data:HolidayDto) => {
+        setFormType(FormType.Info);
+        setHolidayDto(data)
+        setForm(true);
     }
 
-    const createHoliday = async (data: CreateHolidayDto) => {
-        const res = await send.post(HolidayEndpoint.POST_HOL, data);
-        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_HOL, toggleToast)) setCreate(false);
-        toggleRefresh();
-    }
 
-    const updateHoliday = async (data: HolidayDto) => {
-        const res = await send.put(HolidayEndpoint.POST_HOL, data);
-        if (Helper.handleToastByResCode(res, ToastMessage.UPDATE_HOL, toggleToast)) setUpdate(false);
-        toggleRefresh();
-    }
 
     {/* Group Data */ }
     const [holidaysDto, setHolidaysDto] = useState<HolidayDto[]>([]);
     const fetchData = async () => {
-        const res = await HttpRequest.send(HttpMethod.GET, HolidayEndpoint.GET_HOL_LIST)
-        if (res) {
+        const res = await send.get(HolidayEndpoint.GET(locationId));
+        if (res && res.data.data) {
             console.log(res.data.data)
             setHolidaysDto(res.data.data);
         }
     };
-
-    const removeHoliday = async () => {
-        const res = await HttpRequest.send(HttpMethod.DELETE, HolidayEndpoint.DELETE_HOL + removeTarget)
-        if (Helper.handleToastByResCode(res, ToastMessage.DELETE_HOL, toggleToast))
-            toggleRefresh();
-
-
-    }
 
     {/* UseEffect */ }
     useEffect(() => {
@@ -127,46 +143,21 @@ const Holiday = () => {
 
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<HolidayDto[]>([]);
-    const handleCheckedAll = (data: HolidayDto[], e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects(data);
-            } else {
-                setSelectedObjects([]);
-            }
-        }
-    }
-
-    const handleChecked = (data: HolidayDto, e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects((prev) => [...prev, data]);
-            } else {
-                setSelectedObjects((prev) =>
-                    prev.filter((item) => item.componentId !== data.componentId)
-                );
-            }
-        }
-    }
+   
     const content: FormContent[] = [
         {
             label: "Holiday",
             icon: <CalenderIcon />,
-            content: <HolidayForm isUpdate={update} setHolidayDto={setHolidayDto} handleClickWithEvent={handleClick} data={holidatDto} />
+            content: <HolidayForm type={formType} setDto={setHolidayDto} handleClick={handleClick} dto={holidatDto} />
         }
     ]
     return (
         <>
-            {remove && <RemoveModal header='Remove Holiday' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             <PageBreadcrumb pageTitle="Holiday" />
-            {create || update ?
+            {form ?
                 <BaseForm tabContent={content} />
                 :
-                <BaseTable headers={Hol_TABLE_HEAD} keys={Hol_KEY} data={holidaysDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.TIME)} />
+                <BaseTable<HolidayDto> headers={HEADER} keys={KEY} data={holidaysDto} select={selectedObjects} setSelect={setSelectedObjects} onInfo={handleInfo} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.TIME)} />
 
 
             }

@@ -100,7 +100,7 @@ export const MonitorGroupForm: React.FC<PropsWithChildren<FormProp<MonitorGroupD
     }
 
     const fetchMonitor = async (mac:string) =>{
-        const res = await send.get(MonitorPointEndpoint.GET_MP_BY_MAC(mac))
+        const res = await send.get(MonitorPointEndpoint.MP_BY_MAC(mac))
         if(res && res.data.data){
             res.data.data.map((a:MonitorPointDto) => {
                 setNumberOptions(prev => ([...prev,{
