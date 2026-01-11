@@ -1,7 +1,7 @@
 export enum FormType {
-    Create ,
-    Info ,
-    Update 
+    CREATE ,
+    INFO ,
+    UPDATE 
 }
 
 export interface FormProp<T>{

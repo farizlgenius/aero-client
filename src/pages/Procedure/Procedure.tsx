@@ -37,7 +37,7 @@ export const Procedure = () => {
         Actions: [],
         uuid: "",
         componentId: 0,
-        macAddress: "",
+        mac: "",
         locationId: locationId,
         isActive: false
     }

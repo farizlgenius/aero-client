@@ -95,7 +95,7 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
     const fetchPermission = useCallback(async (RoleId:number) => {
         if(!getAccessToken()) return false;
         const res = await send.get(FeatureEndpoint.GET_BY_ROLE(RoleId))
-        console.log(res.data.data)
+        console.log(res)
         if(res && res.data.data){
             permission = res.data.data
         }

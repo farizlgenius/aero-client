@@ -47,7 +47,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
         delayTime:0,
         uuid: "",
         componentId: 0,
-        macAddress: "",
+        mac: "",
         locationId: 0,
         isActive: false
     }
@@ -166,7 +166,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
                 setHardware(prev => ([...prev, {
                     label: a.name,
                     value: a.componentId,
-                    description: a.macAddress
+                    description: a.mac
                 }]))
             })
         }
@@ -179,7 +179,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
                 setMp(prev => ([...prev, {
                     label: a.name,
                     value: a.componentId,
-                    description: a.macAddress
+                    description: a.mac
                 }]))
             })
         }
@@ -192,7 +192,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
                 setCp(prev => ([...prev,{
                     label:a.name,
                     value:a.componentId,
-                    description:a.macAddress
+                    description:a.mac
                 }]))
             })
         }
@@ -238,13 +238,13 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
     }
 
     const fetchMonitorGroup = async () => {
-        var res = await api.get(MonitorGroupEndpoint.GET_MPG(locationId));
+        var res = await api.get(MonitorGroupEndpoint.GET(locationId));
         if(res && res.data.data){
             res.data.data.map((a:MonitorGroupDto) => {
                 setMpg(prev => ([...prev,{
                     label:a.name,
                     value:a.componentId,
-                    description:a.macAddress
+                    description:a.mac
                 }]))
             })
         }
@@ -333,7 +333,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
                                             {i + 1}
                                         </TableCell>
                                         <TableCell className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">
-                                            {a.macAddress}
+                                            {a.mac}
                                         </TableCell>
                                         <TableCell className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">
                                             {a.actionTypeDesc}

@@ -44,7 +44,7 @@ export const IntervalForm: React.FC<PropsWithChildren<FormProp<IntervalDto>>> = 
                                                     checked={dto.days[d as keyof DaysInWeekDto]}
                                                     onChange={handleChange}
                                                     label={Helper.toCapitalCase(d)}
-                                                    disabled={type == FormType.Info}
+                                                    disabled={type == FormType.INFO}
                                                 />
                                             </div>
                                         </div>
@@ -63,7 +63,7 @@ export const IntervalForm: React.FC<PropsWithChildren<FormProp<IntervalDto>>> = 
                                                 value={dto.startTime}
                                                 min='00:00'
                                                 placeholder={dto.startTime}
-                                                disabled={type == FormType.Info}
+                                                disabled={type == FormType.INFO}
                                             />
                                             <span className="absolute text-gray-500  pointer-events-none right-3 top-1/2 dark:text-gray-400">
                                                 <TimeIcon className="size-6" />
@@ -80,7 +80,7 @@ export const IntervalForm: React.FC<PropsWithChildren<FormProp<IntervalDto>>> = 
                                                 max='23:59'
                                                 value={dto.endTime}
                                                 placeholder={dto.endTime}
-                                                disabled={type == FormType.Info}
+                                                disabled={type == FormType.INFO}
                                             />
                                             <span className="absolute text-gray-500 pointer-events-none right-3 top-1/2 dark:text-gray-400">
                                                 <TimeIcon className="size-6" />
@@ -91,7 +91,7 @@ export const IntervalForm: React.FC<PropsWithChildren<FormProp<IntervalDto>>> = 
 
                                 </div>
                                 <div className='mt-3 flex gap-2'>
-                                    <Button disabled={type == FormType.Info} onClickWithEvent={handleClickWithEvent} name={type == FormType.Update ? "update" : "create"} size='sm'>{type == FormType.Update ? "Update" : "Create"}</Button>
+                                    <Button disabled={type == FormType.INFO} onClickWithEvent={handleClickWithEvent} name={type == FormType.UPDATE ? "update" : "create"} size='sm'>{type == FormType.UPDATE ? "Update" : "Create"}</Button>
                                     <Button variant='danger' onClickWithEvent={handleClickWithEvent} name='cancel' size='sm'>Cancel</Button>
                                 </div>
 

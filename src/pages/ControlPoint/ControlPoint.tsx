@@ -31,7 +31,7 @@ import { FormType } from '../../model/Form/FormProp';
 
 
 export const OUTPUT_TABLE_HEADER: string[] = ["Name", "Main Controller", "Module", "Mode","Offline","Pulse Time", "Status", "Action"]
-export const OUTPUT_KEY: string[] = ["name", "macAddressDescription", "moduleDescription", "relayModeDescription","offlineModeDescription","defaultPulse"];
+export const OUTPUT_KEY: string[] = ["name", "hardwareName", "moduleDescription", "relayModeDescription","offlineModeDescription","defaultPulse"];
 
 const ControlPoint = () => {
     const { toggleToast } = useToast();
@@ -41,20 +41,20 @@ const ControlPoint = () => {
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     const [form,setForm] = useState<boolean>(false);
-    const [formType,setFormType] = useState<FormType>(FormType.Create)
+    const [formType,setFormType] = useState<FormType>(FormType.CREATE)
 
 
     {/* handle Table Action */ }
     const handleEdit = (data: ControlPointDto) => {
         setControlPointDto(data)
-        setFormType(FormType.Update)
+        setFormType(FormType.UPDATE)
         setForm(true)
     }
 
     const handleInfo = (data:ControlPointDto) => {
         console.log(data)
         setControlPointDto(data);
-        setFormType(FormType.Info);
+        setFormType(FormType.INFO);
         setForm(true);
     }
 
@@ -81,12 +81,12 @@ const ControlPoint = () => {
         // base
         uuid: "",
         componentId: -1,
-        macAddress: '',
+        mac: '',
         locationId: locationId,
         isActive: true,
         relayModeDescription: '',
         offlineModeDescription: '',
-        macAddressDescription: '',
+        hardwareName: '',
         moduleDescription: ''
     }
     const [controlPointDto, setControlPointDto] = useState<ControlPointDto>(defaultDto);
@@ -100,7 +100,7 @@ const ControlPoint = () => {
 
             // Batch set state
             const newStatuses = res.data.data.map((a: ControlPointDto) => ({
-                macAddress: a.macAddress,
+                macAddress: a.mac,
                 componentId: a.componentId,
                 status: 0
             }));
@@ -111,7 +111,7 @@ const ControlPoint = () => {
 
             // Fetch status for each
             res.data.data.forEach((a: ControlPointDto) => {
-                fetchStatus(a.macAddress, a.componentId);
+                fetchStatus(a.mac, a.componentId);
             });
 
         }
@@ -169,7 +169,7 @@ const ControlPoint = () => {
         console.log(e.currentTarget.name)
         switch (e.currentTarget.name) {
             case "add":
-                setFormType(FormType.Create)
+                setFormType(FormType.CREATE)
                 setForm(true)
                 break;
             case "delete":
@@ -220,7 +220,7 @@ const ControlPoint = () => {
                 if (selectedObjects.length > 0) {
                     selectedObjects.map(async (a: ControlPointDto) => {
                         let data: OutputTrigger = {
-                            macAddress: a.macAddress,
+                            macAddress: a.mac,
                             componentId: a.componentId,
                             command: 2
                         }
@@ -234,7 +234,7 @@ const ControlPoint = () => {
                 if (selectedObjects.length > 0) {
                     selectedObjects.map(async (a: ControlPointDto) => {
                         let data: OutputTrigger = {
-                            macAddress: a.macAddress,
+                            macAddress: a.mac,
                             componentId: a.componentId,
                             command: 1
                         }
@@ -247,7 +247,7 @@ const ControlPoint = () => {
                 if (selectedObjects.length > 0) {
                     selectedObjects.map(async (a: ControlPointDto) => {
                         let data: OutputTrigger = {
-                            macAddress: a.macAddress,
+                            macAddress: a.mac,
                             componentId: a.componentId,
                             command: 3
                         }

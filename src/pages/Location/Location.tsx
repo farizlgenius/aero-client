@@ -40,7 +40,7 @@ export const Location = () => {
     const [locationDto, setLocationDto] = useState<LocationDto>(defaultDto);
     const [locationsDto, setLocationsDto] = useState<LocationDto[]>([]);
     const [select,setSelect] = useState<LocationDto[]>([])
-    const [formType,setFormType] = useState<FormType>(FormType.Create);
+    const [formType,setFormType] = useState<FormType>(FormType.CREATE);
     const toggleRefresh = () => setRefresh(!refresh)
 
     const handleRemove = (data: LocationDto) => {
@@ -56,14 +56,14 @@ export const Location = () => {
     }
 
     const handleInfo = (data:LocationDto) => {
-        setFormType(FormType.Info);
+        setFormType(FormType.INFO);
         setLocationDto(data);
         setForm(true);
     }
 
     {/* handle Table Action */ }
     const handleEdit = (data: LocationDto) => {
-        setFormType(FormType.Update);
+        setFormType(FormType.UPDATE);
         setLocationDto(data);
         setForm(true);
     }
@@ -73,7 +73,7 @@ export const Location = () => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
-                setFormType(FormType.Create);
+                setFormType(FormType.CREATE);
                 setForm(true);
                 break;
             case "delete":

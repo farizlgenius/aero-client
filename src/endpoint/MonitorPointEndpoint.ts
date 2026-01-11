@@ -6,7 +6,7 @@ export const MonitorPointEndpoint = {
     MP_BY_MAC:(mac:string) =>  `/api/${API_VERSION}/${CONTROLLER}/${mac}`,
     CREATE : `/api/${API_VERSION}/${CONTROLLER}`,
     UPDATE:  `/api/${API_VERSION}/${CONTROLLER}`,
-    GET_MP_STATUS : `/api/${API_VERSION}/${CONTROLLER}/status/`,
+    GET_MP_STATUS:(mac:string,component:number) => `/api/${API_VERSION}/${CONTROLLER}/status/${mac}/${component}`,
     DELETE :(component:number) => `/api/${API_VERSION}/${CONTROLLER}/${component}`,
     DELETE_RANGE: `/api/${API_VERSION}/${CONTROLLER}/delete/range`,
     IP_LIST :(mac:string,component:number) => `/api/${API_VERSION}/${CONTROLLER}/ip/${mac}/${component}`,

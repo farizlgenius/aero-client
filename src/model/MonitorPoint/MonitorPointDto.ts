@@ -4,6 +4,7 @@ export interface MonitorPointDto extends BaseDto
 {
     name:string;
     moduleId:number;
+    moduleDescription:string;
     inputNo:number;
     inputMode:number;
     inputModeDescription:string;

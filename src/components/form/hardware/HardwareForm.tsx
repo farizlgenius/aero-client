@@ -83,35 +83,35 @@ const HardwareForm: React.FC<PropsWithChildren<FormProp<HardwareDto>>> = ({ dto,
           <div className="flex flex-col gap-5 w-3/4">
             <div>
               <Label htmlFor="name">Name</Label>
-              <Input disabled={type == FormType.Info} name="name" value={dto.name} type="text" id="name" onChange={handleChange} />
+              <Input disabled={type == FormType.INFO} name="name" value={dto.name} type="text" id="name" onChange={handleChange} />
             </div>
             <div>
               <Label htmlFor="componentId">Component Id</Label>
-              <Input disabled={type == FormType.Info || type == FormType.Update} name="componentId" value={dto.componentId} type="text" id="componentId" onChange={handleChange} isReadOnly={true} />
+              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="componentId" value={dto.componentId} type="text" id="componentId" onChange={handleChange} isReadOnly={true} />
             </div>
             <div>
               <Label htmlFor="macAddress">Mac</Label>
-              <Input disabled={type == FormType.Info || type == FormType.Update} name="macAddress" value={dto.macAddress} type="text" id="macAddress" onChange={handleChange} isReadOnly={true} />
+              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="macAddress" value={dto.mac} type="text" id="macAddress" onChange={handleChange} isReadOnly={true} />
             </div>
             <div>
               <Label htmlFor="ipAddress">Ip</Label>
-              <Input disabled={type == FormType.Info || type == FormType.Update} name="ip" value={dto.ip} type="text" id="ipAddress" onChange={handleChange} isReadOnly={true} />
+              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="ip" value={dto.ip} type="text" id="ipAddress" onChange={handleChange} isReadOnly={true} />
             </div>
             <div>
               <Label htmlFor="ipAddress">Firmware</Label>
-              <Input disabled={type == FormType.Info || type == FormType.Update} name="ip" value={dto.firmware} type="text" id="ipAddress" onChange={handleChange} isReadOnly={true} />
+              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="ip" value={dto.firmware} type="text" id="ipAddress" onChange={handleChange} isReadOnly={true} />
             </div>
             <div>
               <Label htmlFor="ipAddress">Port</Label>
-              <Input disabled={type == FormType.Info || type == FormType.Update} name="ip" value={dto.port} type="text" id="ipAddress" onChange={handleChange} isReadOnly={true} />
+              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="ip" value={dto.port} type="text" id="ipAddress" onChange={handleChange} isReadOnly={true} />
             </div>
             <div>
               <Label htmlFor="serialnumber">Serial Number</Label>
-              <Input disabled={type == FormType.Info || type == FormType.Update} name="serialnumber" value={dto.serialNumber} type="text" id="serialnumber" onChange={handleChange} isReadOnly={true} />
+              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="serialnumber" value={dto.serialNumber} type="text" id="serialnumber" onChange={handleChange} isReadOnly={true} />
             </div>
             <div >
               <Label htmlFor="model">Type</Label>
-              <Input disabled={type == FormType.Info || type == FormType.Update} name="model" value={dto.hardwareTypeDescription} type="text" id="model" onChange={handleChange} isReadOnly={true} />
+              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="model" value={dto.hardwareTypeDescription} type="text" id="model" onChange={handleChange} isReadOnly={true} />
             </div>
           </div>
         </div>
@@ -193,7 +193,7 @@ const HardwareForm: React.FC<PropsWithChildren<FormProp<HardwareDto>>> = ({ dto,
         </div>
         <div className="col-span-full flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
           <div className="flex justify-center gap-5">
-            <Button onClickWithEvent={handleClick} disabled={type == FormType.Info} name={type == FormType.Update ? "update" : "create"} className="w-50" size="sm">{type == FormType.Update ? "Update" : "Create"}</Button>
+            <Button onClickWithEvent={handleClick} disabled={type == FormType.INFO} name={type == FormType.UPDATE ? "update" : "create"} className="w-50" size="sm">{type == FormType.UPDATE ? "Update" : "Create"}</Button>
             <Button onClickWithEvent={handleClick} name="close" variant="danger" className="w-50" size="sm">Cancel</Button>
           </div>
         </div>

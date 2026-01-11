@@ -45,7 +45,7 @@ const ScanCardModal:React.FC<PropsWithChildren<ScanCardProps>> = ({onStartScan})
         if(res && res.data.data){
             res.data.data.map((a:HardwareDto) => {
                 setControllerOption(prev => ([...prev,{
-                    value:a.macAddress,
+                    value:a.mac,
                     label:a.name,
                     isTaken:false,
                     description:a.ipAddress

@@ -30,7 +30,7 @@ const TimeZone = () => {
     const { locationId } = useLocation();
     const { filterPermission } = useAuth();
     const { toggleToast } = useToast();
-    const [formType,setFormType] = useState<FormType>(FormType.Create);
+    const [formType,setFormType] = useState<FormType>(FormType.CREATE);
     const { setConfirmRemove,setConfirmCreate,setConfirmUpdate,setUpdate,setRemove,setCreate } = usePopup();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
@@ -93,7 +93,7 @@ const TimeZone = () => {
 
     {/* handle Table Action */ }
     const handleEdit = (data: TimeZoneDto) => {
-        setFormType(FormType.Update)
+        setFormType(FormType.UPDATE)
         setTimeZoneDto(data)
         setForm(true)
     }
@@ -111,7 +111,7 @@ const TimeZone = () => {
     }
 
     const handleInfo = (data:TimeZoneDto) => {
-        setFormType(FormType.Info)
+        setFormType(FormType.INFO)
         setTimeZoneDto(data)
         setForm(true);
     }

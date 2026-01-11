@@ -159,7 +159,7 @@ const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type
             <div className='flex flex-col gap-3'>
               <div>
                 <Label htmlFor="name">Name</Label>
-                <Input disabled={type == FormType.Info} name="name" type="text" id="name" onChange={(e) => setDto((prev: TimeZoneDto) => ({ ...prev, name: e.target.value }))} value={dto.name} />
+                <Input disabled={type == FormType.INFO} name="name" type="text" id="name" onChange={(e) => setDto((prev: TimeZoneDto) => ({ ...prev, name: e.target.value }))} value={dto.name} />
               </div>
 
               <div>
@@ -208,7 +208,7 @@ const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type
                 <TextArea disabled={true} value={modeDetail} placeholder='Detail info will show here'/>
               </div>
               <div className='flex gap-4'>
-                <Button disabled={type == FormType.Info} onClickWithEvent={handleClick} name={type == FormType.Update ? "update" : "create"} className='w-50'>{type == FormType.Update ? "Update" : "Create"}</Button>
+                <Button disabled={type == FormType.INFO} onClickWithEvent={handleClick} name={type == FormType.UPDATE ? "update" : "create"} className='w-50'>{type == FormType.UPDATE ? "Update" : "Create"}</Button>
                 <Button variant='danger' onClickWithEvent={handleClick} name='close' className='w-50 danger'>Cancel</Button>
               </div>
             </div>
@@ -233,8 +233,8 @@ const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type
                       />
                     </div>
                     <div className='mt-3 flex gap-2'>
-                      <Button disabled={type == FormType.Info} onClickWithEvent={handleClickWithEvent} name='interval' size='sm'>Add</Button>
-                      <Button disabled={type == FormType.Info} variant='danger' onClick={() => setIntervalForm(false)} name='cancelInterval' size='sm'>Cancel</Button>
+                      <Button disabled={type == FormType.INFO} onClickWithEvent={handleClickWithEvent} name='interval' size='sm'>Add</Button>
+                      <Button disabled={type == FormType.INFO} variant='danger' onClick={() => setIntervalForm(false)} name='cancelInterval' size='sm'>Cancel</Button>
                     </div>
                   </div>
                 </>

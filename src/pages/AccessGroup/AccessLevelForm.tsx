@@ -100,7 +100,7 @@ const AccessLevelForm: React.FC<PropsWithChildren<AccessGroupFormProp>> = ({ isU
         setDoorOption(prev => ([...prev, {
           value: a.componentId,
           label: a.name,
-          description: a.macAddress,
+          description: a.mac,
           isTaken: false
         }]))
       })

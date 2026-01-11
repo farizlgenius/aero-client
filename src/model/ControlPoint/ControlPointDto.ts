@@ -18,7 +18,7 @@ export const defaultOutputDto: ControlPointDto = {
     // Base
     uuid: "",
     componentId: -1,
-    macAddress: "",
+    mac: "",
     locationId: 0,
     isActive: true,
 
@@ -32,5 +32,5 @@ export const defaultOutputDto: ControlPointDto = {
     defaultPulse: 1,
     relayModeDescription: "",
     offlineModeDescription: "",
-    macAddressDescription: ""
+    hardwareName: ""
 }

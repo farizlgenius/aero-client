@@ -11,7 +11,7 @@ export const MomentUnlockForm:React.FC<PropsWithChildren<CommandFormInterface>> 
         <>
             <div>
                 <Label>Doors</Label>
-                <Select icon={<DoorIcon />} options={options} name={"arg1"} defaultValue={action.arg1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),macAddress:options.find(x => x.value == Number(value))?.description ?? ""}))} />
+                <Select icon={<DoorIcon />} options={options} name={"arg1"} defaultValue={action.arg1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),mac:options.find(x => x.value == Number(value))?.description ?? ""}))} />
             </div>
             <div>
                 <Label htmlFor='time'>Time Delay (Second)</Label>

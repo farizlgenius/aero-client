@@ -35,7 +35,7 @@ export const TimezoneControlForm:React.FC<PropsWithChildren<CommandFormInterface
          <>
             <div>
                 <Label>Time Zone</Label>
-                <Select icon={<TimezonIcon />} options={options} name={"arg1"} defaultValue={action.arg1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),macAddress:options.find(x => x.value == Number(value))?.description ?? ""}))} />
+                <Select icon={<TimezonIcon />} options={options} name={"arg1"} defaultValue={action.arg1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),mac:options.find(x => x.value == Number(value))?.description ?? ""}))} />
             </div>
             <div>
                 <Label htmlFor='command' >Command</Label>

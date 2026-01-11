@@ -41,7 +41,7 @@ export const Trigger = () => {
         timeZone: -1,
         uuid: "",
         componentId: 0,
-        macAddress: "",
+        mac: "",
         locationId: locationId,
         isActive: true
     }

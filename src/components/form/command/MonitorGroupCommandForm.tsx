@@ -32,7 +32,7 @@ export const MonitorGroupCommandForm:React.FC<PropsWithChildren<CommandFormInter
          <>
             <div>
                 <Label>Monitor Point</Label>
-                <Select icon={<MonitorPointGroupIcon />} options={options} name={"arg1"} defaultValue={action.arg1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),macAddress:options.find(x => x.value == Number(value))?.description ?? ""}))} />
+                <Select icon={<MonitorPointGroupIcon />} options={options} name={"arg1"} defaultValue={action.arg1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),mac:options.find(x => x.value == Number(value))?.description ?? ""}))} />
             </div>
             <div>
                 <Label htmlFor='mode' >Command</Label>

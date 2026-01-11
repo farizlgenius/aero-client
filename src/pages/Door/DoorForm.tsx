@@ -62,7 +62,7 @@ const DoorForm: React.FC<PropsWithChildren<DoorFormProps>> = ({ handleClick, dat
   // base 
   uuid: "",
   componentId: -1,
-  macAddress: "",
+  mac: "",
   locationId: locationId,
   isActive: true,
 
@@ -78,7 +78,7 @@ var defaultReader: ReaderDto = {
   // base 
   uuid: "",
   componentId: -1,
-  macAddress: "",
+  mac: "",
   locationId: locationId,
   isActive: true,
 
@@ -182,7 +182,7 @@ var defaultReader: ReaderDto = {
       res.data.data.map((a: HardwareDto) => {
         setControllerOption(prev => [...prev, {
           label: a.name,
-          value: a.macAddress,
+          value: a.mac,
           isTaken: false
         }])
       });
@@ -556,12 +556,12 @@ var defaultReader: ReaderDto = {
                       name="macAddress"
                       options={controllerOption}
                       onChange={(value: string) => {
-                        setDoorDto(prev => ({ ...prev, macAddress: value }))
+                        setDoorDto(prev => ({ ...prev, mac: value }))
                         fetchModule(value);
                         fetchDoorByMac(value);
                       }}
                       className="dark:bg-dark-900"
-                      defaultValue={data.macAddress}
+                      defaultValue={data.mac}
                     />
                   </div>
                   <div>
@@ -687,8 +687,8 @@ var defaultReader: ReaderDto = {
                               options={moduleOption}
                               placeholder="Select Option"
                               onChange={(value: string) => {
-                                setDoorDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 0 ? { ...r, macAddress: prev.macAddress, moduleId: Number(value) } : r) }))
-                                fetchReaderIn(data.macAddress, Number(value));
+                                setDoorDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 0 ? { ...r, mac: prev.mac, moduleId: Number(value) } : r) }))
+                                fetchReaderIn(data.mac, Number(value));
                               }}
                               className="dark:bg-dark-900"
                               defaultValue={data.readers[0].moduleId}
@@ -833,8 +833,8 @@ var defaultReader: ReaderDto = {
                           options={moduleOption}
                           placeholder="Select Option"
                           onChangeWithEvent={(value: string) => {
-                            setDoorDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 1 ? { ...r, macAddress: prev.macAddress, moduleId: Number(value) } : r) }))
-                            fetchReaderOut(data.macAddress, Number(value));
+                            setDoorDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 1 ? { ...r, mac: prev.mac, moduleId: Number(value) } : r) }))
+                            fetchReaderOut(data.mac, Number(value));
                           }}
                           className="dark:bg-dark-900"
                           defaultValue={data.readers[1].moduleId}
@@ -917,8 +917,8 @@ var defaultReader: ReaderDto = {
                         name="rex0.moduleId"
                         options={moduleOption}
                         onChange={(value: string) => {
-                          fetchInputRex0(data.macAddress, Number(value));
-                          setDoorDto(prev => ({ ...prev, requestExits: prev.requestExits.map((r, i) => i === 0 ? { ...r, macAddress: prev.macAddress, moduleId: Number(value) } : r) }))
+                          fetchInputRex0(data.mac, Number(value));
+                          setDoorDto(prev => ({ ...prev, requestExits: prev.requestExits.map((r, i) => i === 0 ? { ...r, mac: prev.mac, moduleId: Number(value) } : r) }))
                         }}
                         className="dark:bg-dark-900"
                         defaultValue={data.requestExits[0].moduleId}
@@ -962,8 +962,8 @@ var defaultReader: ReaderDto = {
                             name="rex1.moduleId"
                             options={moduleOption}
                             onChange={(value: string) => {
-                              fetchInputRex1(data.macAddress, Number(value));
-                              setDoorDto(prev => ({ ...prev, requestExits: prev.requestExits.map((r, i) => i === 1 ? { ...r, macAddress: prev.macAddress, moduleId: Number(value) } : r) }))
+                              fetchInputRex1(data.mac, Number(value));
+                              setDoorDto(prev => ({ ...prev, requestExits: prev.requestExits.map((r, i) => i === 1 ? { ...r, mac: prev.mac, moduleId: Number(value) } : r) }))
                             }}
                             className="dark:bg-dark-900"
                             defaultValue={data.requestExits[1].moduleId}
@@ -1018,8 +1018,8 @@ var defaultReader: ReaderDto = {
                     name="strk.moduleId"
                     options={moduleOption}
                     onChange={(value: string) => {
-                      fetchOutput(data.macAddress, Number(value))
-                      setDoorDto(prev => ({ ...prev, strk: { ...prev.strk, macAddress: prev.macAddress, moduleId: Number(value) } }))
+                      fetchOutput(data.mac, Number(value))
+                      setDoorDto(prev => ({ ...prev, strk: { ...prev.strk, mac: prev.mac, moduleId: Number(value) } }))
                     }}
                     className="dark:bg-dark-900"
                     defaultValue={data.strk.moduleId}
@@ -1074,8 +1074,8 @@ var defaultReader: ReaderDto = {
                     name="sensor.moduleId"
                     options={moduleOption}
                     onChange={(value: string) => {
-                      fetchInputSensor(data.macAddress, Number(value));
-                      setDoorDto(prev => ({ ...prev, sensor: { ...prev.sensor, macAddress: prev.macAddress, moduleId: Number(value) } }))
+                      fetchInputSensor(data.mac, Number(value));
+                      setDoorDto(prev => ({ ...prev, sensor: { ...prev.sensor, mac: prev.mac, moduleId: Number(value) } }))
                     }}
                     className="dark:bg-dark-900"
                     defaultValue={data.sensor.moduleId}
@@ -1085,7 +1085,7 @@ var defaultReader: ReaderDto = {
                     name="sensor.inputNo"
                     options={inputSensorOption}
                     onChange={(value: string) => {
-                      fetchInputSensor(data.macAddress, Number(value));
+                      fetchInputSensor(data.mac, Number(value));
                       setDoorDto(prev => ({ ...prev, sensor: { ...prev.sensor, inputNo: Number(value) } }))
                     }}
                     className="dark:bg-dark-900"
@@ -1096,7 +1096,7 @@ var defaultReader: ReaderDto = {
                     name="sensor.inputMode"
                     options={inputModeOption}
                     onChange={(value: string) => {
-                      fetchInputSensor(data.macAddress, Number(value));
+                      fetchInputSensor(data.mac, Number(value));
                       setDoorDto(prev => ({ ...prev, sensor: { ...prev.sensor, inputMode: Number(value) } }))
                     }}
                     className="dark:bg-dark-900"

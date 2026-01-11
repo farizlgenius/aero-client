@@ -172,7 +172,7 @@ export const OperatorForm: React.FC<PropsWithChildren<FormProp<OperatorDto>>> = 
                     <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
                         <div className='flex flex-col gap-2'>
                             {
-                                type == FormType.Update &&
+                                type == FormType.UPDATE &&
 
                                 <div className="flex-1">
                                     <Label>
@@ -384,7 +384,7 @@ export const OperatorForm: React.FC<PropsWithChildren<FormProp<OperatorDto>>> = 
 
                             </div>
                             <div className='mt-3 flex justify-center gap-5'>
-                                <Button onClickWithEvent={handleClick} name={ type == FormType.Create ? "create" : "change"} size='sm'>{ type == FormType.Create ? "Create" : "Change"}</Button>
+                                <Button onClickWithEvent={handleClick} name={ type == FormType.CREATE ? "create" : "change"} size='sm'>{ type == FormType.CREATE ? "Create" : "Change"}</Button>
                                 <Button variant='danger' onClickWithEvent={handleClick} name='cancel' size='sm'>Cancel</Button>
                             </div>
                         </div>
@@ -395,19 +395,19 @@ export const OperatorForm: React.FC<PropsWithChildren<FormProp<OperatorDto>>> = 
                         <div className='flex gap-2 w-1/2'>
                             <div className='flex-1'>
                                 <Label htmlFor="username">Username</Label>
-                                <Input disabled={type == FormType.Info || type == FormType.Update} name="username" type="text" id="username" onChange={handleChange} value={dto.username} />
+                                <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="username" type="text" id="username" onChange={handleChange} value={dto.username} />
                             </div>
                             <div className='flex-1'>
                                 {
-                                    type == FormType.Update || type == FormType.Create ?
+                                    type == FormType.UPDATE || type == FormType.CREATE ?
                                         <>
                                             <Label htmlFor="password">Password</Label>
-                                            <Button onClick={() => handleChangePassword()} variant={type == FormType.Create && dto.password.length > 0 ? "green" : "primary"}>{type == FormType.Update ? "Change Password" :  dto.password.length == 0 ? "Please Set Password" : "Password assigned"}</Button>
+                                            <Button onClick={() => handleChangePassword()} variant={type == FormType.CREATE && dto.password.length > 0 ? "green" : "primary"}>{type == FormType.UPDATE ? "Change Password" :  dto.password.length == 0 ? "Please Set Password" : "Password assigned"}</Button>
                                         </>
                                         :
                                         <>
                                             <Label htmlFor="password">Password</Label>
-                                            <Input disabled={type == FormType.Info} name="password" type="password" id="password" onChange={handleChange} value={dto.password} />
+                                            <Input disabled={type == FormType.INFO} name="password" type="password" id="password" onChange={handleChange} value={dto.password} />
                                         </>
 
 
@@ -419,29 +419,29 @@ export const OperatorForm: React.FC<PropsWithChildren<FormProp<OperatorDto>>> = 
                         <div className='flex gap-2 w-1/2'>
                             <div className='flex-1'>
                                 <Label htmlFor="title">Title</Label>
-                                <Input disabled={type == FormType.Info} name="title" type="text" id="title" onChange={handleChange} value={dto.title} />
+                                <Input disabled={type == FormType.INFO} name="title" type="text" id="title" onChange={handleChange} value={dto.title} />
                             </div>
                             <div className='flex-2'>
                                 <Label htmlFor="firstName">Firstname</Label>
-                                <Input disabled={type == FormType.Info} name="firstName" type="text" id="firstName" onChange={handleChange} value={dto.firstName} />
+                                <Input disabled={type == FormType.INFO} name="firstName" type="text" id="firstName" onChange={handleChange} value={dto.firstName} />
                             </div>
                             <div className='flex-2'>
                                 <Label htmlFor="middleName">Middlename</Label>
-                                <Input disabled={type == FormType.Info} name="middleName" type="text" id="middleName" onChange={handleChange} value={dto.middleName} />
+                                <Input disabled={type == FormType.INFO} name="middleName" type="text" id="middleName" onChange={handleChange} value={dto.middleName} />
                             </div>
                             <div className='flex-2'>
                                 <Label htmlFor="lastName">Lastname</Label>
-                                <Input disabled={type == FormType.Info} name="lastName" type="text" id="lastName" onChange={handleChange} value={dto.lastName} />
+                                <Input disabled={type == FormType.INFO} name="lastName" type="text" id="lastName" onChange={handleChange} value={dto.lastName} />
                             </div>
                         </div>
                         <div className='flex gap-2 w-1/2'>
                             <div className='flex-1'>
                                 <Label htmlFor="email">Email</Label>
-                                <Input disabled={type == FormType.Info} name="email" type="email" id="email" onChange={handleChange} value={dto.email} />
+                                <Input disabled={type == FormType.INFO} name="email" type="email" id="email" onChange={handleChange} value={dto.email} />
                             </div>
                             <div className='flex-1'>
                                 <Label htmlFor="phone">Phone</Label>
-                                <Input disabled={type == FormType.Info} name="phone" type="text" id="phone" onChange={handleChange} value={dto.phone} />
+                                <Input disabled={type == FormType.INFO} name="phone" type="text" id="phone" onChange={handleChange} value={dto.phone} />
                             </div>
                         </div>
                         <div className='flex gap-2 w-1/2'>
@@ -469,7 +469,7 @@ export const OperatorForm: React.FC<PropsWithChildren<FormProp<OperatorDto>>> = 
                                         onChange={e => setLocationId(Number(e))}
                                         name="location"
                                     />
-                                    <Button variant={locationIds.length > 0 ? "danger" : "primary"} disabled={type == FormType.Info} onClick={() => {
+                                    <Button variant={locationIds.length > 0 ? "danger" : "primary"} disabled={type == FormType.INFO} onClick={() => {
                                         if (locationIds.length > 0) {
                                             setDto(prev => ({ ...prev, locationIds: prev.locationIds.filter(x => !locationIds.includes(x)) }))
                                             setLocations(prev => Helper.updateOptionByValue(prev, locationId, false))
@@ -504,7 +504,7 @@ export const OperatorForm: React.FC<PropsWithChildren<FormProp<OperatorDto>>> = 
                         </div>
 
                         <div className='mt-3 flex gap-5'>
-                            <Button disabled={type == FormType.Info} onClickWithEvent={handleClickWithEvent} name={type == FormType.Update ? "update" : "create"} size='sm'>{type == FormType.Update ? "Update" : "Create"}</Button>
+                            <Button disabled={type == FormType.INFO} onClickWithEvent={handleClickWithEvent} name={type == FormType.UPDATE ? "update" : "create"} size='sm'>{type == FormType.UPDATE ? "Update" : "Create"}</Button>
                             <Button variant='danger' onClickWithEvent={handleClickWithEvent} name='cancel' size='sm'>Cancel</Button>
                         </div>
                     </div>

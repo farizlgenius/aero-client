@@ -15,7 +15,7 @@ import { MonitorPointEndpoint } from "../../endpoint/MonitorPointEndpoint";
 import { HardwareEndpoint } from "../../endpoint/HardwareEndpoint";
 import { send } from "../../api/api";
 import { useLocation } from "../../context/LocationContext";
-import { FormProp } from "../../model/Form/FormProp";
+import { FormProp, FormType } from "../../model/Form/FormProp";
 
 
 
@@ -39,17 +39,17 @@ const MonitorPointForm: React.FC<PropsWithChildren<FormProp<MonitorPointDto>>> =
    
     switch (e.target.name) {
       case "macAddress":
-        setDto(prev => ({...prev,macAddress:value,macAddressDescription:controllerOption.find(x => x.value == value)?.label ?? ""}))
+        setDto(prev => ({...prev,mac:value,hardwareName:controllerOption.find(x => x.value == value)?.label ?? ""}))
         const res1 = await send.get(ModuleEndpoint.GET_MAC(value))
         if (res1?.data.data) {
           res1.data.data.map((a: ModuleDto) => {
-            setModuleOption((prev) => [...prev, { label: `${a.model} ( ${a.address} )`, value: a.componentId }])
+            setModuleOption((prev) => [...prev, { label: `${a.modelDescription} ( ${a.address} )`, value: a.componentId }])
           })
         }
         break;
       case "moduleId":
         setDto(prev => ({...prev,moduleId:Number(value)}))
-        const res2 = await send.get(MonitorPointEndpoint.IP_LIST(dto.macAddress,Number(value)))
+        const res2 = await send.get(MonitorPointEndpoint.IP_LIST(dto.mac,Number(value)))
         if (res2?.data.data) {
           res2.data.data.map((a: number) => {
             setInputOption((prev) => [...prev, {
@@ -82,13 +82,13 @@ const MonitorPointForm: React.FC<PropsWithChildren<FormProp<MonitorPointDto>>> =
     let res = await send.get(HardwareEndpoint.GET(locationId))
     if (res?.data.data) {
       res.data.data.map((a: HardwareDto) => {
-        setControllerOption((prev) => [...prev, { label: a.name, value: a.macAddress }])
+        setControllerOption((prev) => [...prev, { label: a.name, value: a.mac }])
       })
     }
   }
 
   const fetchInputMode = async () => {
-    let res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.IP_MODE);
+    let res = await send.get(MonitorPointEndpoint.IP_MODE);
     if (res?.data.data) {
       res.data.data.map((a: ModeDto) => {
         setInputModeOption((prev) => [...prev, { label: a.name, value: a.value }])
@@ -97,7 +97,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<FormProp<MonitorPointDto>>> =
   }
 
   const fetchMonitorPointMode = async () => {
-    let res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.MP_MODE);
+    let res = await send.get(MonitorPointEndpoint.MP_MODE);
     if (res?.data.data) {
       res.data.data.map((a: ModeDto) => {
         setMonitorPointModeOption((prev) => [...prev, { label: a.name, value: a.value }])
@@ -133,23 +133,25 @@ const MonitorPointForm: React.FC<PropsWithChildren<FormProp<MonitorPointDto>>> =
       <div className="space-y-6">
         <div>
           <Label htmlFor="name">Monitor Point Name</Label>
-          <Input value={dto.name} name="name" type="text" id="name" onChange={handleChange} />
+          <Input value={dto.name} name="name" type="text" id="name" onChange={handleChange} disabled={type==FormType.INFO} />
         </div>
         <div>
           <Label>Controller</Label>
           <Select
+          disabled={type==FormType.INFO}
             isString={true}
             name="macAddress"
             options={controllerOption}
             placeholder="Select Option"
             onChangeWithEvent={handleSelectChange}
             className="dark:bg-dark-900"
-            defaultValue={dto.macAddress}
+            defaultValue={dto.mac}
           />
         </div>
         <div>
           <Label>Module</Label>
           <Select
+          disabled={type==FormType.INFO}
             name="moduleId"
             options={moduleOption}
             placeholder="Select Option"
@@ -161,6 +163,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<FormProp<MonitorPointDto>>> =
         <div>
           <Label>Input</Label>
           <Select
+          disabled={type==FormType.INFO}
             name="inputNo"
             options={inputOption}
             placeholder="Select Option"
@@ -173,6 +176,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<FormProp<MonitorPointDto>>> =
           <div>
             <Label>Input Mode</Label>
             <Select
+            disabled={type==FormType.INFO}
               name="inputMode"
               options={inputModeOption}
               placeholder="Select Option"
@@ -186,6 +190,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<FormProp<MonitorPointDto>>> =
         <div>
           <Label className="pb-3">Monitor Point Mode</Label>
           <Select
+          disabled={type==FormType.INFO}
             name="monitorPointMode"
             options={monitorPointModeOption}
             placeholder="Select Option"
@@ -198,6 +203,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<FormProp<MonitorPointDto>>> =
         <div>
           <Label className="pb-3">Log Function Mode</Label>
           <Select
+          disabled={type==FormType.INFO}
             name="logFunction"
             options={logFunctionOption}
             placeholder="Select Option"
@@ -210,15 +216,15 @@ const MonitorPointForm: React.FC<PropsWithChildren<FormProp<MonitorPointDto>>> =
 
         <div className={dto.monitorPointMode == 1 || dto.monitorPointMode == 2 ? "" : "hidden"}>
           <Label htmlFor="delayEntry">Delay Entry(s)</Label>
-          <Input value={dto.delayEntry} min="0" max="65535" name="delayEntry" type="number" id="delayEntry" onChange={handleChange} />
+          <Input disabled={type==FormType.INFO} value={dto.delayEntry} min="0" max="65535" name="delayEntry" type="number" id="delayEntry" onChange={handleChange} />
         </div>
         <div className={dto.monitorPointMode == 1 || dto.monitorPointMode == 2 ? "" : "hidden"}>
           <Label htmlFor="delayExit">Delay Exit(s)</Label>
-          <Input value={dto.delayExit} min="0" max="65535" name="delayExit" type="number" id="delayExit" onChange={handleChange} />
+          <Input disabled={type==FormType.INFO} value={dto.delayExit} min="0" max="65535" name="delayExit" type="number" id="delayExit" onChange={handleChange} />
         </div>
         <div className="flex justify-center gap-4">
-          <Button name="create" onClickWithEvent={handleClick} className="w-50" size="sm">Submit </Button>
-          <Button name="cancel" onClickWithEvent={handleClick} variant="danger" className="w-50" size="sm">Cancle</Button>
+          <Button disabled={type==FormType.INFO} name={type == FormType.CREATE ? "create" : "update"} onClickWithEvent={handleClick} className="w-50" size="sm">{type == FormType.CREATE ? "create" : "update"}</Button>
+          <Button name="cancel" onClickWithEvent={handleClick} variant="danger" className="w-50" size="sm">Cancel</Button>
         </div>
       </div>
     </div>

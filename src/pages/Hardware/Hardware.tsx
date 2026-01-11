@@ -56,7 +56,7 @@ const Hardware = () => {
     // Base
     uuid: "",
     componentId: -1,
-    macAddress: "",
+    mac: "",
     locationId: locationId,
     isActive: true,
 
@@ -66,7 +66,7 @@ const Hardware = () => {
     serialNumber: "",
     isUpload: false,
     isReset: false,
-    hardware_type: 0,
+    hardwareType: 0,
     hardwareTypeDescription: "",
     firmware: "",
     port: "",
@@ -79,14 +79,14 @@ const Hardware = () => {
     protocolTwo: 0,
     protocolTwoDescription: "",
     baudRateTwo: -1,
-    macAddressDescription: ""
+    hardwareName: ""
   }
 
 
   {/* Modal Handler */ }
   const [scan, setScan] = useState<boolean>(false)
   const [form,setForm] = useState<boolean>(false);
-  const [formType,setFormType] = useState<FormType>(FormType.Create);
+  const [formType,setFormType] = useState<FormType>(FormType.CREATE);
 
   // Upload Modal
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -102,14 +102,14 @@ const Hardware = () => {
       // Base
       uuid: "",
       componentId: data.componentId,
-      macAddress: data.macAddress,
-      macAddressDescription:'',
+      mac: data.macAddress,
+      hardwareName:'',
       locationId: locationId,
       isActive: true,
 
       // Define
       name: "",
-      hardware_type:data.hardwareType,
+      hardwareType:data.hardwareType,
       hardwareTypeDescription: data.hardwareTypeDescription,
       ip: data.ip,
       firmware:data.firmware,
@@ -195,7 +195,7 @@ const Hardware = () => {
 
       // Batch set state
       const newStatuses = res.data.data.map((a: HardwareDto) => ({
-        macAddress: a.macAddress,
+        macAddress: a.mac,
         componentId: a.componentId,
         status: -1,
         tamper: -1,
@@ -204,7 +204,7 @@ const Hardware = () => {
       }));
 
       const newTranStatuses = res.data.data.map((a: HardwareDto) => ({
-        macAddress: a.macAddress,
+        macAddress: a.mac,
         capacity: 0,
         oldest: 0,
         lastReport: 0,
@@ -219,8 +219,8 @@ const Hardware = () => {
       console.log(res.data.data)
       // Fetch status for each
       res.data.data.forEach((a: HardwareDto) => {
-        fetchStatus(a.macAddress);
-        fetchTransactionStatus(a.macAddress);
+        fetchStatus(a.mac);
+        fetchTransactionStatus(a.mac);
       });
     }
 
@@ -286,19 +286,19 @@ const Hardware = () => {
 
   {/* Handle Action Table*/ }
   const handleEdit = (data: HardwareDto) => {
-    setFormType(FormType.Update)
+    setFormType(FormType.UPDATE)
     setHardwareDto({
       // Base
       uuid: data.uuid,
       componentId: data.componentId,
-      macAddressDescription:data.macAddressDescription,
-      macAddress: data.macAddress,
+      hardwareName:data.hardwareName,
+      mac: data.mac,
       locationId: data.locationId,
       isActive: true,
       // detail
 
       name: data.name,
-      hardware_type: data.hardware_type,
+      hardwareType: data.hardwareType,
       hardwareTypeDescription: data.hardwareTypeDescription,
       ip: data.ip,
       firmware: data.firmware,
@@ -321,7 +321,7 @@ const Hardware = () => {
 
   const handleRemove = (data: HardwareDto) => {
     setConfirmRemove(() => async () => {
-      const res = await send.delete(HardwareEndpoint.DELETE(data.macAddress));
+      const res = await send.delete(HardwareEndpoint.DELETE(data.mac));
       if(Helper.handleToastByResCode(res,HardwareToast.DELETE,toggleToast)){
         setHardwareDto(defaultDto)
         toggleRefresh();
@@ -331,7 +331,7 @@ const Hardware = () => {
 
   }
   const handleInfo = (data:HardwareDto) => {
-    setFormType(FormType.Info);
+    setFormType(FormType.INFO);
     setHardwareDto(data);
     setForm(true);
   }
@@ -340,7 +340,7 @@ const Hardware = () => {
     console.log(e.currentTarget.name);
     switch (e.currentTarget.name) {
       case "add":
-        setFormType(FormType.Create);
+        setFormType(FormType.CREATE);
         setForm(true);
         break;
       case "report":
@@ -351,7 +351,7 @@ const Hardware = () => {
           let data:SetTranDto[] = []
           select.map((a:HardwareDto) => {
             data.push({
-              macAddress:a.macAddress,
+              macAddress:a.mac,
               param:1
             });
           })
@@ -413,7 +413,7 @@ const Hardware = () => {
       case "reset":
         if (select.length != 0) {
           select.map((a: HardwareDto) => {
-            resetDevice(a.macAddress);
+            resetDevice(a.mac);
           })
 
         } else {
@@ -423,7 +423,7 @@ const Hardware = () => {
       case "upload":
         if (select.length != 0) {
           select.map((a: HardwareDto) => {
-            uploadConfig(a.macAddress);
+            uploadConfig(a.mac);
           })
 
         } else {
@@ -527,12 +527,12 @@ const Hardware = () => {
   const renderOptional = (data: HardwareDto, statusDto: StatusDto[],index:number) => {
     console.log(data)
     console.log(statusDto)
-    console.log(statusDto.find(b => b.macAddress == data.macAddress)?.status)
+    console.log(statusDto.find(b => b.macAddress == data.mac)?.status)
     return [
       <TableCell key={index} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
         <>
           {
-            data.isReset == true && statusDto.find(b => b.macAddress == data.macAddress)?.status == 0 ?
+            data.isReset == true && statusDto.find(b => b.macAddress == data.mac)?.status == 0 ?
               <FlashLoading />
               :
               data.isReset == true ?
@@ -575,14 +575,14 @@ const Hardware = () => {
           <Badge
             size="sm"
             color={
-              statusDto.find(b => b.macAddress == data.macAddress)?.status == 1
+              statusDto.find(b => b.macAddress == data.mac)?.status == 1
                 ? "success"
-                : statusDto.find(b => b.macAddress == data.macAddress)?.status == 0
+                : statusDto.find(b => b.macAddress == data.mac)?.status == 0
                   ? "error"
                   : "warning"
             }
           >
-            {statusDto.find(b => b.macAddress == data.macAddress)?.status == 1 ? "Online" : statusDto.find(b => b.macAddress == data.macAddress)?.status == 0 ? "Offline" : statusDto.find(b => b.macAddress == data.macAddress)?.status}
+            {statusDto.find(b => b.macAddress == data.mac)?.status == 1 ? "Online" : statusDto.find(b => b.macAddress == data.mac)?.status == 0 ? "Offline" : statusDto.find(b => b.macAddress == data.mac)?.status}
           </Badge>
 
         }
@@ -631,8 +631,8 @@ const Hardware = () => {
             {
               key: "tranStatus",
               content: (a, i) => <TableCell key={i} className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">
-                <Badge size="sm" color={tranStatus.find(x => x.macAddress == a.macAddress)?.disabled == 0 && tranStatus.find(x => x.macAddress == a.macAddress)?.status ? "success" : "error"}>
-                  {tranStatus.find(x => x.macAddress == a.macAddress)?.status ?? "Unknown"}
+                <Badge size="sm" color={tranStatus.find(x => x.macAddress == a.mac)?.disabled == 0 && tranStatus.find(x => x.macAddress == a.mac)?.status ? "success" : "error"}>
+                  {tranStatus.find(x => x.macAddress == a.mac)?.status ?? "Unknown"}
                 </Badge>
               </TableCell>
             }

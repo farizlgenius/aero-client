@@ -16,7 +16,7 @@ export const MonitorMaskForm:React.FC<PropsWithChildren<CommandFormInterface>> =
         <>
             <div>
                 <Label>Monitor Point</Label>
-                <Select icon={<MonitorIcon />} options={options} name={"arg1"} defaultValue={action.arg1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),macAddress:options.find(x => x.value == Number(value))?.description ?? ""}))} />
+                <Select icon={<MonitorIcon />} options={options} name={"arg1"} defaultValue={action.arg1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),mac:options.find(x => x.value == Number(value))?.description ?? ""}))} />
             </div>
             <div>
                 <Label htmlFor='mode' >Mask Option</Label>

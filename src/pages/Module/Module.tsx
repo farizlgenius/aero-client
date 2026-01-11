@@ -42,7 +42,7 @@ export default function Module() {
       console.log(res.data.data)
       setModuleDto(res.data.data);
       const newStatuses = res.data.data.map((a: ModuleDto) => ({
-        macAddress: a.macAddress,
+        macAddress: a.mac,
         componentId: a.componentId,
         status: 0,
         tamper: "",
@@ -56,7 +56,7 @@ export default function Module() {
 
       // Fetch status for each
       res.data.data.forEach((a: ModuleDto) => {
-        fetchStatus(a.macAddress, a.componentId);
+        fetchStatus(a.mac, a.componentId);
       });
     }
 

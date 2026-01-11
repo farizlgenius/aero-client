@@ -39,7 +39,7 @@ export const Role = () => {
     const [refresh, setRefresh] = useState<boolean>(false);
     const [roleDto, setRoleDto] = useState<RoleDto>(defaultDto);
     const [rolesDto, setRolesDto] = useState<RoleDto[]>([]);
-    const [formType,setFormType] = useState<FormType>(FormType.Create);
+    const [formType,setFormType] = useState<FormType>(FormType.CREATE);
     const toggleRefresh = () => setRefresh(!refresh)
 
     const handleRemove = (data: RoleDto) => {
@@ -56,14 +56,14 @@ export const Role = () => {
     }
 
     const handleInfo = (data:RoleDto) => {
-        setFormType(FormType.Info)
+        setFormType(FormType.INFO)
         setRoleDto(data)
         setForm(true);
     }
 
     {/* handle Table Action */ }
     const handleEdit = (data: RoleDto) => {
-        setFormType(FormType.Update)
+        setFormType(FormType.UPDATE)
         setRoleDto(data);
         setForm(true);
     }
@@ -73,7 +73,7 @@ export const Role = () => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
-                setFormType(FormType.Create)
+                setFormType(FormType.CREATE)
                 setForm(true);
                 break;
             case "delete":

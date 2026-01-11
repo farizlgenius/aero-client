@@ -56,7 +56,7 @@ const Interval = () => {
     }
 
 
-    const [formType, setFormType] = useState<FormType>(FormType.Create);
+    const [formType, setFormType] = useState<FormType>(FormType.CREATE);
     const [intervalDto, setIntervalDto] = useState<IntervalDto>(defaultDto);
 
     {/* Modal */ }
@@ -66,7 +66,7 @@ const Interval = () => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
-                setFormType(FormType.Create)
+                setFormType(FormType.CREATE)
                 setForm(true)
                 break;
             case "delete":
@@ -139,7 +139,7 @@ const Interval = () => {
     const handleEdit = (data: IntervalDto) => {
         intervalDto.days = data.days
         setIntervalDto(data);
-        setFormType(FormType.Update);
+        setFormType(FormType.UPDATE);
         setForm(true)
     }
 
@@ -158,7 +158,7 @@ const Interval = () => {
     const handleInfo = (data: IntervalDto) => {
         setIntervalDto(data);
         intervalDto.days = data.days
-        setFormType(FormType.Info);
+        setFormType(FormType.INFO);
         setForm(true);
     }
 

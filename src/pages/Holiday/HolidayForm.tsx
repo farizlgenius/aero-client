@@ -39,7 +39,7 @@ const HolidayForm: React.FC<PropsWithChildren<FormProp<HolidayDto>>> = ({ type, 
                 />
               </div>
               <div className='flex gap-4'>
-                <Button disabled={type == FormType.Info} onClickWithEvent={handleClick} name={type == FormType.Update ? "update" : "create"} className="w-50" size="sm">{type == FormType.Update ? "Update" : "Create"}</Button>
+                <Button disabled={type == FormType.INFO} onClickWithEvent={handleClick} name={type == FormType.UPDATE ? "update" : "create"} className="w-50" size="sm">{type == FormType.UPDATE ? "Update" : "Create"}</Button>
                 <Button onClickWithEvent={handleClick} variant='danger' name='close' className="w-50" size="sm">Cancel</Button>
               </div>
 

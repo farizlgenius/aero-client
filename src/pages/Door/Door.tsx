@@ -47,7 +47,7 @@ const Door = () => {
                 // base 
                 uuid: "",
                 componentId: -1,
-                macAddress: "",
+                mac: "",
                 locationId: locationId,
                 isActive: true,
 
@@ -68,7 +68,7 @@ const Door = () => {
                 // base 
                 uuid: "",
                 componentId: -1,
-                macAddress: "",
+                mac: "",
                 locationId: locationId,
                 isActive: true,
 
@@ -95,7 +95,7 @@ const Door = () => {
             // base
             uuid: "",
             componentId: -1,
-            macAddress: '',
+            mac: '',
             locationId: locationId,
             isActive: true,
             strkMax: 5,
@@ -111,7 +111,7 @@ const Door = () => {
             // base
             uuid: "",
             componentId: -1,
-            macAddress: '',
+            mac: '',
             locationId: locationId,
             isActive: true,
             debounce: 0,
@@ -121,7 +121,7 @@ const Door = () => {
             // base 
             uuid: "",
             componentId: -1,
-            macAddress: "",
+            mac: "",
             locationId: locationId,
             isActive: true,
 
@@ -136,7 +136,7 @@ const Door = () => {
             // base 
             uuid: "",
             componentId: -1,
-            macAddress: "",
+            mac: "",
             locationId: locationId,
             isActive: true,
 
@@ -181,7 +181,7 @@ const Door = () => {
         // base
         uuid: "",
         componentId: -1,
-        macAddress: '',
+        mac: '',
         locationId: locationId,
         isActive: true,
         strkComponentId: 0,
@@ -215,32 +215,32 @@ const Door = () => {
                 break;
             case "unlock":
                 selectedObjects.map(a => {
-                    changeDoorMode(a.macAddress, a.componentId, 2);
+                    changeDoorMode(a.mac, a.componentId, 2);
                 })
                 break;
             case "lock":
                 selectedObjects.map(a => {
-                    changeDoorMode(a.macAddress, a.componentId, 3);
+                    changeDoorMode(a.mac, a.componentId, 3);
                 })
                 break;
             case "moment":
                 selectedObjects.map(a => {
-                    unlockDoor(a.macAddress, a.componentId);
+                    unlockDoor(a.mac, a.componentId);
                 })
                 break;
             case "secure":
                 selectedObjects.map(a => {
                     console.log(a)
-                    changeDoorMode(a.macAddress, a.componentId, a.defaultMode);
+                    changeDoorMode(a.mac, a.componentId, a.defaultMode);
                 })
                 break;
             case "disable":
                 selectedObjects.map(a => {
-                    changeDoorMode(a.macAddress, a.componentId, 1);
+                    changeDoorMode(a.mac, a.componentId, 1);
                 })
                 break;
             case "remove-confirm":
-                removeDoors(removeTarget.macAddress, removeTarget.componentId);
+                removeDoors(removeTarget.mac, removeTarget.componentId);
                 break;
             case "remove-cancel":
                 setIsRemoveModal(false);
@@ -283,7 +283,7 @@ const Door = () => {
 
             // Batch set state
             const newStatuses = res.data.data.map((a: DoorDto) => ({
-                macAddress: a.macAddress,
+                macAddress: a.mac,
                 componentId: a.componentId,
                 status: 0,
                 tamper: a.modeDesc,
@@ -297,7 +297,7 @@ const Door = () => {
 
             // Fetch status for each
             res.data.data.forEach((a: DoorDto) => {
-                fetchStatus(a.macAddress, a.componentId);
+                fetchStatus(a.mac, a.componentId);
             });
         }
 

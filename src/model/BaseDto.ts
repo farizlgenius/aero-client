@@ -1,8 +1,8 @@
 export interface BaseDto{
   uuid:string;
   componentId:number;
-  macAddressDescription:string;
-  macAddress:string;
+  hardwareName:string;
+  mac:string;
   locationId:number;
   isActive:boolean;
 }

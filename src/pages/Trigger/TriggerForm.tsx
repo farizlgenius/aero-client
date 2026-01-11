@@ -49,7 +49,7 @@ export const TriggerForm: React.FC<PropsWithChildren<FormProp<TriggerDto>>> = ({
                 fetchTranCode(Number(value));
                 break;
             case "sourceNumber":
-                setDto(prev => ({...prev,sourceNumber:Number(value),macAddress:device.find(x => x.value == Number(value))?.description ?? ""}))
+                setDto(prev => ({...prev,sourceNumber:Number(value),mac:device.find(x => x.value == Number(value))?.description ?? ""}))
                 break;
             case "codeMap":
                 setDto(prev => ({...prev,codeMap:prev.codeMap.some(x => x.value == Number(value)) ? prev.codeMap : [...prev.codeMap,{
@@ -150,7 +150,7 @@ export const TriggerForm: React.FC<PropsWithChildren<FormProp<TriggerDto>>> = ({
             res.data.data.map((a: ProcedureDto) => {
                 setProcedure(prev => ([...prev, {
                     label: a.name,
-                    description: a.macAddress,
+                    description: a.mac,
                     value: a.componentId
                 }]))
             })

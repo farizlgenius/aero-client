@@ -19,7 +19,7 @@ export const HardwareComponentForm:React.FC<PropsWithChildren<HardwareComponentF
     const [deviceConfig, setDeviceConfig] = useState<VerifyHardwareDeviceConfigDto[]>([]);
 
     const fetchData = async () => {
-        const res = await send.post(HardwareEndpoint.VERIFY_COM(data.macAddress))
+        const res = await send.post(HardwareEndpoint.VERIFY_COM(data.mac))
         if(res && res.data.data){
              setDeviceConfig(res.data.data)
         }
@@ -42,7 +42,7 @@ export const HardwareComponentForm:React.FC<PropsWithChildren<HardwareComponentF
 
         <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
             {
-                data.hardware_type == 1 ? 
+                data.hardwareType == 1 ? 
                 <div className="space-y-6">
                 <Table>
                     <TableHeader className="border-b border-gray-100 dark:border-white/[0.05] bg-white dark:bg-gray-900 sticky top-0 z-10">

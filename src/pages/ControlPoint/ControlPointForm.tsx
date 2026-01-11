@@ -37,7 +37,7 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
     switch (e.target.name) {
       case "macAddress":
         fetchModuleByMac(value)
-        setDto((prev) => ({...prev,macAddress:value,macAddressDescription:controllerOption.find(a => a.value == value)?.label ?? ""}))
+        setDto((prev) => ({...prev,mac:value,hardwareName:controllerOption.find(a => a.value == value)?.label ?? ""}))
         break;
       case "moduleId":
         fetchOutput(value);
@@ -62,7 +62,7 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
       res.data.data.map((a: HardwareDto) => {
         setControllerOption(prev => [...prev, {
           label: a.name,
-          value: a.macAddress
+          value: a.mac
         }])
       })
     }
@@ -105,7 +105,7 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
   }
 
   const fetchOutput = async (value: string) => {
-    var res = await send.get(ControlPointEndpoint.OUTPUT(dto.macAddress,Number(value)));
+    var res = await send.get(ControlPointEndpoint.OUTPUT(dto.mac,Number(value)));
     if (res) {
       res.data.data.map((a: number) => {
         setRelayOption((prev) => [...prev, {
@@ -120,8 +120,8 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
   useEffect(() => {
     fetchController();
     fetchRelayMode();
-    if(type == FormType.Info || type == FormType.Update){
-      fetchModuleByMac(dto.macAddress);
+    if(type == FormType.INFO || type == FormType.UPDATE){
+      fetchModuleByMac(dto.mac);
       fetchOutput(String(dto.moduleId));
     }
   }, []);
@@ -131,7 +131,7 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
       <div className="space-y-6">
         <div>
           <Label htmlFor="name">Control Point Name</Label>
-          <Input disabled={type == FormType.Info} name="name" value={dto.name} type="text" id="name" onChange={handleChange} />
+          <Input disabled={type == FormType.INFO} name="name" value={dto.name} type="text" id="name" onChange={handleChange} />
         </div>
         <div>
           <Label>Controller</Label>
@@ -142,8 +142,8 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
             placeholder="Select Option"
             onChangeWithEvent={handleSelect}
             className="dark:bg-dark-900"
-            defaultValue={dto.macAddress}
-            disabled={type == FormType.Info}
+            defaultValue={dto.mac}
+            disabled={type == FormType.INFO}
           />
         </div>
         <div>
@@ -156,7 +156,7 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
             onChangeWithEvent={handleSelect}
             className="dark:bg-dark-900"
             defaultValue={dto.moduleId}
-            disabled={type == FormType.Info}
+            disabled={type == FormType.INFO}
           />
         </div>
         <div>
@@ -168,7 +168,7 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
             onChangeWithEvent={handleSelect}
             className="dark:bg-dark-900"
             defaultValue={dto.outputNo}
-            disabled={type == FormType.Info}
+            disabled={type == FormType.INFO}
           />
         </div>
         <div className="flex gap-2">
@@ -181,7 +181,7 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
               onChangeWithEvent={handleSelect}
               className="dark:bg-dark-900"
               defaultValue={dto.relayMode}
-              disabled={type == FormType.Info}
+              disabled={type == FormType.INFO}
             />
           </div>
           <div className="w-full">
@@ -193,7 +193,7 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
               onChangeWithEvent={handleSelect}
               className="dark:bg-dark-900"
               defaultValue={dto.offlineMode}
-              disabled={type == FormType.Info}
+              disabled={type == FormType.INFO}
             />
           </div>
 
@@ -201,10 +201,10 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
 
         <div>
           <Label htmlFor="defaultPulseTime">Pulse Time (second)</Label>
-          <Input disabled={type == FormType.Info} defaultValue={0} value={dto.defaultPulse} min="0" max="500" name="defaultPulse" type="number" id="defaultPulse" onChange={handleChange} />
+          <Input disabled={type == FormType.INFO} defaultValue={0} value={dto.defaultPulse} min="0" max="500" name="defaultPulse" type="number" id="defaultPulse" onChange={handleChange} />
         </div>
         <div className="flex justify-center gap-4">
-          <Button disabled={type == FormType.Info} name={type == FormType.Create ? "create" : "update"} className="w-50" size="sm" onClickWithEvent={handleClick}>{type == FormType.Update ? "Update" : "Create"}</Button>
+          <Button disabled={type == FormType.INFO} name={type == FormType.CREATE ? "create" : "update"} className="w-50" size="sm" onClickWithEvent={handleClick}>{type == FormType.UPDATE ? "Update" : "Create"}</Button>
           <Button name="close" className="w-50" variant="danger" size="sm" onClickWithEvent={handleClick}>Cancel </Button>
         </div>
       </div>

@@ -49,7 +49,7 @@ export const Operator = () => {
     const { toggleToast } = useToast();
     const { setRemove, setConfirmRemove,setConfirmCreate ,setCreate,setUpdate,setConfirmUpdate,setInfo,setMessage} = usePopup();
     const [form,setForm] = useState<boolean>(false);
-    const [formType,setFormType] = useState<FormType>(FormType.Create);
+    const [formType,setFormType] = useState<FormType>(FormType.CREATE);
     const [refresh, setRefresh] = useState<boolean>(false);
     const [operatorDto, setOperatorDto] = useState<OperatorDto>(defaultDto);
     const [operatorsDto, setOperatorsDto] = useState<OperatorDto[]>([]);
@@ -72,13 +72,13 @@ export const Operator = () => {
     {/* handle Table Action */ }
     const handleEdit = (data: OperatorDto) => {
         setOperatorDto(data);
-        setFormType(FormType.Update)
+        setFormType(FormType.UPDATE)
         setForm(true);
     }
 
     const handleInfo = (data:OperatorDto) => {
         setOperatorDto(data);
-        setFormType(FormType.Info)
+        setFormType(FormType.INFO)
         setForm(true);
     }
 
@@ -87,7 +87,7 @@ export const Operator = () => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
-                setFormType(FormType.Create)
+                setFormType(FormType.CREATE)
                 setForm(true);
                 break;
             case "delete":

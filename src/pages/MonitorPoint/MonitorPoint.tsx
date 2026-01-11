@@ -6,8 +6,7 @@ import Logger from '../../utility/Logger';
 import MonitorPointForm from './MonitorPointForm';
 import { MonitorPointDto } from '../../model/MonitorPoint/MonitorPointDto';
 import { StatusDto } from '../../model/StatusDto';
-import { RemoveInput } from '../../model/MonitorPoint/RemoveInput';
-import { MonitorPointToast, ToastMessage } from '../../model/ToastMessage';
+import { MonitorPointToast } from '../../model/ToastMessage';
 import { useToast } from '../../context/ToastContext';
 import Helper from '../../utility/Helper';
 import { HttpMethod } from '../../enum/HttpMethod';
@@ -28,7 +27,7 @@ import { FormType } from '../../model/Form/FormProp';
 
 // Define Global Variable
 export const MP_TABLE_HEADER: string[] = ["Name", "Main Controller", "Module", "Mode","Input Mode", "Masked", "Status", "Action"]
-export const MP_KEY: string[] = ["name", "macAddressDescription", "moduleDescription", "monitorPointModeDescription","inputModeDescription", "isMask"];
+export const MP_KEY: string[] = ["name", "hardwareName", "moduleDescription", "monitorPointModeDescription","inputModeDescription", "isMask"];
 
 const MonitorPoint = () => {
     const { filterPermission } = useAuth();
@@ -39,18 +38,18 @@ const MonitorPoint = () => {
     const toggleRefresh = () => setRefresh(!refresh);
     {/* Modal */ }
     const [form,setForm] = useState<boolean>(false);
-    const [formType,setFormType] = useState<FormType>(FormType.Create);
+    const [formType,setFormType] = useState<FormType>(FormType.CREATE);
 
     {/* handle Table Action */ }
     const handleEdit = (data:MonitorPointDto) => {
         setMonitorPointDto(data);
-        setFormType(FormType.Update)
+        setFormType(FormType.UPDATE)
         setForm(true)
     }
 
     const handleInfo = (data:MonitorPointDto) => {
         setMonitorPointDto(data)
-        setFormType(FormType.Info)
+        setFormType(FormType.INFO)
         setForm(true);
     }
 
@@ -68,7 +67,7 @@ const MonitorPoint = () => {
         let res;
         switch (e.currentTarget.name) {
             case "add":
-                setFormType(FormType.Create)
+                setFormType(FormType.CREATE)
                 setForm(true);
                 break;
             case "delete":
@@ -92,7 +91,7 @@ const MonitorPoint = () => {
             case "create":
                 setConfirmCreate(() => async () => {
                     const res = await send.post(MonitorPointEndpoint.CREATE, monitorPointDto);
-                    if (Helper.handleToastByResCode(res, ToastMessage.CREATE_MP, toggleToast)) {
+                    if (Helper.handleToastByResCode(res, MonitorPointToast.CREATE, toggleToast)) {
                         setForm(false);
                         toggleRefresh();
                     }
@@ -151,13 +150,14 @@ const MonitorPoint = () => {
         isMask: false,
         uuid: '',
         componentId: -1,
-        macAddress: '',
+        mac: '',
         locationId: locationId,
         isActive: false,
-        macAddressDescription: '',
+        hardwareName: '',
         inputModeDescription: '',
         logFunctionDescription: '',
-        monitorPointModeDescription: ''
+        monitorPointModeDescription: '',
+        moduleDescription: ''
     }
     const [monitorPointsDto, setMonitorPointsDto] = useState<MonitorPointDto[]>([]);
     const [monitorPointDto, setMonitorPointDto] = useState<MonitorPointDto>(defaultDto);
@@ -170,7 +170,7 @@ const MonitorPoint = () => {
 
             // Batch set state
             const newStatuses = res.data.data.map((a: MonitorPointDto) => ({
-                macAddress: a.macAddress,
+                macAddress: a.mac,
                 componentId: a.componentId,
                 status: 0
             }));
@@ -181,13 +181,13 @@ const MonitorPoint = () => {
 
             // Fetch status for each
             res.data.data.forEach((a: MonitorPointDto) => {
-                fetchStatus(a.macAddress, a.componentId);
+                fetchStatus(a.mac, a.componentId);
             });
         }
 
     };
     const fetchStatus = async (scpMac: string, mpNo: number) => {
-        const res = await HttpRequest.send(HttpMethod.GET, MonitorPointEndpoint.GET_MP_STATUS + scpMac + "/" + mpNo);
+        const res = await send.get(MonitorPointEndpoint.GET_MP_STATUS(scpMac,mpNo));
         Logger.info(res);
     };
 

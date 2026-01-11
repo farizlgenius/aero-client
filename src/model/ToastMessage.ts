@@ -102,9 +102,11 @@ export enum MonitorPointToast {
 
 export enum MonitorGroupToast 
 {
-    CREATE_MP_GROUP = "Create Monitor Group",
-    DELETE_MPG = "Delete Monitor Group",
-    POST_MONITOR_GROUP_COMMAND = "Monitor Group Command"
+    CREATE = "Create Monitor Group",
+    DELETE = "Delete Monitor Group",
+    DELETE_RANGE = "Delete Monitor Groups",
+    UPDATE = "Update Monitor Group",
+    COMMAND = "Monitor Group Command"
 }
 
 export enum DoorToast {

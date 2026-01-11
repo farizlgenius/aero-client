@@ -28,7 +28,7 @@ const Holiday = () => {
     const {setCreate,setUpdate,setRemove,setConfirmCreate,setConfirmRemove,setConfirmUpdate,setInfo,setMessage} = usePopup();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
-    const [formType,setFormType] = useState<FormType>(FormType.Create);
+    const [formType,setFormType] = useState<FormType>(FormType.CREATE);
     const defaultDto: HolidayDto = {
         uuid: "",
         locationId: locationId,
@@ -48,7 +48,7 @@ const Holiday = () => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
-                setFormType(FormType.Create)
+                setFormType(FormType.CREATE)
                 setForm(true);
                 break;
             case "delete":
@@ -102,7 +102,7 @@ const Holiday = () => {
 
     {/* handle Table Action */ }
     const handleEdit = (data: HolidayDto) => {
-        setFormType(FormType.Update)
+        setFormType(FormType.UPDATE)
         setHolidayDto(data)
         setForm(true);
     }
@@ -117,7 +117,7 @@ const Holiday = () => {
     }
 
     const handleInfo = (data:HolidayDto) => {
-        setFormType(FormType.Info);
+        setFormType(FormType.INFO);
         setHolidayDto(data)
         setForm(true);
     }
