@@ -2,7 +2,8 @@ import axios from "axios";
 import Logger from "./Logger";
 import api from "../api/api";
 
-const server = import.meta.env.VITE_SERVER_IP;
+const PORT = import.meta.env.PORT || 5031;
+const server = import.meta.env.VITE_SERVER_IP || `${location.protocol}//${location.hostname}:${PORT}`;
 
 class HttpRequest {
 

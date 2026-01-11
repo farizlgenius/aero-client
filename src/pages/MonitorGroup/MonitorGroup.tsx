@@ -221,7 +221,7 @@ export const MonitorGroup = () => {
             icon: <MonitorIcon />
         }, {
             lable: "force",
-            buttonName: "Froce Arm",
+            buttonName: "Froce",
             icon: <MonitorIcon />
         }, {
             lable: "arm",
@@ -229,7 +229,7 @@ export const MonitorGroup = () => {
             icon: <MonitorIcon />
         }, {
             lable: "override-arm",
-            buttonName: "Override Arm",
+            buttonName: "Override",
             icon: <MonitorIcon />
         },
     ];

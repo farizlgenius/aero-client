@@ -1,9 +1,11 @@
 import * as signalR from "@microsoft/signalr";
 import { HubEndPoint } from "../constants/constant";
 
-const server = import.meta.env.VITE_SERVER_IP;
+const PORT = import.meta.env.PORT || 5031;
+const server = import.meta.env.VITE_SERVER_IP || `${location.protocol}//${location.hostname}:${PORT}`;
 
 class SignalRService {
+  
   private connection: signalR.HubConnection | null = null;
 
   public getConnection(): signalR.HubConnection {
@@ -43,6 +45,7 @@ class SignalRService {
       console.info("[SignalR] Connection started successfully.");
     } catch (error) {
       console.error("[SignalR] Connection start failed:", error);
+      console.log(server)
       // Retry after delay if initial connect fails
       setTimeout(() => this.startConnection(), 5000);
     }

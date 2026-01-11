@@ -2,8 +2,8 @@
 import axios, { AxiosInstance } from "axios";
 import Logger from "../utility/Logger";
 
-const API_BASE = import.meta.env.VITE_SERVER_IP;
-
+const PORT = import.meta.env.PORT || 5031;
+const API_BASE = import.meta.env.VITE_SERVER_IP || `${location.protocol}//${location.hostname}:${PORT}`;
 let accessToken: string | null = null;
 
 const api: AxiosInstance = axios.create({
