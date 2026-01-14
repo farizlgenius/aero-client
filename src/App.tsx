@@ -57,6 +57,9 @@ import { Procedure } from "./pages/Procedure/Procedure";
 import { Trigger } from "./pages/Trigger/Trigger";
 import { usePopup } from "./context/PopupContext";
 import { PasswordRule } from "./pages/Settings/PasswordRule";
+import { send } from "./api/api";
+import Helper from "./utility/Helper";
+import { LicenseToast, ToastMessage } from "./model/ToastMessage";
 
 
 export default function App() {
@@ -65,10 +68,10 @@ export default function App() {
   const { create, remove, update, createModal, removeModal, updateModal,info,infoModal } = usePopup();
   const { show, locationId } = useLocation();
   const { showAlertFlag, alertSuccessFlag, alertMessage } = useAlert();
-  const { showToast, ToastContainer } = useToast();
+  const { showToast, ToastContainer,toggleToast } = useToast();
   const { loading, Loading } = useLoading();
 
-  const [license, setLicense] = useState<boolean>(true);
+  const [license, setLicense] = useState<boolean>(false);
   const [loginDto, setLoginDto] = useState<LoginDto>({
     username: "",
     password: ""
@@ -94,16 +97,16 @@ export default function App() {
   const [message, setMessage] = useState<string>("");
   {/* License Check */ }
   const checkLicense = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET, LicenseEndpoint.GET_LICENSE)
-    if (res && res.data.data) {
+    const res = await send.get(LicenseEndpoint.CHECK);
+    if (Helper.handleToastByResCode(res,LicenseToast.CHECK,toggleToast)) {
       console.log(res.data.data)
-      //setLicense(true);
+      setLicense(true);
     }
   }
 
   {/* License */ }
   const addLicense = async () => {
-    const res = await HttpRequest.send(HttpMethod.POST, LicenseEndpoint.POST_LICENSE,)
+    const res = await HttpRequest.send(HttpMethod.POST, LicenseEndpoint.CREATE,)
     if (res && res.data.data) {
       console.log(res.data.data)
       //setLicense(true);

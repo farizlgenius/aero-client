@@ -55,6 +55,10 @@ export enum ToastMessage{
     DELETE_MPG = "Delete Monitor Group"
 }
 
+export enum LicenseToast{
+    CHECK = "Validate License"
+}
+
 export enum AuthToast {
     LOGIN = "Login"
 }

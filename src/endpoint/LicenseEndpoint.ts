@@ -1,4 +1,7 @@
-export enum LicenseEndpoint{
-    GET_LICENSE = '/api/v1/License',
-    POST_LICENSE = "/api/v1/License"
-}
+const API_VERSION = import.meta.env.VITE_API_VERSION;
+const CONTROLLER = 'License'
+
+export const LicenseEndpoint = {
+    CHECK :`/api/${API_VERSION}/${CONTROLLER}`,
+    CREATE :`/api/${API_VERSION}/${CONTROLLER}`
+} as const

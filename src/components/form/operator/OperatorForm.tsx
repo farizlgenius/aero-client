@@ -70,7 +70,7 @@ export const OperatorForm: React.FC<PropsWithChildren<FormProp<OperatorDto>>> = 
                 setPassForm(false)
                 break;
             case "create":
-                setDto(prev =>({...prev,password:passDto.new}))
+                setDto(prev => ({ ...prev, password: passDto.new }))
                 setPassDto(defaulDto)
                 setPassForm(false)
                 break;
@@ -199,7 +199,7 @@ export const OperatorForm: React.FC<PropsWithChildren<FormProp<OperatorDto>>> = 
 
 
                             }
-                            
+
                             <div className="flex-1">
                                 <Label>
                                     New Password <span className="text-error-500">*</span>{" "}
@@ -384,128 +384,128 @@ export const OperatorForm: React.FC<PropsWithChildren<FormProp<OperatorDto>>> = 
 
                             </div>
                             <div className='mt-3 flex justify-center gap-5'>
-                                <Button onClickWithEvent={handleClick} name={ type == FormType.CREATE ? "create" : "change"} size='sm'>{ type == FormType.CREATE ? "Create" : "Change"}</Button>
+                                <Button onClickWithEvent={handleClick} name={type == FormType.CREATE ? "create" : "change"} size='sm'>{type == FormType.CREATE ? "Create" : "Change"}</Button>
                                 <Button variant='danger' onClickWithEvent={handleClick} name='cancel' size='sm'>Cancel</Button>
                             </div>
                         </div>
 
                     </div>
                     :
-                    <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-                        <div className='flex gap-2 w-1/2'>
-                            <div className='flex-1'>
-                                <Label htmlFor="username">Username</Label>
-                                <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="username" type="text" id="username" onChange={handleChange} value={dto.username} />
-                            </div>
-                            <div className='flex-1'>
-                                {
-                                    type == FormType.UPDATE || type == FormType.CREATE ?
-                                        <>
-                                            <Label htmlFor="password">Password</Label>
-                                            <Button onClick={() => handleChangePassword()} variant={type == FormType.CREATE && dto.password.length > 0 ? "green" : "primary"}>{type == FormType.UPDATE ? "Change Password" :  dto.password.length == 0 ? "Please Set Password" : "Password assigned"}</Button>
-                                        </>
-                                        :
-                                        <>
-                                            <Label htmlFor="password">Password</Label>
-                                            <Input disabled={type == FormType.INFO} name="password" type="password" id="password" onChange={handleChange} value={dto.password} />
-                                        </>
+                    <div className="flex gap-5 justify-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+                        <div className="flex-1 flex flex-col justify-center  gap-5">
+                            <div className='flex gap-2'>
+                                <div className='flex-1'>
+                                    <Label htmlFor="username">Username</Label>
+                                    <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="username" type="text" id="username" onChange={handleChange} value={dto.username} />
+                                </div>
+                                <div className='flex-1'>
+                                    {
+                                        type == FormType.UPDATE || type == FormType.CREATE ?
+                                            <>
+                                                <Label htmlFor="password">Password</Label>
+                                                <Button onClick={() => handleChangePassword()} variant={type == FormType.CREATE && dto.password.length > 0 ? "green" : "primary"}>{type == FormType.UPDATE ? "Change Password" : dto.password.length == 0 ? "Please Set Password" : "Password assigned"}</Button>
+                                            </>
+                                            :
+                                            <>
+                                                <Label htmlFor="password">Password</Label>
+                                                <Input disabled={type == FormType.INFO} name="password" type="password" id="password" onChange={handleChange} value={dto.password} />
+                                            </>
 
 
-                                }
+                                    }
 
 
+                                </div>
                             </div>
-                        </div>
-                        <div className='flex gap-2 w-1/2'>
-                            <div className='flex-1'>
-                                <Label htmlFor="title">Title</Label>
-                                <Input disabled={type == FormType.INFO} name="title" type="text" id="title" onChange={handleChange} value={dto.title} />
+                            <div className='flex gap-2'>
+                                <div className='flex-1'>
+                                    <Label htmlFor="title">Title</Label>
+                                    <Input disabled={type == FormType.INFO} name="title" type="text" id="title" onChange={handleChange} value={dto.title} />
+                                </div>
+                                <div className='flex-2'>
+                                    <Label htmlFor="firstName">Firstname</Label>
+                                    <Input disabled={type == FormType.INFO} name="firstName" type="text" id="firstName" onChange={handleChange} value={dto.firstName} />
+                                </div>
+                                <div className='flex-2'>
+                                    <Label htmlFor="middleName">Middlename</Label>
+                                    <Input disabled={type == FormType.INFO} name="middleName" type="text" id="middleName" onChange={handleChange} value={dto.middleName} />
+                                </div>
+                                <div className='flex-2'>
+                                    <Label htmlFor="lastName">Lastname</Label>
+                                    <Input disabled={type == FormType.INFO} name="lastName" type="text" id="lastName" onChange={handleChange} value={dto.lastName} />
+                                </div>
                             </div>
-                            <div className='flex-2'>
-                                <Label htmlFor="firstName">Firstname</Label>
-                                <Input disabled={type == FormType.INFO} name="firstName" type="text" id="firstName" onChange={handleChange} value={dto.firstName} />
+                            <div className='flex gap-2'>
+                                <div className='flex-1'>
+                                    <Label htmlFor="email">Email</Label>
+                                    <Input disabled={type == FormType.INFO} name="email" type="email" id="email" onChange={handleChange} value={dto.email} />
+                                </div>
+                                <div className='flex-1'>
+                                    <Label htmlFor="phone">Phone</Label>
+                                    <Input disabled={type == FormType.INFO} name="phone" type="text" id="phone" onChange={handleChange} value={dto.phone} />
+                                </div>
                             </div>
-                            <div className='flex-2'>
-                                <Label htmlFor="middleName">Middlename</Label>
-                                <Input disabled={type == FormType.INFO} name="middleName" type="text" id="middleName" onChange={handleChange} value={dto.middleName} />
-                            </div>
-                            <div className='flex-2'>
-                                <Label htmlFor="lastName">Lastname</Label>
-                                <Input disabled={type == FormType.INFO} name="lastName" type="text" id="lastName" onChange={handleChange} value={dto.lastName} />
-                            </div>
-                        </div>
-                        <div className='flex gap-2 w-1/2'>
-                            <div className='flex-1'>
-                                <Label htmlFor="email">Email</Label>
-                                <Input disabled={type == FormType.INFO} name="email" type="email" id="email" onChange={handleChange} value={dto.email} />
-                            </div>
-                            <div className='flex-1'>
-                                <Label htmlFor="phone">Phone</Label>
-                                <Input disabled={type == FormType.INFO} name="phone" type="text" id="phone" onChange={handleChange} value={dto.phone} />
-                            </div>
-                        </div>
-                        <div className='flex gap-2 w-1/2'>
-                            <div className='flex-1'>
-                                <Label htmlFor="phone">Role</Label>
-                                <Select
-
-                                    isString={false}
-                                    options={roles}
-                                    defaultValue={dto.roleId}
-                                    onChange={e => setDto(prev => ({ ...prev, roleId: Number(e) }))}
-                                    name="roleId"
-                                />
-
-                            </div>
-                        </div>
-                        <div className='flex flex-col gap-2 w-1/2'>
-                            <div className='flex-1'>
-                                <Label htmlFor="phone">Location</Label>
-                                <div className="flex gap-5">
+                            <div className='flex gap-2'>
+                                <div className='flex-1'>
+                                    <Label htmlFor="phone">Role</Label>
                                     <Select
+
                                         isString={false}
-                                        options={locations}
-                                        defaultValue={locationId}
-                                        onChange={e => setLocationId(Number(e))}
-                                        name="location"
+                                        options={roles}
+                                        defaultValue={dto.roleId}
+                                        onChange={e => setDto(prev => ({ ...prev, roleId: Number(e) }))}
+                                        name="roleId"
                                     />
-                                    <Button variant={locationIds.length > 0 ? "danger" : "primary"} disabled={type == FormType.INFO} onClick={() => {
-                                        if (locationIds.length > 0) {
-                                            setDto(prev => ({ ...prev, locationIds: prev.locationIds.filter(x => !locationIds.includes(x)) }))
-                                            setLocations(prev => Helper.updateOptionByValue(prev, locationId, false))
-                                        } else {
-                                            if (locationId != -1 && !dto.locationIds.includes(locationId)) {
-                                                setDto(prev => ({ ...prev, locationIds: [...prev.locationIds, locationId] }))
-                                                setLocations(prev => Helper.updateOptionByValue(prev, locationId, true))
-                                                setLocationId(-1);
-                                            }
-                                        }
 
-                                    }}>{locationIds.length > 0 ? "Delete" : "Add"}</Button>
                                 </div>
                             </div>
-                            <Label>Locations</Label>
-                            <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-                                <div className="grid grid-cols-5 gap-4">
-                                    {dto.locationIds.map((s, i) => (
-                                        <div onClick={() => onLocationClick(s)} key={i} className={`cursor-pointer flex flex-col rounded-2xl border border-gray-200 hover:dark:bg-white/[0.01] hover:bg-gray-200 ${locationIds.includes(s) ? "bg-gray-200 dark:bg-white/[0.01]" : "dark:bg-white/[0.03] bg-white"} p-5 dark:border-gray-800  md:p-6`}>
-                                            <div className="flex flex-col justify-center items-center gap-2">
-                                                <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl dark:bg-gray-800">
-                                                    <LocationIcon />
-                                                </div>
-                                                <span className="text-sm text-gray-500 dark:text-gray-400">{locations.find(a => a.value == s)?.label}</span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
+                            <div className='mt-3 flex gap-5'>
+                                <Button disabled={type == FormType.INFO} onClickWithEvent={handleClickWithEvent} name={type == FormType.UPDATE ? "update" : "create"} size='sm'>{type == FormType.UPDATE ? "Update" : "Create"}</Button>
+                                <Button variant='danger' onClickWithEvent={handleClickWithEvent} name='cancel' size='sm'>Cancel</Button>
                             </div>
-
                         </div>
+                        <div className="flex-1 flex flex-col gap-5">
+                             <div>
+                                    <Label htmlFor="phone">Location</Label>
+                                    <div className="flex gap-5">
+                                        <Select
+                                            isString={false}
+                                            options={locations}
+                                            defaultValue={locationId}
+                                            onChange={e => setLocationId(Number(e))}
+                                            name="location"
+                                        />
+                                        <Button variant={locationIds.length > 0 ? "danger" : "primary"} disabled={type == FormType.INFO} onClick={() => {
+                                            if (locationIds.length > 0) {
+                                                setDto(prev => ({ ...prev, locationIds: prev.locationIds.filter(x => !locationIds.includes(x)) }))
+                                                setLocations(prev => Helper.updateOptionByValue(prev, locationId, false))
+                                            } else {
+                                                if (locationId != -1 && !dto.locationIds.includes(locationId)) {
+                                                    setDto(prev => ({ ...prev, locationIds: [...prev.locationIds, locationId] }))
+                                                    setLocations(prev => Helper.updateOptionByValue(prev, locationId, true))
+                                                    setLocationId(-1);
+                                                }
+                                            }
 
-                        <div className='mt-3 flex gap-5'>
-                            <Button disabled={type == FormType.INFO} onClickWithEvent={handleClickWithEvent} name={type == FormType.UPDATE ? "update" : "create"} size='sm'>{type == FormType.UPDATE ? "Update" : "Create"}</Button>
-                            <Button variant='danger' onClickWithEvent={handleClickWithEvent} name='cancel' size='sm'>Cancel</Button>
+                                        }}>{locationIds.length > 0 ? "Delete" : "Add"}</Button>
+                                    </div>
+                                </div>
+                                <Label>Locations</Label>
+                                <div className="flex-1 flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+                                    <div className="grid grid-cols-5 gap-4">
+                                        {dto.locationIds.map((s, i) => (
+                                            <div onClick={() => onLocationClick(s)} key={i} className={`cursor-pointer flex flex-col rounded-2xl border border-gray-200 hover:dark:bg-white/[0.01] hover:bg-gray-200 ${locationIds.includes(s) ? "bg-gray-200 dark:bg-white/[0.01]" : "dark:bg-white/[0.03] bg-white"} p-5 dark:border-gray-800  md:p-6`}>
+                                                <div className="flex flex-col justify-center items-center gap-2">
+                                                    <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl dark:bg-gray-800">
+                                                        <LocationIcon />
+                                                    </div>
+                                                    <span className="text-sm text-gray-500 dark:text-gray-400">{locations.find(a => a.value == s)?.label}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                </div>
                         </div>
                     </div>
 
