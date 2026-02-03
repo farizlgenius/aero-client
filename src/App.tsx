@@ -71,7 +71,7 @@ export default function App() {
   const { showToast, ToastContainer,toggleToast } = useToast();
   const { loading, Loading } = useLoading();
 
-  const [license, setLicense] = useState<boolean>(false);
+  const [license, setLicense] = useState<boolean>(true);
   const [loginDto, setLoginDto] = useState<LoginDto>({
     username: "",
     password: ""

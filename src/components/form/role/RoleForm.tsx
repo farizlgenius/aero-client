@@ -4,20 +4,19 @@ import { RoleDto } from "../../../model/Role/RoleDto";
 import Button from "../../ui/button/Button";
 import Label from "../Label";
 import Input from "../input/InputField";
-import HttpRequest from "../../../utility/HttpRequest";
-import { HttpMethod } from "../../../enum/HttpMethod";
 import { RoleEndpoint } from "../../../endpoint/RoleEndpoint";
 import Switch from "../switch/Switch";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../ui/table";
 import { FeatureDto } from "../../../model/Role/FeatureDto";
 import Checkbox from "../input/Checkbox";
+import api from "../../../api/api";
 
 export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type, handleClick: handleClickWithEvent, dto, setDto }) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setDto(prev => ({ ...prev, [e.target.name]: e.target.value }))
     }
     const fetchFeatureList = async () => {
-        const res = await HttpRequest.send(HttpMethod.GET, RoleEndpoint.GET_FEATURE_LIST)
+        const res = await api.get(RoleEndpoint.GET_FEATURE_LIST);
         console.log(res?.data.data)
         if (res && res.data.data) {
             // setList(res.data.data)

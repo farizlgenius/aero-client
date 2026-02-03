@@ -5,14 +5,12 @@ import { LocationDto } from "../../model/Location/LocationDto";
 import { FormContent } from "../../model/Form/FormContent";
 import { AddIcon, LocationIcon } from "../../icons";
 import { LocationForm } from "../../components/form/location/LocationForm";
-import HttpRequest from "../../utility/HttpRequest";
-import { HttpMethod } from "../../enum/HttpMethod";
 import { LocationEndpoint } from "../../endpoint/LocationEndpoint";
 import { useToast } from "../../context/ToastContext";
 import Helper from "../../utility/Helper";
 import { LocationToast } from "../../model/ToastMessage";
 import { BaseTable } from "../UiElements/BaseTable";
-import { send } from "../../api/api";
+import api, { send } from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import { usePopup } from "../../context/PopupContext";
 import { FeatureId } from "../../enum/FeatureId";
@@ -47,7 +45,7 @@ export const Location = () => {
         removeTarget = data.componentId;
         setRemove(true);
         setConfirmRemove(() => async () => {
-            const res = await HttpRequest.send(HttpMethod.DELETE, LocationEndpoint.DELETE(removeTarget))
+            const res = await api.delete(LocationEndpoint.DELETE(removeTarget));
             if (Helper.handleToastByResCode(res, LocationToast.DELETE, toggleToast)) {
                 toggleRefresh();
                 removeTarget = 0;
@@ -109,7 +107,7 @@ export const Location = () => {
                 break;
             case "update":
                 setConfirmUpdate(() => async () => {
-                    const res = await HttpRequest.send(HttpMethod.PUT, LocationEndpoint.UPDATE, true, locationDto)
+                    const res = await api.put(LocationEndpoint.UPDATE,locationDto);
                     if (Helper.handleToastByResCode(res, LocationToast.UPDATE, toggleToast)) {
                         setForm(false)
                         toggleRefresh();
