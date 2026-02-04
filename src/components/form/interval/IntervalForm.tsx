@@ -1,4 +1,4 @@
-import { PropsWithChildren } from "react"
+import { PropsWithChildren, useState } from "react"
 import { TimeIcon } from "../../../icons"
 import { DaysInWeekDto } from "../../../model/Interval/DaysInWeekDto"
 import Button from "../../ui/button/Button"
@@ -12,6 +12,7 @@ import Helper from "../../../utility/Helper"
 const daysInWeek = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
 export const IntervalForm: React.FC<PropsWithChildren<FormProp<IntervalDto>>> = ({ type, handleClick: handleClickWithEvent, setDto, dto }) => {
+    const [daysDesc,setDayDesc] = useState<string[]>([]);
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         console.log(e.target.name)
         console.log(e.target.value);

@@ -6,17 +6,22 @@ import Button from '../../components/ui/button/Button';
 import { CardFormatDto } from '../../model/CardFormat/CardFormatDto';
 import { Card } from '../UiElements/Card';
 import { CardComponent } from '../../model/CardFormat/CardComponent';
+import { FormProp, FormType } from '../../model/Form/FormProp';
+import { useLocation } from '../../context/LocationContext';
 
 
 // Global Variable
 
-interface CardFormatFormProp {
-  isUpdate: boolean,
-  handleClickWithEvent: (e: React.MouseEvent<HTMLButtonElement>) => void,
-  setCardFormatDto: React.Dispatch<React.SetStateAction<CardFormatDto>>;
-  data: CardFormatDto
-}
-const defaultDto: CardFormatDto = {
+
+
+const CardFormatForm: React.FC<PropsWithChildren<FormProp<CardFormatDto>>> = ({ type, setDto, handleClick,dto }) => {
+  const [selectObject, setSelectObject] = useState<CardComponent[]>([])
+  const [cards, setCards] = useState<CardComponent[]>([])
+  const [refresh, setRefresh] = useState<boolean>(false);
+  const toggleRefresh = () => setRefresh(!refresh);
+  const { locationId } = useLocation();
+
+  const defaultDto: CardFormatDto = {
   name: '',
   componentId: 0,
   facility: -1,
@@ -35,23 +40,15 @@ const defaultDto: CardFormatDto = {
   icLn: 0,
   icLoc: 0,
   uuid: '',
-  locationId: 0,
-  locationName: '',
+  locationId: locationId,
   isActive: false
 }
 
 
-const CardFormatForm: React.FC<PropsWithChildren<CardFormatFormProp>> = ({ handleClickWithEvent, data, setCardFormatDto }) => {
-  const [selectObject, setSelectObject] = useState<CardComponent[]>([])
-  const [lastSelectedIndex, setLastSelectedIndex] = useState<number>(0);
-  const [cards, setCards] = useState<CardComponent[]>([])
-  const [refresh, setRefresh] = useState<boolean>(false);
-  const toggleRefresh = () => setRefresh(!refresh);
-
 
 
   const handleAdvanceCardClick = (event: React.MouseEvent<HTMLDivElement>, data: CardComponent, index: number) => {
-    //setSelectObject(prev => prev.map(d => d.num == data.num) ? selectObject.filter(a => a.num !== data.num) : [...prev, data]);
+    //setSelectObject(prev => prev.map(d => d.num == dto.num) ? selectObject.filter(a => a.num !== dto.num) : [...prev, data]);
     setSelectObject(prev => {
       const exists = prev.some(i => i.num === data.num);
       if (exists) {
@@ -87,7 +84,7 @@ const CardFormatForm: React.FC<PropsWithChildren<CardFormatFormProp>> = ({ handl
   //   }
   // };
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClickInside = (e: React.MouseEvent<HTMLButtonElement>) => {
     switch (e.currentTarget.name) {
       case "odd":
         console.log(selectObject)
@@ -110,7 +107,7 @@ const CardFormatForm: React.FC<PropsWithChildren<CardFormatFormProp>> = ({ handl
         setSelectObject([])
         break;
       case "reset":
-        setCardFormatDto(defaultDto);
+        setDto(defaultDto);
         toggleRefresh()
         break;
       default:
@@ -121,20 +118,20 @@ const CardFormatForm: React.FC<PropsWithChildren<CardFormatFormProp>> = ({ handl
 
   useEffect(() => {
     setCards(prev => prev.map(a => ({...a, 
-      odd: a.num >= Number(data.poLoc) && a.num < Number(data.poLoc) + Number(data.poLn) && data.poLoc > -1 ? true : false,
-      even: a.num >= Number(data.peLoc) && a.num < Number(data.peLoc) + Number(data.peLn) && data.peLoc > -1 ? true : false, 
-      fac: a.num >= Number(data.fcLoc) && a.num < Number(data.fcLoc) + Number(data.fcLn) && data.fcLoc > -1 ? true : false, 
-      data: a.num >= Number(data.chLoc) && a.num < Number(data.chLoc) + Number(data.chLn) && data.chLoc > -1 ? true : false, 
+      odd: a.num >= Number(dto.poLoc) && a.num < Number(dto.poLoc) + Number(dto.poLn) && dto.poLoc > -1 ? true : false,
+      even: a.num >= Number(dto.peLoc) && a.num < Number(dto.peLoc) + Number(dto.peLn) && dto.peLoc > -1 ? true : false, 
+      fac: a.num >= Number(dto.fcLoc) && a.num < Number(dto.fcLoc) + Number(dto.fcLn) && dto.fcLoc > -1 ? true : false, 
+      data: a.num >= Number(dto.chLoc) && a.num < Number(dto.chLoc) + Number(dto.chLn) && dto.chLoc > -1 ? true : false, 
     })))
-  }, [data])
+  }, [dto])
 
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCardFormatDto((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+    setDto((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
   useEffect(() => {
-    setCardFormatDto(prev => ({
+    setDto(prev => ({
       ...prev,
       peLn: 0,
       peLoc: -1,
@@ -145,8 +142,8 @@ const CardFormatForm: React.FC<PropsWithChildren<CardFormatFormProp>> = ({ handl
       chLn: 0,
       chLoc: -1
     }))
-    setCards(Array.from({ length: data.bits }).map((_, i) => ({ num: i, data: false, fac: false, odd: false, even: false, active: false })));
-  }, [data.bits, refresh]);
+    setCards(Array.from({ length: dto.bits }).map((_, i) => ({ num: i, data: false, fac: false, odd: false, even: false, active: false })));
+  }, [dto.bits, refresh]);
   //className='h-[60vh] overflow-y-auto hidden-scroll'
   return (
     <ComponentCard title="Add Card Format">
@@ -156,15 +153,15 @@ const CardFormatForm: React.FC<PropsWithChildren<CardFormatFormProp>> = ({ handl
       <div className="flex justify-center flex-col gap-6 sm:flex-row sm:gap-8">
         <div className='flex flex-col gap-1'>
           <Label htmlFor="name">Name</Label>
-          <Input name="name" type="text" id="cardFormatName" onChange={handleChange} value={data.name} />
+          <Input disabled={type == FormType.INFO} name="name" type="text" id="cardFormatName" onChange={handleChange} value={dto.name} />
         </div>
         <div className='flex flex-col gap-1'>
           <Label htmlFor="facility">Facility</Label>
-          <Input name="facility" type="text" id="cardFormatName" onChange={handleChange} value={data.facility} />
+          <Input disabled={type == FormType.INFO} name="facility" type="text" id="cardFormatName" onChange={handleChange} value={dto.facility} />
         </div>
         <div className='flex flex-col gap-1'>
           <Label htmlFor="bits">Bits</Label>
-          <Input name="bits" type="number" id="bits" onChange={handleChange} value={data.bits} />
+          <Input disabled={type == FormType.INFO} name="bits" type="number" id="bits" onChange={handleChange} value={dto.bits} />
         </div>
       </div >
       <div className='grid grid-cols-4 gap-4'>
@@ -177,11 +174,11 @@ const CardFormatForm: React.FC<PropsWithChildren<CardFormatFormProp>> = ({ handl
             </div>
             <div className='flex flex-col gap-1'>
               <Label htmlFor="poLoc">Start</Label>
-              <Input className='w-20' name="poLoc" type="number" id="poLoc" onChange={handleChange} value={data.poLoc} />
+              <Input disabled={type == FormType.INFO} className='w-20' name="poLoc" type="number" id="poLoc" onChange={handleChange} value={dto.poLoc} />
             </div>
             <div className='flex flex-col gap-1'>
               <Label htmlFor="poLn">Length</Label>
-              <Input className='w-20' name="poLn" type="number" id="poLn" onChange={handleChange} value={data.poLn} />
+              <Input disabled={type == FormType.INFO} className='w-20' name="poLn" type="number" id="poLn" onChange={handleChange} value={dto.poLn} />
             </div>
           </div>
         </div >
@@ -194,11 +191,11 @@ const CardFormatForm: React.FC<PropsWithChildren<CardFormatFormProp>> = ({ handl
             </div>
             <div className='flex flex-col gap-1'>
               <Label htmlFor="peLoc">Start</Label>
-              <Input className='w-20' name="peLoc" type="number" id="cardFormatName" onChange={handleChange} value={data.peLoc} />
+              <Input disabled={type == FormType.INFO} className='w-20' name="peLoc" type="number" id="cardFormatName" onChange={handleChange} value={dto.peLoc} />
             </div>
             <div className='flex flex-col gap-1'>
               <Label htmlFor="peLn">Length</Label>
-              <Input className='w-20' name="peLn" type="number" id="peLn" onChange={handleChange} value={data.peLn} />
+              <Input disabled={type == FormType.INFO} className='w-20' name="peLn" type="number" id="peLn" onChange={handleChange} value={dto.peLn} />
             </div>
           </div>
         </div>
@@ -213,11 +210,11 @@ const CardFormatForm: React.FC<PropsWithChildren<CardFormatFormProp>> = ({ handl
             </div>
             <div className='flex flex-col gap-1'>
               <Label htmlFor="fcLoc">Start</Label>
-              <Input className='w-20' name="fcLoc" type="number" id="fcLoc" onChange={handleChange} value={data.fcLoc} />
+              <Input disabled={type == FormType.INFO} className='w-20' name="fcLoc" type="number" id="fcLoc" onChange={handleChange} value={dto.fcLoc} />
             </div>
             <div className='flex flex-col gap-1'>
               <Label htmlFor="fcLn">Length</Label>
-              <Input className='w-20' name="fcLn" type="number" id="fcLn" onChange={handleChange} value={data.fcLn} />
+              <Input disabled={type == FormType.INFO} className='w-20' name="fcLn" type="number" id="fcLn" onChange={handleChange} value={dto.fcLn} />
             </div>
           </div>
 
@@ -231,11 +228,11 @@ const CardFormatForm: React.FC<PropsWithChildren<CardFormatFormProp>> = ({ handl
             </div>
             <div className='flex flex-col gap-1'>
               <Label htmlFor="chLoc">Start</Label>
-              <Input className='w-20' name="chLoc" type="number" id="chLoc" onChange={handleChange} value={data.chLoc} />
+              <Input disabled={type == FormType.INFO} className='w-20' name="chLoc" type="number" id="chLoc" onChange={handleChange} value={dto.chLoc} />
             </div>
             <div className='flex flex-col gap-1'>
               <Label htmlFor="chLn">Length</Label>
-              <Input className='w-20' name="chLn" type="number" id="chLn" onChange={handleChange} value={data.chLn} />
+              <Input disabled={type == FormType.INFO} className='w-20' name="chLn" type="number" id="chLn" onChange={handleChange} value={dto.chLn} />
             </div>
           </div>
 
@@ -253,25 +250,25 @@ const CardFormatForm: React.FC<PropsWithChildren<CardFormatFormProp>> = ({ handl
           )}
         </div>
         <div className="flex justify-center gap-2">
-          <Button startIcon={<div
+          <Button disabled={type == FormType.INFO} startIcon={<div
             className={`w-3 h-3 rounded-full bg-blue-500 shadow-sm`}
-          ></div>} onClickWithEvent={handleClick} name='odd' className='w-50' variant='outline'>Odd Parity</Button>
-          <Button startIcon={<div
+          ></div>} onClickWithEvent={handleClickInside} name='odd' className='w-50' variant='outline'>Odd Parity</Button>
+          <Button disabled={type == FormType.INFO} startIcon={<div
             className={`w-3 h-3 rounded-full bg-orange-500 shadow-sm`}
-          ></div>} onClickWithEvent={handleClick} name='even' className='w-50' variant='outline'>Even Parity</Button>
-          <Button startIcon={
+          ></div>} onClickWithEvent={handleClickInside} name='even' className='w-50' variant='outline'>Even Parity</Button>
+          <Button disabled={type == FormType.INFO} startIcon={
             <div
               className={`w-3 h-3 rounded-full bg-green-500 shadow-sm`}
             ></div>
-          } onClickWithEvent={handleClick} name='data' className='w-50' variant='outline'>Card Data</Button>
-          <Button startIcon={<div
+          } onClickWithEvent={handleClickInside} name='data' className='w-50' variant='outline'>Card Data</Button>
+          <Button disabled={type == FormType.INFO} startIcon={<div
             className={`w-3 h-3 rounded-full bg-yellow-500 shadow-sm`}
-          ></div>} onClickWithEvent={handleClick} name='fac' className='w-50' variant='outline'>Facility</Button>
+          ></div>} onClickWithEvent={handleClickInside} name='fac' className='w-50' variant='outline'>Facility</Button>
         </div>
         <div className='flex justify-center gap-4'>
-          <Button name='create' onClickWithEvent={handleClickWithEvent} className='w-50'>Create</Button>
-          <Button name='cancle' onClickWithEvent={handleClickWithEvent} className='w-50' variant='danger'>Cancle</Button>
-          <Button name='reset' onClickWithEvent={handleClick} className='w-50' >Reset</Button>
+          <Button disabled={type == FormType.INFO} name={type == FormType.CREATE ? 'create' : 'update'} onClickWithEvent={handleClick} className='w-50'>{type == FormType.CREATE ? 'Create' : 'Update'}</Button>
+          <Button name='cancle' onClickWithEvent={handleClick} className='w-50' variant='danger'>Cancel</Button>
+          <Button disabled={type == FormType.INFO} name='reset' onClickWithEvent={handleClickInside} className='w-50' >Reset</Button>
         </div>
 
       </div>

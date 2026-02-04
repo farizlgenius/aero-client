@@ -1,10 +1,8 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react'
-import ComponentCard from '../../components/common/ComponentCard';
 import Label from '../../components/form/Label';
 import Input from '../../components/form/input/InputField';
 import Button from '../../components/ui/button/Button';
 import DatePicker from '../../components/form/date-picker';
-import HttpRequest from '../../utility/HttpRequest';
 import Select from '../../components/form/Select';
 import Modals from '../UiElements/Modals';
 import { usePopupActions } from '../../utility/PopupCalling';
@@ -14,7 +12,6 @@ import { IntervalDto } from '../../model/Interval/IntervalDto';
 import { TimeZoneDto } from '../../model/TimeZone/TimeZoneDto';
 import { Options } from '../../model/Options';
 import { ModeDto } from '../../model/ModeDto';
-import { HttpMethod } from '../../enum/HttpMethod';
 import { TimeZoneEndPoint } from '../../endpoint/TimezoneEndpoint';
 import { IntervalEndpoint } from '../../endpoint/IntervalEndpoint';
 import { useLocation } from '../../context/LocationContext';
@@ -22,11 +19,12 @@ import { FormProp, FormType } from '../../model/Form/FormProp';
 import { send } from '../../api/api';
 import { CalenderIcon, TimeIcon } from '../../icons';
 import TextArea from '../../components/form/input/TextArea';
+import { useToast } from '../../context/ToastContext';
 
 
 
 const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type, setDto, dto, handleClick }) => {
-  const { showPopup } = usePopupActions();
+  const { toggleToast} = useToast();
   const { locationId } = useLocation();
   const [modeDetail, setModeDetail] = useState<string>("");
   const [modeDetailPopup, setModeDetailPopup] = useState<boolean>(false);
@@ -127,7 +125,7 @@ const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type
         break;
       case "interval":
         if (interval.componentId == -1) {
-          showPopup(false, ["Please select interval"])
+          toggleToast("warning", "Please select interval")
         }
         else {
           setDto((prev: TimeZoneDto) => ({ ...prev, intervals: [...prev.intervals, interval] }))
@@ -223,10 +221,10 @@ const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type
                     <div className='flex flex-col gap-2'>
                       <Label>Intervals</Label>
                       <Select
-
-                        isString={true}
+                        isString={false}
                         name="intervals"
                         options={intervalOption.filter(a => a.isTaken != true)}
+                        defaultValue={interval.componentId}
                         placeholder="Select Option"
                         onChangeWithEvent={handleSelect}
                         className="dark:bg-dark-900"

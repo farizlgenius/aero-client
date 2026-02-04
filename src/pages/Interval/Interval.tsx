@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { AddIcon, CamIcon } from '../../icons';
+import {  CamIcon } from '../../icons';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import Helper from '../../utility/Helper';
 import { IntervalDto } from '../../model/Interval/IntervalDto';
@@ -17,11 +17,11 @@ import { FeatureId } from '../../enum/FeatureId';
 import { FormType } from '../../model/Form/FormProp';
 import { usePopup } from '../../context/PopupContext';
 import { useLocation } from '../../context/LocationContext';
+import { DaysInWeekDto } from '../../model/Interval/DaysInWeekDto';
 
 
 
 // Define Global Variable
-let removeTarget: number;
 
 
 export const INTERVAL_TABLE_HEAD: string[] = ["Start Time", "End Time", "Days", "Action"]
@@ -59,6 +59,18 @@ const Interval = () => {
     const [formType, setFormType] = useState<FormType>(FormType.CREATE);
     const [intervalDto, setIntervalDto] = useState<IntervalDto>(defaultDto);
 
+    const dayDescBuilder = (days:DaysInWeekDto) =>{
+        let res:string[] = [];
+        if(days.monday) res.push('Mon');
+        if(days.tuesday) res.push('Tue');
+        if(days.wednesday) res.push('Wed');
+        if(days.thursday) res.push('Thu');
+        if(days.friday) res.push('Fri');
+        if(days.saturday) res.push('Sat');
+
+        return res.join(' ');
+    }
+
     {/* Modal */ }
     const [form, setForm] = useState<boolean>(false);
 
@@ -88,6 +100,7 @@ const Interval = () => {
                 setRemove(true);
                 break;
             case "create":
+                intervalDto.daysDesc = dayDescBuilder(intervalDto.days)
                 setConfirmCreate(() => async () => {
                     if (!Helper.isDayEmpty(intervalDto.days)) {
                         toggleToast("error", "Day can't be empty")
@@ -145,7 +158,6 @@ const Interval = () => {
 
 
     const handleRemove = (data: IntervalDto) => {
-        removeTarget = data.componentId;
         setConfirmRemove(() => async () => {
             const res = await send.delete(IntervalEndpoint.DELETE(data.componentId))
             if (Helper.handleToastByResCode(res, IntervalToast.DELETE, toggleToast)) {

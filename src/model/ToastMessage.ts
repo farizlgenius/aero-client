@@ -132,8 +132,10 @@ export enum CardToast {
 }
 
 export enum CardFormatToast {
-        CREATE_CARD_FORMAT = "Create CardFormat",
-    DELETE_CARDFORMAT = "Delete CardFormat"
+        CREATE = "Create CardFormat",
+        UPDATE = "Update CardFormat",
+    DELETE = "Delete CardFormat",
+    DELETE_RANGE = "Delete CardFormats",
 }
 
 
@@ -160,7 +162,8 @@ export enum HolidayToast {
 export enum TimeZoneToast {
     CREATE = "Create Timezone",
     DELETE = "Delete Timezone",
-    UPDATE = "Update Timezone"
+    UPDATE = "Update Timezone",
+    DELETE_RANGE = "Delete Timezones"
 }
 
 export enum IntervalToast {

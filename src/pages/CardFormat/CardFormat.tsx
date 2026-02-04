@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import RemoveModal from '../UiElements/RemoveModal';
 import CardFormatForm from './CardFormatForm';
 import { CardFormatDto } from '../../model/CardFormat/CardFormatDto';
 import HttpRequest from '../../utility/HttpRequest';
 import Helper from '../../utility/Helper';
-import { ToastMessage } from '../../model/ToastMessage';
+import { CardFormatToast, ToastMessage } from '../../model/ToastMessage';
 import { useToast } from '../../context/ToastContext';
 import { CardFormatEndpoint } from '../../endpoint/CardFormatEndpoint';
 import { HttpMethod } from '../../enum/HttpMethod';
@@ -17,6 +16,8 @@ import { send } from '../../api/api';
 import { FormContent } from '../../model/Form/FormContent';
 import { AddIcon } from '../../icons';
 import { BaseForm } from '../UiElements/BaseForm';
+import { usePopup } from '../../context/PopupContext';
+import { FormType } from '../../model/Form/FormProp';
 
 
 // Define Global Variable
@@ -32,6 +33,7 @@ const CardFormat = () => {
     const { toggleToast } = useToast();
     const { locationId } = useLocation();
     const { filterPermission } = useAuth();
+    const { setCreate, setUpdate, setInfo, setRemove, setConfirmRemove, setConfirmCreate, setConfirmUpdate,setMessage } = usePopup();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     const defaultDto: CardFormatDto = {
@@ -57,24 +59,62 @@ const CardFormat = () => {
         isActive: false
     }
 
+    const [formType,setFormType] = useState<FormType>(FormType.CREATE);
     const [cardFormatDto, setCardFormatDto] = useState<CardFormatDto>(defaultDto);
     {/* Modal */ }
-    const [isRemoveModal, setIsRemoveModal] = useState(false);
-    const [create, setCreate] = useState<boolean>(false);
-    const [update, setUpdate] = useState<boolean>(false);
+    const [form,setForm] = useState<boolean>(false);
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
-                setCreate(true);
+                setFormType(FormType.CREATE);
+                setForm(true);
+                break;
+            case "delete":
+                if(selectedObjects.length == 0){            
+                    setMessage("Please select object")
+                    setInfo(true);
+                }
+                setConfirmRemove(() => async () => {
+                    var data:number[] = [];
+                    selectedObjects.map(async (a:CardFormatDto) => {
+                        data.push(a.componentId)
+                    })
+                    var res = await send.post(CardFormatEndpoint.DELETE_RANGE,data)
+                    if(Helper.handleToastByResCode(res,CardFormatToast.DELETE_RANGE,toggleToast)){
+                        setRemove(false);
+                        toggleRefresh();
+                    }
+                })
+                setRemove(true);
                 break;
             case "create":
-                createCardformat();
+                setConfirmCreate(() => async () => {
+                    const res = await send.post(CardFormatEndpoint.CREATE, cardFormatDto)
+                    if (Helper.handleToastByResCode(res, CardFormatToast.CREATE, toggleToast)) {
+                        setForm(false)
+                        setCardFormatDto(defaultDto)
+                        toggleRefresh();
+                    }
+                })
+                setCreate(true);
                 break;
+            case "update":
+                setConfirmUpdate(() => async () => {
+                    const res = await send.put(CardFormatEndpoint.UPDATE, cardFormatDto);
+                    if (Helper.handleToastByResCode(res,CardFormatToast.UPDATE, toggleToast)) {
+                        setCardFormatDto(defaultDto)
+                        setForm(false);
+                        toggleRefresh();
+                    }
+                })
+                setUpdate(true)
+                break;
+            case "close":
             case "cancle":
-                setCreate(false);
-                setUpdate(false);
+                setCardFormatDto(defaultDto);
+                setForm(false);
                 break;
             default:
                 break;
@@ -83,49 +123,37 @@ const CardFormat = () => {
 
 
     {/* handle Table Action */ }
-    const handleEdit = () => {
-
+    const handleInfo = (data:CardFormatDto) => {
+            setFormType(FormType.INFO);
+                    setCardFormatDto(data)
+                    setForm(true);
+    }
+    const handleEdit = (data:CardFormatDto) => {
+        setFormType(FormType.UPDATE)
+                setCardFormatDto(data)
+                setForm(true);
     }
 
     const handleRemove = (data: CardFormatDto) => {
-        console.log(data);
-        setIsRemoveModal(true);
-        removeTarget = data.componentId
+       setConfirmRemove(() => async () => {
+            const res = await send.delete(CardFormatEndpoint.DELETE(data.componentId))
+            if (Helper.handleToastByResCode(res, CardFormatToast.DELETE, toggleToast))
+                toggleRefresh();
+        })
+        setRemove(true);
     }
-    const handleOnClickCloseRemove = () => {
-        setIsRemoveModal(false);
-    }
-    const handleOnClickConfirmRemove = () => {
-        removeCardFormat(removeTarget);
 
-    }
 
     {/* Group Data */ }
     const [cardFormatsDto, setCardFormatsDto] = useState<CardFormatDto[]>([]);
-    const createCardformat = async () => {
-        var res = await send.post(CardFormatEndpoint.CREATE_CARDFORMAT,cardFormatDto)
-        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_CARD_FORMAT, toggleToast)) {
-            setCreate(false)
-            setUpdate(false)
-            toggleRefresh();
-        }
-    }
+
     const fetchData = async () => {
-        var res = await send.get(CardFormatEndpoint.GET_CARDFORMAT);
+        var res = await send.get(CardFormatEndpoint.GET);
         if (res) {
             setCardFormatsDto(res.data.data);
         }
 
     };
-
-    const removeCardFormat = async (cardFormatNo: number) => {
-        var res = await HttpRequest.send(HttpMethod.DELETE, CardFormatEndpoint.DELETE_CARDFORMAT + cardFormatNo);
-        if (Helper.handleToastByResCode(res, ToastMessage.DELETE_CARDFORMAT, toggleToast)) {
-            setIsRemoveModal(false);
-            toggleRefresh();
-        }
-
-    }
 
 
     {/* UseEffect */ }
@@ -137,47 +165,22 @@ const CardFormat = () => {
 
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<CardFormatDto[]>([]);
-    const handleCheckedAll = (data: CardFormatDto[], e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects(data);
-            } else {
-                setSelectedObjects([]);
-            }
-        }
-    }
-
-    const handleChecked = (data: CardFormatDto, e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects((prev) => [...prev, data]);
-            } else {
-                setSelectedObjects((prev) =>
-                    prev.filter((item) => item.componentId !== data.componentId)
-                );
-            }
-        }
-    }
+   
 
     const content:FormContent[] = [
         {
             label:"Card Format",
             icon:<AddIcon/>,
-            content: <CardFormatForm data={cardFormatDto} setCardFormatDto={setCardFormatDto} isUpdate={update} handleClickWithEvent={handleClick} />
+            content: <CardFormatForm dto={cardFormatDto} setDto={setCardFormatDto} type={formType} handleClick={handleClick} />
         }
     ]
     return (
         <>
-            {isRemoveModal && <RemoveModal header='Remove Card Format' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
             <PageBreadcrumb pageTitle="Card Format Configuration" />
-            {create || update ?
+            {form ?
                 <BaseForm tabContent={content}/>
                 :
-                <BaseTable<CardFormatDto> headers={CARDFORMAT_TABLE_HEAD} keys={CARDFORMAT_KEY} data={cardFormatsDto} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onEdit={handleEdit} onRemove={handleRemove} selectedObject={selectedObjects} onClick={handleClick} permission={filterPermission(FeatureId.SETTING)} />
+                <BaseTable<CardFormatDto> headers={CARDFORMAT_TABLE_HEAD} keys={CARDFORMAT_KEY} data={cardFormatsDto} onInfo={handleInfo}  onEdit={handleEdit} onRemove={handleRemove} select={selectedObjects} setSelect={setSelectedObjects} onClick={handleClick} permission={filterPermission(FeatureId.SETTING)} />
 
             }
 

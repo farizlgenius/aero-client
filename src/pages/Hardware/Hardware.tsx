@@ -35,7 +35,7 @@ import { SetTranDto } from "../../model/Hardware/SetTranDto";
 
 
 const HEADER = ["Name", "Type", "Mac","Firmware", "IP","Port", "Transction", "Configuration", "Status", "Action"];
-const KEY = ["name", "hardwareTypeDescription", "macAddress","firmware", "ip","port", "tranStatus"];
+const KEY = ["name", "hardwareTypeDescription", "mac","firmware", "ip","port", "tranStatus"];
 // Hardware Page
 const ID_REPORT_KEY = [ "componentId",'macAddress','port','ip','serialNumber'];
 const ID_REPORT_TABLE_HEADER = ["Id", "Mac", "Port", "Ip","Serial No", "Action"];
@@ -237,7 +237,7 @@ const Hardware = () => {
     console.log(res)
     if (res && res.data.data) {
       setStatus((prev) => prev.map((a) =>
-        a.macAddress == res.data.data.macAddress
+        a.macAddress == res.data.data.mac
           ? {
             ...a,
             status: res.data.data.status,
@@ -442,14 +442,14 @@ const Hardware = () => {
   {/* UseEffect */ }
   useEffect(() => {
     var connection = SignalRService.getConnection();
-    connection.on("CommStatus", (ScpMac: string, CommStatus: number) => {
+    connection.on("SCP.STATUS", (ScpMac: string, CommStatus: number) => {
       console.log(ScpMac);
       console.log(CommStatus);
       fetchStatus(ScpMac);
 
     });
 
-    connection.on("TranStatus", (data: TranStatusDto) => {
+    connection.on("SCP.TRAN", (data: TranStatusDto) => {
       console.log(data)
       setTranStatus((prev) => prev.map((a) =>
         a.macAddress == data.macAddress
@@ -485,7 +485,7 @@ const Hardware = () => {
       })
     });
 
-    connection.on("IdReport", (IdReports: IdReport[]) => {
+    connection.on("SCP.ID_REPORT", (IdReports: IdReport[]) => {
       setIdReportList(IdReports);
     })
     //connection.on

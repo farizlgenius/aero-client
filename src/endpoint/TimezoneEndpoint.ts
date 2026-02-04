@@ -7,6 +7,7 @@ export const TimeZoneEndPoint = {
     LOCATION:(location:number) => `/api/${API_VERSION}/${location}/${CONTROLLER}`,
     GET_ID :(component:number) => `/api/${API_VERSION}/${CONTROLLER}/${component}`,
     DELETE :(component:number) => `/api/${API_VERSION}/${CONTROLLER}/${component}`,
+    DELETE_RANGE: `/api/${API_VERSION}/${CONTROLLER}/delete/range`,
     UPDATE: `/api/${API_VERSION}/${CONTROLLER}`,
     CREATE : `/api/${API_VERSION}/${CONTROLLER}`,
     GET_MODE : `/api/${API_VERSION}/${CONTROLLER}/mode`,

@@ -82,7 +82,7 @@ const Holiday = () => {
                 break;
             case "update":
                 setConfirmUpdate(() => async () => {
-                    const res = await send.put(HolidayEndpoint.CREATE, holidatDto);
+                    const res = await send.put(HolidayEndpoint.UPDATE, holidatDto);
                     if (Helper.handleToastByResCode(res,HolidayToast.UPDATE, toggleToast)) {
                         setHolidayDto(defaultDto)
                         setForm(false);

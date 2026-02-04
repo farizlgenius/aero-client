@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { AddIcon, TimezonIcon } from '../../icons';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import RemoveModal from '../UiElements/RemoveModal';
-import HttpRequest from '../../utility/HttpRequest';
 import TimeZoneForm from './TimeZoneForm';
 import Helper from '../../utility/Helper';
 import { TimeZoneDto } from '../../model/TimeZone/TimeZoneDto';
 import { useToast } from '../../context/ToastContext';
-import { CreateTimeZoneDto } from '../../model/TimeZone/CreateTimeZone';
 import { TimeZoneToast } from '../../model/ToastMessage';
 import { TimeZoneEndPoint } from '../../endpoint/TimezoneEndpoint';
-import { HttpMethod } from '../../enum/HttpMethod';
 import { useLocation } from '../../context/LocationContext';
 import { useAuth } from '../../context/AuthContext';
 import { send } from '../../api/api';
@@ -31,7 +27,7 @@ const TimeZone = () => {
     const { filterPermission } = useAuth();
     const { toggleToast } = useToast();
     const [formType,setFormType] = useState<FormType>(FormType.CREATE);
-    const { setConfirmRemove,setConfirmCreate,setConfirmUpdate,setUpdate,setRemove,setCreate } = usePopup();
+    const { setConfirmRemove,setConfirmCreate,setConfirmUpdate,setUpdate,setRemove,setCreate,setMessage,setInfo } = usePopup();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     {/* Modal */ }
@@ -57,9 +53,26 @@ const TimeZone = () => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
+                setFormType(FormType.CREATE)
                 setForm(true);
                 break;
             case "delete":
+                 if(selectedObjects.length == 0){            
+                    setMessage("Please select object")
+                    setInfo(true);
+                }
+                setConfirmRemove(() => async () => {
+                    var data:number[] = [];
+                    selectedObjects.map(async (a:TimeZoneDto) => {
+                        data.push(a.componentId)
+                    })
+                    var res = await send.post(TimeZoneEndPoint.DELETE_RANGE,data)
+                    if(Helper.handleToastByResCode(res,TimeZoneToast.DELETE_RANGE,toggleToast)){
+                        setRemove(false);
+                        toggleRefresh();
+                    }
+                })
+                setRemove(true);
                 break;
             case "create":
                 setConfirmCreate(() => async () => {

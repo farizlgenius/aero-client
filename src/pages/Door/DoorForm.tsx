@@ -447,7 +447,7 @@ var defaultReader: ReaderDto = {
   };
 
   const fetchCardFormat = async () => {
-    const res = await send.get(CardFormatEndpoint.GET_CARDFORMAT);
+    const res = await send.get(CardFormatEndpoint.GET);
     if (res && res.data.data) {
       res.data.data.map((a: CardFormatDto) => {
         setFormatsOption(prev => [...prev, {

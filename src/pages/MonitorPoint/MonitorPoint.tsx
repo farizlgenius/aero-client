@@ -24,6 +24,7 @@ import { BaseForm } from '../UiElements/BaseForm';
 import { FormContent } from '../../model/Form/FormContent';
 import { usePopup } from '../../context/PopupContext';
 import { FormType } from '../../model/Form/FormProp';
+import { MpStatus } from '../../model/MonitorPoint/MpStatus';
 
 // Define Global Variable
 export const MP_TABLE_HEADER: string[] = ["Name", "Main Controller", "Module", "Mode","Input Mode", "Masked", "Status", "Action"]
@@ -200,17 +201,14 @@ const MonitorPoint = () => {
     useEffect(() => {
         // Initialize SignalR as soon as app starts
         var connection = SignalRService.getConnection();
-        connection.on("MpStatus",
-            (scpMac: string, first: number, status: string) => {
-                console.log(scpMac)
-                console.log(first)
-                console.log(status)
+        connection.on("MP.STATUS",
+            (status:MpStatus) => {
                 setStatus((prev) =>
                     prev.map((a) =>
-                        a.macAddress == scpMac && a.componentId == first
+                        a.macAddress == status.mac && a.componentId == status.first
                             ? {
                                 ...a,
-                                status: status,
+                                status: status.status,
                             }
                             : {
                                 // scpIp:ScpIp,

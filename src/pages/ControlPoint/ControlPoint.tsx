@@ -25,6 +25,7 @@ import { FormContent } from '../../model/Form/FormContent';
 import SignalRService from '../../services/SignalRService';
 import { usePopup } from '../../context/PopupContext';
 import { FormType } from '../../model/Form/FormProp';
+import { CpStatus } from '../../model/ControlPoint/CpStatus';
 
 // Define Global Variable
 
@@ -118,7 +119,7 @@ const ControlPoint = () => {
     };
 
     const fetchStatus = async (scpMac: string, cpNo: number) => {
-        const res = await HttpRequest.send(HttpMethod.GET, ControlPointEndpoint.STATUS + scpMac + "/" + cpNo);
+        const res = send.get(ControlPointEndpoint.STATUS(scpMac,cpNo));
         Logger.info(res);
     };
 
@@ -130,17 +131,15 @@ const ControlPoint = () => {
     useEffect(() => {
         // Initialize SignalR as soon as app starts
         var connection = SignalRService.getConnection();
-        connection.on("CpStatus",
-            (scpMac: string, first: number, status: string) => {
-                console.log(scpMac)
-                console.log(first)
-                console.log(status)
+        connection.on("CP.STATUS",
+            (status:CpStatus) => {
+                console.log(">>>>>>>>>>>>>>>> " + status.first);
                 setStatus((prev) =>
                     prev.map((a) =>
-                        a.macAddress == scpMac && a.componentId == first
+                        a.macAddress == status.mac && a.componentId == status.first
                             ? {
                                 ...a,
-                                status: status,
+                                status: status.status,
                             }
                             : {
                                 // scpIp:ScpIp,
@@ -220,7 +219,7 @@ const ControlPoint = () => {
                 if (selectedObjects.length > 0) {
                     selectedObjects.map(async (a: ControlPointDto) => {
                         let data: OutputTrigger = {
-                            macAddress: a.mac,
+                            mac: a.mac,
                             componentId: a.componentId,
                             command: 2
                         }
@@ -234,7 +233,7 @@ const ControlPoint = () => {
                 if (selectedObjects.length > 0) {
                     selectedObjects.map(async (a: ControlPointDto) => {
                         let data: OutputTrigger = {
-                            macAddress: a.mac,
+                            mac: a.mac,
                             componentId: a.componentId,
                             command: 1
                         }
@@ -247,7 +246,7 @@ const ControlPoint = () => {
                 if (selectedObjects.length > 0) {
                     selectedObjects.map(async (a: ControlPointDto) => {
                         let data: OutputTrigger = {
-                            macAddress: a.mac,
+                            mac: a.mac,
                             componentId: a.componentId,
                             command: 3
                         }

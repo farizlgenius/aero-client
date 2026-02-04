@@ -14,6 +14,7 @@ import SignalRService from "../../services/SignalRService";
 import { Table, TableBody, TableCell, TableRow } from "../../components/ui/table";
 import Badge from "../../components/ui/badge/Badge";
 import ResponsiveImage from "../../components/ui/images/ResponsiveImage";
+import { SioStatus } from "../../model/Module/SioStatus";
 
 const HEADER: string[] = [
   "Model","Address", "Tamper", "AC", "Battery", "Status", "Action"
@@ -120,28 +121,19 @@ export default function Module() {
     // Initialize SignalR as soon as app starts
     var connection = SignalRService.getConnection();
     connection.on(
-      "SioStatus",
+      "SIO.STATUS",
       (
-        ScpMac: string,
-        SioNo: number,
-        Status: string,
-        Tamper: string,
-        Ac: string,
-        Batt: string
+       status:SioStatus
       ) => {
-        console.log(Status);
-        console.log(Tamper);
-        console.log(Ac);
-        console.log(Batt);
         setStatus((prev) =>
           prev.map((a) =>
-            a.macAddress == ScpMac && a.componentId == SioNo
+            a.macAddress == status.mac && a.componentId == status.sioNo
               ? {
                 ...a,
-                status: Status,
-                tamper: Tamper == null ? a.tamper : Tamper,
-                ac: Ac == null ? a.ac : Ac,
-                batt: Batt == null ? a.batt : Batt
+                status: status.status,
+                tamper: status.tamper == null ? a.tamper : status.tamper,
+                ac: status.ac == null ? a.ac : status.ac,
+                batt: status.batt == null ? a.batt : status.batt
               }
               : {
                 ...a

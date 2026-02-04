@@ -1,5 +1,5 @@
 export interface OutputTrigger {
-  macAddress:string;
+  mac:string;
   componentId:number;
   command:number;
 }
