@@ -7,11 +7,11 @@ import Button from "../../ui/button/Button";
 // import Dropzone from "react-dropzone";
 
 interface DropzoneComponentProp{
-  handleClick:(e:React.MouseEvent<HTMLButtonElement>) => void;
   setImageFileDto:React.Dispatch<React.SetStateAction<ImageFileDto>>
+  setFile:(value: React.SetStateAction<boolean>) => void
 }
 
-const DropzoneComponent: React.FC<PropsWithChildren<DropzoneComponentProp>> = ({setImageFileDto,handleClick}) => {
+const DropzoneComponent: React.FC<PropsWithChildren<DropzoneComponentProp>> = ({setImageFileDto,setFile}) => {
   const [image,setImage] = useState<File>()
 
   const onDrop = (acceptedFiles: File[]) => {
@@ -37,6 +37,7 @@ const DropzoneComponent: React.FC<PropsWithChildren<DropzoneComponentProp>> = ({
       fileSize: image?.size,
       fileData: await Helper.fileToBase64(image)
     })
+    setFile(false);
   } 
 
   useEffect(() => {
@@ -96,7 +97,7 @@ const DropzoneComponent: React.FC<PropsWithChildren<DropzoneComponentProp>> = ({
           </div>
         </form>
       </div>
-      <Button name="cancle" onClickWithEvent={handleClick} variant="danger">Cancle</Button>
+      {/* <Button name="cancle" onClickWithEvent={handleClick} variant="danger">Cancle</Button> */}
     </ComponentCard>
   );
 };

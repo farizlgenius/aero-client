@@ -22,7 +22,7 @@ import { ActionButton } from "../../model/ActionButton";
 import { BaseForm } from "../UiElements/BaseForm";
 import { FormContent } from "../../model/Form/FormContent";
 import { useToast } from "../../context/ToastContext";
-import { HardwareToast, ToastMessage } from "../../model/ToastMessage";
+import { HardwareToast } from "../../model/ToastMessage";
 import Badge from "../../components/ui/badge/Badge";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../components/ui/table";
 import { HardwareMemAllocForm } from "../../components/form/hardware/HardwareMemAllocForm";
@@ -54,7 +54,6 @@ const Hardware = () => {
 
   const defaultDto: HardwareDto = {
     // Base
-    uuid: "",
     componentId: -1,
     mac: "",
     locationId: locationId,
@@ -100,7 +99,6 @@ const Hardware = () => {
   const handleAddIdReport = async (data: IdReport) => {
     setHardwareDto({
       // Base
-      uuid: "",
       componentId: data.componentId,
       mac: data.macAddress,
       hardwareName:'',
@@ -265,14 +263,14 @@ const Hardware = () => {
 
   const resetDevice = async (ScpMac: string) => {
     const res = await send.post(HardwareEndpoint.RESET(ScpMac))
-    if (Helper.handleToastByResCode(res, ToastMessage.RESET_SCP, toggleToast)) {
+    if (Helper.handleToastByResCode(res, HardwareToast.RESET, toggleToast)) {
       toggleRefresh();
     }
   }
 
   const uploadConfig = async (ScpMac: string) => {
     const res = await send.post(HardwareEndpoint.UPLOAD(ScpMac))
-    if (Helper.handleToastByResCode(res, ToastMessage.UPLOAD_SCP, toggleToast)) {
+    if (Helper.handleToastByResCode(res, HardwareToast.UPLOAD, toggleToast)) {
       toggleRefresh();
     }
   }
@@ -289,7 +287,6 @@ const Hardware = () => {
     setFormType(FormType.UPDATE)
     setHardwareDto({
       // Base
-      uuid: data.uuid,
       componentId: data.componentId,
       hardwareName:data.hardwareName,
       mac: data.mac,

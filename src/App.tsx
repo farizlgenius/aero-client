@@ -60,6 +60,7 @@ import { PasswordRule } from "./pages/Settings/PasswordRule";
 import { send } from "./api/api";
 import Helper from "./utility/Helper";
 import { LicenseToast, ToastMessage } from "./model/ToastMessage";
+import { Map } from "./pages/Map/Map";
 
 
 export default function App() {
@@ -204,6 +205,7 @@ export default function App() {
             <Route path="/procedure" element={<Procedure />} />
             <Route path="/trigger" element={<Trigger />} />
             <Route path="/pass" element={<PasswordRule />}/>
+            <Route path="/map" element={<Map/>}/>
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />

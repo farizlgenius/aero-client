@@ -1,5 +1,7 @@
 import { PropsWithChildren, useEffect, useRef, useState } from "react"
 import { ImageFileDto } from "../../model/CardHolder/ImageFileDto";
+import Button from "../../components/ui/button/Button";
+import ComponentCard from "../../components/common/ComponentCard";
 
 interface NativeWebcamProp {
     modelStatus: boolean
@@ -86,13 +88,18 @@ export const NativeWebcam: React.FC<PropsWithChildren<NativeWebcamProp>> = ({ ha
             // setImageFileDto(prev => ({...prev,fileData:url}))
         }, "image/png");
     }
+
     useEffect(() => {
         closeCamera()
     },[imgUrl])
     return (
-        <section className="p-4 mb-6">
+        <ComponentCard title="Capture Zone">
+             <div className="transition border border-gray-300 border-dashed cursor-pointer dark:hover:border-brand-500 dark:border-gray-700 rounded-xl hover:border-brand-500">
+            <section className="p-4 mb-6">
             <div className="flex gap-5">
-                <div className="flex-1">
+                {
+                    imgUrl == "" || imgUrl == null ? 
+                    <div className="flex-1">
                     {error ? (
                         <div className="text-red-500">Error: {error}</div>
                     ) : (
@@ -101,9 +108,8 @@ export const NativeWebcam: React.FC<PropsWithChildren<NativeWebcamProp>> = ({ ha
                         </>
                     )}
                 </div>
-
-
-                <div className="flex-1">
+                    :
+                    <div className="flex-1">
                     <p className="text-sm text-gray-600">Preview</p>
                     <div className="mt-2 p-2 min-h-[180px] flex items-center justify-center">
                         {imgUrl ? (
@@ -113,16 +119,35 @@ export const NativeWebcam: React.FC<PropsWithChildren<NativeWebcamProp>> = ({ ha
                         )}
                     </div>
                 </div>
+
+                }
+                
+
+
+                
             </div>
             <div className="mt-2 flex gap-2 justify-center">
-                <button onClick={capture} className="px-3 py-1 rounded bg-green-500 text-white">Capture</button>
-                <button onClick={handleClick} name="close" className="px-3 py-1 rounded bg-indigo-500 text-white">OK</button>
-                <button onClick={closeCamera} className="px-3 py-1 rounded bg-indigo-500 text-white">Stop</button>
+                {
+                     imgUrl == "" || imgUrl == null ?
+                     <>
+                      <Button onClick={capture} className="px-3 py-1 rounded bg-green-500 text-white">Capture</Button>
+                        {/* <Button onClick={closeCamera} className="px-3 py-1 rounded bg-indigo-500 text-white">Stop</Button> */}
+                     </>   
+                     :
+                     <Button onClick={handleClick} name="close" className="px-3 py-1 rounded bg-indigo-500 text-white">OK</Button>
+                }
+                
+                
+                
             </div>
 
 
             {/* hidden canvas used for capture */}
             <canvas ref={canvasRef} style={{ display: "none" }} />
         </section>
+
+             </div>
+        </ComponentCard>
+        
     );
 }

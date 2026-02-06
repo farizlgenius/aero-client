@@ -11,10 +11,10 @@ interface ModalContent {
 
 
 const Modals:React.FC<PropsWithChildren<ModalContent>> = ({header,body,handleClickWithEvent,isWide=false}) => {
-    const notWide = "relative w-full max-w-[584px] rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10"
-    const wide = "relative h-full w-full max-w-[1000px] rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10";
+    const notWide = "relative w-full max-w-[650px] rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10"
+    const wide = "relative h-full w-full max-w-[800px] rounded-3xl bg-white p-6 dark:bg-gray-900 lg:p-10";
     return (
-        <>
+        <div className="flex">
             <div className="fixed inset-0 flex items-center justify-center p-5 overflow-y-auto modal z-99998">
                 <div className="modal-close-btn fixed inset-0 h-full w-full bg-gray-400/50 backdrop-blur-[32px]"></div>
                 <div className={isWide ? wide:notWide}>
@@ -35,7 +35,7 @@ const Modals:React.FC<PropsWithChildren<ModalContent>> = ({header,body,handleCli
 
                 </div>
             </div>
-        </>
+        </div>
     )
 }
 

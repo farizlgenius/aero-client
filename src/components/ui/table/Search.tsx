@@ -1,17 +1,16 @@
 import React, { PropsWithChildren } from 'react'
 import { AddIcon, TrashBinIcon } from '../../../icons'
 import { FeatureDto } from '../../../model/Role/FeatureDto';
-import { Dropdown } from '../../../pages/UiElements/Dropdown';
 import { ActionButton } from '../../../model/ActionButton';
 
 interface SearchProp {
-    onSelectPageSize: (data: string) => void;
+    
     onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     permission?: FeatureDto;
     action?: ActionButton[];
 }
 
-const Search: React.FC<PropsWithChildren<SearchProp>> = ({ onSelectPageSize, onClick, permission, action }) => {
+const Search: React.FC<PropsWithChildren<SearchProp>> = ({  onClick, permission, action }) => {
     console.log(permission)
     return (
         <div className="flex flex-col gap-2 px-4 py-4 border border-b-0 border-gray-100 dark:border-white/[0.05] rounded-t-xl sm:flex-row sm:items-center sm:justify-between">
@@ -52,37 +51,7 @@ const Search: React.FC<PropsWithChildren<SearchProp>> = ({ onSelectPageSize, onC
                     }
 
                 </div>
-                {/* <span className="text-gray-500 dark:text-gray-400">
-                    Show
-                </span>
-                <div className="relative z-20 bg-transparent">
-                    <select onChange={(e) => onSelectPageSize(e.target.value) } className="w-full py-2 pl-3 pr-8 text-sm text-gray-800 bg-transparent border border-gray-300 rounded-lg appearance-none dark:bg-dark-900 h-9 bg-none shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800">
-                        <option value="10" className="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-                            10
-                        </option>
-                        <option value="25" className="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-                            25
-                        </option>
-                        <option value="50" className="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-                            50
-                        </option>
-                                                <option value="75" className="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-                            75
-                        </option>
-                                                <option value="100" className="text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-                            100
-                        </option>
-                    </select>
-                    <span className="absolute z-30 text-gray-500 -translate-y-1/2 right-2 top-1/2 dark:text-gray-400">
-                        <svg className="stroke-current" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3.8335 5.9165L8.00016 10.0832L12.1668 5.9165" stroke="" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-                            </path>
-                        </svg>
-                    </span>
-                </div>
-                <span className="text-gray-500 dark:text-gray-400">
-                    entries
-                </span> */}
+                
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <div className="relative">

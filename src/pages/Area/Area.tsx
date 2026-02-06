@@ -4,7 +4,6 @@ import { AreaDto } from "../../model/Area/AreaDto";
 import HttpRequest from "../../utility/HttpRequest";
 import { AreaEndPoint } from "../../constants/constant";
 import Helper from "../../utility/Helper";
-import { ToastMessage } from "../../model/ToastMessage";
 import RemoveModal from "../UiElements/RemoveModal";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import Button from "../../components/ui/button/Button";
@@ -22,7 +21,6 @@ import { FeatureId } from "../../enum/FeatureId";
 var removeTarget: number;
 var defaultDto: AreaDto = {
     // base
-    uuid: "",
     name: "",
     multiOccupancy: -1,
     accessControl: -1,
@@ -34,7 +32,6 @@ var defaultDto: AreaDto = {
     areaFlag: 0x00,
     componentId: 0,
     locationId: 1,
-    locationName: "Main",
     isActive: true
 }
 const AREA_HEADERS = ["Name", "Action"]

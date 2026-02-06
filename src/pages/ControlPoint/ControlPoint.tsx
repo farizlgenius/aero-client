@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb'
 import { AddIcon, ControlIcon, OffIcon, OnIcon, ToggleIcon } from '../../icons';
-import HttpRequest from '../../utility/HttpRequest';
 import ControlPointForm from './ControlPointForm';
 import Logger from '../../utility/Logger';
 import { ControlPointDto } from '../../model/ControlPoint/ControlPointDto';
@@ -9,8 +8,7 @@ import { StatusDto } from '../../model/StatusDto';
 import { OutputTrigger } from '../../model/ControlPoint/OutputTrigger';
 import Helper from '../../utility/Helper';
 import { useToast } from '../../context/ToastContext';
-import { ControlPointToast, ToastMessage } from '../../model/ToastMessage';
-import { HttpMethod } from '../../enum/HttpMethod';
+import { ControlPointToast } from '../../model/ToastMessage';
 import { ControlPointEndpoint } from '../../endpoint/ControlPointEndpoint';
 import { send } from '../../api/api';
 import { useLocation } from '../../context/LocationContext';
@@ -80,7 +78,6 @@ const ControlPoint = () => {
         defaultPulse: 1,
 
         // base
-        uuid: "",
         componentId: -1,
         mac: '',
         locationId: locationId,
@@ -224,7 +221,7 @@ const ControlPoint = () => {
                             command: 2
                         }
                         const res = await send.post(ControlPointEndpoint.TRIGGER, data);
-                        Helper.handleToastByResCode(res, ToastMessage.TOGGLE_OUTPUT, toggleToast)
+                        Helper.handleToastByResCode(res, ControlPointToast.TOGGLE, toggleToast)
                     });
                 }
 
@@ -238,7 +235,7 @@ const ControlPoint = () => {
                             command: 1
                         }
                         const res = await send.post(ControlPointEndpoint.TRIGGER, data);
-                        Helper.handleToastByResCode(res, ToastMessage.TOGGLE_OUTPUT, toggleToast)
+                        Helper.handleToastByResCode(res,  ControlPointToast.TOGGLE, toggleToast)
                     });
                 }
                 break;
@@ -251,7 +248,7 @@ const ControlPoint = () => {
                             command: 3
                         }
                         const res = await send.post(ControlPointEndpoint.TRIGGER, data);
-                        Helper.handleToastByResCode(res, ToastMessage.TOGGLE_OUTPUT, toggleToast)
+                        Helper.handleToastByResCode(res,  ControlPointToast.TOGGLE, toggleToast)
                     });
                 }
                 break;

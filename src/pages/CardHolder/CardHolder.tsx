@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import RemoveModal from '../UiElements/RemoveModal';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import { AddIcon, BoxIcon, CamIcon } from '../../icons';
 import { CardHolderDto } from '../../model/CardHolder/CardHolderDto';
 import { CardHolderEndpoint } from '../../endpoint/CardHolderEndpoint';
 import { useToast } from '../../context/ToastContext';
 import Helper from '../../utility/Helper';
-import { ToastMessage } from '../../model/ToastMessage';
+import { CardHolderToast } from '../../model/ToastMessage';
 import { FormContent } from '../../model/Form/FormContent';
 import { PersonalInformationForm } from '../../components/form/card-holder/PersonalInformationForm';
 import { AccessLevelForm } from '../../components/form/card-holder/AccessLevelForm';
@@ -19,9 +18,10 @@ import { BaseTable } from '../UiElements/BaseTable';
 import { useAuth } from '../../context/AuthContext';
 import { FeatureId } from '../../enum/FeatureId';
 import { ActionButton } from '../../model/ActionButton';
+import { FormType } from '../../model/Form/FormProp';
+import { usePopup } from '../../context/PopupContext';
 
 
-let removeTarget: string;
 
 const CARDHOLDER_HEAD: string[] = ["Id", "Title", "First Name", "Middle Name", "Last Name", "Status", "Action"];
 const CARDHOLDER_KEY: string[] = ["userId", "title", "firstName", "middleName", "lastName", "holderStatus"];
@@ -30,10 +30,12 @@ const CARDHOLDER_KEY: string[] = ["userId", "title", "firstName", "middleName", 
 const CardHolder = () => {
     const { locationId } = useLocation();
     const { filterPermission } = useAuth();
+    const {setCreate,setUpdate,setRemove,setConfirmCreate,setConfirmRemove,setConfirmUpdate,setInfo,setMessage} = usePopup();
     const { toggleToast } = useToast();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     const [cardHoldersDto, setCardHoldersDto] = useState<CardHolderDto[]>([]);
+    const [formType,setFormType] = useState<FormType>(FormType.CREATE);
 
     const defaultDto: CardHolderDto = {
         userId: '',
@@ -53,45 +55,75 @@ const CardHolder = () => {
             fileSize: 0,
             fileData: '',
         },
-        additionals: [
-        ],
+        additionals: [],
         credentials: [],
         accessLevels: [],
-        uuid: '',
         locationId: locationId,
         isActive: true,
         identification: '',
         dateOfBirth: '',
         address: '',
-        flag: 1
+        flag: 1,
+        componentId: 0,
     }
 
     const [cardHolderDto, setCardHolderDto] = useState<CardHolderDto>(defaultDto)
     {/* Modal */ }
-    const [deleteModal, setRemoveModal] = useState<boolean>(false);
-    const [createModal, setCreateModal] = useState<boolean>(false);
-    const [updateModal, setUpdateModal] = useState<boolean>(false);
+    const [form,setForm] = useState<boolean>(false);
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         console.log(e.currentTarget.name);
         console.log(e.currentTarget.value)
         switch (e.currentTarget.name) {
             case "add":
-                setCreateModal(true);
+                setFormType(FormType.CREATE)
+                setForm(true);
+                break;
+            case "delete":
+                if(selectedObjects.length == 0){            
+                    setMessage("Please select object")
+                    setInfo(true);
+                }
+                setConfirmRemove(() => async () => {
+                    var data:number[] = [];
+                    selectedObjects.map(async (a:CardHolderDto) => {
+                        data.push(a.componentId)
+                    })
+                    var res = await send.post(CardHolderEndpoint.DELETE_RANGE,data)
+                    if(Helper.handleToastByResCode(res,CardHolderToast.DELETE_RANGE,toggleToast)){
+                        setSelectedObjects([])                  
+                        toggleRefresh();
+                    }
+                })
+                setRemove(true);
                 break;
             case "create":
-                createCardHolder(cardHolderDto);
+                setConfirmCreate(() => async() => {
+                    const res = await send.post(CardHolderEndpoint.CREATE,cardHolderDto);
+                    if(Helper.handleToastByResCode(res,CardHolderToast.CREATE,toggleToast)){
+                        setCardHolderDto(defaultDto);
+                        setForm(false);
+                        toggleRefresh();
+                    }
+                })
+                setCreate(true);
+                break;
+            case "update":
+                 setConfirmUpdate(() => async () => {
+                    const res = await send.put(CardHolderEndpoint.UPDATE, cardHolderDto);
+                    if (Helper.handleToastByResCode(res,CardHolderToast.UPDATE, toggleToast)) {
+                        setCardHolderDto(defaultDto)
+                        setForm(false);
+                        toggleRefresh();
+                    }
+                })
+                setUpdate(true)
                 break;
             case "cancle":
-                setUpdateModal(false)
-                setCreateModal(false)
+            case "close":
+                setForm(false)
+                setCardHolderDto(defaultDto);
                 break;
-            case "remove-confirm":
-                removeCardHolder(removeTarget);
-                break;
-                case "remove-cancel":
-                    setRemoveModal(false);
-                    break;
             default:
                 break;
         }
@@ -102,37 +134,48 @@ const CardHolder = () => {
         {
             icon: <CamIcon />,
             label: "Personal Information",
-            content: <PersonalInformationForm dto={cardHolderDto} setDto={setCardHolderDto} />
+            content: <PersonalInformationForm type={formType} dto={cardHolderDto} setDto={setCardHolderDto} handleClick={handleClick} />
         }, {
             icon: <BoxIcon />,
-            label: "Access Level",
-            content: <AccessLevelForm dto={cardHolderDto} setDto={setCardHolderDto} />
+            label: "Level & Credential",
+            content: <AccessLevelForm type={formType} handleClick={handleClick} dto={cardHolderDto} setDto={setCardHolderDto} />
         },
         {
             icon: <BoxIcon />,
             label: "Credentials",
-            content: <CredentialForm dto={cardHolderDto} setDto={setCardHolderDto} />
+            content: <CredentialForm type={formType} handleClick={handleClick} dto={cardHolderDto} setDto={setCardHolderDto} />
         },
         {
             icon: <BoxIcon />,
             label: "Settings",
-            content: <UserSettingForm handleClick={handleClick} dto={cardHolderDto} setDto={setCardHolderDto} />
+            content: <UserSettingForm type={formType} handleClick={handleClick} dto={cardHolderDto} setDto={setCardHolderDto} />
         }
     ];
 
 
     {/* handle Table Action */ }
-    const handleEdit = () => {
+    const handleEdit = (data:CardHolderDto) => {
+        setFormType(FormType.UPDATE)
+                setCardHolderDto(data)
+                setForm(true);
+    }
 
+    const handleInfo = (data:CardHolderDto) => {
+          setFormType(FormType.INFO);
+                setCardHolderDto(data)
+                setForm(true);
     }
 
     const handleRemove = (data: CardHolderDto) => {
-        console.log(data);
-        removeTarget = data.userId;
-        setRemoveModal(true);
+        setConfirmRemove(() => async () => {
+            const res = await send.delete(CardHolderEndpoint.DELETE(data.userId))
+            if (Helper.handleToastByResCode(res, CardHolderToast.DELETE, toggleToast))
+                toggleRefresh();
+        })
+        setRemove(true);
     }
     const fetchData = async () => {
-        const res = await send.get(CardHolderEndpoint.GET_CARDHOLDERS(locationId));
+        const res = await send.get(CardHolderEndpoint.GET(locationId));
         if (res && res.data.data) {
             setCardHoldersDto(res.data.data)
             console.log(res.data.data)
@@ -140,23 +183,7 @@ const CardHolder = () => {
 
     };
 
-    const removeCardHolder = async (UserId: string) => {
-        const res = await send.delete(CardHolderEndpoint.DELETE_CARDHOLDER(UserId));
-        if (Helper.handleToastByResCode(res, ToastMessage.DELETE_CARDHOLDER, toggleToast)) {
-            setRemoveModal(false);
-            toggleRefresh();
-        }
-    }
-
-
-    const createCardHolder = async (data: CardHolderDto) => {
-        const res = await send.post(CardHolderEndpoint.CREATE_CARDHOLDER, data);
-        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_CARDHOLDER, toggleToast)) {
-            setUpdateModal(false)
-            setCreateModal(false)
-            toggleRefresh();
-        }
-    }
+   
 
 
     {/* UseEffect */ }
@@ -166,31 +193,7 @@ const CardHolder = () => {
 
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<CardHolderDto[]>([]);
-    const handleCheckedAll = (data: CardHolderDto[], e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects(data);
-            } else {
-                setSelectedObjects([]);
-            }
-        }
-    }
-
-    const handleChecked = (data: CardHolderDto, e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects((prev) => [...prev, data]);
-            } else {
-                setSelectedObjects((prev) =>
-                    prev.filter((item) => item.userId !== data.userId)
-                );
-            }
-        }
-    }
+   
 
     const action: ActionButton[] = [
         {
@@ -211,15 +214,14 @@ const CardHolder = () => {
 
     return (
         <>
-            <PageBreadcrumb pageTitle="Credentials" />
-            {deleteModal && <RemoveModal header='Remove Credentials' body='Please Click Confirm if you want to remove this users' handleClick={handleClick} />}
-            {createModal || updateModal ?
+            <PageBreadcrumb pageTitle="Card Holders" />
+            {form  ?
 
                 <BaseForm tabContent={tabContent} />
 
                 :
 
-                <BaseTable<CardHolderDto> headers={CARDHOLDER_HEAD} keys={CARDHOLDER_KEY} data={cardHoldersDto} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onClick={handleClick} onRemove={handleRemove} onEdit={handleEdit} permission={filterPermission(FeatureId.CARDHODLER)} action={action} />
+                <BaseTable<CardHolderDto> headers={CARDHOLDER_HEAD} keys={CARDHOLDER_KEY} data={cardHoldersDto} select={selectedObjects} setSelect={setSelectedObjects}  onClick={handleClick} onRemove={handleRemove} onEdit={handleEdit} onInfo={handleInfo} permission={filterPermission(FeatureId.CARDHODLER)} action={action} />
 
 
             }

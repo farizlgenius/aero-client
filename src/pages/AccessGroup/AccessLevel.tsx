@@ -1,13 +1,10 @@
-import Button from '../../components/ui/button/Button';
-import { AddIcon, GroupIcon } from '../../icons';
+import { GroupIcon } from '../../icons';
 import { useEffect, useState } from 'react';
-import RemoveModal from '../UiElements/RemoveModal';
 import AccessLevelForm from './AccessLevelForm';
 import { AccessLevelDto } from '../../model/AccessGroup/AccessLevelDto';
-import { AccessGroupTable } from './AccessGroupTable';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import Helper from '../../utility/Helper';
-import { ToastMessage } from '../../model/ToastMessage';
+import { AccessAreaToast, AccessLevelToast } from '../../model/ToastMessage';
 import { useToast } from '../../context/ToastContext';
 import { CreateUpdateAccessLevelDto } from '../../model/AccessGroup/CreateUpdateAccessLevelDto';
 import { useLocation } from '../../context/LocationContext';
@@ -18,13 +15,14 @@ import { useAuth } from '../../context/AuthContext';
 import { FeatureId } from '../../enum/FeatureId';
 import { BaseForm } from '../UiElements/BaseForm';
 import { FormContent } from '../../model/Form/FormContent';
+import { FormType } from '../../model/Form/FormProp';
+import { usePopup } from '../../context/PopupContext';
 
-// Define Global Variable
-let removeTarget: number;
+
 
 // Access Group Page 
 export const HEADER: string[] = [
-    "Name","Action"
+    "Name", "Action"
 ]
 
 export const KEY: string[] = [
@@ -32,42 +30,77 @@ export const KEY: string[] = [
 ];
 
 const AccessLevel = () => {
-    const {toggleToast} = useToast();
-    const {locationId} = useLocation();
-    const {filterPermission} = useAuth();
+    const { toggleToast } = useToast();
+    const { locationId } = useLocation();
+    const { filterPermission } = useAuth();
+    const { setCreate, setUpdate, setRemove, setConfirmCreate, setConfirmRemove, setConfirmUpdate, setInfo, setMessage } = usePopup();
     const defaultDto: CreateUpdateAccessLevelDto = {
-    // Detail
-    name: "",
-    createUpdateAccessLevelDoorTimeZoneDto: [],
-    componentId: 0,
-    uuid: '',
-    locationId: locationId,
-    isActive: false
-}
+        // Detail
+        name: "",
+        components: [],
+        componentId: 0,
+        locationId: locationId,
+        isActive: false
+    }
     const [accesLevelDto, setAccessLevelDto] = useState<CreateUpdateAccessLevelDto>(defaultDto);
     const [accessLevelDtos, setAccessLevelDtos] = useState<AccessLevelDto[]>([]);
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     {/* Modal */ }
-    const [isRemoveModal, setIsRemoveModal] = useState(false);
-    const [createModal, setCreateModal] = useState<boolean>(false);
-    const [updateModal, setUpdateModal] = useState<boolean>(false);
-    const closeModalToggle = () => {
-        setCreateModal(false);
-        toggleRefresh();
-    };
+    const [form, setForm] = useState<boolean>(false);
+    const [formType, setFormType] = useState<FormType>(FormType.CREATE);
+
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         console.log(e.currentTarget.name);
         switch (e.currentTarget.name) {
             case "add":
-                setCreateModal(true);
+                setForm(true);
+                setFormType(FormType.CREATE);
+                break;
+            case "delete":
+                if (selectedObjects.length == 0) {
+                    setMessage("Please select object")
+                    setInfo(true);
+                }
+                setConfirmRemove(() => async () => {
+                    var data: number[] = [];
+                    selectedObjects.map(async (a: AccessLevelDto) => {
+                        data.push(a.componentId)
+                    })
+                    var res = await send.post(AccessLevelEndPoint.DELETE_RANGE, data)
+                    if (Helper.handleToastByResCode(res, AccessLevelToast.DELETE_RANGE, toggleToast)) {
+                        setSelectedObjects([])
+                        toggleRefresh();
+                    }
+                })
+                setRemove(true);
                 break;
             case "create":
-                createAccessGroup();
+                setConfirmCreate(() => async () => {
+                    const res = await send.post(AccessLevelEndPoint.CREATE, accesLevelDto);
+                    if (Helper.handleToastByResCode(res, AccessLevelToast.CREATE, toggleToast)) {
+                        setAccessLevelDto(defaultDto);
+                        setForm(false);
+                        toggleRefresh();
+                    }
+                })
+                setCreate(true);
                 break;
+            case "update":
+                setConfirmUpdate(() => async () => {
+                    const res = await send.put(AccessLevelEndPoint.UPDATE, accesLevelDto);
+                    if (Helper.handleToastByResCode(res, AccessLevelToast.UPDATE, toggleToast)) {
+                        setAccessLevelDto(defaultDto)
+                        setForm(false);
+                        toggleRefresh();
+                    }
+                })
+                setUpdate(true)
+                break;
+            case "close":
             case "cancle":
-                setCreateModal(false)
-                setUpdateModal(false)
+                setForm(false);
+                setAccessLevelDto(defaultDto)
                 break;
             default:
                 break;
@@ -76,47 +109,38 @@ const AccessLevel = () => {
     }
 
     {/* handle Table Action */ }
-    const handleEdit = () => {
-
+    const handleInfo = (data: AccessLevelDto) => {
+        setFormType(FormType.UPDATE)
+        // setAccessLevelDto(data)
+        setForm(true);
+    }
+    const handleEdit = (data: AccessLevelDto) => {
+        setFormType(FormType.UPDATE)
+        // setAccessLevelDto(data)
+        setForm(true);
     }
 
     const handleRemove = (data: AccessLevelDto) => {
-        removeTarget = data.componentId;
-        setIsRemoveModal(true);
+        setConfirmRemove(() => async () => {
+            const res = await send.delete(AccessLevelEndPoint.DELETE(data.componentId))
+            if (Helper.handleToastByResCode(res, AccessLevelToast.DELETE, toggleToast))
+                toggleRefresh();
+        })
+        setRemove(true);
     }
-    const handleOnClickCloseRemove = () => {
-        setIsRemoveModal(false);
-    }
-    const handleOnClickConfirmRemove = () => {
-       removeAccessLevel(removeTarget);
 
-    }
 
     {/* Group Data */ }
     const fetchData = async () => {
-        const res = await send.get(AccessLevelEndPoint.GET_ACCESS_LEVEL(locationId))
+        const res = await send.get(AccessLevelEndPoint.GET(locationId))
         if (res && res.data.data) {
             console.log(res.data.data)
             setAccessLevelDtos(res.data.data);
         }
     };
 
-    const createAccessGroup = async () => {
-        const res = await send.post(AccessLevelEndPoint.CREATE_ACCESS_LEVLE,accesLevelDto)
-        if(Helper.handleToastByResCode(res,ToastMessage.CREATE_ACCESS_LEVEL,toggleToast)){
-            setCreateModal(false)
-            toggleRefresh();
-        }
-    }
 
-    const removeAccessLevel = async (ComponentId:number) => {
-        const res = await send.delete(AccessLevelEndPoint.DELETE_ACCESS_LEVEL(ComponentId));
-        if(Helper.handleToastByResCode(res,ToastMessage.DELETE_ACCESS_LEVEL,toggleToast)){
-            setIsRemoveModal(false)
-            toggleRefresh()
-        }
-    }
-    
+
 
     {/* UseEffect */ }
     useEffect(() => {
@@ -127,48 +151,22 @@ const AccessLevel = () => {
 
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<AccessLevelDto[]>([]);
-    const handleCheckedAll = (data: AccessLevelDto[], e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects(data);
-            } else {
-                setSelectedObjects([]);
-            }
-        }
-    }
 
-    const handleChecked = (data: AccessLevelDto, e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects((prev) => [...prev, data]);
-            } else {
-                setSelectedObjects((prev) =>
-                    prev.filter((item) => item.componentId !== data.componentId)
-                );
-            }
-        }
-    }
-
-    const tabContent:FormContent[] = [
+    const tabContent: FormContent[] = [
         {
             label: "Access Level",
             icon: <GroupIcon />,
-            content: <AccessLevelForm data={accesLevelDto} isUpdate={updateModal} handleClickWithEvent={handleClick} setAccessGroupDto={setAccessLevelDto} />
+            content: <AccessLevelForm dto={accesLevelDto} handleClick={handleClick} setDto={setAccessLevelDto} type={formType} />
         }
     ]
 
     return (
         <>
-            <PageBreadcrumb pageTitle="Access Group" />
-            {isRemoveModal && <RemoveModal header='Remove Control Point' body='Please Click Confirm if you want to remove this Control Point' onCloseModal={handleOnClickCloseRemove} onConfirmModal={handleOnClickConfirmRemove} />}
-            {createModal || updateModal ?
+            <PageBreadcrumb pageTitle="Access Level" />
+            {form ?
                 <BaseForm tabContent={tabContent} />
                 :
-                 <BaseTable<AccessLevelDto> headers={HEADER} keys={KEY} data={accessLevelDtos} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} selectedObject={selectedObjects} permission={filterPermission(FeatureId.ACCESSLEVEL)}/>
+                <BaseTable<AccessLevelDto> headers={HEADER} keys={KEY} data={accessLevelDtos} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} select={selectedObjects} setSelect={setSelectedObjects} permission={filterPermission(FeatureId.ACCESSLEVEL)} onInfo={handleInfo} />
             }
 
         </>

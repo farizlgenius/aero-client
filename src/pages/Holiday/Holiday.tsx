@@ -5,7 +5,7 @@ import HolidayForm from './HolidayForm';
 import Helper from '../../utility/Helper';
 import { HolidayDto } from '../../model/Holiday/HolidayDto';
 import { useToast } from '../../context/ToastContext';
-import { HolidayToast, ToastMessage } from '../../model/ToastMessage';
+import { HolidayToast } from '../../model/ToastMessage';
 import { HolidayEndpoint } from '../../endpoint/HolidayEndpoint';
 import { send } from '../../api/api';
 import { useLocation } from '../../context/LocationContext';
@@ -30,7 +30,6 @@ const Holiday = () => {
     const toggleRefresh = () => setRefresh(!refresh);
     const [formType,setFormType] = useState<FormType>(FormType.CREATE);
     const defaultDto: HolidayDto = {
-        uuid: "",
         locationId: locationId,
         isActive: true,
         componentId: -1,
@@ -110,7 +109,7 @@ const Holiday = () => {
     const handleRemove = (data: HolidayDto) => {
         setConfirmRemove(() => async () => {
             const res = await send.delete(HolidayEndpoint.DELETE(data.componentId))
-            if (Helper.handleToastByResCode(res, ToastMessage.DELETE_HOL, toggleToast))
+            if (Helper.handleToastByResCode(res, HolidayToast.DELETE, toggleToast))
                 toggleRefresh();
         })
         setRemove(true);

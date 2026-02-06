@@ -14,7 +14,7 @@ import { useLocation } from "../../../context/LocationContext";
 
 
 
-export const CredentialForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({ dto, setDto }) => {
+export const CredentialForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({dto, setDto,type,handleClick }) => {
     const {locationId} = useLocation();    
     var defaultCredential: CredentialDto = {
     componentId: 0,
@@ -25,7 +25,6 @@ export const CredentialForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>
     pin: "",
     activeDate: new Date().toISOString(),
     deactiveDate: new Date(new Date().setFullYear(new Date().getFullYear() + 10)).toISOString(),
-    uuid: '',
     locationId: locationId,
     isActive: true
 }
@@ -40,7 +39,7 @@ export const CredentialForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>
         setCredentialDto(prev => ({ ...prev, [e.target.name]: e.target.value }))
     }
     
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const handleClickInternal = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         switch (e.currentTarget.name) {
             case "addCard":
                 setDto(prev => ({ ...prev, credentials: [...prev.credentials, credentialDto] }))
@@ -118,7 +117,7 @@ export const CredentialForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>
 
     return (
         <>
-            {scanCard && <Modals isWide={false} body={<ScanCardModal onStartScan={handleStartScan} />} handleClickWithEvent={handleClick} />}
+            {scanCard && <Modals isWide={false} body={<ScanCardModal onStartScan={handleStartScan} />} handleClickWithEvent={handleClickInternal} />}
             <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
                 <div className='flex flex-col gap-5'>
                     <div className='gap-3'>
@@ -200,8 +199,8 @@ export const CredentialForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>
                                         </div>
 
                                         <div className='flex gap-4 justify-center mt-5'>
-                                            <Button name='addCard' onClickWithEvent={handleClick} size='sm'>Add Card</Button>
-                                            <Button name='cancleCard' onClickWithEvent={handleClick} size='sm' variant='danger'>Cancle</Button>
+                                            <Button name='addCard' onClickWithEvent={handleClickInternal} size='sm'>Add Card</Button>
+                                            <Button name='cancleCard' onClickWithEvent={handleClickInternal} size='sm' variant='danger'>Cancle</Button>
                                         </div>
 
                                     </div>

@@ -1,36 +1,36 @@
 import { PropsWithChildren, useEffect, useState } from "react";
 import { FormProp } from "../../../model/Form/FormProp";
 import { CardHolderDto } from "../../../model/CardHolder/CardHolderDto";
-import ActionElement from "../../../pages/UiElements/ActionElement";
 import { AccessLevelDto } from "../../../model/AccessGroup/AccessLevelDto";
-import Button from "../../ui/button/Button";
-import Select from "../Select";
-import Label from "../Label";
-import HttpRequest from "../../../utility/HttpRequest";
-import { HttpMethod } from "../../../enum/HttpMethod";
 import { Options } from "../../../model/Options";
 import { useLocation } from "../../../context/LocationContext";
 import { send } from "../../../api/api";
 import { AccessLevelEndPoint } from "../../../endpoint/AccessLevelEndpoint";
+import ListTransfer from "../list-transfer/ListTransfer";
 
 
-export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({ dto, setDto }) => {
-    const {locationId} = useLocation();
+export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({ dto, setDto, type, handleClick }) => {
+    const { locationId } = useLocation();
     var defaultAccessLevel: AccessLevelDto = {
-    name: '',
-    componentId: -1,
-    accessLevelDoorTimeZoneDto: [],
-    uuid: '',
-    locationId: locationId,
-    isActive: true
-}
+        name: '',
+        componentId: -1,
+        accessLevelDoorTimeZoneDto: [],
+        locationId: locationId,
+        isActive: true
+    }
+
 
     const [addAccessLeveForm, setAddAccessLeveForm] = useState<boolean>(false);
     const [accessLevelOption, setAccessLevelOption] = useState<Options[]>([]);
+    let op:Options[] = [];
     const [accessGroupDto, setAccessGroupDto] = useState<AccessLevelDto>(defaultAccessLevel);
 
     const handleClickAccessLevel = () => {
         setAddAccessLeveForm(true);
+    }
+
+    const handleListChange = (data:Options[]) => {
+       
     }
 
     {/* handle Table Action */ }
@@ -42,7 +42,7 @@ export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>
         console.log(data);
     }
 
-    const handleClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const handleClickInternal = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         switch (e.currentTarget.name) {
             case "addAvl":
                 setDto(prev => ({ ...prev, accessLevels: [...prev.accessLevels, accessGroupDto] }))
@@ -57,7 +57,7 @@ export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>
     }
 
     const fetchAccessLevel = async () => {
-        const res = await send.get(AccessLevelEndPoint.GET_ACCESS_LEVEL(locationId))
+        const res = await send.get(AccessLevelEndPoint.GET(locationId))
         if (res && res.data.data) {
             res.data.data.map((a: AccessLevelDto) => {
                 setAccessLevelOption(prev => ([...prev, {
@@ -65,6 +65,11 @@ export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>
                     value: a.componentId,
                     isTaken: false
                 }]))
+                op.push({
+                    label: a.name,
+                    value: a.componentId,
+                    isTaken: false
+                });
             })
 
         }
@@ -74,12 +79,10 @@ export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>
         fetchAccessLevel();
     }, [])
     return (
-        <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-            <div className='flex flex-col gap-5'>
-                <div className='gap-3'>
-                    <div className='flex flex-col gap-1 w-100'>
+        <div className="flex gap-5 justify-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+            <div className='flex flex-col w-3/4'>
 
-                        {addAccessLeveForm ?
+                {/* {addAccessLeveForm ?
                             <>
                                 <div>
                                     <div>
@@ -94,9 +97,10 @@ export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>
                                             defaultValue={accessGroupDto.componentId}
                                         />
                                     </div>
+
                                     <div className='flex gap-4 justify-center mt-5'>
-                                        <Button name='addAvl' onClickWithEvent={handleClick} size='sm'>Add</Button>
-                                        <Button name='cancleAvl' onClickWithEvent={handleClick} size='sm' variant='danger'>Cancle</Button>
+                                        <Button name='addAvl' onClickWithEvent={handleClickInternal} size='sm'>Add</Button>
+                                        <Button name='cancleAvl' onClickWithEvent={handleClickInternal} size='sm' variant='danger'>Cancle</Button>
                                     </div>
 
                                 </div>
@@ -107,50 +111,24 @@ export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>
 
                             <>
 
-                                <div className="flex flex-col gap-4 swim-lane">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <h3 className="flex items-center gap-3 text-base font-medium text-gray-800 dark:text-white/90">
-                                            Access Groups
-                                            <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-theme-xs font-medium text-gray-700 dark:bg-white/[0.03] dark:text-white/80">
-                                                {dto.accessLevels.length}/32
-                                            </span>
-                                        </h3>
-                                        <a onClick={() => handleClickAccessLevel()} className="cursor-pointer font-medium text-blue-600 dark:text-blue-500 hover:underline">Add</a>
-                                    </div>
-                                </div>
 
 
-                                <div className='flex flex-col gap-1'>
-                                    {/* Card */}
-                                    {dto.accessLevels.map((a: AccessLevelDto, i: number) => (
-                                        <div key={i} className="p-3 bg-white border border-gray-200 task rounded-xl shadow-theme-sm dark:border-gray-800 dark:bg-white/5">
-                                            <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-                                                <div className="flex items-start w-full gap-4">
-                                                    <label htmlFor="taskCheckbox1" className="w-full cursor-pointer">
-                                                        <div className="relative flex items-start">
-                                                            <p className="-mt-0.5 text-base text-gray-800 dark:text-white/90">
-                                                                Access Level : {a.name}
-                                                            </p>
-                                                        </div>
-                                                    </label>
-                                                </div>
-
-                                                <div className="flex flex-col-reverse items-start justify-end w-full gap-3 xl:flex-row xl:items-center xl:gap-5">
-                                                    <span className="inline-flex rounded-full bg-brand-50 px-2 py-0.5 text-theme-xs font-medium text-brand-500 dark:bg-brand-500/15 dark:text-brand-400">
-                                                        Active
-                                                    </span>
-                                                    <ActionElement onEditClick={handleOnClickEdit} onRemoveClick={handleOnClickRemove} data={{}} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
 
                             </>
                         }
-
-                    </div>
+                         */}
+                <div className="flex items-center justify-between mb-2">
+                    <h3 className="flex items-center gap-3 text-base font-medium text-gray-800 dark:text-white/90">
+                        Access Levels
+                        <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-theme-xs font-medium text-gray-700 dark:bg-white/[0.03] dark:text-white/80">
+                            {dto.accessLevels.length}/32
+                        </span>
+                    </h3>
                 </div>
+                <div className="flex justify-center">
+                    <ListTransfer availableItems={op} onChange={handleListChange} />
+                </div>
+
             </div>
         </div>
 

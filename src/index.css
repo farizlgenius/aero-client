@@ -1072,3 +1072,40 @@ span.flatpickr-weekday,
     stroke-dashoffset: 0;
   }
 }
+
+/* Chrome, Edge, Safari */
+.scrollbar-transparent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-transparent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-transparent::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+}
+
+.scrollbar-transparent:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Firefox */
+.scrollbar-transparent {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
+
+.dark .scrollbar-transparent::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+.dark .scrollbar-transparent:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.45);
+}
+
+.dark .scrollbar-transparent {
+  scrollbar-color: rgba(255,255,255,0.3) transparent;
+}
+

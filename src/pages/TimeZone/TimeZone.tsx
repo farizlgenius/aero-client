@@ -34,7 +34,6 @@ const TimeZone = () => {
     const [form,setForm] = useState<boolean>(false);
     {/* Data */ }
     const defaultDto: TimeZoneDto = {
-        uuid: "",
         locationId: locationId,
         componentId: -1,
         isActive: true,

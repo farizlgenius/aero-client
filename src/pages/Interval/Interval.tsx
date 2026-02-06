@@ -4,7 +4,7 @@ import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import Helper from '../../utility/Helper';
 import { IntervalDto } from '../../model/Interval/IntervalDto';
 import { useToast } from '../../context/ToastContext';
-import { IntervalToast, ToastMessage } from '../../model/ToastMessage';
+import { IntervalToast } from '../../model/ToastMessage';
 import { IntervalEndpoint } from '../../endpoint/IntervalEndpoint';
 import { BaseTable } from '../UiElements/BaseTable';
 import { TableCell } from '../../components/ui/table';
@@ -109,7 +109,7 @@ const Interval = () => {
                     }
                     else {
                         const res = await send.post(IntervalEndpoint.CREATE, intervalDto)
-                        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_INTERVAL, toggleToast)) {
+                        if (Helper.handleToastByResCode(res, IntervalToast.CREATE, toggleToast)) {
                             setForm(false)
                             setIntervalDto(defaultDto)
                             toggleRefresh();
@@ -127,7 +127,7 @@ const Interval = () => {
                     }
                     else {
                         const res = await send.put(IntervalEndpoint.UPDATE, intervalDto);
-                        if (Helper.handleToastByResCode(res, ToastMessage.UPDATE_INTERVAL, toggleToast)) {
+                        if (Helper.handleToastByResCode(res, IntervalToast.UPDATE, toggleToast)) {
                             setForm(false)
                             toggleRefresh();
                         } else {

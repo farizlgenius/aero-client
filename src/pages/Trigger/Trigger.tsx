@@ -12,7 +12,6 @@ import { FeatureId } from "../../enum/FeatureId";
 import { send } from "../../api/api";
 import { TriggerEndpoint } from "../../endpoint/TriggerEndpoint";
 import Helper from "../../utility/Helper";
-import { ToastMessage } from "../../model/ToastMessage";
 import { useToast } from "../../context/ToastContext";
 import RemoveModal from "../UiElements/RemoveModal";
 

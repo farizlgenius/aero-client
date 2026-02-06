@@ -8,7 +8,6 @@ import RemoveModal from "../UiElements/RemoveModal";
 import { send } from "../../api/api";
 import { ProcedureEndpoint } from "../../endpoint/ProcedureEndpoint";
 import Helper from "../../utility/Helper";
-import { ToastMessage } from "../../model/ToastMessage";
 import { useToast } from "../../context/ToastContext";
 import { useLocation } from "../../context/LocationContext";
 import { TriggerIcon } from "../../icons";

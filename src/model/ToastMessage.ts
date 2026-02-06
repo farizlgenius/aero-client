@@ -1,60 +1,4 @@
 
-export enum ToastMessage{
-    DELETE_SCP = "Delete Hardware",
-    RESET_SCP = "Reset Hardware",
-    UPLOAD_SCP = "Upload Hardware",
-    GET_SCP_STATUS = "Get Hardware Status",
-    GET_SCP_LIST = "Get Hardware List",
-    GET_SCP_STRUCTURE = "Get Hardware Structure",
-    CREATE_HARDWARE = "Create Hardware",
-    GET_ID_REPORT_LIST = "Get Id Report List",
-    CREATE_CP = "Control Point Created",
-    GET_CP_STATUS = "Retrive Control Point Status",
-    DELETE_CP = "Delete Control Point",
-    TRIGGER_CP = "Trigger Control Point",
-    CREATE_MP = "Monitor Point Created",
-    DELETE_MP = "Delete Monitor Point",
-    MASK_MP = "Masked Monitor Point",
-    UNMASK_MP = "Unmasked Monitor Point",
-    GET_MODULE_STATUS = "Get Module Status",
-    GET_MODULE_LIST = "Get Module",
-    DELETE_HOL = "Delete Holiday",
-    GET_HOL = "Get Holiday",
-    CREATE_HOL = "Create Holiday",
-    UPDATE_HOL = "Update Holiday",
-    GET_TZ = "Get TimeZone",
-    DELETE_TZ = "Delete TimeZone",
-    CREATE_TZ = "Create TimeZone",
-    GET_TZ_MODE = "Get TimeZone Mode",
-    GET_ACR = "Get Doors",
-    GET_ACR_STATUS = "Get Door Status",
-    CREATE_ACR = "Create Doors",
-    DELETE_DOOR = "Delete Door",
-    GET_INTERVAL = "Get Interval",
-    CREATE_INTERVAL = "Create Interval",
-    UPDATE_INTERVAL = "Update Interval",
-    REMOVE_INTERVAL = "Remove Interval",
-    API_ERROR = "Restful Api Exception no response",
-    TOGGLE_OUTPUT = "Toggle Output",
-    DELETE_CARDFORMAT = "Delete CardFormat",
-    CREATE_CARD_FORMAT = "Create CardFormat",
-    CREATE_ACCESS_LEVEL = "Create AccessGroup",
-    DELETE_ACCESS_LEVEL = "Delete AccessGroup",
-    DELETE_CARDHOLDER = "Delte Card Holder",
-    CREATE_CARDHOLDER = "Create Card Holder",
-    CREATE_AREA = "Create Area",
-    CREATE_LOCATION = "Create Location",
-    DELETE_LOCATION = "Delete Location",
-    LOGIN = "Login",
-    CREATE_MP_GROUP = "Create Monitor Group",
-    DELETE_PROCEDURE = "Delete Procedure",
-    POST_MONITOR_GROUP_COMMAND = "Monitor Group Command",
-    CREATE_TRIGGER = "Create Trigger",
-    GET_COMPONENT = "Hardware Component",
-    DELETE_TRIGGER = "Delete Trigger",
-    DELETE_MPG = "Delete Monitor Group"
-}
-
 export enum LicenseToast{
     CHECK = "Validate License"
 }
@@ -114,15 +58,17 @@ export enum MonitorGroupToast
 }
 
 export enum DoorToast {
-        GET_ACR = "Get Doors",
-    GET_ACR_STATUS = "Get Door Status",
-    CREATE_ACR = "Create Doors",
-    DELETE_DOOR = "Delete Door",
+        GET = "Get Doors",
+    STATUS = "Get Door Status",
+    CREATE = "Create Doors",
+    DELETE = "Delete Door",
 }
 
 export enum AccessLevelToast {
-    CREATE_ACCESS_LEVEL = "Create Access Level",
-    DELETE_ACCESS_LEVEL = "Delete Access Leve"
+    CREATE = "Create Access Level",
+    DELETE = "Delete Access Level",
+    UPDATE = "Update Access Level",
+    DELETE_RANGE = "Delete Access Levels"
 }
 
 
@@ -159,6 +105,13 @@ export enum HolidayToast {
 
 }
 
+export enum MapToast {
+    CREATE = "Create Map",
+    UPDATE = "Update Map",
+    DELETE = "Delete Map",
+    DELETE_RANGE = "Delete Maps"
+}
+
 export enum TimeZoneToast {
     CREATE = "Create Timezone",
     DELETE = "Delete Timezone",
@@ -186,5 +139,13 @@ export enum ControlPointToast {
     CREATE = "Create Control Point",
     UPDATE = "Update Control Point",
     DELETE = "Delete Control Point",
-    DELETE_RANGE = "Delete Control Points"
+    DELETE_RANGE = "Delete Control Points",
+    TOGGLE = "Toggle"
+}
+
+export enum CardHolderToast {
+    CREATE = "Create Card Holder",
+    UPDATE = "Update Card Holder",
+    DELETE = "Delete Card Holder",
+    DELETE_RANGE = "Delete Card Holders"
 }

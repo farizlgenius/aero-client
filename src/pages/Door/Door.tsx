@@ -11,7 +11,6 @@ import { DoorDto } from '../../model/Door/DoorDto';
 import { StatusDto } from '../../model/StatusDto';
 import { DoorTable } from './DoorTable';
 import { useToast } from '../../context/ToastContext';
-import { ToastMessage } from '../../model/ToastMessage';
 import { HttpMethod } from '../../enum/HttpMethod';
 import { DoorEndpoint } from '../../endpoint/DoorEndpoint';
 import { useLocation } from '../../context/LocationContext';
@@ -25,6 +24,7 @@ import { BaseForm } from '../UiElements/BaseForm';
 import { FormContent } from '../../model/Form/FormContent';
 import { TableCell } from '../../components/ui/table';
 import Badge from '../../components/ui/badge/Badge';
+import { DoorToast } from '../../model/ToastMessage';
 
 // Define Global Variable
 let removeTarget: DoorDto;
@@ -45,7 +45,6 @@ const Door = () => {
         readers: [
             {
                 // base 
-                uuid: "",
                 componentId: -1,
                 mac: "",
                 locationId: locationId,
@@ -62,11 +61,11 @@ const Door = () => {
                 osdpDiscover: 0x00,
                 osdpTracing: 0x00,
                 osdpBaudrate: 0x00,
-                osdpSecureChannel: 0x00
+                osdpSecureChannel: 0x00,
+                hardwareName: ''
             },
             {
                 // base 
-                uuid: "",
                 componentId: -1,
                 mac: "",
                 locationId: locationId,
@@ -83,7 +82,8 @@ const Door = () => {
                 osdpDiscover: 0x00,
                 osdpTracing: 0x00,
                 osdpBaudrate: 0x00,
-                osdpSecureChannel: 0x00
+                osdpSecureChannel: 0x00,
+                hardwareName: ''
             }
         ],
         strk: {
@@ -93,14 +93,14 @@ const Door = () => {
             offlineMode: -1,
 
             // base
-            uuid: "",
             componentId: -1,
             mac: '',
             locationId: locationId,
             isActive: true,
             strkMax: 5,
             strkMin: 1,
-            strkMode: 0
+            strkMode: 0,
+            hardwareName: ''
         },
         sensor: {
             moduleId: -1,
@@ -109,17 +109,16 @@ const Door = () => {
             holdTime: 0,
 
             // base
-            uuid: "",
             componentId: -1,
             mac: '',
             locationId: locationId,
             isActive: true,
             debounce: 0,
-            dcHeld: 0
+            dcHeld: 0,
+            hardwareName: ''
         },
         requestExits: [{
             // base 
-            uuid: "",
             componentId: -1,
             mac: "",
             locationId: locationId,
@@ -131,10 +130,10 @@ const Door = () => {
             inputMode: -1,
             debounce: 0,
             holdTime: 0,
-            maskTimeZone: 0
+            maskTimeZone: 0,
+            hardwareName: ''
         }, {
             // base 
-            uuid: "",
             componentId: -1,
             mac: "",
             locationId: locationId,
@@ -146,7 +145,8 @@ const Door = () => {
             inputMode: -1,
             debounce: 0,
             holdTime: 0,
-            maskTimeZone: 0
+            maskTimeZone: 0,
+            hardwareName: ''
         }],
         readerOutConfiguration: 1,
         // Notused
@@ -179,13 +179,13 @@ const Door = () => {
         maskForceOpen: false,
         maskHeldOpen: false,
         // base
-        uuid: "",
         componentId: -1,
         mac: '',
         locationId: locationId,
         isActive: true,
         strkComponentId: 0,
-        sensorComponentId: 0
+        sensorComponentId: 0,
+        hardwareName: ''
     }
     const [doorDto, setDoorDto] = useState<DoorDto>(defaultDto)
     const [refresh, setRefresh] = useState(false);
@@ -252,7 +252,7 @@ const Door = () => {
 
     const createAcr = async () => {
         const res = await send.post(DoorEndpoint.POST_ADD_ACR, doorDto)
-        if (Helper.handleToastByResCode(res, ToastMessage.CREATE_ACR, toggleToast)) {
+        if (Helper.handleToastByResCode(res, DoorToast.CREATE, toggleToast)) {
             setUpdateModal(false)
             setCreateModal(false)
             toggleRefresh()
@@ -308,7 +308,7 @@ const Door = () => {
     }
     const removeDoors = async (mac: string, AcrNo: number) => {
         const res = await send.delete(DoorEndpoint.REMOVE_ACR(mac, AcrNo))
-        if (Helper.handleToastByResCode(res, ToastMessage.DELETE_DOOR, toggleToast)) {
+        if (Helper.handleToastByResCode(res, DoorToast.DELETE, toggleToast)) {
             setIsRemoveModal(false);
         }
         toggleRefresh();

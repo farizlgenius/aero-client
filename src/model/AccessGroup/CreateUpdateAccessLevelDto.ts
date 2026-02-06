@@ -1,8 +1,7 @@
 import { NoMacBaseDto } from "../NoMacBaseDto";
-import { CreateUpdateAccessLevelDoorTimezone } from "./CreateUpdateAccessLevelDoorTimezone";
+import { AccessLevelComponentDto } from "./AccessLevelComponentDto";
 
 export interface CreateUpdateAccessLevelDto extends NoMacBaseDto{
     name:string;
-    componentId:number;
-    createUpdateAccessLevelDoorTimeZoneDto:CreateUpdateAccessLevelDoorTimezone[];
+    components:AccessLevelComponentDto[];
 }

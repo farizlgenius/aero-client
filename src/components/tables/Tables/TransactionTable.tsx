@@ -21,7 +21,7 @@ interface TableContents {
 const TransactionTable: React.FC<PropsWithChildren<TableContents>> = ({ tableHeaders, tableDatas, tableKeys }) => {
   return (
     <>
-      <div className="max-h-[70vh] overflow-y-auto hidden-scroll">
+      <div className="max-h-[70vh] overflow-auto scrollbar-thin scrollbar-transparent">
         <Table>
           {/* Table Header */}
           <TableHeader className="border-b border-gray-100 dark:border-white/[0.05] bg-white dark:bg-gray-900 sticky top-0 z-10">

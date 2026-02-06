@@ -1,5 +1,5 @@
 export interface NoMacBaseDto{
-    uuid:string;
+    componentId:number;
     locationId:number;
     isActive:boolean;
 }
