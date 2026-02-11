@@ -7,29 +7,22 @@ import { TransactionEndpoint } from '../../endpoint/TransactionEndpoint'
 import { TransactionDto } from '../../model/Transaction/TransactionDto'
 import SignalRService from '../../services/SignalRService'
 import DatePicker from '../../components/form/date-picker'
-
-
-// Global Variable 
-
-
-
-interface PageProp {
-  pageNumber: number;
-  pageSize: number;
-  totalCount: number;
-  totalPage: number;
-}
+import { PageProp } from '../../model/PageProp'
+import { useLocation } from '../../context/LocationContext'
+import { TableCell } from '../../components/ui/table'
+import { CalenderIcon, TimeIcon } from '../../icons'
+import { Avatar } from '../UiElements/Avatar'
 
 
 
 // Define header Table 
 const headers: string[] = [
-  "Date", "Source", "Device", "Actor", "Decsription", "More Detail", "Remark", "Flags"
+  "Date", "Source", "Device", "Actor", "Decsription", "More Detail", "Remark"
 ]
 
 // Define kwy Table 
 const keys: string[] = [
-  "dateTime", "sourceModule", "origin", "actor", "tranCodeDesc", "extendDesc", "remark", "transactionFlags"
+  "dateTime", "sourceModule", "origin", "actor", "tranCodeDesc", "extendDesc", "remark"
 ]
 
 
@@ -37,9 +30,10 @@ const keys: string[] = [
 
 const Transaction = () => {
   {/* Pagination */ }
-  const [search,setSearch] = useState<string|undefined>();
-  const [startDate,setStartDate] = useState<string|undefined>();
-  const [endDate,setEndDate] = useState<string|undefined>();
+  const { locationId } = useLocation();
+  const [search, setSearch] = useState<string | undefined>();
+  const [startDate, setStartDate] = useState<string | undefined>();
+  const [endDate, setEndDate] = useState<string | undefined>();
   const [pageSize, setPageSize] = useState<number>(10);
   const [pagination, setPagination] = useState<PageProp>({
     pageNumber: 0,
@@ -48,22 +42,22 @@ const Transaction = () => {
     totalPage: 0
   });
   const handleClickFirst = () => {
-    fetchData(1, 10,search,startDate);
+    fetchData(1, 10, search, startDate);
   }
 
   const handleClickPrevious = () => {
 
-    fetchData(pagination.pageNumber - 1, pageSize,search,startDate);
+    fetchData(pagination.pageNumber - 1, pageSize, search, startDate);
   }
 
   const handleClickNext = () => {
 
-    fetchData(pagination.pageNumber + 1, pageSize,search,startDate);
+    fetchData(pagination.pageNumber + 1, pageSize, search, startDate);
   }
 
   const handleClickLast = () => {
 
-    fetchData(pagination.totalPage, pageSize,search,startDate);
+    fetchData(pagination.totalPage, pageSize, search, startDate);
   }
 
   const handlePageSizeSelect = (data: string) => {
@@ -73,8 +67,8 @@ const Transaction = () => {
 
   {/* Event Data */ }
   const [tableDatas, setTablesData] = useState<TransactionDto[]>([]);
-  async function fetchData(pageNumber: number, pageSize: number,search?:string,startDate?:string,endDate?:string) {
-    const res = await send.get(TransactionEndpoint.GET(pageNumber, pageSize,search,startDate,endDate));
+  async function fetchData(pageNumber: number, pageSize: number, search?: string, startDate?: string, endDate?: string) {
+    const res = await send.get(TransactionEndpoint.GET(pageNumber, pageSize, locationId, search, startDate, endDate));
     if (res && res.data.data) {
       console.log(res.data.data)
       setTablesData(res.data.data.data);
@@ -86,15 +80,15 @@ const Transaction = () => {
   useEffect(() => {
     fetchData(1, pageSize);
     const connection = SignalRService.getConnection();
-    connection.on("Transaction", () => {
+    connection.on("EVENT.TRIGGER", () => {
       fetchData(1, pageSize);
     });
 
   }, []);
 
   useEffect(() => {
-    fetchData(1, pageSize,search,startDate)
-  }, [pageSize,search,startDate])
+    fetchData(1, pageSize, search, startDate)
+  }, [pageSize, search, startDate])
 
   // const toLocalISOWithOffset = (date: Date) => {
   //       const pad = (n: number) => String(n).padStart(2, "0");
@@ -114,10 +108,10 @@ const Transaction = () => {
   //       );
   //   }
 
-    const toLocalDateWithOffset = (date: Date): Date => {
+  const toLocalDateWithOffset = (date: Date): Date => {
     const offsetMs = date.getTimezoneOffset() * 60 * 1000;
     return new Date(date.getTime() - offsetMs);
-};
+  };
 
 
 
@@ -183,7 +177,38 @@ const Transaction = () => {
                 </button>
               </div>
             </div>
-            <TransactionTable tableHeaders={headers} tableDatas={tableDatas} tableKeys={keys} />
+            <TransactionTable tableHeaders={headers} tableDatas={tableDatas} tableKeys={keys} specialDisplay={[
+              {
+                key: "dateTime",
+                content: (data, i) => <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                  {/* <span className='flex gap-2'>
+                    {<CalenderIcon className="w-5 h-5" />} {new Intl.DateTimeFormat("en-GB").format(new Date(data.dateTime))}  {<TimeIcon className="w-5 h-5" />}  {new Date(data.dateTime).toTimeString().split(" ")[0]}
+                  </span> */}
+                  {/* <span className='flex gap-2'>
+                    {<TimeIcon className="w-5 h-5" />} {new Date(data.dateTime).toTimeString().split(" ")[0]}
+                  </span> */}
+                  <span className='flex gap-2'>
+                   {new Intl.DateTimeFormat("en-GB").format(new Date(data.dateTime))}  {new Date(data.dateTime).toTimeString().split(" ")[0]}
+                  </span>
+                  
+                </TableCell>
+              }, {
+                key: "actor",
+                content: (data, i) => <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                  {
+                    !data.image || data.image != "" && (
+                      <div className='flex items-center gap-2'>
+                        <div className="cursor-pointer w-11 h-11 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800">
+                          <Avatar userId={data.image} />
+                        </div>
+                        {data.actor}
+                      </div>
+                    )
+                  }
+
+                </TableCell>
+              }
+            ]} />
             <Pagination onSelectPageSize={handlePageSizeSelect} pageNumber={pagination.pageNumber} pageSize={pagination.pageSize} totalCount={pagination.totalCount} totalPage={pagination.totalPage} onClickFirst={handleClickFirst} onClickPrevious={handleClickPrevious} onClickLast={handleClickLast} onClickNext={handleClickNext} />
           </div>
         </div>

@@ -6,12 +6,11 @@ import Input from "../input/InputField";
 import Button from "../../ui/button/Button";
 import Select from "../Select";
 import { Options } from "../../../model/Options";
-import { HttpMethod } from "../../../enum/HttpMethod";
-import HttpRequest from "../../../utility/HttpRequest";
-import { AreaEndPoint } from "../../../constants/constant";
 import { ModeDto } from "../../../model/ModeDto";
 import Switch from "../switch/Switch";
 import { Info2Icon } from "../../../icons";
+import { AreaEndpoint } from "../../../endpoint/AreaEndpoint";
+import { send } from "../../../api/api";
 
 
 export const AreaForm: React.FC<PropsWithChildren<FormProp<AreaDto>>> = ({ handleClick: handleClickWithEvent, setDto, dto }) => {
@@ -21,16 +20,14 @@ export const AreaForm: React.FC<PropsWithChildren<FormProp<AreaDto>>> = ({ handl
     setDto(prev => ({ ...prev, [e.target.name]: e.target.value }))
   }
   const fetchAreaFlag = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET, AreaEndPoint.GET_ARE_FLAG)
-
+    const res = await send.get(AreaEndpoint.GET_ARE_FLAG);
     if (res && res.data.data) {
       setAreaFlag(res.data.data)
 
     }
   }
   const fetchAccessControl = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET, AreaEndPoint.GET_ACCESS_CONTROL)
-
+    const res = await send.get(AreaEndpoint.GET_ACCESS_CONTROL);
     if (res && res.data.data) {
       res.data.data.map((a: ModeDto) => {
         setAccessControlOption(prev => ([...prev, {

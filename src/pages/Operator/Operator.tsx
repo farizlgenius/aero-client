@@ -1,26 +1,22 @@
-import { SetStateAction, useEffect, useState } from "react";
+import {  useEffect, useState } from "react";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb"
 import { useToast } from "../../context/ToastContext";
-import RemoveModal from "../UiElements/RemoveModal";
 import { BaseForm } from "../UiElements/BaseForm";
-import Button from "../../components/ui/button/Button";
 import { BaseTable } from "../UiElements/BaseTable";
-import { AddIcon, OperatorIcon } from "../../icons";
+import {  OperatorIcon } from "../../icons";
 import { OperatorDto } from "../../model/Operator/OperatorDto";
-import { HttpMethod } from "../../enum/HttpMethod";
-import HttpRequest from "../../utility/HttpRequest";
 import Helper from "../../utility/Helper";
-import { OperatorToast, ToastMessage } from "../../model/ToastMessage";
+import { OperatorToast } from "../../model/ToastMessage";
 import { FormContent } from "../../model/Form/FormContent";
-import { RoleEndpoint } from "../../endpoint/RoleEndpoint";
 import { OperatorEndpoint } from "../../endpoint/OperatorEndpoint";
 import { OperatorForm } from "../../components/form/operator/OperatorForm";
 import { useLocation } from "../../context/LocationContext";
-import api, { send } from "../../api/api";
+import { send } from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import { FeatureId } from "../../enum/FeatureId";
 import { usePopup } from "../../context/PopupContext";
 import { FormType } from "../../model/Form/FormProp";
+import { usePagination } from "../../context/PaginationContext";
 
 
 var removeTarget: number = 0;
@@ -44,9 +40,10 @@ export const HEADER: string[] = ["Username", "Action"]
 export const KEY: string[] = ["username"];
 
 export const Operator = () => {
-    const { locationId } = useLocation();
+    const {setPagination} = usePagination();
     const { filterPermission } = useAuth();
     const { toggleToast } = useToast();
+    const {locationId} = useLocation();
     const { setRemove, setConfirmRemove,setConfirmCreate ,setCreate,setUpdate,setConfirmUpdate,setInfo,setMessage} = usePopup();
     const [form,setForm] = useState<boolean>(false);
     const [formType,setFormType] = useState<FormType>(FormType.CREATE);
@@ -56,13 +53,11 @@ export const Operator = () => {
     const toggleRefresh = () => setRefresh(!refresh)
 
     const handleRemove = (data: OperatorDto) => {
-        removeTarget = data.componentId;
         setConfirmRemove(() => async () => {
-            const res = await send.delete(OperatorEndpoint.DELETE(removeTarget))
+            const res = await send.delete(OperatorEndpoint.DELETE(data.componentId))
         if (Helper.handleToastByResCode(res, OperatorToast.DELETE, toggleToast)) {
             setRemove(false)
             toggleRefresh();
-            removeTarget = 0;
         }
         })
         setRemove(true);
@@ -143,14 +138,6 @@ export const Operator = () => {
 
     const [selectedObjects, setSelectedObjects] = useState<OperatorDto[]>([]);
   
-    const fetchDate = async () => {
-        const res = await send.get(OperatorEndpoint.GET(String(locationId)));
-        console.log(res?.data.data)
-        if (res && res.data.data) {
-            setOperatorsDto(res.data.data);
-        }
-    }
-
     {/* Form */ }
     const tabContent: FormContent[] = [
         {
@@ -159,9 +146,16 @@ export const Operator = () => {
             content: <OperatorForm type={formType} dto={operatorDto} setDto={setOperatorDto} handleClick={handleClick} />
         }
     ];
-    useEffect(() => {
-        fetchDate();
-    }, [refresh])
+    
+    const fetchData = async (pageNumber: number, pageSize: number,locationId?:number,search?: string, startDate?: string, endDate?: string) => {
+        const res = await send.get(OperatorEndpoint.PAGINATION(pageNumber,pageSize,locationId,search, startDate, endDate));
+        console.log(res?.data.data)
+        if (res && res.data.data) {
+            console.log(res.data.data)
+            setOperatorsDto(res.data.data.data);
+            setPagination(res.data.data.page);
+        }
+    }
 
 
     return (
@@ -173,7 +167,7 @@ export const Operator = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <BaseTable<OperatorDto> headers={HEADER} keys={KEY} data={operatorsDto} select={selectedObjects} onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} onClick={handleClick} permission={filterPermission(FeatureId.OPERATOR)} setSelect={setSelectedObjects} />
+                    <BaseTable<OperatorDto> headers={HEADER} keys={KEY} data={operatorsDto} select={selectedObjects} onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} onClick={handleClick} permission={filterPermission(FeatureId.OPERATOR)} setSelect={setSelectedObjects} fetchData={fetchData} locationId={locationId}  />
                 </div>
 
             }

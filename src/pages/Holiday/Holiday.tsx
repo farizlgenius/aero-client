@@ -16,6 +16,7 @@ import { BaseForm } from '../UiElements/BaseForm';
 import { FormContent } from '../../model/Form/FormContent';
 import { FormType } from '../../model/Form/FormProp';
 import { usePopup } from '../../context/PopupContext';
+import { usePagination } from '../../context/PaginationContext';
 
 // Holiday Page 
 export const HEADER: string[] = ["Day", "Month", "Year", "Action"]
@@ -25,6 +26,7 @@ const Holiday = () => {
     const { toggleToast } = useToast();
     const { locationId } = useLocation();
     const { filterPermission } = useAuth();
+    const { setPagination } = usePagination();
     const {setCreate,setUpdate,setRemove,setConfirmCreate,setConfirmRemove,setConfirmUpdate,setInfo,setMessage} = usePopup();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
@@ -125,20 +127,17 @@ const Holiday = () => {
 
     {/* Group Data */ }
     const [holidaysDto, setHolidaysDto] = useState<HolidayDto[]>([]);
-    const fetchData = async () => {
-        const res = await send.get(HolidayEndpoint.GET(locationId));
-        if (res && res.data.data) {
-            console.log(res.data.data)
-            setHolidaysDto(res.data.data);
+    const fetchData = async (pageNumber: number, pageSize: number,locationId?:number,search?: string, startDate?: string, endDate?: string) => {
+            const res = await send.get(HolidayEndpoint.PAGINATION(pageNumber,pageSize,locationId,search, startDate, endDate));
+            console.log(res?.data.data)
+            if (res && res.data.data) {
+                console.log(res.data.data)
+                setHolidaysDto(res.data.data.data);
+                setPagination(res.data.data.page);
+            }
         }
-    };
 
-    {/* UseEffect */ }
-    useEffect(() => {
 
-        fetchData();
-
-    }, [refresh]);
 
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<HolidayDto[]>([]);
@@ -156,7 +155,7 @@ const Holiday = () => {
             {form ?
                 <BaseForm tabContent={content} />
                 :
-                <BaseTable<HolidayDto> headers={HEADER} keys={KEY} data={holidaysDto} select={selectedObjects} setSelect={setSelectedObjects} onInfo={handleInfo} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.TIME)} />
+                <BaseTable<HolidayDto> headers={HEADER} keys={KEY} data={holidaysDto} select={selectedObjects} setSelect={setSelectedObjects} onInfo={handleInfo} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.TIME)} fetchData={fetchData} locationId={locationId}/>
 
 
             }

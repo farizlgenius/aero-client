@@ -15,6 +15,7 @@ import { AuthProvider } from "./context/AuthContext.tsx";
 import { LoadingProvider } from "./context/LoadingContext.tsx";
 import { LocationProvider } from "./context/LocationContext.tsx";
 import { SocketProvider } from "./context/SocketContext.tsx";
+import { PaginationProvider } from "./context/PaginationContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   // <StrictMode>
@@ -35,8 +36,11 @@ createRoot(document.getElementById("root")!).render(
                   <NotificationProvider>
                     <PopupProvider>
                       <AlertProvider>
-                        <App/>
-                      
+                        <PaginationProvider>
+                          <App />
+                        </PaginationProvider>
+
+
                       </AlertProvider>
                     </PopupProvider>
                   </NotificationProvider>

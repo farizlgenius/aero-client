@@ -1,20 +1,24 @@
 import { TransactionFlagDto } from "./TransactionFlagDto";
 
 export interface TransactionDto{
-    date:string;
-    time:string;
-    serialNumber:number;
     actor:string;
+    componentId:number;
+    dateTime:string;
+    extendDesc:string;
+    hardwareName:string;
+    image:string;
+    isActive:boolean;
+    locationId:number;
+    mac:string;
+    origin:string;
+    remark:string;
+    serialNumber:number;
     source:number;
     sourceDesc:number;
-    origin:string;
     sourceModule:string;
     type:number;
     typeDesc:string;
     tranCode:number;
-    image:string;
     tranCodeDesc:string;
-    extendDesc:string;
-    remark:number;
     transactionFlags:TransactionFlagDto[];
 }

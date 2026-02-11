@@ -45,6 +45,18 @@ export const send = {
         }
     },
 
+    getImage: async (endpoint: string) => {
+        try {
+            const res = await api.get(endpoint, {
+                responseType: "arraybuffer",
+            });
+            return res;
+        } catch (e: any) {
+            Logger.error(e);
+            return e.response;
+        }
+    },
+
     post: async (endpoint: string, payload?: Object) => {
         try {
             const res = await api.post(endpoint, payload);
@@ -72,6 +84,15 @@ export const send = {
             return e.response;
         }
     },
+    postForm: async (endpoint: string, payload: FormData) => {
+        try {
+            const res = await api.post(endpoint, payload);
+            return res;
+        } catch (e: any) {
+            Logger.error(e)
+            return e.response;
+        }
+    }
 }
 
 
@@ -81,7 +102,7 @@ api.interceptors.request.use((config) => {
     if (accessToken) {
         config.headers = {
             ...(config.headers as any),
-            "Content-Type": "application/json",
+            // "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
         };
     }

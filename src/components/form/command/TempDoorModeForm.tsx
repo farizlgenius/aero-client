@@ -9,8 +9,9 @@ import { ModeDto } from "../../../model/ModeDto"
 import { Options } from "../../../model/Options"
 import { DoorEndpoint } from "../../../endpoint/DoorEndpoint"
 import Input from "../input/InputField"
+import { FormType } from "../../../model/Form/FormProp"
 
-export const TempDoorModeForm:React.FC<PropsWithChildren<CommandFormInterface>> = ({action,setAction,handleClickIn,options}) => {
+export const TempDoorModeForm:React.FC<PropsWithChildren<CommandFormInterface>> = ({action,setAction,handleClickIn,options,type}) => {
         const [doorMode,setDoorMode] = useState<Options[]>([]);
 
     
@@ -55,22 +56,22 @@ export const TempDoorModeForm:React.FC<PropsWithChildren<CommandFormInterface>> 
         <>
             <div>
                 <Label>Doors</Label>
-                <Select icon={<DoorIcon />} options={options} name={"arg1"} defaultValue={action.arg1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),mac:options.find(x => x.value == Number(value))?.description ?? ""}))} />
+                <Select disabled={type == FormType.INFO} icon={<DoorIcon />} options={options} name={"arg1"} defaultValue={action.arg1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),mac:options.find(x => x.value == Number(value))?.description ?? ""}))} />
             </div>
             <div>
                 <Label htmlFor='mode'>Mode</Label>
-                <Select name="arg2" options={doorMode} onChange={(value:string) => setAction(prev => ({...prev,arg2:Number(value)}))} />
+                <Select disabled={type == FormType.INFO} name="arg2" options={doorMode} onChange={(value:string) => setAction(prev => ({...prev,arg2:Number(value)}))} />
             </div>
             <div>
                 <Label htmlFor='time'>Time Unit</Label>
-                <Select name="arg3" options={unit} onChange={(value:string) => setAction(prev => ({...prev,arg3: Number(value) << 14}))} />
+                <Select disabled={type == FormType.INFO} name="arg3" options={unit} onChange={(value:string) => setAction(prev => ({...prev,arg3: Number(value) << 14}))} />
             </div>
             <div>
                 <Label htmlFor='time'>Time Delay (Second)</Label>
-                <Input min="0" name="time" type="number" defaultValue={action.delayTime} onChange={(e) => setAction(prev => ({ ...prev, delayTime: Number(e.target.value) }))} />
+                <Input disabled={type == FormType.INFO} min="0" name="time" type="number" defaultValue={action.delayTime} onChange={(e) => setAction(prev => ({ ...prev, delayTime: Number(e.target.value) }))} />
             </div>
             <div className="flex justify-center gap-3">
-                <Button name="add" onClick={handleClickIn} className="flex-1" variant="primary" >Add</Button>
+                <Button disabled={type == FormType.INFO} name="add" onClick={handleClickIn} className="flex-1" variant="primary" >Add</Button>
                 <Button name="close" onClick={handleClickIn} className="flex-1" variant="danger">Cancel</Button>
             </div>
         </>

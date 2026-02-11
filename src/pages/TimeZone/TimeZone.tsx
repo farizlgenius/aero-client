@@ -16,6 +16,7 @@ import { BaseForm } from '../UiElements/BaseForm';
 import { FormContent } from '../../model/Form/FormContent';
 import { usePopup } from '../../context/PopupContext';
 import { FormType } from '../../model/Form/FormProp';
+import { usePagination } from '../../context/PaginationContext';
 
 
 
@@ -25,6 +26,7 @@ const TIMEZONE_KEY: string[] = ["name", "activeTime", "deactiveTime","mode","int
 const TimeZone = () => {
     const { locationId } = useLocation();
     const { filterPermission } = useAuth();
+    const {setPagination} = usePagination();
     const { toggleToast } = useToast();
     const [formType,setFormType] = useState<FormType>(FormType.CREATE);
     const { setConfirmRemove,setConfirmCreate,setConfirmUpdate,setUpdate,setRemove,setCreate,setMessage,setInfo } = usePopup();
@@ -132,19 +134,17 @@ const TimeZone = () => {
 
     {/* Group Data */ }
     const [timeZonesDto, setTimeZonesDto] = useState<TimeZoneDto[]>([]);
-    const fetchData = async () => {
-        const res = await send.get(TimeZoneEndPoint.LOCATION(locationId))
-        if (res) {
-            setTimeZonesDto(res.data.data);
-            console.log(res.data.data)
+    const fetchData = async (pageNumber: number, pageSize: number,locationId?:number,search?: string, startDate?: string, endDate?: string) => {
+            const res = await send.get(TimeZoneEndPoint.PAGINATION(pageNumber,pageSize,locationId,search, startDate, endDate));
+            console.log(res?.data.data)
+            if (res && res.data.data) {
+                console.log(res.data.data)
+                setTimeZonesDto(res.data.data.data);
+                setPagination(res.data.data.page);
+            }
         }
-    };
 
 
-    {/* UseEffect */ }
-    useEffect(() => {
-        fetchData();
-    }, [refresh]);
 
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<TimeZoneDto[]>([]);
@@ -163,7 +163,7 @@ const TimeZone = () => {
                 <BaseForm tabContent={tabContent} />
 
                 :
-                <BaseTable<TimeZoneDto> keys={TIMEZONE_KEY} headers={TIMEZONE_TABLE_HEAD} data={timeZonesDto} onRemove={handleRemove} onEdit={handleEdit} onInfo={handleInfo} onClick={handleClick} select={selectedObjects} setSelect={setSelectedObjects}  permission={filterPermission(FeatureId.TIME)} />
+                <BaseTable<TimeZoneDto> keys={TIMEZONE_KEY} headers={TIMEZONE_TABLE_HEAD} data={timeZonesDto} onRemove={handleRemove} onEdit={handleEdit} onInfo={handleInfo} onClick={handleClick} select={selectedObjects} setSelect={setSelectedObjects}  permission={filterPermission(FeatureId.TIME)} fetchData={fetchData} locationId={locationId}/>
 
             }
 

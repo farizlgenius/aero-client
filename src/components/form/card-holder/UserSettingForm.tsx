@@ -35,7 +35,7 @@ export const UserSettingForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>
                 </div>)}
             </div>
             <div className='flex m-5 gap-5 justify-center items-center'>
-                <Button  disabled={type == FormType.INFO} name='create' onClickWithEvent={handleClick} className="w-50" size="sm">Create</Button>
+                <Button  disabled={type == FormType.INFO} name={type == FormType.CREATE ? "create" : "update"} onClickWithEvent={handleClick} className="w-50" size="sm">{type == FormType.CREATE ? "Create" : "Update"}</Button>
                 <Button name='cancle' onClickWithEvent={handleClick} className="w-50" size="sm" variant='danger'>Cancle</Button>
             </div>
         </>

@@ -1,10 +1,10 @@
 import { GroupIcon } from '../../icons';
-import { useEffect, useState } from 'react';
+import {  useState } from 'react';
 import AccessLevelForm from './AccessLevelForm';
 import { AccessLevelDto } from '../../model/AccessGroup/AccessLevelDto';
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import Helper from '../../utility/Helper';
-import { AccessAreaToast, AccessLevelToast } from '../../model/ToastMessage';
+import { AccessLevelToast } from '../../model/ToastMessage';
 import { useToast } from '../../context/ToastContext';
 import { CreateUpdateAccessLevelDto } from '../../model/AccessGroup/CreateUpdateAccessLevelDto';
 import { useLocation } from '../../context/LocationContext';
@@ -17,6 +17,7 @@ import { BaseForm } from '../UiElements/BaseForm';
 import { FormContent } from '../../model/Form/FormContent';
 import { FormType } from '../../model/Form/FormProp';
 import { usePopup } from '../../context/PopupContext';
+import { usePagination } from '../../context/PaginationContext';
 
 
 
@@ -33,6 +34,7 @@ const AccessLevel = () => {
     const { toggleToast } = useToast();
     const { locationId } = useLocation();
     const { filterPermission } = useAuth();
+    const { setPagination } = usePagination();
     const { setCreate, setUpdate, setRemove, setConfirmCreate, setConfirmRemove, setConfirmUpdate, setInfo, setMessage } = usePopup();
     const defaultDto: CreateUpdateAccessLevelDto = {
         // Detail
@@ -40,7 +42,8 @@ const AccessLevel = () => {
         components: [],
         componentId: 0,
         locationId: locationId,
-        isActive: false
+        isActive: false,
+        hardwareName: ''
     }
     const [accesLevelDto, setAccessLevelDto] = useState<CreateUpdateAccessLevelDto>(defaultDto);
     const [accessLevelDtos, setAccessLevelDtos] = useState<AccessLevelDto[]>([]);
@@ -111,12 +114,12 @@ const AccessLevel = () => {
     {/* handle Table Action */ }
     const handleInfo = (data: AccessLevelDto) => {
         setFormType(FormType.UPDATE)
-        // setAccessLevelDto(data)
+        setAccessLevelDto(data)
         setForm(true);
     }
     const handleEdit = (data: AccessLevelDto) => {
         setFormType(FormType.UPDATE)
-        // setAccessLevelDto(data)
+        setAccessLevelDto(data)
         setForm(true);
     }
 
@@ -131,23 +134,19 @@ const AccessLevel = () => {
 
 
     {/* Group Data */ }
-    const fetchData = async () => {
-        const res = await send.get(AccessLevelEndPoint.GET(locationId))
-        if (res && res.data.data) {
-            console.log(res.data.data)
-            setAccessLevelDtos(res.data.data);
-        }
-    };
+    const fetchData = async (pageNumber: number, pageSize: number,locationId?:number,search?: string, startDate?: string, endDate?: string) => {
+                const res = await send.get(AccessLevelEndPoint.PAGINATION(pageNumber,pageSize,locationId,search, startDate, endDate));
+                console.log(res?.data.data)
+                if (res && res.data.data) {
+                    console.log(res.data.data)
+                    setAccessLevelDtos(res.data.data.data);
+                    setPagination(res.data.data.page);
+                }
+            }
 
 
 
 
-    {/* UseEffect */ }
-    useEffect(() => {
-
-        fetchData();
-
-    }, [refresh]);
 
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<AccessLevelDto[]>([]);
@@ -166,7 +165,7 @@ const AccessLevel = () => {
             {form ?
                 <BaseForm tabContent={tabContent} />
                 :
-                <BaseTable<AccessLevelDto> headers={HEADER} keys={KEY} data={accessLevelDtos} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} select={selectedObjects} setSelect={setSelectedObjects} permission={filterPermission(FeatureId.ACCESSLEVEL)} onInfo={handleInfo} />
+                <BaseTable<AccessLevelDto> headers={HEADER} keys={KEY} data={accessLevelDtos} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} select={selectedObjects} setSelect={setSelectedObjects} permission={filterPermission(FeatureId.ACCESSLEVEL)} onInfo={handleInfo} fetchData={fetchData} locationId={locationId} refresh={refresh} />
             }
 
         </>

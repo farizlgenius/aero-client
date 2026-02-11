@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableRow } from "../../components/ui/table
 import Badge from "../../components/ui/badge/Badge";
 import ResponsiveImage from "../../components/ui/images/ResponsiveImage";
 import { SioStatus } from "../../model/Module/SioStatus";
+import { usePagination } from "../../context/PaginationContext";
 
 const HEADER: string[] = [
   "Model","Address", "Tamper", "AC", "Battery", "Status", "Action"
@@ -29,20 +30,22 @@ const KEY: string[] = [
 
 export default function Module() {
   const { locationId } = useLocation();
+  const {setPagination} = usePagination();
   const { filterPermission } = useAuth();
   {/* Module Data */ }
   const [status, setStatus] = useState<StatusDto[]>([]);
   const [moduleDto, setModuleDto] = useState<ModuleDto[]>([]);
   const [refresh, setRefresh] = useState<boolean>(false);
   const toggleRefresh = () => setRefresh(prev => !prev)
-  const fetchModule = async () => {
+  const fetchModule = async (pageNumber: number, pageSize: number,locationId?:number,search?: string, startDate?: string, endDate?: string) => {
     console.log(locationId)
-    const res = await send.get(ModuleEndpoint.GET(locationId))
+    const res = await send.get(ModuleEndpoint.PAGINATION(pageNumber,pageSize,locationId,search, startDate, endDate))
     if (res && res.data.data) {
       //Helper.handlePopup(res, PopUpMsg.GET_MODULE_STATUS, showPopup)
       console.log(res.data.data)
-      setModuleDto(res.data.data);
-      const newStatuses = res.data.data.map((a: ModuleDto) => ({
+      setModuleDto(res.data.data.data);
+      setPagination(res.data.data.page)
+      const newStatuses = res.data.data.data.map((a: ModuleDto) => ({
         macAddress: a.mac,
         componentId: a.componentId,
         status: 0,
@@ -56,7 +59,7 @@ export default function Module() {
       setStatus((prev) => [...prev, ...newStatuses]);
 
       // Fetch status for each
-      res.data.data.forEach((a: ModuleDto) => {
+      res.data.data.data.forEach((a: ModuleDto) => {
         fetchStatus(a.mac, a.componentId);
       });
     }
@@ -90,33 +93,7 @@ export default function Module() {
 
   {/* checkBox */ }
   const [selectedObjects, setSelectedObjects] = useState<ModuleDto[]>([]);
-  const handleCheckedAll =
-    (data: ModuleDto[]) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (setSelectedObjects) {
-        if (e.target.checked) {
-          setSelectedObjects(data);
-        } else {
-          setSelectedObjects([]);
-        }
-      }
-    };
-  const handleCheck =
-    (data: ModuleDto) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (setSelectedObjects) {
-        if (e.target.checked) {
-          setSelectedObjects((prev) => [...prev, data]);
-        } else {
-          setSelectedObjects((prev) =>
-            prev.filter((item) => item.componentId !== data.componentId)
-          );
-        }
-      }
-    };
-  {/* UseEffect */ }
-  useEffect(() => {
-    fetchModule();
-  }, []);
-
+ 
   useEffect(() => {
     // Initialize SignalR as soon as app starts
     var connection = SignalRService.getConnection();
@@ -233,7 +210,7 @@ export default function Module() {
         <Modals header="Edit Module" body={<EditModuleInputs data={moduleDto[0]} />} handleClickWithEvent={closeModalToggle} />
       }
       <PageBreadcrumb pageTitle="Module" />
-      <BaseTable<ModuleDto> subTable={subTable} headers={HEADER} keys={KEY} data={moduleDto} status={status} select={selectedObjects} setSelect={setSelectedObjects} onEdit={handleEdit} onInfo={handleInfo} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.DEVICE)} renderOptionalComponent={filterComponent} />
+      <BaseTable<ModuleDto> subTable={subTable} headers={HEADER} keys={KEY} data={moduleDto} status={status} select={selectedObjects} setSelect={setSelectedObjects} onEdit={handleEdit} onInfo={handleInfo} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.DEVICE)} renderOptionalComponent={filterComponent} fetchData={fetchModule} locationId={locationId} />
     </>
   );
 }

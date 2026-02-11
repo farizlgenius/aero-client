@@ -1,5 +1,5 @@
 import { PropsWithChildren, useEffect, useState } from "react"
-import { FormProp } from "../../model/Form/FormProp"
+import { FormProp, FormType } from "../../model/Form/FormProp"
 import { ProcedureDto } from "../../model/Procedure/ProcedureDto"
 import Label from "../../components/form/Label"
 import Input from "../../components/form/input/InputField"
@@ -31,7 +31,7 @@ import { MonitorGroupEndpoint } from "../../endpoint/MonitorGroupEndpoint"
 import { MonitorGroupDto } from "../../model/MonitorGroup/MonitorGroupDto"
 import { TempDoorModeForm } from "../../components/form/command/TempDoorModeForm"
 
-export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> = ({ handleClick, dto, setDto, isUpdate }) => {
+export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> = ({ handleClick, dto, setDto, type }) => {
     const defaultDto: ActionDto = {
         scpId: -1,
         actionType: -1,
@@ -44,12 +44,12 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
         arg6: 0,
         arg7: 0,
         strArg: "",
-        delayTime:0,
-        uuid: "",
+        delayTime: 0,
         componentId: 0,
         mac: "",
         locationId: 0,
-        isActive: false
+        isActive: false,
+        hardwareName: ""
     }
     const { locationId } = useLocation();
     const [action, setAction] = useState<ActionDto>(defaultDto);
@@ -140,19 +140,19 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
             case 1:
                 // Always Mask
                 // setAction(prev => ({...prev,arg2:1}))
-                return <MonitorMaskForm options={mp} handleClickIn={handleClickIn}  action={action} setAction={setAction}  />
+                return <MonitorMaskForm type={type} options={mp} handleClickIn={handleClickIn}  action={action} setAction={setAction}  />
             case 2:
-                return <ControlCommandForm options={cp} handleClickIn={handleClickIn}  action={action} setAction={setAction}  />
+                return <ControlCommandForm type={type} options={cp} handleClickIn={handleClickIn}  action={action} setAction={setAction}  />
             case 3:
-                return <DoorModeForm options={door} handleClickIn={handleClickIn} action={action} setAction={setAction} />
+                return <DoorModeForm type={type} options={door} handleClickIn={handleClickIn} action={action} setAction={setAction} />
             case 6:
-                return <MomentUnlockForm options={door} handleClickIn={handleClickIn} action={action} setAction={setAction} />
+                return <MomentUnlockForm type={type} options={door} handleClickIn={handleClickIn} action={action} setAction={setAction} />
             case 9:
-            return <TimezoneControlForm options={tz} handleClickIn={handleClickIn} action={action} setAction={setAction} />
+            return <TimezoneControlForm type={type} options={tz} handleClickIn={handleClickIn} action={action} setAction={setAction} />
             case 14:
-                return <MonitorGroupCommandForm options={mpg} handleClickIn={handleClickIn} action={action} setAction={setAction}/>
+                return <MonitorGroupCommandForm type={type} options={mpg} handleClickIn={handleClickIn} action={action} setAction={setAction}/>
             case 24:
-                return <TempDoorModeForm options={door} handleClickIn={handleClickIn} action={action} setAction={setAction}/>
+                return <TempDoorModeForm type={type} options={door} handleClickIn={handleClickIn} action={action} setAction={setAction}/>
                 default:
                 return <></>
         }
@@ -173,7 +173,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
     }
 
     const fetchMp = async () => {
-        var res = await api.get(MonitorPointEndpoint.MPS(locationId));
+        var res = await api.get(MonitorPointEndpoint.GET(locationId));
         if (res && res.data.data) {
             res.data.data.map((a: MonitorPointDto) => {
                 setMp(prev => ([...prev, {
@@ -282,7 +282,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
                 <>
                     <div>
                         <Label>Name</Label>
-                        <Input name="name" type="text" placeholder="Procedure name" onChange={handleChange} />
+                        <Input disabled={type == FormType.INFO} name="name" type="text" placeholder="Procedure name" onChange={handleChange} />
                     </div>
                     <div className="flex flex-col gap-2">
                         <div className="flex justify-end">
@@ -370,7 +370,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
                         </Table>
                     </div>
                     <div className="flex gap-4">
-                        <Button className="flex-1" name="create" onClick={handleClick} variant="primary">Create</Button>
+                        <Button disabled={type == FormType.INFO} className="flex-1" name={type == FormType.CREATE ? "create" : "update"} onClick={handleClick} variant="primary">{type == FormType.CREATE ? "Create" : "Update"}</Button>
                         <Button className="flex-1" name="close" onClick={handleClick} variant="danger">Cancel</Button>
                     </div>
                 </>

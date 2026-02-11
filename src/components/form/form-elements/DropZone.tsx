@@ -1,23 +1,22 @@
 import React, { PropsWithChildren, useEffect, useState } from "react";
-import Helper from "../../../utility/Helper";
 import ComponentCard from "../../common/ComponentCard";
 import { useDropzone } from "react-dropzone";
-import { ImageFileDto } from "../../../model/CardHolder/ImageFileDto";
-import Button from "../../ui/button/Button";
 // import Dropzone from "react-dropzone";
 
-interface DropzoneComponentProp{
-  setImageFileDto:React.Dispatch<React.SetStateAction<ImageFileDto>>
-  setFile:(value: React.SetStateAction<boolean>) => void
+interface DropzoneComponentProp {
+  setFile: (value: React.SetStateAction<boolean>) => void
+  image: File | undefined
+  setImage: React.Dispatch<React.SetStateAction<File | undefined>>
+  newImage:File | undefined,
+  setNewImage:React.Dispatch<React.SetStateAction<File | undefined>>
 }
 
-const DropzoneComponent: React.FC<PropsWithChildren<DropzoneComponentProp>> = ({setImageFileDto,setFile}) => {
-  const [image,setImage] = useState<File>()
-
+const DropzoneComponent: React.FC<PropsWithChildren<DropzoneComponentProp>> = ({ setFile, image, setImage, newImage, setNewImage }) => {
+  const [imageState, setImageState] = useState<File>()
   const onDrop = (acceptedFiles: File[]) => {
     console.log("Files dropped:", acceptedFiles);
     // Handle file uploads here
-    setImage(acceptedFiles[0]);
+    setImageState(acceptedFiles[0]);
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -30,20 +29,18 @@ const DropzoneComponent: React.FC<PropsWithChildren<DropzoneComponentProp>> = ({
     },
   });
 
-  const convert = async (image:File) => {
-    setImageFileDto({
-      fileName: image?.name,
-      contentType: image?.type,
-      fileSize: image?.size,
-      fileData: await Helper.fileToBase64(image)
-    })
+  const convert = async (image: File) => {
+    setNewImage(image);
+    setImage(image);
     setFile(false);
-  } 
+  };
 
   useEffect(() => {
-    if(image != undefined)
-    convert(image)
-  }, [image])
+    if (imageState != undefined) {
+      convert(imageState)
+    }
+
+  }, [imageState])
 
   return (
     <ComponentCard title="Dropzone">
@@ -51,11 +48,10 @@ const DropzoneComponent: React.FC<PropsWithChildren<DropzoneComponentProp>> = ({
         <form
           {...getRootProps()}
           className={`dropzone rounded-xl   border-dashed border-gray-300 p-7 lg:p-10
-        ${
-          isDragActive
-            ? "border-brand-500 bg-gray-100 dark:bg-gray-800"
-            : "border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-900"
-        }
+        ${isDragActive
+              ? "border-brand-500 bg-gray-100 dark:bg-gray-800"
+              : "border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-900"
+            }
       `}
           id="demo-upload"
         >

@@ -18,6 +18,7 @@ import { FormType } from '../../model/Form/FormProp';
 import { usePopup } from '../../context/PopupContext';
 import { useLocation } from '../../context/LocationContext';
 import { DaysInWeekDto } from '../../model/Interval/DaysInWeekDto';
+import { usePagination } from '../../context/PaginationContext';
 
 
 
@@ -31,13 +32,13 @@ const Interval = () => {
 
     const { toggleToast } = useToast();
     const { filterPermission } = useAuth();
+    const { setPagination } = usePagination();
     const { locationId } = useLocation();
     const { setCreate, setUpdate, setInfo, setRemove, setConfirmRemove, setConfirmCreate, setConfirmUpdate,setMessage } = usePopup();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
 
-    const defaultDto = {
-        uuid: "",
+    const defaultDto:IntervalDto = {
         locationId: locationId,
         isActive: true,
         componentId: 0,
@@ -52,7 +53,8 @@ const Interval = () => {
         },
         daysDesc: "",
         startTime: "",
-        endTime: ""
+        endTime: "",
+        hardwareName: ''
     }
 
 
@@ -176,14 +178,15 @@ const Interval = () => {
 
     {/* Group Data */ }
     const [intervalsDto, setIntervalsDto] = useState<IntervalDto[]>([]);
-    const fetchData = async () => {
-        const res = await send.get(IntervalEndpoint.LOCATION(locationId));
-        console.log(res);
-        if (res) {
-            setIntervalsDto(res.data.data);
+    const fetchData = async (pageNumber: number, pageSize: number,locationId?:number,search?: string, startDate?: string, endDate?: string) => {
+            const res = await send.get(IntervalEndpoint.PAGINATION(pageNumber,pageSize,locationId,search, startDate, endDate));
+            console.log(res?.data.data)
+            if (res && res.data.data) {
+                console.log(res.data.data)
+                setIntervalsDto(res.data.data.data);
+                setPagination(res.data.data.page);
+            }
         }
-
-    };
 
     {/* State */ }
     // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -200,12 +203,6 @@ const Interval = () => {
     //     }
     // }
 
-    {/* UseEffect */ }
-    useEffect(() => {
-
-        fetchData();
-
-    }, [refresh]);
 
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<IntervalDto[]>([]);
@@ -261,7 +258,7 @@ const Interval = () => {
                                 </div>
                             </TableCell>
                         }
-                    ]} onClick={handleClickWithEvent} permission={filterPermission(FeatureId.TIME)} />
+                    ]} onClick={handleClickWithEvent} permission={filterPermission(FeatureId.TIME)} fetchData={fetchData} locationId={locationId} />
                 </div>
             }
 

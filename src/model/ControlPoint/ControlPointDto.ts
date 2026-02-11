@@ -3,6 +3,7 @@ import { BaseDto } from "../BaseDto";
 export interface ControlPointDto extends BaseDto
 {
     name:string;
+    cpId:number;
     moduleId:number;
     moduleDescription:string;
     outputNo:number;
@@ -16,9 +17,9 @@ export interface ControlPointDto extends BaseDto
 
 export const defaultOutputDto: ControlPointDto = {
     // Base
-    uuid: "",
     componentId: -1,
     mac: "",
+    cpId:0,
     locationId: 0,
     isActive: true,
 

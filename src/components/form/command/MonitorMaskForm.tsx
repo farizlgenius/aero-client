@@ -6,9 +6,10 @@ import Label from "../Label"
 import Select from "../Select"
 import { CommandFormInterface } from "../../../model/CommandForm"
 import Input from "../input/InputField"
+import { FormType } from "../../../model/Form/FormProp"
 
 
-export const MonitorMaskForm:React.FC<PropsWithChildren<CommandFormInterface>> = ({options,action,handleClickIn,setAction}) => {
+export const MonitorMaskForm:React.FC<PropsWithChildren<CommandFormInterface>> = ({options,action,handleClickIn,setAction,type}) => {
     const handleRadio = (value:string) => {
         setAction(prev => ({...prev,arg2:Number(value)}))
     }
@@ -16,7 +17,7 @@ export const MonitorMaskForm:React.FC<PropsWithChildren<CommandFormInterface>> =
         <>
             <div>
                 <Label>Monitor Point</Label>
-                <Select icon={<MonitorIcon />} options={options} name={"arg1"} defaultValue={action.arg1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),mac:options.find(x => x.value == Number(value))?.description ?? ""}))} />
+                <Select disabled={type == FormType.INFO} icon={<MonitorIcon />} options={options} name={"arg1"} defaultValue={action.arg1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),mac:options.find(x => x.value == Number(value))?.description ?? ""}))} />
             </div>
             <div>
                 <Label htmlFor='mode' >Mask Option</Label>
@@ -45,10 +46,10 @@ export const MonitorMaskForm:React.FC<PropsWithChildren<CommandFormInterface>> =
             </div>
            <div>
                 <Label htmlFor='time'>Time Delay (Second)</Label>
-                <Input min="0" name="time" type="number" defaultValue={action.delayTime} onChange={(e) => setAction(prev => ({ ...prev, delayTime: Number(e.target.value) }))} />
+                <Input disabled={type == FormType.INFO} min="0" name="time" type="number" defaultValue={action.delayTime} onChange={(e) => setAction(prev => ({ ...prev, delayTime: Number(e.target.value) }))} />
             </div>
             <div className="flex justify-center gap-3">
-                <Button name="add" onClick={handleClickIn} className="flex-1" variant="primary" >Add</Button>
+                <Button disabled={type == FormType.INFO} name="add" onClick={handleClickIn} className="flex-1" variant="primary" >Add</Button>
                 <Button name="close" onClick={handleClickIn} className="flex-1" variant="danger">Cancel</Button>
             </div>
         </>

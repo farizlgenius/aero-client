@@ -18,6 +18,7 @@ import { MonitorGroupCommandDto } from "../../model/MonitorGroup/MonitorGroupCom
 import { FormType } from "../../model/Form/FormProp";
 import { usePopup } from "../../context/PopupContext";
 import { MonitorGroupToast } from "../../model/ToastMessage";
+import { usePagination } from "../../context/PaginationContext";
 
 export const MP_GP_HEADER: string[] = ["Name", "Main Controller", "Action"]
 export const MP_GP_KEY: string[] = ["name", "macAddress",];
@@ -29,11 +30,11 @@ var removeElement = {
 export const MonitorGroup = () => {
     const { toggleToast } = useToast();
     const { locationId } = useLocation();
+    const { setPagination } = usePagination();
     const defaultDto: MonitorGroupDto = {
         name: "",
         nMpCount: 0,
         nMpList: [],
-        uuid: "",
         componentId: 0,
         mac: "",
         locationId: locationId,
@@ -193,12 +194,15 @@ export const MonitorGroup = () => {
         setForm(true);
     }
 
-    const fetchData = async () => {
-        const res = await send.get(MonitorGroupEndpoint.GET(locationId))
-        if (res && res.data.data) {
-            setMpGroupsDto(res.data.data)
-        }
-    }
+    const fetchData = async (pageNumber: number, pageSize: number,locationId?:number,search?: string, startDate?: string, endDate?: string) => {
+           const res = await send.get(MonitorGroupEndpoint.PAGINATION(pageNumber,pageSize,locationId,search, startDate, endDate));
+           console.log(res?.data.data)
+           if (res && res.data.data) {
+               console.log(res.data.data)
+               setMpGroupsDto(res.data.data.data);
+               setPagination(res.data.data.page);
+           }
+       }
 
 
 
@@ -234,10 +238,6 @@ export const MonitorGroup = () => {
         },
     ];
 
-    useEffect(() => {
-        fetchData();
-    }, [refresh])
-
     return (
         <>
             <PageBreadcrumb pageTitle="Monitor Group" />
@@ -245,7 +245,7 @@ export const MonitorGroup = () => {
 
                 <BaseForm tabContent={tabContent} />
                 :
-                <BaseTable<MonitorGroupDto> headers={MP_GP_HEADER} keys={MP_GP_KEY} onClick={handleClick} data={mpGroupsDto} onInfo={handleInfo} onEdit={handleEdit} onRemove={handleRemove} select={selectedObject} setSelect={setSelectedObjects} permission={filterPermission(FeatureId.DEVICE)} action={action} />
+                <BaseTable<MonitorGroupDto> headers={MP_GP_HEADER} keys={MP_GP_KEY} onClick={handleClick} data={mpGroupsDto} onInfo={handleInfo} onEdit={handleEdit} onRemove={handleRemove} select={selectedObject} setSelect={setSelectedObjects} permission={filterPermission(FeatureId.DEVICE)} action={action} fetchData={fetchData} locationId={locationId} />
 
             }
         </>

@@ -1,15 +1,17 @@
 import { PropsWithChildren, useEffect, useRef, useState } from "react"
-import { ImageFileDto } from "../../model/CardHolder/ImageFileDto";
 import Button from "../../components/ui/button/Button";
 import ComponentCard from "../../components/common/ComponentCard";
 
 interface NativeWebcamProp {
     modelStatus: boolean
-    setImageFileDto:React.Dispatch<React.SetStateAction<ImageFileDto>>
     handleClick:(e: React.MouseEvent<HTMLButtonElement>) => void
+    image:File | undefined,
+    setImage:React.Dispatch<React.SetStateAction<File | undefined>>,
+    newImage:File | undefined,
+    setNewImage:React.Dispatch<React.SetStateAction<File | undefined>>
 }
 
-export const NativeWebcam: React.FC<PropsWithChildren<NativeWebcamProp>> = ({ handleClick,modelStatus,setImageFileDto }) => {
+export const NativeWebcam: React.FC<PropsWithChildren<NativeWebcamProp>> = ({ handleClick,modelStatus,image,setImage,newImage,setNewImage }) => {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [stream, setStream] = useState<MediaStream | null>(null);
@@ -82,16 +84,18 @@ export const NativeWebcam: React.FC<PropsWithChildren<NativeWebcamProp>> = ({ ha
         // get blob (async) and create object URL
         canvas.toBlob((blob) => {
             if (!blob) return;
+            const file = new File([blob], `capture_${Date.now()}.png`, { type: "image/png" });
+            setImage(file);
+            setNewImage(file); 
             const url = URL.createObjectURL(blob);
             setImgUrl(url);
-            setImageFileDto(prev => ({...prev,fileData:url}))
             // setImageFileDto(prev => ({...prev,fileData:url}))
         }, "image/png");
     }
 
     useEffect(() => {
         closeCamera()
-    },[imgUrl])
+    },[image])
     return (
         <ComponentCard title="Capture Zone">
              <div className="transition border border-gray-300 border-dashed cursor-pointer dark:hover:border-brand-500 dark:border-gray-700 rounded-xl hover:border-brand-500">

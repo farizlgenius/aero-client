@@ -9,6 +9,7 @@ export interface DoorDto extends BaseDto {
   name: string;
   accessConfig: number;
   pairDoorNo: number;
+  acrId:number;
 
   // Reader setting for Reader In
   readers:ReaderDto[] ;

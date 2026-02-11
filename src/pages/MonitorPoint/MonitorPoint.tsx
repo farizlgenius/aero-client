@@ -25,6 +25,7 @@ import { FormContent } from '../../model/Form/FormContent';
 import { usePopup } from '../../context/PopupContext';
 import { FormType } from '../../model/Form/FormProp';
 import { MpStatus } from '../../model/MonitorPoint/MpStatus';
+import { usePagination } from '../../context/PaginationContext';
 
 // Define Global Variable
 export const MP_TABLE_HEADER: string[] = ["Name", "Main Controller", "Module", "Mode","Input Mode", "Masked", "Status", "Action"]
@@ -34,6 +35,7 @@ const MonitorPoint = () => {
     const { filterPermission } = useAuth();
     const { toggleToast } = useToast();
     const { locationId } = useLocation();
+    const {setPagination} = usePagination();
     const { setCreate,setRemove,setUpdate,setConfirmCreate,setConfirmRemove,setConfirmUpdate,setInfo,setMessage } = usePopup();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
@@ -139,6 +141,7 @@ const MonitorPoint = () => {
     {/* input Data */ }
     const defaultDto: MonitorPointDto = {
         name: '',
+        mpId:0,
         moduleId: -1,
         inputNo: -1,
         inputMode: -1,
@@ -149,7 +152,6 @@ const MonitorPoint = () => {
         delayEntry: 0,
         delayExit: 0,
         isMask: false,
-        uuid: '',
         componentId: -1,
         mac: '',
         locationId: locationId,
@@ -163,14 +165,15 @@ const MonitorPoint = () => {
     const [monitorPointsDto, setMonitorPointsDto] = useState<MonitorPointDto[]>([]);
     const [monitorPointDto, setMonitorPointDto] = useState<MonitorPointDto>(defaultDto);
     const [status, setStatus] = useState<StatusDto[]>([]);
-    const fetchData = async () => {
-        const res = await send.get(MonitorPointEndpoint.MPS(locationId));
+    const fetchData = async (pageNumber: number, pageSize: number,locationId?:number,search?: string, startDate?: string, endDate?: string) => {
+        const res = await send.get(MonitorPointEndpoint.PAGINATION(pageNumber,pageSize,locationId,search, startDate, endDate));
         console.log(res)
         if (res?.data.data) {
-            setMonitorPointsDto(res.data.data);
+            setMonitorPointsDto(res.data.data.data);
+            setPagination(res.data.data.page);
 
             // Batch set state
-            const newStatuses = res.data.data.map((a: MonitorPointDto) => ({
+            const newStatuses = res.data.data.data.map((a: MonitorPointDto) => ({
                 macAddress: a.mac,
                 componentId: a.componentId,
                 status: 0
@@ -181,14 +184,14 @@ const MonitorPoint = () => {
             setStatus((prev) => [...prev, ...newStatuses]);
 
             // Fetch status for each
-            res.data.data.forEach((a: MonitorPointDto) => {
-                fetchStatus(a.mac, a.componentId);
+            res.data.data.data.forEach((a: MonitorPointDto) => {
+                fetchStatus(a.componentId);
             });
         }
 
     };
-    const fetchStatus = async (scpMac: string, mpNo: number) => {
-        const res = await send.get(MonitorPointEndpoint.GET_MP_STATUS(scpMac,mpNo));
+    const fetchStatus = async ( mpNo: number) => {
+        const res = await send.get(MonitorPointEndpoint.GET_MP_STATUS(mpNo));
         Logger.info(res);
     };
 
@@ -225,9 +228,7 @@ const MonitorPoint = () => {
         };
     }, []);
 
-    useEffect(() => {
-        fetchData();
-    }, [refresh])
+
 
     const renderOptionalComponent = (data: any, statusDto: StatusDto[]) => {
         return [
@@ -275,7 +276,7 @@ const MonitorPoint = () => {
             {form ?
                 <BaseForm tabContent={tabContent} />
                 :
-                <BaseTable<MonitorPointDto> headers={MP_TABLE_HEADER} keys={MP_KEY} data={monitorPointsDto} status={status}  onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} select={selectedObjects} setSelect={setSelectedObjects} onClick={handleClick} action={action} renderOptionalComponent={renderOptionalComponent} permission={filterPermission(FeatureId.MONITOR)} />
+                <BaseTable<MonitorPointDto> headers={MP_TABLE_HEADER} keys={MP_KEY} data={monitorPointsDto} status={status}  onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} select={selectedObjects} setSelect={setSelectedObjects} onClick={handleClick} action={action} renderOptionalComponent={renderOptionalComponent} permission={filterPermission(FeatureId.MONITOR)} fetchData={fetchData} locationId={locationId} refresh={refresh} />
 
             }
 

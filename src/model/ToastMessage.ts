@@ -34,7 +34,8 @@ export enum HardwareToast {
     COMPONENT = "Hardware Component",
     UPDATE = "Hardware Update",
     DELETE_RANGE = "Delete Hardwares",
-    TOGGLE_TRAN = "Set Transaction"
+    TOGGLE_TRAN = "Set Transaction",
+    GET_IDREPORT = "Get Id Report"
 }
 
 
@@ -62,6 +63,8 @@ export enum DoorToast {
     STATUS = "Get Door Status",
     CREATE = "Create Doors",
     DELETE = "Delete Door",
+    UPDATE = "Update Door",
+    DELETE_RANGE = "Delete Doors"
 }
 
 export enum AccessLevelToast {
@@ -94,6 +97,9 @@ export enum LocationToast {
 
 export enum AccessAreaToast {
     CREATE = "Create Area",
+    DELETE = "Delete Area",
+    DELETE_RANGE = "Delete Areas",
+    UPDATE = "Update Area"
 }
 
 
@@ -124,6 +130,20 @@ export enum IntervalToast {
     DELETE = "Delete Interval",
     UPDATE = "Update Interval",
     DELETE_RANGE = "Delete Intervals"
+}
+
+export enum TriggerToast {
+    CREATE = "Create Trigger",
+    DELETE = "Delete Trigger",
+    UPDATE = "Update Trigger",
+    DELETE_RANGE = "Delete trigger"
+}
+
+export enum ProcedureToast {
+    CREATE = "Create Procedure",
+    DELETE = "Delete Procedure",
+    DELETE_RANGE = "Delete Procedures",
+    UPDATE = "Update Procedure"
 }
 
 

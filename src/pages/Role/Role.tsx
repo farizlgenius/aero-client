@@ -15,6 +15,8 @@ import { useAuth } from "../../context/AuthContext";
 import { FeatureId } from "../../enum/FeatureId";
 import { usePopup } from "../../context/PopupContext";
 import { FormType } from "../../model/Form/FormProp";
+import { useLocation } from "../../context/LocationContext";
+import { usePagination } from "../../context/PaginationContext";
 
 
 var removeTarget: number = 0;
@@ -31,6 +33,8 @@ export const LOCATION_KEY: string[] = ["name"];
 
 export const Role = () => {
     const { toggleToast } = useToast();
+    const {locationId} = useLocation();
+    const {setPagination} = usePagination();
     const {filterPermission} = useAuth();
     const { setCreate,setConfirmCreate,setUpdate,setConfirmUpdate,setRemove,setConfirmRemove,setInfo,setMessage } = usePopup();
     const [form, setForm] = useState<boolean>(false);
@@ -125,12 +129,15 @@ export const Role = () => {
 
     const [selectedObjects, setSelectedObjects] = useState<RoleDto[]>([]);
 
-    const fetchDate = async () => {
-        const res = await send.get(RoleEndpoint.GET)
-        if (res && res.data.data) {
-            setRolesDto(res.data.data);
-        }
-    }
+  const fetchData = async (pageNumber: number, pageSize: number,locationId?:number,search?: string, startDate?: string, endDate?: string) => {
+          const res = await send.get(RoleEndpoint.PAGINATION(pageNumber,pageSize,locationId,search, startDate, endDate));
+          console.log(res?.data.data)
+          if (res && res.data.data) {
+              console.log(res.data.data)
+              setRolesDto(res.data.data.data);
+              setPagination(res.data.data.page);
+          }
+      }
 
 
     {/* Form */ }
@@ -144,11 +151,6 @@ export const Role = () => {
 
 
 
-    useEffect(() => {
-        fetchDate();
-    }, [refresh])
-
-
     return (
 
         <>
@@ -158,7 +160,7 @@ export const Role = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <BaseTable<RoleDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={rolesDto} select={selectedObjects} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.OPERATOR)} onInfo={handleInfo} setSelect={setSelectedObjects} />
+                    <BaseTable<RoleDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={rolesDto} select={selectedObjects} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.OPERATOR)} onInfo={handleInfo} setSelect={setSelectedObjects} fetchData={fetchData} locationId={locationId} />
                 </div>
 
             }

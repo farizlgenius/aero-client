@@ -6,10 +6,11 @@ import Input from "../input/InputField";
 import Button from "../../ui/button/Button";
 import HttpRequest from "../../../utility/HttpRequest";
 import { HttpMethod } from "../../../enum/HttpMethod";
-import { AreaEndPoint } from "../../../constants/constant";
 import { Options } from "../../../model/Options";
 import { ModeDto } from "../../../model/ModeDto";
 import Select from "../Select";
+import { send } from "../../../api/api";
+import { AreaEndpoint } from "../../../endpoint/AreaEndpoint";
 
 
 export const OccupancyForm: React.FC<PropsWithChildren<FormProp<AreaDto>>> = ({ handleClick: handleClickWithEvent, setDto, dto }) => {
@@ -19,8 +20,7 @@ export const OccupancyForm: React.FC<PropsWithChildren<FormProp<AreaDto>>> = ({ 
     setDto(prev => ({ ...prev, [e.target.name]: e.target.value }))
   }
   const fetchMultiOcc = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET, AreaEndPoint.GET_MULTI_OCC)
-
+    const res = await send.get(AreaEndpoint.GET_MULTI_OCC);
     if (res && res.data.data) {
       res.data.data.map((a: ModeDto) => {
         setMultiOccOption(prev => ([...prev, {
@@ -33,7 +33,7 @@ export const OccupancyForm: React.FC<PropsWithChildren<FormProp<AreaDto>>> = ({ 
     }
   }
   const fetchOccControl = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET, AreaEndPoint.GET_OCC_CONTROL)
+    const res = await send.get(AreaEndpoint.GET_OCC_CONTROL);
 
     if (res && res.data.data) {
       res.data.data.map((a: ModeDto) => {

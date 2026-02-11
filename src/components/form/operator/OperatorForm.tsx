@@ -16,7 +16,7 @@ import { send } from "../../../api/api";
 import { OperatorEndpoint } from "../../../endpoint/OperatorEndpoint";
 import { SettingEndpoint } from "../../../endpoint/SettingEndpoint";
 import { PasswordRuleDto } from "../../../model/Setting/PasswordRuleDto";
-import { OperatorToast, ToastMessage } from "../../../model/ToastMessage";
+import { OperatorToast } from "../../../model/ToastMessage";
 import { useToast } from "../../../context/ToastContext";
 
 type PasswordDto = {

@@ -6,9 +6,10 @@ import Label from "../Label"
 import Select from "../Select"
 import { CommandFormInterface } from "../../../model/CommandForm"
 import Input from "../input/InputField"
+import { FormType } from "../../../model/Form/FormProp"
 
 
-export const ControlCommandForm: React.FC<PropsWithChildren<CommandFormInterface>> = ({ options, handleClickIn, action,setAction }) => {
+export const ControlCommandForm: React.FC<PropsWithChildren<CommandFormInterface>> = ({ options, handleClickIn, action,setAction,type }) => {
     const handleRadio = (value:string) => {
         setAction(prev => ({...prev,arg2:Number(value)}))
     }
@@ -43,7 +44,7 @@ export const ControlCommandForm: React.FC<PropsWithChildren<CommandFormInterface
         <>
             <div>
                 <Label>Control Point</Label>
-                <Select icon={<ControlIcon />} options={options} name={"arg1"} defaultValue={-1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),mac:options.find(x => x.value == Number(value))?.description ?? ""}))} />
+                <Select disabled={type == FormType.INFO} icon={<ControlIcon />} options={options} name={"arg1"} defaultValue={-1} onChange={(value:string) => setAction(prev => ({...prev,arg1:Number(value),mac:options.find(x => x.value == Number(value))?.description ?? ""}))} />
             </div>
             <div>
                 <Label htmlFor='mode' >Command Option</Label>
@@ -94,10 +95,10 @@ export const ControlCommandForm: React.FC<PropsWithChildren<CommandFormInterface
             {render(action.arg2)}
             <div>
                 <Label htmlFor='time'>Time Delay (Second)</Label>
-                <Input min="0" name="time" type="number" defaultValue={action.delayTime} onChange={(e) => setAction(prev => ({ ...prev, delayTime: Number(e.target.value) }))} />
+                <Input disabled={type == FormType.INFO} min="0" name="time" type="number" defaultValue={action.delayTime} onChange={(e) => setAction(prev => ({ ...prev, delayTime: Number(e.target.value) }))} />
             </div>
             <div className="flex justify-center gap-3">
-                <Button name="add" onClick={handleClickIn} className="flex-1" variant="primary" >Add</Button>
+                <Button disabled={type == FormType.INFO} name="add" onClick={handleClickIn} className="flex-1" variant="primary" >Add</Button>
                 <Button name="close" onClick={handleClickIn} className="flex-1" variant="danger">Cancel</Button>
             </div>
         </>

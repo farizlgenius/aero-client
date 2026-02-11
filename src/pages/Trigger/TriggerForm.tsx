@@ -17,7 +17,7 @@ import { ProcedureEndpoint } from "../../endpoint/ProcedureEndpoint"
 import { TimeZoneDto } from "../../model/TimeZone/TimeZoneDto"
 import { ProcedureDto } from "../../model/Procedure/ProcedureDto"
 
-export const TriggerForm: React.FC<PropsWithChildren<FormProp<TriggerDto>>> = ({ handleClick, dto, setDto, isUpdate }) => {
+export const TriggerForm: React.FC<PropsWithChildren<FormProp<TriggerDto>>> = ({ handleClick, dto, setDto, type }) => {
     const { locationId } = useLocation();
     const [command, setCommand] = useState<Options[]>([])
     const [source, setSource] = useState<Options[]>([]);

@@ -24,6 +24,7 @@ import SignalRService from '../../services/SignalRService';
 import { usePopup } from '../../context/PopupContext';
 import { FormType } from '../../model/Form/FormProp';
 import { CpStatus } from '../../model/ControlPoint/CpStatus';
+import { usePagination } from '../../context/PaginationContext';
 
 // Define Global Variable
 
@@ -34,6 +35,7 @@ export const OUTPUT_KEY: string[] = ["name", "hardwareName", "moduleDescription"
 
 const ControlPoint = () => {
     const { toggleToast } = useToast();
+    const { setPagination } = usePagination();
     const { locationId } = useLocation();
     const { filterPermission } = useAuth();
     const { setCreate,setRemove,setMessage,setUpdate,setInfo,setConfirmCreate,setConfirmRemove,setConfirmUpdate } = usePopup();
@@ -71,6 +73,7 @@ const ControlPoint = () => {
     {/* Output Data */ }
     const defaultDto: ControlPointDto = {
         name: "",
+        cpId:0,
         moduleId: -1,
         outputNo: -1,
         relayMode: -1,
@@ -90,14 +93,15 @@ const ControlPoint = () => {
     const [controlPointDto, setControlPointDto] = useState<ControlPointDto>(defaultDto);
     const [outputsDto, setOutputsDto] = useState<ControlPointDto[]>([]);
     const [status, setStatus] = useState<StatusDto[]>([]);
-    const fetchData = async () => {
-        const res = await send.get(ControlPointEndpoint.GET(locationId));
+    const fetchData = async (pageNumber: number, pageSize: number,locationId?:number,search?: string, startDate?: string, endDate?: string) => {
+        const res = await send.get(ControlPointEndpoint.PAGINATION(pageNumber,pageSize,locationId,search, startDate, endDate));
         if (res && res.data.data) {
             console.log(res.data.data)
-            setOutputsDto(res.data.data);
+            setOutputsDto(res.data.data.data);
+            setPagination(res.data.data.page)
 
             // Batch set state
-            const newStatuses = res.data.data.map((a: ControlPointDto) => ({
+            const newStatuses = res.data.data.data.map((a: ControlPointDto) => ({
                 macAddress: a.mac,
                 componentId: a.componentId,
                 status: 0
@@ -108,7 +112,7 @@ const ControlPoint = () => {
             setStatus((prev) => [...prev, ...newStatuses]);
 
             // Fetch status for each
-            res.data.data.forEach((a: ControlPointDto) => {
+            res.data.data.data.forEach((a: ControlPointDto) => {
                 fetchStatus(a.mac, a.componentId);
             });
 
@@ -154,9 +158,7 @@ const ControlPoint = () => {
 
     }, []);
 
-    useEffect(() => {
-        fetchData();
-    }, [refresh])
+
 
 
 
@@ -318,7 +320,7 @@ const ControlPoint = () => {
                     </>
 
                     :
-                    <BaseTable<ControlPointDto> headers={OUTPUT_TABLE_HEADER} keys={OUTPUT_KEY} status={status} data={outputsDto} onEdit={handleEdit} onRemove={handleRemove} select={selectedObjects} setSelect={setSelectedObjects} onClick={handleClick} permission={filterPermission(FeatureId.CONTROL)} renderOptionalComponent={renderOptionalComponent} action={action} onInfo={handleInfo} />
+                    <BaseTable<ControlPointDto> headers={OUTPUT_TABLE_HEADER} keys={OUTPUT_KEY} status={status} data={outputsDto} onEdit={handleEdit} onRemove={handleRemove} select={selectedObjects} setSelect={setSelectedObjects} onClick={handleClick} permission={filterPermission(FeatureId.CONTROL)} renderOptionalComponent={renderOptionalComponent} action={action} onInfo={handleInfo} fetchData={fetchData} locationId={locationId} refresh={refresh} />
 
 
             }

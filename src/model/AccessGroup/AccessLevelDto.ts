@@ -1,8 +1,7 @@
 import { NoMacBaseDto } from "../NoMacBaseDto";
-import { AccessLevelDoorComponentDto } from "./AccessLevelDoorComponentDto";
+import { AccessLevelComponentDto } from "./AccessLevelComponentDto";
 
 export interface AccessLevelDto extends NoMacBaseDto {
     name:string;
-    componentId:number;
-    accessLevelDoorTimeZoneDto:AccessLevelDoorComponentDto[];
+    components:AccessLevelComponentDto[];
 }

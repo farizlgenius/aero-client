@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react"
+import {  useState } from "react"
 import { BaseForm } from "../UiElements/BaseForm";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { LocationDto } from "../../model/Location/LocationDto";
 import { FormContent } from "../../model/Form/FormContent";
-import { AddIcon, LocationIcon } from "../../icons";
+import { LocationIcon } from "../../icons";
 import { LocationForm } from "../../components/form/location/LocationForm";
 import { LocationEndpoint } from "../../endpoint/LocationEndpoint";
 import { useToast } from "../../context/ToastContext";
@@ -15,6 +15,8 @@ import { useAuth } from "../../context/AuthContext";
 import { usePopup } from "../../context/PopupContext";
 import { FeatureId } from "../../enum/FeatureId";
 import { FormType } from "../../model/Form/FormProp";
+import { usePagination } from "../../context/PaginationContext";
+import { useLocation } from "../../context/LocationContext";
 
 var removeTarget: number = 0;
 
@@ -30,16 +32,19 @@ export const LOCATION_HEADER: string[] = ["Name", "Action"]
 export const LOCATION_KEY: string[] = ["locationName"];
 
 export const Location = () => {
+    const {locationId} = useLocation();
     const { toggleToast } = useToast();
-    const { user,filterPermission } = useAuth();
-    const { setRemove, setConfirmRemove,setConfirmCreate,setInfo,setMessage ,setCreate,setUpdate,setConfirmUpdate} = usePopup();
+    const {setPagination} = usePagination();
+    const {  filterPermission } = useAuth();
+    const { setRemove, setConfirmRemove, setConfirmCreate, setInfo, setMessage, setCreate, setUpdate, setConfirmUpdate } = usePopup();
     const [form, setForm] = useState<boolean>(false);
-    const [refresh, setRefresh] = useState<boolean>(false);
+     const [refresh, setRefresh] = useState<boolean>(false);
+        const toggleRefresh = () => setRefresh(!refresh)
     const [locationDto, setLocationDto] = useState<LocationDto>(defaultDto);
     const [locationsDto, setLocationsDto] = useState<LocationDto[]>([]);
-    const [select,setSelect] = useState<LocationDto[]>([])
-    const [formType,setFormType] = useState<FormType>(FormType.CREATE);
-    const toggleRefresh = () => setRefresh(!refresh)
+    const [select, setSelect] = useState<LocationDto[]>([])
+    const [formType, setFormType] = useState<FormType>(FormType.CREATE);
+    
 
     const handleRemove = (data: LocationDto) => {
         removeTarget = data.componentId;
@@ -53,7 +58,7 @@ export const Location = () => {
         })
     }
 
-    const handleInfo = (data:LocationDto) => {
+    const handleInfo = (data: LocationDto) => {
         setFormType(FormType.INFO);
         setLocationDto(data);
         setForm(true);
@@ -75,24 +80,24 @@ export const Location = () => {
                 setForm(true);
                 break;
             case "delete":
-                if(select.length == 0){            
+                if (select.length == 0) {
                     setMessage("Please select object")
                     setInfo(true);
-                }else{
+                } else {
                     setConfirmRemove(() => async () => {
-                    var data:number[] = [];
-                    select.map(async (a:LocationDto) => {
-                        data.push(a.componentId)
+                        var data: number[] = [];
+                        select.map(async (a: LocationDto) => {
+                            data.push(a.componentId)
+                        })
+                        var res = await send.post(LocationEndpoint.DELETE_RANGE, data)
+                        if (Helper.handleToastByResCode(res, LocationToast.DELETE_RANGE, toggleToast)) {
+                            setRemove(false);
+                            toggleRefresh();
+                        }
                     })
-                    var res = await send.post(LocationEndpoint.DELETE_RANGE,data)
-                    if(Helper.handleToastByResCode(res,LocationToast.DELETE_RANGE,toggleToast)){
-                        setRemove(false);
-                        toggleRefresh();
-                    }
-                })
-                setRemove(true);
+                    setRemove(true);
                 }
-                
+
                 break;
             case "create":
                 setConfirmCreate(() => async () => {
@@ -107,13 +112,13 @@ export const Location = () => {
                 break;
             case "update":
                 setConfirmUpdate(() => async () => {
-                    const res = await api.put(LocationEndpoint.UPDATE,locationDto);
+                    const res = await api.put(LocationEndpoint.UPDATE, locationDto);
                     if (Helper.handleToastByResCode(res, LocationToast.UPDATE, toggleToast)) {
                         setForm(false)
                         toggleRefresh();
                     }
-                    
-                })     
+
+                })
                 setUpdate(true);
                 break;
             case "close":
@@ -127,11 +132,13 @@ export const Location = () => {
     }
 
 
-    const fetchDate = async () => {
-        const res = await send.get(LocationEndpoint.GET);
+    const fetchData = async (pageNumber: number, pageSize: number,locationId?:number, search?: string, startDate?: string, endDate?: string) => {
+        const res = await send.get(LocationEndpoint.PAGINATION(pageNumber, pageSize,locationId,search, startDate, endDate));
         console.log(res?.data.data)
         if (res && res.data.data) {
-            setLocationsDto(res.data.data);
+            console.log(res.data.data)
+            setLocationsDto(res.data.data.data);
+            setPagination(res.data.data.page);
         }
     }
 
@@ -149,9 +156,7 @@ export const Location = () => {
 
 
 
-    useEffect(() => {
-        fetchDate();
-    }, [refresh])
+
 
 
     return (
@@ -163,7 +168,7 @@ export const Location = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <BaseTable<LocationDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={locationsDto} select={select} setSelect={setSelect} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClickWithEvent} permission={filterPermission(FeatureId.LOCATION)} onInfo={handleInfo} />
+                    <BaseTable<LocationDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={locationsDto} select={select} setSelect={setSelect} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClickWithEvent} permission={filterPermission(FeatureId.LOCATION)} onInfo={handleInfo} fetchData={fetchData} refresh={refresh} locationId={locationId} />
                 </div>
 
             }

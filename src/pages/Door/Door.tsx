@@ -1,17 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import Button from '../../components/ui/button/Button';
-import { AddIcon, ControlIcon, DisableIcon, DoorIcon, LockedIcon, LockIcon, MomentIcon, UnlockIcon } from '../../icons';
-import RemoveModal from '../UiElements/RemoveModal';
-import HttpRequest from '../../utility/HttpRequest';
+import {  ControlIcon, DisableIcon, DoorIcon,  LockIcon, MomentIcon, UnlockIcon } from '../../icons';
 import Logger from '../../utility/Logger';
 import DoorForm from './DoorForm';
 import Helper from '../../utility/Helper';
 import { DoorDto } from '../../model/Door/DoorDto';
 import { StatusDto } from '../../model/StatusDto';
-import { DoorTable } from './DoorTable';
 import { useToast } from '../../context/ToastContext';
-import { HttpMethod } from '../../enum/HttpMethod';
 import { DoorEndpoint } from '../../endpoint/DoorEndpoint';
 import { useLocation } from '../../context/LocationContext';
 import { send } from '../../api/api';
@@ -25,9 +20,11 @@ import { FormContent } from '../../model/Form/FormContent';
 import { TableCell } from '../../components/ui/table';
 import Badge from '../../components/ui/badge/Badge';
 import { DoorToast } from '../../model/ToastMessage';
+import { usePagination } from '../../context/PaginationContext';
+import { FormType } from '../../model/Form/FormProp';
+import { usePopup } from '../../context/PopupContext';
+import { AcrStatus as AcrStatus } from '../../model/Door/AcrStatus';
 
-// Define Global Variable
-let removeTarget: DoorDto;
 
 
 // ACR Page
@@ -38,8 +35,11 @@ const Door = () => {
     const { filterPermission } = useAuth();
     const { toggleToast } = useToast();
     const { locationId } = useLocation();
+    const {setPagination} = usePagination();
+    const { setRemove, setConfirmRemove,setConfirmCreate ,setCreate,setUpdate,setConfirmUpdate,setInfo,setMessage} = usePopup();
     const defaultDto: DoorDto = {
         name: '',
+        acrId:-1,
         accessConfig: -1,
         pairDoorNo: -1,
         readers: [
@@ -99,7 +99,7 @@ const Door = () => {
             isActive: true,
             strkMax: 5,
             strkMin: 1,
-            strkMode: 0,
+            strkMode: -1,
             hardwareName: ''
         },
         sensor: {
@@ -130,7 +130,7 @@ const Door = () => {
             inputMode: -1,
             debounce: 0,
             holdTime: 0,
-            maskTimeZone: 0,
+            maskTimeZone: -1,
             hardwareName: ''
         }, {
             // base 
@@ -145,7 +145,7 @@ const Door = () => {
             inputMode: -1,
             debounce: 0,
             holdTime: 0,
-            maskTimeZone: 0,
+            maskTimeZone: -1,
             hardwareName: ''
         }],
         readerOutConfiguration: 1,
@@ -191,36 +191,70 @@ const Door = () => {
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     {/* Modal */ }
-    const [isRemoveModal, setIsRemoveModal] = useState(false);
-    const [createModal, setCreateModal] = useState<boolean>(false);
-    const [updateModal, setUpdateModal] = useState<boolean>(false);
+    const [form,setForm] = useState<boolean>(false);
+    const [formType,setFormType] = useState<FormType>(FormType.CREATE);
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
         console.log(e.currentTarget.name);
         console.log(e.currentTarget.value)
         switch (e.currentTarget.name) {
             case "add":
-                setCreateModal(true);
+                setFormType(FormType.CREATE)
+                setForm(true);
+                break;
+            case "delete":
+                if(selectedObjects.length == 0){            
+                    setMessage("Please select object")
+                    setInfo(true);
+                }
+                setConfirmRemove(() => async () => {
+                    var data:number[] = [];
+                    selectedObjects.map(async (a:DoorDto) => {
+                        data.push(a.componentId)
+                    })
+                    var res = await send.post(DoorEndpoint.DELETE_RANGE,data)
+                    if(Helper.handleToastByResCode(res,DoorToast.DELETE_RANGE,toggleToast)){
+                        setRemove(false);
+                        toggleRefresh();
+                    }
+                })
+                setRemove(true);
                 break;
             case "create":
-                createAcr();
+                setConfirmCreate(() => async () => {
+                    const res = await send.post(DoorEndpoint.CREATE,doorDto);
+                    if (Helper.handleToastByResCode(res, DoorToast.CREATE, toggleToast)) {
+                        setForm(false)
+                        setDoorDto(defaultDto)
+                        toggleRefresh();
+                    }
+                })
+                setCreate(true);
+                break;
+            case "update":
+                setConfirmUpdate(() => async () => {
+                    const res = await send.put(DoorEndpoint.UPDATE,doorDto)
+                    if (Helper.handleToastByResCode(res, DoorToast.UPDATE, toggleToast)) {
+                        setForm(false)
+                        setDoorDto(defaultDto)
+                        toggleRefresh();
+                    }
+                });
+                setUpdate(true)
                 break;
             case "close":
-                setUpdateModal(false)
-                setCreateModal(false)
+            case "cancel":
                 setDoorDto(defaultDto)
+                setForm(false);
                 break;
-            case "detail":
-                setUpdateModal(true)
-                break;
-            case "unlock":
+           case "unlock":
                 selectedObjects.map(a => {
-                    changeDoorMode(a.mac, a.componentId, 2);
+                    changeDoorMode(a.mac, a.componentId, 2,a.acrId);
                 })
                 break;
             case "lock":
                 selectedObjects.map(a => {
-                    changeDoorMode(a.mac, a.componentId, 3);
+                    changeDoorMode(a.mac, a.componentId, 3,a.acrId);
                 })
                 break;
             case "moment":
@@ -231,58 +265,59 @@ const Door = () => {
             case "secure":
                 selectedObjects.map(a => {
                     console.log(a)
-                    changeDoorMode(a.mac, a.componentId, a.defaultMode);
+                    changeDoorMode(a.mac, a.componentId, a.defaultMode,a.acrId);
                 })
                 break;
             case "disable":
                 selectedObjects.map(a => {
-                    changeDoorMode(a.mac, a.componentId, 1);
+                    changeDoorMode(a.mac, a.componentId, 1,a.acrId);
                 })
-                break;
-            case "remove-confirm":
-                removeDoors(removeTarget.mac, removeTarget.componentId);
-                break;
-            case "remove-cancel":
-                setIsRemoveModal(false);
                 break;
             default:
                 break;
         }
     }
 
-    const createAcr = async () => {
-        const res = await send.post(DoorEndpoint.POST_ADD_ACR, doorDto)
-        if (Helper.handleToastByResCode(res, DoorToast.CREATE, toggleToast)) {
-            setUpdateModal(false)
-            setCreateModal(false)
-            toggleRefresh()
+
+
+     const handleRemove = (data: DoorDto) => {
+        setConfirmRemove(() => async () => {
+            const res = await send.delete(DoorEndpoint.DELETE(data.componentId))
+        if (Helper.handleToastByResCode(res, DoorToast.DELETE, toggleToast)) {
+            setRemove(false)
+            toggleRefresh();
         }
+        })
+        setRemove(true);
     }
+
 
     {/* handle Table Action */ }
     const handleEdit = (data: DoorDto) => {
-        setDoorDto(data)
-        setUpdateModal(true);
+        setDoorDto(data);
+        setFormType(FormType.UPDATE)
+        setForm(true);
     }
 
-    const handleRemove = (data: DoorDto) => {
-        console.log(data);
-        removeTarget = data;
-        setIsRemoveModal(true);
+    const handleInfo = (data:DoorDto) => {
+        setDoorDto(data);
+        setFormType(FormType.INFO)
+        setForm(true);
     }
 
     {/* Door Data */ }
     const [doorsDto, setDoorsDto] = useState<DoorDto[]>([]);
     const [status, setStatus] = useState<StatusDto[]>([]);
-    const fetchData = async () => {
-        const res = await send.get(DoorEndpoint.GET_ACR_LIST(locationId))
+    const fetchData = async (pageNumber: number, pageSize: number,locationId?:number,search?: string, startDate?: string, endDate?: string) => {
+        const res = await send.get(DoorEndpoint.PAGINATION(pageNumber,pageSize,locationId,search, startDate, endDate));
         Logger.info(res);
         if (res && res.data.data) {
             console.log(res.data.data)
-            setDoorsDto(res.data.data);
+            setDoorsDto(res.data.data.data);
+            setPagination(res.data.data.page);
 
             // Batch set state
-            const newStatuses = res.data.data.map((a: DoorDto) => ({
+            const newStatuses = res.data.data.data.map((a: DoorDto) => ({
                 macAddress: a.mac,
                 componentId: a.componentId,
                 status: 0,
@@ -291,12 +326,12 @@ const Door = () => {
                 batt: 0
             }));
 
-            console.log(newStatuses);
+            console.log(">>>>>>>>>." + JSON.stringify(newStatuses));
 
             setStatus((prev) => [...prev, ...newStatuses]);
 
             // Fetch status for each
-            res.data.data.forEach((a: DoorDto) => {
+            res.data.data.data.forEach((a: DoorDto) => {
                 fetchStatus(a.mac, a.componentId);
             });
         }
@@ -306,16 +341,10 @@ const Door = () => {
         const res = await send.get(DoorEndpoint.GET_ACR_STATUS(scpMac, acrNo));
         Logger.info(res)
     }
-    const removeDoors = async (mac: string, AcrNo: number) => {
-        const res = await send.delete(DoorEndpoint.REMOVE_ACR(mac, AcrNo))
-        if (Helper.handleToastByResCode(res, DoorToast.DELETE, toggleToast)) {
-            setIsRemoveModal(false);
-        }
-        toggleRefresh();
-    }
-    const changeDoorMode = async (macAddress: string, componentId: number, mode: number) => {
+
+    const changeDoorMode = async (mac: string, componentId: number, mode: number,acrId:number) => {
         const data = {
-            macAddress, componentId, mode
+            mac, componentId, mode,acrId
         }
         const res = await send.post(DoorEndpoint.POST_ACR_CHANGE_MODE, data)
         Logger.info(res)
@@ -328,18 +357,14 @@ const Door = () => {
     useEffect(() => {
         var connection = SignalRService.getConnection();
         connection.on(
-            "AcrStatus",
-            (ScpMac: string, AcrNo: number, AcrMode: string, AccessPointStatus: string) => {
-                console.log(ScpMac)
-                console.log(AcrNo)
-                console.log(AcrMode)
-                console.log(AccessPointStatus)
+            "ACR.STATUS",
+            (status: AcrStatus) => {
                 setStatus((prev) =>
                     prev.map((a) =>
-                        a.macAddress == ScpMac && a.componentId == AcrNo ? {
+                        a.macAddress == status.mac && a.componentId == status.number ? {
                             ...a,
-                            status: AccessPointStatus == "" ? a.status : AccessPointStatus,
-                            tamper: AcrMode == "" ? a.tamper : AcrMode
+                            status: status.status == "" ? a.status : status.status,
+                            tamper: status.mode == "" ? a.tamper : status.mode
                         } : {
                             ...a
                         }
@@ -351,38 +376,11 @@ const Door = () => {
 
     }, []);
 
-    useEffect(() => {
-        fetchData();
-    },[refresh])
+
 
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<DoorDto[]>([]);
-    const handleCheckedAll = (data: DoorDto[], e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects(data);
-            } else {
-                setSelectedObjects([]);
-            }
-        }
-    }
-
-    const handleChecked = (data: DoorDto, e: React.ChangeEvent<HTMLInputElement>) => {
-        console.log(data)
-        console.log(e.target.checked)
-        if (setSelectedObjects) {
-            if (e.target.checked) {
-                setSelectedObjects((prev) => [...prev, data]);
-            } else {
-                setSelectedObjects((prev) =>
-                    prev.filter((item) => item.componentId !== data.componentId)
-                );
-            }
-        }
-    }
-
+  
     const action: ActionButton[] = [
         {
             lable: "secure",
@@ -411,7 +409,7 @@ const Door = () => {
     const content: FormContent[] = [
         {
             label: "Door",
-            content: <DoorForm handleClick={handleClick} data={doorDto} setDoorDto={setDoorDto} />,
+            content: <DoorForm handleClick={handleClick} dto={doorDto} setDto={setDoorDto} type={formType} />,
             icon: <DoorIcon />
         }
     ]
@@ -441,13 +439,12 @@ const Door = () => {
 
     return (
         <>
-            {isRemoveModal && <RemoveModal header='Remove Door' body='Please Click Confirm if you want to remove this Control Point' handleClick={handleClick} />}
             <PageBreadcrumb pageTitle="Doors" />
-            {createModal || updateModal ?
+            {form ?
                 <BaseForm tabContent={content} />
 
                 :
-                <BaseTable<DoorDto> headers={DOOR_TABLE_HEADER} keys={DOOR_KEY} selectedObject={selectedObjects} handleCheck={handleChecked} handleCheckAll={handleCheckedAll} onClick={handleClick} onEdit={handleEdit} onRemove={handleRemove} data={doorsDto} status={status} action={action} permission={filterPermission(FeatureId.DOOR)} renderOptionalComponent={filterComponet}/>
+                <BaseTable<DoorDto> headers={DOOR_TABLE_HEADER} keys={DOOR_KEY} select={selectedObjects} setSelect={setSelectedObjects} onInfo={handleInfo} onClick={handleClick} onEdit={handleEdit} onRemove={handleRemove} data={doorsDto} status={status} action={action} permission={filterPermission(FeatureId.DOOR)} renderOptionalComponent={filterComponet} fetchData={fetchData} locationId={locationId} refresh={refresh}/>
 
             }
 

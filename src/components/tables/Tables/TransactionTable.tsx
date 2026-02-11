@@ -9,6 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from "../../ui/table";
+import Badge from "../../ui/badge/Badge";
+import { TableSpecialDisplay } from "../../../model/TableSpecialDisplay";
 
 
 
@@ -16,9 +18,10 @@ interface TableContents {
   tableHeaders: string[];
   tableDatas: TransactionDto[];
   tableKeys: string[];
+  specialDisplay?:TableSpecialDisplay<TransactionDto>[];
 }
 
-const TransactionTable: React.FC<PropsWithChildren<TableContents>> = ({ tableHeaders, tableDatas, tableKeys }) => {
+const TransactionTable: React.FC<PropsWithChildren<TableContents>> = ({ tableHeaders, tableDatas, tableKeys, specialDisplay }) => {
   return (
     <>
       <div className="max-h-[70vh] overflow-auto scrollbar-thin scrollbar-transparent">
@@ -39,20 +42,36 @@ const TransactionTable: React.FC<PropsWithChildren<TableContents>> = ({ tableHea
           </TableHeader>
           <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
             {tableDatas && tableDatas.map((data: TransactionDto, i: number) => (
-              <TableRow key={i}>
+              <TableRow key={i} >
                 {tableKeys.map((key: string, i: number) =>
                   key == "transactionFlags" ?
                     <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {data.transactionFlags.map((a: TransactionFlagDto, i: number) => (
-                        <TableRow>
+                      {/* {data.transactionFlags.map((a: TransactionFlagDto, i: number) => (
+                        <TableRow key={i}>
                          { `[${a.topic}] ${a.description}\n`}
                         </TableRow>
-                      ))}
+                      ))} */}
+                      {/* {
+                        data.transactionFlags.map((a: TransactionFlagDto, i: number) => (
+                          <>
+                          <Badge key={i} color="success" variant="light">
+                            {a.description}
+                          </Badge>
+                          <br/>
+                          </>
+                          
+                        ))
+                      } */}
+                      -
                     </TableCell>
                     :
-                    <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
-                      {String(data[key as keyof typeof data])}
-                    </TableCell>
+                    specialDisplay?.some(a => a.key == key) ?
+                      specialDisplay.find(a => a.key == key)?.content(data, i)
+                      :
+                      <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
+                        {String(data[key as keyof typeof data])}
+                      </TableCell>
+                                                                
                 )}
               </TableRow>
             ))}

@@ -1,6 +1,7 @@
 import React, { JSX, useEffect, useState } from "react";
 import Label from "../Label";
-import { Options } from "../../../model/Options";
+import { NoMacBaseDto } from "../../../model/NoMacBaseDto";
+import { GroupIcon } from "../../../icons";
 
 
 // Generic constraint: item must have id + label (or override labelKey)
@@ -10,14 +11,14 @@ import { Options } from "../../../model/Options";
 // }
 
 
-interface ListTransferProps<T extends Options> {
+interface ListTransferProps<T extends NoMacBaseDto> {
       availableItems: T[];
       selectedItems?: T[];
       onChange?: (items: T[]) => void;
 }
 
 
-export default function ListTransfer<T extends Options>({
+export default function ListTransfer<T extends NoMacBaseDto>({
       availableItems,
       selectedItems = [],
       onChange,
@@ -43,8 +44,8 @@ export default function ListTransfer<T extends Options>({
 
 
       const moveToRight = (): void => {
-            const moving = leftItems.filter((i) => selectedLeft.has(Number(i.value)));
-            const nextLeft = leftItems.filter((i) => !selectedLeft.has(Number(i.value)));
+            const moving = leftItems.filter((i) => selectedLeft.has(Number(i.componentId)));
+            const nextLeft = leftItems.filter((i) => !selectedLeft.has(Number(i.componentId)));
             const nextRight = [...rightItems, ...moving];
 
             setLeftItems(nextLeft);
@@ -55,8 +56,8 @@ export default function ListTransfer<T extends Options>({
 
 
       const moveToLeft = (): void => {
-            const moving = rightItems.filter((i) => selectedRight.has(Number(i.value)));
-            const nextRight = rightItems.filter((i) => !selectedRight.has(Number(i.value)));
+            const moving = rightItems.filter((i) => selectedRight.has(Number(i.componentId)));
+            const nextRight = rightItems.filter((i) => !selectedRight.has(Number(i.componentId)));
             const nextLeft = [...leftItems, ...moving];
 
 
@@ -67,13 +68,28 @@ export default function ListTransfer<T extends Options>({
       };
 
 
+      // const itemClass = (selected: boolean): string =>
+      //       `px-3 py-2 rounded-lg cursor-pointer transition mb-1 ${selected ? "bg-blue-100 text-blue-700" : "hover:bg-blue-500"
+      //       }`;
+
       const itemClass = (selected: boolean): string =>
-            `px-3 py-2 rounded-lg cursor-pointer transition mb-1 ${selected ? "bg-blue-100 text-blue-700" : "hover:bg-blue-500"
+            `flex gap-4 rounded-lg border p-4 cursor-pointer transition select-none hover:shadow-md ${selected ? "border-blue-500 bg-blue-50 dark:bg-blue-500/10" : "border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900"
             }`;
 
       useEffect(() => {
             console.log(availableItems)
-      },[])
+      }, [])
+
+      const Info = ({ label, value }: { label: string; value: any }) => (
+            <div className="flex flex-col">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {label}
+                  </span>
+                  <span className="font-medium text-gray-800 dark:text-white/90">
+                        {value}
+                  </span>
+            </div>
+      );
 
       return (
             <div className="flex items-center justify-center p-6 w-full">
@@ -81,14 +97,22 @@ export default function ListTransfer<T extends Options>({
                         {/* Left Box */}
                         <div>
                               <Label>Available</Label>
-                              <div className="overflow-auto scrollbar-thin scrollbar-transparent h-64 w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs bg-transparent">
+                              <div className="flex flex-col gap-2 overflow-auto scrollbar-thin scrollbar-transparent h-64 w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs bg-transparent">
                                     {leftItems.map((item) => (
                                           <div
-                                                key={Number(item.value)}
-                                                onClick={() => toggle(setSelectedLeft, Number(item.value))}
-                                                className={itemClass(selectedLeft.has(Number(item.value)))}
+                                                key={Number(item.componentId)}
+                                                onClick={() => toggle(setSelectedLeft, Number(item.componentId))}
+                                                className={itemClass(selectedLeft.has(Number(item.componentId)))}
                                           >
-                                                {item.label}
+                                                {/* Icon */}
+                                                <div className="pt-1">
+                                                      <GroupIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                                                </div>
+
+                                                {/* Content */}
+                                                <div className="flex-1 grid grid-cols-2 gap-y-1 gap-x-4">
+                                                      <Info label="Name" value={item.name} />
+                                                </div>
                                           </div>
                                     ))}
                               </div>
@@ -119,14 +143,22 @@ export default function ListTransfer<T extends Options>({
                         {/* Right Box */}
                         <div>
                               <Label>Selected</Label>
-                              <div className="overflow-auto scrollbar-thin scrollbar-transparent h-64 w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs bg-transparent">
+                              <div className="flex flex-col gap-2 overflow-auto scrollbar-thin scrollbar-transparent h-64 w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs bg-transparent">
                                     {rightItems.map((item) => (
                                           <div
-                                                key={Number(item.value)}
-                                                onClick={() => toggle(setSelectedRight, Number(item.value))}
-                                                className={itemClass(selectedRight.has(Number(item.value)))}
+                                                key={Number(item.componentId)}
+                                                onClick={() => toggle(setSelectedRight, Number(item.componentId))}
+                                                className={itemClass(selectedRight.has(Number(item.componentId)))}
                                           >
-                                                {item.label}
+                                                {/* Icon */}
+                                                <div className="pt-1">
+                                                      <GroupIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                                                </div>
+
+                                                {/* Content */}
+                                                <div className="flex-1 grid grid-cols-2 gap-y-1 gap-x-4">
+                                                      <Info label="Name" value={item.name} />
+                                                </div>
                                           </div>
                                     ))}
                               </div>

@@ -6,28 +6,25 @@ import DropzoneComponent from "../form-elements/DropZone"
 import Input from "../input/InputField"
 import Radio from "../input/Radio"
 import Label from "../Label"
-import { FormProp } from "../../../model/Form/FormProp"
+import { FormProp, FormType } from "../../../model/Form/FormProp"
 import { CardHolderDto } from "../../../model/CardHolder/CardHolderDto"
 import TextArea from "../input/TextArea"
 import { Gender } from "../../../enum/Sex"
-import { ImageFileDto } from "../../../model/CardHolder/ImageFileDto"
 import { NativeWebcam } from "../../../pages/UiElements/NativeWebcam"
 import Modals from "../../../pages/UiElements/Modals"
+import { Avatar } from "../../../pages/UiElements/Avatar"
 
-
-var defaultImageFileDto: ImageFileDto = {
-    fileData: "",
-    fileName: "",
-    fileSize: 0,
-    contentType: ""
+interface PersonalInformationFormProp extends FormProp<CardHolderDto> {
+    image: File | undefined
+    setImage: React.Dispatch<React.SetStateAction<File | undefined>>
 }
 
 
-export const PersonalInformationForm: React.FC<FormProp<CardHolderDto>> = ({ dto, setDto, type, handleClick }) => {
+export const PersonalInformationForm: React.FC<PersonalInformationFormProp> = ({ dto, setDto, type, handleClick, image, setImage }) => {
+    const [newImage,setNewImage] = useState<File | undefined>();
     const [file, setFile] = useState<boolean>(false);
     const [cam, setCam] = useState<boolean>(false);
     const [selectedValue, setSelectedValue] = useState<string>(Gender.M);
-    const [imageFileDto, setImageFileDto] = useState<ImageFileDto>(defaultImageFileDto)
 
     function generateEmployeeId(): string {
         return `${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
@@ -77,23 +74,20 @@ export const PersonalInformationForm: React.FC<FormProp<CardHolderDto>> = ({ dto
                         <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
                             {file || cam ?
                                 file ?
-                                    <Modals handleClickWithEvent={handleClickInternal} body={<DropzoneComponent setImageFileDto={setImageFileDto} setFile={setFile} />} />
+                                    <Modals handleClickWithEvent={handleClickInternal} body={<DropzoneComponent newImage={newImage} setNewImage={setNewImage} image={image} setImage={setImage} setFile={setFile} />} />
 
                                     :
-                                    <Modals handleClickWithEvent={handleClickInternal} body={<NativeWebcam setImageFileDto={setImageFileDto} modelStatus={cam} handleClick={handleClickInternal} />} />
+                                    <Modals handleClickWithEvent={handleClickInternal} body={<NativeWebcam newImage={newImage} setNewImage={setNewImage} image={image} setImage={setImage} modelStatus={cam} handleClick={handleClickInternal} />} />
 
                                 :
                                 <>
                                     <div className="cursor-pointer w-50 h-50 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800">
-                                        <img
-                                            src={imageFileDto.fileData === "" ? "/images/user/default.jpg" : imageFileDto.fileData}
-                                            alt="user"
-                                            className="w-full h-full object-cover"
-                                        />
+                                        {/* "/images/user/default.jpg" */}
+                                        <Avatar userId={dto.userId} newImage={newImage} image={image} />
                                     </div>
                                     <div className='flex gap-5'>
-                                        <Button name='file' onClickWithEvent={handleClickInternal} startIcon={<FileIcon />}>Browse</Button>
-                                        <Button name='cam' onClickWithEvent={handleClickInternal} startIcon={<CamIcon />}>Take Picture</Button>
+                                        <Button disabled={type == FormType.INFO} name='file' onClickWithEvent={handleClickInternal} startIcon={<FileIcon />}>Browse</Button>
+                                        <Button disabled={type == FormType.INFO} name='cam' onClickWithEvent={handleClickInternal} startIcon={<CamIcon />}>Take Picture</Button>
                                     </div>
                                 </>
 
@@ -112,6 +106,7 @@ export const PersonalInformationForm: React.FC<FormProp<CardHolderDto>> = ({ dto
                                 return (<div className="mb-3" key={i}>
                                     <Label>Additionals {i + 1}</Label>
                                     <Input
+                                    disabled={type == FormType.INFO}
                                         key={i}
 
                                         onChange={(e) => {
@@ -140,35 +135,35 @@ export const PersonalInformationForm: React.FC<FormProp<CardHolderDto>> = ({ dto
                             <div className='flex gap-2 mb-3'>
                                 <div className='flex-5'>
                                     <Label htmlFor="userId">Cardholder ID / Employee ID</Label>
-                                    <Input name="userId" type="text" id="cardHolderId" onChange={handleChange} value={dto.userId} />
+                                    <Input disabled={type == FormType.INFO} name="userId" type="text" id="cardHolderId" onChange={handleChange} value={dto.userId} />
                                 </div>
                                 <div className='flex-1 flex items-end'>
-                                    <Button onClick={() => setDto((prev) => ({ ...prev, userId: generateEmployeeId() }))}>Auto</Button>
+                                    <Button disabled={type == FormType.INFO} onClick={() => setDto((prev) => ({ ...prev, userId: generateEmployeeId() }))}>Auto</Button>
                                 </div>
                             </div>
                             <div className='flex gap-2 mb-3'>
                                 <div className='flex-1'>
                                     <Label>Identification ( ID Card | Passport )</Label>
-                                    <Input type='text' name='identification' onChange={handleChange} value={dto.identification} />
+                                    <Input disabled={type == FormType.INFO} type='text' name='identification' onChange={handleChange} value={dto.identification} />
                                 </div>
 
                             </div>
                             <div className='flex gap-2 mb-3'>
                                 <div className='flex-1'>
                                     <Label htmlFor="title">Title</Label>
-                                    <Input name="title" type='text' id="title" onChange={handleChange} value={dto.title} />
+                                    <Input disabled={type == FormType.INFO} name="title" type='text' id="title" onChange={handleChange} value={dto.title} />
                                 </div>
                                 <div className='flex-2'>
                                     <Label htmlFor="firstName">First Name</Label>
-                                    <Input name="firstName" type="text" id="firstName" onChange={handleChange} value={dto.firstName} />
+                                    <Input disabled={type == FormType.INFO} name="firstName" type="text" id="firstName" onChange={handleChange} value={dto.firstName} />
                                 </div>
                                 <div className='flex-2'>
                                     <Label htmlFor="middleName">Middle Name</Label>
-                                    <Input name="middleName" type="text" id="middleName" onChange={handleChange} value={dto.middleName} />
+                                    <Input disabled={type == FormType.INFO} name="middleName" type="text" id="middleName" onChange={handleChange} value={dto.middleName} />
                                 </div>
                                 <div className='flex-2'>
                                     <Label htmlFor="lastName">Last Name</Label>
-                                    <Input name="lastName" type="text" id="lastName" onChange={handleChange} value={dto.lastName} />
+                                    <Input disabled={type == FormType.INFO} name="lastName" type="text" id="lastName" onChange={handleChange} value={dto.lastName} />
                                 </div>
                             </div>
                             <div className='flex gap-2 mb-3'>
@@ -206,6 +201,7 @@ export const PersonalInformationForm: React.FC<FormProp<CardHolderDto>> = ({ dto
                             <div className='flex gap-2 mb-3'>
                                 <div className='flex-1'>
                                     <DatePicker
+                                        
                                         isTime={false}
                                         id="Date"
                                         label="Date of birth"
@@ -220,6 +216,7 @@ export const PersonalInformationForm: React.FC<FormProp<CardHolderDto>> = ({ dto
                                     <Label>Email</Label>
                                     <div className="relative">
                                         <Input
+                                        disabled={type == FormType.INFO}
                                             name="email"
                                             placeholder="info@gmail.com"
                                             type="text"
@@ -235,6 +232,7 @@ export const PersonalInformationForm: React.FC<FormProp<CardHolderDto>> = ({ dto
                                 <div className='flex-1'>
                                     <Label>Phone</Label>
                                     <Input
+                                    disabled={type == FormType.INFO}
                                         onChange={handleChange}
                                         value={dto.phone}
                                         name="phone"
@@ -244,7 +242,7 @@ export const PersonalInformationForm: React.FC<FormProp<CardHolderDto>> = ({ dto
                             </div>
                             <div>
                                 <Label>Address</Label>
-                                <TextArea value={dto.address} onChange={(e: string) => setDto(prev => ({ ...prev, address: e }))} />
+                                <TextArea disabled={type == FormType.INFO} value={dto.address} onChange={(e: string) => setDto(prev => ({ ...prev, address: e }))} />
                             </div>
                         </div>
                     </div>
@@ -256,6 +254,7 @@ export const PersonalInformationForm: React.FC<FormProp<CardHolderDto>> = ({ dto
                                 <div className='flex-1'>
                                     <Label>Company</Label>
                                     <Input
+                                    disabled={type == FormType.INFO}
                                         onChange={handleChange}
                                         value={dto.company}
                                         name="company"
@@ -268,6 +267,7 @@ export const PersonalInformationForm: React.FC<FormProp<CardHolderDto>> = ({ dto
                                 <div className='flex-1'>
                                     <Label>Position</Label>
                                     <Input
+                                    disabled={type == FormType.INFO}
                                         onChange={handleChange}
                                         value={dto.position}
                                         name="position"
@@ -280,6 +280,7 @@ export const PersonalInformationForm: React.FC<FormProp<CardHolderDto>> = ({ dto
                                 <div className='flex-1'>
                                     <Label>Department</Label>
                                     <Input
+                                    disabled={type == FormType.INFO}
                                         onChange={handleChange}
                                         value={dto.department}
                                         name="department"

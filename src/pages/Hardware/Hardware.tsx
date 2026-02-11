@@ -32,6 +32,8 @@ import { TranStatusDto } from "../../model/Hardware/TranStatusDto";
 import { FormType } from "../../model/Form/FormProp";
 import { usePopup } from "../../context/PopupContext";
 import { SetTranDto } from "../../model/Hardware/SetTranDto";
+import { usePagination } from "../../context/PaginationContext";
+import { ScpStatus } from "../../model/Hardware/ScpStatus";
 
 
 const HEADER = ["Name", "Type", "Mac","Firmware", "IP","Port", "Transction", "Configuration", "Status", "Action"];
@@ -43,6 +45,7 @@ const ID_REPORT_TABLE_HEADER = ["Id", "Mac", "Port", "Ip","Serial No", "Action"]
 
 const Hardware = () => {
   const { FlashLoading } = useLoading();
+  const {setPagination} = usePagination();
   const { locationId } = useLocation();
   const { toggleToast } = useToast();
   const { filterPermission } = useAuth();
@@ -130,12 +133,11 @@ const Hardware = () => {
     setForm(true);
   }
   const fetchIdReport = async () => {
-    const res = await HttpRequest.send(HttpMethod.GET, HardwareEndpoint.ID_REPORT)
-    Logger.info(res);
-    console.log(res);
+    const res = await send.get(HardwareEndpoint.ID_REPORT(locationId));
     if (res && res.data.data) {
       setIdReportList(res.data.data);
     }
+    
   }
 
   ScanTableTemplate = (
@@ -186,13 +188,13 @@ const Hardware = () => {
   const [data, setData] = useState<HardwareDto[]>([]);
   const [status, setStatus] = useState<StatusDto[]>([]);
   const [tranStatus, setTranStatus] = useState<TranStatusDto[]>([]);
-  const fetchData = async () => {
-    const res = await send.get(HardwareEndpoint.GET(locationId))
+  const fetchData = async (pageNumber: number, pageSize: number,locationId?:number,search?: string, startDate?: string, endDate?: string) => {
+    const res = await send.get(HardwareEndpoint.PAGINATION(pageNumber,pageSize,locationId,search, startDate, endDate))
     if (res && res.data.data) {
-      setData(res.data.data);
-
+      setData(res.data.data.data);
+      setPagination(res.data.data.page);
       // Batch set state
-      const newStatuses = res.data.data.map((a: HardwareDto) => ({
+      const newStatuses = res.data.data.data.map((a: HardwareDto) => ({
         macAddress: a.mac,
         componentId: a.componentId,
         status: -1,
@@ -201,7 +203,7 @@ const Hardware = () => {
         batt: -1
       }));
 
-      const newTranStatuses = res.data.data.map((a: HardwareDto) => ({
+      const newTranStatuses = res.data.data.data.map((a: HardwareDto) => ({
         macAddress: a.mac,
         capacity: 0,
         oldest: 0,
@@ -216,7 +218,7 @@ const Hardware = () => {
       setStatus((prev) => [...prev, ...newStatuses]);
       console.log(res.data.data)
       // Fetch status for each
-      res.data.data.forEach((a: HardwareDto) => {
+      res.data.data.data.forEach((a: HardwareDto) => {
         fetchStatus(a.mac);
         fetchTransactionStatus(a.mac);
       });
@@ -439,10 +441,9 @@ const Hardware = () => {
   {/* UseEffect */ }
   useEffect(() => {
     var connection = SignalRService.getConnection();
-    connection.on("SCP.STATUS", (ScpMac: string, CommStatus: number) => {
-      console.log(ScpMac);
-      console.log(CommStatus);
-      fetchStatus(ScpMac);
+    connection.on("SCP.STATUS", (status:ScpStatus) => {
+      console.log(status);
+      fetchStatus(status.mac);
 
     });
 
@@ -487,7 +488,6 @@ const Hardware = () => {
     })
     //connection.on
     fetchIdReport();
-    fetchData();
     return () => {
       //SignalRService.stopConnection()
     };
@@ -624,7 +624,7 @@ const Hardware = () => {
           </>
 
           :
-          <BaseTable<HardwareDto> headers={HEADER} keys={KEY} data={data} onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} onClick={handleClickWithEvent} select={select} setSelect={setSelect} permission={filterPermission(FeatureId.DEVICE)} action={actionBtn} renderOptionalComponent={renderOptional} status={status} specialDisplay={[
+          <BaseTable<HardwareDto> headers={HEADER} keys={KEY} data={data} onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} onClick={handleClickWithEvent} select={select} setSelect={setSelect} permission={filterPermission(FeatureId.DEVICE)} action={actionBtn} renderOptionalComponent={renderOptional} status={status} locationId={locationId} fetchData={fetchData} specialDisplay={[
             {
               key: "tranStatus",
               content: (a, i) => <TableCell key={i} className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">

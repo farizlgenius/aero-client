@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, {  useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import CardFormatForm from './CardFormatForm';
 import { CardFormatDto } from '../../model/CardFormat/CardFormatDto';
-import HttpRequest from '../../utility/HttpRequest';
 import Helper from '../../utility/Helper';
-import { CardFormatToast, ToastMessage } from '../../model/ToastMessage';
+import { CardFormatToast } from '../../model/ToastMessage';
 import { useToast } from '../../context/ToastContext';
 import { CardFormatEndpoint } from '../../endpoint/CardFormatEndpoint';
-import { HttpMethod } from '../../enum/HttpMethod';
 import { useLocation } from '../../context/LocationContext';
 import { useAuth } from '../../context/AuthContext';
 import { BaseTable } from '../UiElements/BaseTable';
@@ -18,10 +16,10 @@ import { AddIcon } from '../../icons';
 import { BaseForm } from '../UiElements/BaseForm';
 import { usePopup } from '../../context/PopupContext';
 import { FormType } from '../../model/Form/FormProp';
+import { usePagination } from '../../context/PaginationContext';
 
 
 // Define Global Variable
-let removeTarget: number = -1;
 export const CARDFORMAT_TABLE_HEAD: string[] = [
     "Name", "Bits", "Facility", "Action"
 ]
@@ -34,6 +32,7 @@ const CardFormat = () => {
     const { locationId } = useLocation();
     const { filterPermission } = useAuth();
     const { setCreate, setUpdate, setInfo, setRemove, setConfirmRemove, setConfirmCreate, setConfirmUpdate,setMessage } = usePopup();
+    const { setPagination } = usePagination();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
     const defaultDto: CardFormatDto = {
@@ -54,7 +53,6 @@ const CardFormat = () => {
         chLoc: 0,
         icLn: 0,
         icLoc: 0,
-        uuid: '',
         locationId: locationId,
         isActive: false
     }
@@ -147,21 +145,17 @@ const CardFormat = () => {
     {/* Group Data */ }
     const [cardFormatsDto, setCardFormatsDto] = useState<CardFormatDto[]>([]);
 
-    const fetchData = async () => {
-        var res = await send.get(CardFormatEndpoint.GET);
-        if (res) {
-            setCardFormatsDto(res.data.data);
+    const fetchData = async (pageNumber: number, pageSize: number,locationId?:number,search?: string, startDate?: string, endDate?: string) => {
+            const res = await send.get(CardFormatEndpoint.PAGINATION(pageNumber,pageSize,locationId,search, startDate, endDate));
+            console.log(res?.data.data)
+            if (res && res.data.data) {
+                console.log(res.data.data)
+                setCardFormatsDto(res.data.data.data);
+                setPagination(res.data.data.page);
+            }
         }
 
-    };
 
-
-    {/* UseEffect */ }
-    useEffect(() => {
-
-        fetchData();
-
-    }, [refresh]);
 
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<CardFormatDto[]>([]);
@@ -180,7 +174,7 @@ const CardFormat = () => {
             {form ?
                 <BaseForm tabContent={content}/>
                 :
-                <BaseTable<CardFormatDto> headers={CARDFORMAT_TABLE_HEAD} keys={CARDFORMAT_KEY} data={cardFormatsDto} onInfo={handleInfo}  onEdit={handleEdit} onRemove={handleRemove} select={selectedObjects} setSelect={setSelectedObjects} onClick={handleClick} permission={filterPermission(FeatureId.SETTING)} />
+                <BaseTable<CardFormatDto> headers={CARDFORMAT_TABLE_HEAD} keys={CARDFORMAT_KEY} data={cardFormatsDto} onInfo={handleInfo}  onEdit={handleEdit} onRemove={handleRemove} select={selectedObjects} setSelect={setSelectedObjects} onClick={handleClick} permission={filterPermission(FeatureId.SETTING)} refresh={refresh} fetchData={fetchData} locationId={locationId} />
 
             }
 

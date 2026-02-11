@@ -12,30 +12,31 @@ import { CreateUpdateAccessLevelDto } from "../../model/AccessGroup/CreateUpdate
 import { AccessLevelComponentDto } from "../../model/AccessGroup/AccessLevelComponentDto";
 import { send } from "../../api/api";
 import { useLocation } from "../../context/LocationContext";
-import { FormProp } from "../../model/Form/FormProp";
+import { FormProp, FormType } from "../../model/Form/FormProp";
 import { AccessLevelDoorComponentDto } from "../../model/AccessGroup/AccessLevelDoorComponentDto";
+import { GroupIcon } from "../../icons";
 
 
 
 
 const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CreateUpdateAccessLevelDto>>> = ({ dto, setDto, handleClick, type }) => {
-  const defaulComponent:AccessLevelComponentDto = {
+  const defaulComponent: AccessLevelComponentDto = {
     mac: "",
     doorComponent: []
-  } 
+  }
   const defaultDoorComponent: AccessLevelDoorComponentDto = {
     acrId: -1,
-    timezonId: -1
+    timezoneId: -1
   }
   const { locationId } = useLocation();
   const [doorOption, setDoorOption] = useState<Options[]>([]);
   const [timeZoneOption, setTimeZoneOption] = useState<Options[]>([]);
-  const [components,setComponents] = useState<AccessLevelComponentDto[]>([]);
-  const [doorComponent,setDoorComponent] = useState<AccessLevelDoorComponentDto>(defaultDoorComponent);
-  const [selectComponent,setSelectComponent] = useState({
-    mac:"",
-    acrId:-1,
-    timezoneId:-1
+  const [components, setComponents] = useState<AccessLevelComponentDto[]>([]);
+  const [doorComponent, setDoorComponent] = useState<AccessLevelDoorComponentDto>(defaultDoorComponent);
+  const [selectComponent, setSelectComponent] = useState({
+    mac: "",
+    acrId: -1,
+    timezoneId: -1
   })
 
 
@@ -45,11 +46,11 @@ const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CreateUpdateAccessLev
     switch (e.target.name) {
       case "door":
         // setDoorTimezone(prev => ({ ...prev, doorId: Number(value), doorName: doorOption.find(a => a.value === Number(value))?.label ?? "", doorMacAddress: doorOption.find(a => a.value === Number(value))?.description ?? "" }))
-        setSelectComponent(prev => ({...prev,mac:doorOption.find(a => a.value === Number(value))?.description ?? "",acrId:Number(value)}))
+        setSelectComponent(prev => ({ ...prev, mac: doorOption.find(a => a.value === Number(value))?.description ?? "", acrId: Number(value) }))
         break;
       case "timezone":
         // setDoorTimezone(prev => ({ ...prev, timeZoneId: Number(value), timeZoneName: timeZoneOption.find(a => a.value === Number(value))?.label ?? "" }))
-        setSelectComponent(prev => ({...prev,timezoneId:Number(value)}))
+        setSelectComponent(prev => ({ ...prev, timezoneId: Number(value) }))
         break;
       default:
         break;
@@ -88,6 +89,17 @@ const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CreateUpdateAccessLev
     }
   }
 
+  const Info = ({ label, value }: { label: string; value: any }) => (
+    <div className="flex flex-col">
+      <span className="text-xs text-gray-500 dark:text-gray-400">
+        {label}
+      </span>
+      <span className="font-medium text-gray-800 dark:text-white/90">
+        {value}
+      </span>
+    </div>
+  );
+
   useEffect(() => {
     fetchDoor();
     fetchTimeZone();
@@ -101,7 +113,7 @@ const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CreateUpdateAccessLev
           <div className="flex flex-col gap-6 w-full">
             <div className='flex flex-col gap-1'>
               <Label htmlFor="name">Name</Label>
-              <Input name="name" type="text" id="name" value={dto.name} onChange={e => setDto(prev => ({...prev,name:e.target.value}))} />
+              <Input disabled={type == FormType.INFO} name="name" type="text" id="name" value={dto.name} onChange={e => setDto(prev => ({ ...prev, name: e.target.value }))} />
             </div>
             {/* <div className="flex flex-col gap-4 swim-lane">
                 <div className="flex items-center justify-between mb-2">
@@ -114,54 +126,56 @@ const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CreateUpdateAccessLev
             {/* List Transfer */}
             <div className='flex gap-2 items-end'>
               <div className='flex-2'>
-                  <Label>Door</Label>
-                  <Select
-                    name="door"
-                    options={doorOption.filter(x => x.isTaken == false)}
-                    placeholder="Select Option"
-                    onChangeWithEvent={handleSelect}
-                    className="dark:bg-dark-900"
-                    defaultValue={selectComponent.acrId}
-                  />
-                </div>
-                <div className='flex-2'>
-                  <Label>Time Zone</Label>
-                  <Select
-                    isString={false}
-                    name="timezone"
-                    options={timeZoneOption.filter(x => x.isTaken == false)}
-                    placeholder="Select Option"
-                    onChangeWithEvent={handleSelect}
-                    className="dark:bg-dark-900"
-                    defaultValue={selectComponent.timezoneId}
-                  />
+                <Label>Door</Label>
+                <Select
+                  disabled={type == FormType.INFO}
+                  name="door"
+                  options={doorOption.filter(x => x.isTaken == false)}
+                  placeholder="Select Option"
+                  onChangeWithEvent={handleSelect}
+                  className="dark:bg-dark-900"
+                  defaultValue={selectComponent.acrId}
+                />
+              </div>
+              <div className='flex-2'>
+                <Label>Time Zone</Label>
+                <Select
+                  disabled={type == FormType.INFO}
+                  isString={false}
+                  name="timezone"
+                  options={timeZoneOption.filter(x => x.isTaken == false)}
+                  placeholder="Select Option"
+                  onChangeWithEvent={handleSelect}
+                  className="dark:bg-dark-900"
+                  defaultValue={selectComponent.timezoneId}
+                />
 
-                </div>
-                <div>
-                  <Button onClickWithEvent={() => {
-                    if(dto.components.length > 0){
-                      dto.components.forEach(element => {
-                        if(element.mac == selectComponent.mac){
-                          element.doorComponent.push({
-                            acrId: selectComponent.acrId,
-                            timezonId: selectComponent.timezoneId
-                          });
-                        }
+              </div>
+              <div>
+                <Button onClickWithEvent={() => {
+                  if (dto.components.length > 0) {
+                    dto.components.forEach(element => {
+                      if (element.mac == selectComponent.mac) {
+                        element.doorComponent.push({
+                          acrId: selectComponent.acrId,
+                          timezoneId: selectComponent.timezoneId
+                        });
+                      }
                     });
-                    }else{
-                      dto.components.push({
-                        mac: selectComponent.mac,
-                        doorComponent: [
-                          {
-                            acrId: selectComponent.acrId,
-                            timezonId: selectComponent.timezoneId
-                          }
-                        ]
-                      })
-                    }
-                    
-                  }} name='addDoor' size='sm'>Add</Button>
-                </div>
+                  } else {
+                    dto.components.push({
+                      mac: selectComponent.mac,
+                      doorComponent: [
+                        {
+                          acrId: selectComponent.acrId,
+                          timezonId: selectComponent.timezoneId
+                        }
+                      ]
+                    })
+                  }
+
+                }} name='addDoor' size='sm'>Add</Button>
+              </div>
 
             </div>
 
@@ -169,14 +183,22 @@ const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CreateUpdateAccessLev
               <div className="items-center w-full">
                 <div>
                   <Label>Doors / Timezone</Label>
-                  <div className="overflow-auto scrollbar-thin scrollbar-transparent h-64 w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs bg-transparent">
+                  <div className="flex flex-col gap-2 overflow-auto scrollbar-thin scrollbar-transparent h-64 w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs bg-transparent">
                     {dto.components.map((item) => (
                       <div
                         key={Number(item.mac)}
                       // onClick={() => toggle(setSelectedLeft, Number(item.value))}
                       // className={itemClass(selectedLeft.has(Number(item.value)))}
                       >
-                        {item.mac}
+                        {/* Icon */}
+                        <div className="pt-1">
+                          <GroupIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 grid grid-cols-2 gap-y-1 gap-x-4">
+                          <Info label="Name" value={item.name} />
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -185,7 +207,7 @@ const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CreateUpdateAccessLev
               </div>
             </div>
 
-           
+
             <div className='flex flex-col gap-1'>
               {dto.components.map((a: AccessLevelComponentDto, i: number) => (
                 <div key={i} className="p-3 bg-white border border-gray-200 task rounded-xl shadow-theme-sm dark:border-gray-800 dark:bg-white/5">

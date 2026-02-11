@@ -1,4 +1,4 @@
 export interface ScanCardDto {
-    macAddress:string;
+    mac:string;
     doorId:number;
 }
