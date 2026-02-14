@@ -198,7 +198,7 @@ const Transaction = () => {
                   {
                     !data.image || data.image != "" && (
                       <div className='flex items-center gap-2'>
-                        <div className="cursor-pointer w-11 h-11 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800">
+                        <div className="cursor-pointer w-7 h-7 overflow-hidden border border-gray-200 rounded-full dark:border-gray-800">
                           <Avatar userId={data.image} />
                         </div>
                         {data.actor}

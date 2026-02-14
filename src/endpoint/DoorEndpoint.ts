@@ -2,7 +2,7 @@ const API_VERSION = import.meta.env.VITE_API_VERSION;
 const CONTROLLER = `Door`;
 
 export const DoorEndpoint = {
-    GET_ACR_LIST:(location:number) => `/api/${API_VERSION}/${location}/${CONTROLLER}`,
+    GET:(location:number) => `/api/${API_VERSION}/${location}/${CONTROLLER}`,
     PAGINATION:(pageNumber:number,pageSize:number,locationId?:number | undefined,search?:string | undefined,startDate?:string | undefined,endDate?:string | undefined) => `/api/${API_VERSION}${locationId == 0 || locationId == undefined ?  "" : `/${locationId}` }/${CONTROLLER}/pagination?PageNumber=${pageNumber}&PageSize=${pageSize}${search == undefined || search == "" ? "" : `&search=${search}`}${startDate == undefined ? "" : `&startDate=${startDate}`}${endDate == undefined ? "" : `&startDate=${endDate}`}`,
     DELETE:(component:number) => `/api/${API_VERSION}/${CONTROLLER}/${component}`,
     DELETE_RANGE: `/api/${API_VERSION}/${CONTROLLER}`,

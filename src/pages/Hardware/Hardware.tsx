@@ -68,7 +68,7 @@ const Hardware = () => {
     serialNumber: "",
     isUpload: false,
     isReset: false,
-    hardwareType: 0,
+    hardwareType: 1,
     hardwareTypeDescription: "",
     firmware: "",
     port: "",

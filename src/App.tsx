@@ -59,8 +59,11 @@ import { usePopup } from "./context/PopupContext";
 import { PasswordRule } from "./pages/Settings/PasswordRule";
 import { send } from "./api/api";
 import Helper from "./utility/Helper";
-import { LicenseToast, ToastMessage } from "./model/ToastMessage";
+import { LicenseToast } from "./model/ToastMessage";
 import { Map } from "./pages/Map/Map";
+import { Reports } from "./pages/Report/Report";
+import { Command } from "./pages/Diagnostic/Command";
+import { CommandStatus } from "./pages/Diagnostic/CommandStatus";
 
 
 export default function App() {
@@ -206,6 +209,9 @@ export default function App() {
             <Route path="/trigger" element={<Trigger />} />
             <Route path="/pass" element={<PasswordRule />}/>
             <Route path="/map" element={<Map/>}/>
+            <Route path="/report" element={<Reports />} />
+            <Route path="/command" element={<Command/>} />
+            <Route path="/status" element={<CommandStatus/>} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />

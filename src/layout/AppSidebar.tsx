@@ -137,13 +137,17 @@ const navItems: NavItem[] = [
     componentId: 13,
     icon: <ReportIcon />,
     name: "Reports",
-    subItems: [{ name: "Transaction", path: "/transaction", }, { name: "Audit Trail", path: "/audit", }, { name: "Time Attendance", path: "/attendance", }],
+    subItems: [{ name: "Transaction", path: "/report", }, { name: "Audit Trail", path: "/audit", }, { name: "Time Attendance", path: "/attendance", }],
   },
   {
     componentId: 14,
     icon: <SettingIcon />,
     name: "Settings",
     subItems: [{ name: "Card Format", path: "/cardformat", }, { name: "Reader LED", path: "/led", },{name:"Password Rule",path:"/pass"}],
+  }, {
+    icon: <SettingIcon />,
+    name: "Diagnostics",
+    subItems: [{ name: "Send Command", path: "/command", }, { name: "Status", path: "/status", }],
   },
   {
     icon: <CalenderIcon />,
@@ -203,7 +207,11 @@ const othersItems: NavItem[] = [
       { name: "Sign In", path: "/signin", },
       { name: "Sign Up", path: "/signup", },
     ],
-  },
+  },{
+    icon: <SettingIcon />,
+    name: "Diagnostics",
+    subItems: [{ name: "Send Command", path: "/command", }, { name: "Status", path: "/status", }],
+  }
 ];
 
 

@@ -94,10 +94,10 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
                   ))
                 ) : (
                   <input
-                    placeholder="Support all format"
+                    placeholder="Select All"
                     className="w-full h-full p-1 pr-2 text-sm bg-transparent border-0 outline-hidden appearance-none placeholder:text-gray-800 focus:border-0 focus:outline-hidden focus:ring-0 dark:placeholder:text-white/90 text-gray-700 dark:bg-gray-900 dark:text-gray-400"
                     readOnly
-                    value="Support all format"
+                    value="Select All"
                   />
                 )}
               </div>

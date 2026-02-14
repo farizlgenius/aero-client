@@ -43,7 +43,8 @@ const TimeZone = () => {
         mode: -1,
         activeTime: "",
         deactiveTime: "",
-        intervals: []
+        intervals: [],
+        hardwareName: ''
     }
 
     const [timeZoneDto, setTimeZoneDto] = useState<TimeZoneDto>(defaultDto);
@@ -163,7 +164,7 @@ const TimeZone = () => {
                 <BaseForm tabContent={tabContent} />
 
                 :
-                <BaseTable<TimeZoneDto> keys={TIMEZONE_KEY} headers={TIMEZONE_TABLE_HEAD} data={timeZonesDto} onRemove={handleRemove} onEdit={handleEdit} onInfo={handleInfo} onClick={handleClick} select={selectedObjects} setSelect={setSelectedObjects}  permission={filterPermission(FeatureId.TIME)} fetchData={fetchData} locationId={locationId}/>
+                <BaseTable<TimeZoneDto> keys={TIMEZONE_KEY} headers={TIMEZONE_TABLE_HEAD} data={timeZonesDto} onRemove={handleRemove} onEdit={handleEdit} onInfo={handleInfo} onClick={handleClick} select={selectedObjects} setSelect={setSelectedObjects}  permission={filterPermission(FeatureId.TIME)} fetchData={fetchData} locationId={locationId} refresh={refresh}/>
 
             }
 

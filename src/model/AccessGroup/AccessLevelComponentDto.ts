@@ -1,5 +1,8 @@
 
 export interface AccessLevelComponentDto{
     mac:string;
-    doorComponent:AccessLevelComponentDto[]
+    doorId:number;
+    acrId:number;
+    timezoneId:number;
+    alvlId:number;
 }

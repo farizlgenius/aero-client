@@ -212,7 +212,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
     }
 
     const fetchDoor = async () => {
-        var res = await api.get(DoorEndpoint.GET_ACR_LIST(locationId));
+        var res = await api.get(DoorEndpoint.GET(locationId));
         if (res && res.data.data) {
             res.data.data.map((a: ModeDto) => {
                 setDoor(prev => ([...prev, {

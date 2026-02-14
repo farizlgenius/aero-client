@@ -5,10 +5,9 @@ import SignalRService from "../../../services/SignalRService";
 import { useToast } from "../../../context/ToastContext";
 import { HardwareEndpoint } from "../../../endpoint/HardwareEndpoint";
 import { send } from "../../../api/api";
-import Helper from "../../../utility/Helper";
-import { ToastMessage } from "../../../model/ToastMessage";
 import { VerifyHardwareDeviceConfigDto } from "../../../model/Hardware/VerifyHardwareDeviceConfigDto";
 import { HardwareDto } from "../../../model/Hardware/HardwareDto";
+import { ScpConfiguration } from "../../../model/Hardware/ScpConfiguraion";
 
 interface HardwareComponentFormInterface {
     data: HardwareDto;
@@ -28,12 +27,13 @@ export const HardwareComponentForm:React.FC<PropsWithChildren<HardwareComponentF
     useEffect(() => {
         fetchData();
         var connection = SignalRService.getConnection();
-        connection.on("DeviceConfiguration", (mac: string, location: number, mem: VerifyHardwareDeviceConfigDto[]) => {
-            console.log(mem)
-            setDeviceConfig(mem)
+        connection.on("SCP.DEVICE_CONFIGURATION", (status:ScpConfiguration) => {
+            console.log("Received SCP.DEVICE_CONFIGURATION:", status)
+            setDeviceConfig(status.configurations)
         });
         return () => { }
     }, [])
+    
     useEffect(() => {
 
     })
@@ -42,7 +42,7 @@ export const HardwareComponentForm:React.FC<PropsWithChildren<HardwareComponentF
 
         <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
             {
-                data.hardwareType == 1 ? 
+                data.hardwareType == 3 ? 
                 <div className="space-y-6">
                 <Table>
                     <TableHeader className="border-b border-gray-100 dark:border-white/[0.05] bg-white dark:bg-gray-900 sticky top-0 z-10">

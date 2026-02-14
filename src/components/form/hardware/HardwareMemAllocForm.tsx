@@ -2,13 +2,12 @@ import { PropsWithChildren, useEffect, useState } from "react"
 import Badge from "../../ui/badge/Badge"
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../ui/table"
 import SignalRService from "../../../services/SignalRService"
-import { MemoryAllocateDto } from "../../../model/Hardware/MemoryAllocateDto"
+import { MemoryDto as MemoryDto } from "../../../model/Hardware/MemoryDto"
 import { send } from "../../../api/api"
 import { HardwareEndpoint } from "../../../endpoint/HardwareEndpoint"
-import Helper from "../../../utility/Helper"
-import { ToastMessage } from "../../../model/ToastMessage"
 import { useToast } from "../../../context/ToastContext"
 import { HardwareDto } from "../../../model/Hardware/HardwareDto"
+import { MemoryAllocateDto } from "../../../model/Hardware/MemoryAllocateDto"
 
 interface HardwareMemAllocFormInterface {
     data:HardwareDto;
@@ -16,7 +15,7 @@ interface HardwareMemAllocFormInterface {
 
 export const HardwareMemAllocForm:React.FC<PropsWithChildren<HardwareMemAllocFormInterface>> = ({data}) => {
     const {toggleToast} = useToast();
-    const [memAllocs, setMemAllocs] = useState<MemoryAllocateDto[]>([]);
+    const [memAllocs, setMemAllocs] = useState<MemoryDto[]>([]);
 
     const fetchData = async () => {
         const res = await send.post(HardwareEndpoint.VERIFY_MEM(data.mac))
@@ -26,9 +25,9 @@ export const HardwareMemAllocForm:React.FC<PropsWithChildren<HardwareMemAllocFor
     useEffect(() => {
         fetchData();
         var connection = SignalRService.getConnection();
-        connection.on("MemoryAllocate", (mac:string,mem: MemoryAllocateDto[]) => {
-            console.log(mem)
-            setMemAllocs(mem)
+        connection.on("SCP.MEMORY_ALLOCATE", (status:MemoryAllocateDto) => {
+            console.log(status)
+            setMemAllocs(status.memories)
         });
         return () => { }
     }, [])
@@ -37,7 +36,7 @@ export const HardwareMemAllocForm:React.FC<PropsWithChildren<HardwareMemAllocFor
 
         <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
             {
-                data.hardwareType == 1 ?
+                data.hardwareType == 3 ?
                 <div className="space-y-6">
                 <Table>
                     <TableHeader className="border-b border-gray-100 dark:border-white/[0.05] bg-white dark:bg-gray-900 sticky top-0 z-10">
@@ -63,7 +62,7 @@ export const HardwareMemAllocForm:React.FC<PropsWithChildren<HardwareMemAllocFor
                         </TableRow>
                     </TableHeader>
                     <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                        {memAllocs.map((a: MemoryAllocateDto, i: number) => (
+                        {memAllocs.map((a: MemoryDto, i: number) => (
                             <TableRow key={i}>
                                 <TableCell className="px-5 py-3 font-medium text-gray-500 text-center text-theme-xs dark:text-gray-400">
                                     {a.strType}
