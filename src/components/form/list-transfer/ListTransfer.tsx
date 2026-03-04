@@ -44,8 +44,8 @@ export default function ListTransfer<T extends NoMacBaseDto>({
 
 
       const moveToRight = (): void => {
-            const moving = leftItems.filter((i) => selectedLeft.has(Number(i.componentId)));
-            const nextLeft = leftItems.filter((i) => !selectedLeft.has(Number(i.componentId)));
+            const moving = leftItems.filter((i) => selectedLeft.has(Number(i.driverId)));
+            const nextLeft = leftItems.filter((i) => !selectedLeft.has(Number(i.driverId)));
             const nextRight = [...rightItems, ...moving];
 
             setLeftItems(nextLeft);
@@ -56,8 +56,8 @@ export default function ListTransfer<T extends NoMacBaseDto>({
 
 
       const moveToLeft = (): void => {
-            const moving = rightItems.filter((i) => selectedRight.has(Number(i.componentId)));
-            const nextRight = rightItems.filter((i) => !selectedRight.has(Number(i.componentId)));
+            const moving = rightItems.filter((i) => selectedRight.has(Number(i.driverId)));
+            const nextRight = rightItems.filter((i) => !selectedRight.has(Number(i.driverId)));
             const nextLeft = [...leftItems, ...moving];
 
 
@@ -100,9 +100,9 @@ export default function ListTransfer<T extends NoMacBaseDto>({
                               <div className="flex flex-col gap-2 overflow-auto scrollbar-thin scrollbar-transparent h-64 w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs bg-transparent">
                                     {leftItems.map((item) => (
                                           <div
-                                                key={Number(item.componentId)}
-                                                onClick={() => toggle(setSelectedLeft, Number(item.componentId))}
-                                                className={itemClass(selectedLeft.has(Number(item.componentId)))}
+                                                key={Number(item.driverId)}
+                                                onClick={() => toggle(setSelectedLeft, Number(item.driverId))}
+                                                className={itemClass(selectedLeft.has(Number(item.driverId)))}
                                           >
                                                 {/* Icon */}
                                                 <div className="pt-1">
@@ -146,9 +146,9 @@ export default function ListTransfer<T extends NoMacBaseDto>({
                               <div className="flex flex-col gap-2 overflow-auto scrollbar-thin scrollbar-transparent h-64 w-full rounded-lg border px-4 py-2.5 text-sm shadow-theme-xs bg-transparent">
                                     {rightItems.map((item) => (
                                           <div
-                                                key={Number(item.componentId)}
-                                                onClick={() => toggle(setSelectedRight, Number(item.componentId))}
-                                                className={itemClass(selectedRight.has(Number(item.componentId)))}
+                                                key={Number(item.driverId)}
+                                                onClick={() => toggle(setSelectedRight, Number(item.driverId))}
+                                                className={itemClass(selectedRight.has(Number(item.driverId)))}
                                           >
                                                 {/* Icon */}
                                                 <div className="pt-1">

@@ -1,7 +1,9 @@
-import { NoMacBaseDto } from "../NoMacBaseDto";
+import { BaseDto } from "../BaseDto";
 
-export interface HolidayDto extends NoMacBaseDto{
-  componentId:number;
+export interface HolidayDto extends BaseDto{
+  id:number;
+  driverId:number;
+  name:string;
   year:number;
   month:number;
   day:number;

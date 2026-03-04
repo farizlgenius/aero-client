@@ -1,10 +1,10 @@
-import { NoMacBaseDto } from "../NoMacBaseDto";
+import { BaseDto } from "../BaseDto";
 import { DaysInWeekDto } from "./DaysInWeekDto";
 
-export interface IntervalDto extends NoMacBaseDto {
-  componentId: number;
+export interface IntervalDto extends BaseDto {
+  id: number;
   days: DaysInWeekDto;
-  daysDesc:string;
-  startTime: string;
-  endTime: string;
+  daysDetail:string;
+  start: string;
+  end: string;
 }

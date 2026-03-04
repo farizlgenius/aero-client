@@ -17,8 +17,8 @@ export const IntervalForm: React.FC<PropsWithChildren<FormProp<IntervalDto>>> = 
         console.log(e.target.name)
         console.log(e.target.value);
         switch (e.target.name) {
-            case "startTime":
-            case "endTime":
+            case "start":
+            case "end":
                 setDto((prev) => ({ ...prev, [e.target.name]: e.target.value }))
                 break;
             default:
@@ -58,12 +58,12 @@ export const IntervalForm: React.FC<PropsWithChildren<FormProp<IntervalDto>>> = 
                                             <Input
                                                 type="time"
                                                 id="tm"
-                                                name="startTime"
+                                                name="start"
                                                 onChange={handleChange}
                                                 defaultValue={"00:00"}
-                                                value={dto.startTime}
+                                                value={dto.start}
                                                 min='00:00'
-                                                placeholder={dto.startTime}
+                                                placeholder={dto.start}
                                                 disabled={type == FormType.INFO}
                                             />
                                             <span className="absolute text-gray-500  pointer-events-none right-3 top-1/2 dark:text-gray-400">
@@ -75,12 +75,12 @@ export const IntervalForm: React.FC<PropsWithChildren<FormProp<IntervalDto>>> = 
                                             <Input
                                                 type="time"
                                                 id="tm"
-                                                name="endTime"
+                                                name="end"
                                                 onChange={handleChange}
                                                 defaultValue={"23:59"}
                                                 max='23:59'
-                                                value={dto.endTime}
-                                                placeholder={dto.endTime}
+                                                value={dto.end}
+                                                placeholder={dto.end}
                                                 disabled={type == FormType.INFO}
                                             />
                                             <span className="absolute text-gray-500 pointer-events-none right-3 top-1/2 dark:text-gray-400">

@@ -19,8 +19,8 @@ import { usePopup } from '../../context/PopupContext';
 import { usePagination } from '../../context/PaginationContext';
 
 // Holiday Page 
-export const HEADER: string[] = ["Day", "Month", "Year", "Action"]
-export const KEY: string[] = ["day", "month", "year"];
+export const HEADER: string[] = ["Name","Day", "Month", "Year", "Action"]
+export const KEY: string[] = ["name","day", "month", "year"];
 
 const Holiday = () => {
     const { toggleToast } = useToast();
@@ -34,12 +34,14 @@ const Holiday = () => {
     const defaultDto: HolidayDto = {
         locationId: locationId,
         isActive: true,
-        componentId: -1,
+        driverId: -1,
         year: 0,
         month: 0,
         day: 0,
         extend: 0,
-        typeMask: 0
+        typeMask: 0,
+        id: 0,
+        name: ''
     }
     const [holidatDto, setHolidayDto] = useState<HolidayDto>(defaultDto)
     {/* Modal */ }
@@ -60,7 +62,7 @@ const Holiday = () => {
                 setConfirmRemove(() => async () => {
                     var data:number[] = [];
                     selectedObjects.map(async (a:HolidayDto) => {
-                        data.push(a.componentId)
+                        data.push(a.driverId)
                     })
                     var res = await send.post(HolidayEndpoint.DELETE_RANGE,data)
                     if(Helper.handleToastByResCode(res,HolidayToast.DELETE_RANGE,toggleToast)){
@@ -110,7 +112,7 @@ const Holiday = () => {
 
     const handleRemove = (data: HolidayDto) => {
         setConfirmRemove(() => async () => {
-            const res = await send.delete(HolidayEndpoint.DELETE(data.componentId))
+            const res = await send.delete(HolidayEndpoint.DELETE(data.id))
             if (Helper.handleToastByResCode(res, HolidayToast.DELETE, toggleToast))
                 toggleRefresh();
         })
@@ -155,7 +157,7 @@ const Holiday = () => {
             {form ?
                 <BaseForm tabContent={content} />
                 :
-                <BaseTable<HolidayDto> headers={HEADER} keys={KEY} data={holidaysDto} select={selectedObjects} setSelect={setSelectedObjects} onInfo={handleInfo} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.TIME)} fetchData={fetchData} locationId={locationId}/>
+                <BaseTable<HolidayDto> headers={HEADER} keys={KEY} data={holidaysDto} select={selectedObjects} setSelect={setSelectedObjects} onInfo={handleInfo} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} refresh={refresh} permission={filterPermission(FeatureId.TIME)} fetchData={fetchData} locationId={locationId}/>
 
 
             }

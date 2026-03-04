@@ -47,7 +47,7 @@ export const CredentialForm: React.FC<PropsWithChildren<FormProp<UserDto>>> = ({
         }));
     };
     var defaultCredential: CredentialDto = {
-        componentId: 0,
+        driverId: 0,
         bits: 0,
         issueCode: 0,
         facilityCode: -1,

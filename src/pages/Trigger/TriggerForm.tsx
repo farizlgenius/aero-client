@@ -138,7 +138,7 @@ export const TriggerForm: React.FC<PropsWithChildren<FormProp<TriggerDto>>> = ({
                 setTz(prev => ([...prev, {
                     label: a.name,
                     description: "",
-                    value: a.componentId
+                    value: a.driverId
                 }]))
             })
         }

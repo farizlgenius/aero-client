@@ -5,7 +5,6 @@ import Button from '../../components/ui/button/Button';
 import DatePicker from '../../components/form/date-picker';
 import Select from '../../components/form/Select';
 import Modals from '../UiElements/Modals';
-import { usePopupActions } from '../../utility/PopupCalling';
 import Helper from '../../utility/Helper';
 import ActionElement from '../UiElements/ActionElement';
 import { IntervalDto } from '../../model/Interval/IntervalDto';
@@ -32,10 +31,9 @@ const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type
   const [intervalOption, setIntervalOption] = useState<Options[]>([])
   const [intervalForm, setIntervalForm] = useState<boolean>(false);
   const defaultIntervalDto: IntervalDto = {
-    uuid: "",
     locationId: locationId,
     isActive: true,
-    componentId: -1,
+    id: -1,
     days: {
       sunday: false,
       monday: false,
@@ -45,9 +43,9 @@ const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type
       friday: false,
       saturday: false
     },
-    daysDesc: "",
-    startTime: "",
-    endTime: ""
+    daysDetail: "",
+    start: "",
+    end: ""
   }
   const [interval, setInterval] = useState<IntervalDto>(defaultIntervalDto);
   const [allIntervals, setAllIntervals] = useState<IntervalDto[]>([]);
@@ -96,8 +94,8 @@ const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type
         setAllIntervals(res.data.data)
         res.data.data.map((a: IntervalDto) => {
           setIntervalOption((prev) => [...prev, {
-            label: a.startTime + " - " + a.endTime + " " + a.daysDesc,
-            value: a.componentId,
+            label: a.start + " - " + a.end + " " + a.daysDetail,
+            value: a.id,
           }])
         })
       }
@@ -106,12 +104,12 @@ const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type
 
   const handleSelect = (value: string, e: React.ChangeEvent<HTMLSelectElement>) => {
     console.log(value)
-    setInterval(allIntervals.filter(a => a.componentId == Number(value))[0]);
+    setInterval(allIntervals.filter(a => a.id == Number(value))[0]);
   }
 
   const handleClickWithData = (data: IntervalDto) => {
-    setIntervalOption(prev => Helper.updateOptionByValue(prev, data.componentId, false));
-    setDto((prev: TimeZoneDto) => ({ ...prev, intervals: [...prev.intervals.filter(a => a.componentId !== data.componentId)] }));
+    setIntervalOption(prev => Helper.updateOptionByValue(prev, data.id, false));
+    setDto((prev: TimeZoneDto) => ({ ...prev, intervals: [...prev.intervals.filter(a => a.id !== data.id)] }));
   };
   const handleClickWithEvent = (e: React.MouseEvent<HTMLButtonElement>) => {
     console.log(e)
@@ -124,12 +122,12 @@ const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type
         // setModeDetailPopup(true);
         break;
       case "interval":
-        if (interval.componentId == -1) {
+        if (interval.id == -1) {
           toggleToast("warning", "Please select interval")
         }
         else {
           setDto((prev: TimeZoneDto) => ({ ...prev, intervals: [...prev.intervals, interval] }))
-          setIntervalOption((prev) => Helper.updateOptionByValue(prev, interval.componentId, true))
+          setIntervalOption((prev) => Helper.updateOptionByValue(prev, interval.id, true))
           setIntervalForm(false);
           setInterval(defaultIntervalDto)
         }
@@ -165,11 +163,11 @@ const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type
                   id="activeTime"
                   label="Activate Date"
                   placeholder="Select a date"
-                  value={dto.activeTime}
+                  value={dto.active}
                   onChange={(dates, currentDateString) => {
                     // Handle your logic
                     console.log({ dates, currentDateString });
-                    setDto((prev: TimeZoneDto) => ({ ...prev, activeTime: toLocalISOWithOffset(dates[0]) }))
+                    setDto((prev: TimeZoneDto) => ({ ...prev, active: toLocalISOWithOffset(dates[0]) }))
                   }}
                 />
               </div>
@@ -178,11 +176,11 @@ const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type
                   id="deactiveTime"
                   label="Deactive Date"
                   placeholder="Select a date"
-                  value={dto.deactiveTime}
+                  value={dto.deactive}
                   onChange={(dates, currentDateString) => {
                     // Handle your logic
                     console.log({ dates, currentDateString });
-                    setDto((prev: TimeZoneDto) => ({ ...prev, deactiveTime: toLocalISOWithOffset(dates[0]) }))
+                    setDto((prev: TimeZoneDto) => ({ ...prev, deactive: toLocalISOWithOffset(dates[0]) }))
                   }}
                 />
               </div>
@@ -224,7 +222,7 @@ const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type
                         isString={false}
                         name="intervals"
                         options={intervalOption.filter(a => a.isTaken != true)}
-                        defaultValue={interval.componentId}
+                        defaultValue={interval.id}
                         placeholder="Select Option"
                         onChangeWithEvent={handleSelect}
                         className="dark:bg-dark-900"
@@ -260,13 +258,13 @@ const TimeZoneForm: React.FC<PropsWithChildren<FormProp<TimeZoneDto>>> = ({ type
                                 <div className='flex justify-center items-center gap-5'>
                                   <TimeIcon fontSize={25}/>
                                   <p className="-mt-0.5 text-base text-gray-800 dark:text-white/90">
-                                    {a.startTime} - {a.endTime}
+                                    {a.start} - {a.end}
                                   </p>
                                 </div>
                                 <div className='flex justify-center items-center gap-5'>
                                   <CalenderIcon fontSize={25}/>
                                   <p className="-mt-0.5 text-base text-gray-800 dark:text-white/90">
-                                    {a.daysDesc}
+                                    {a.daysDetail}
                                   </p>
                                 </div>
 

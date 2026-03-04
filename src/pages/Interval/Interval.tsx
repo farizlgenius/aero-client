@@ -26,7 +26,7 @@ import { usePagination } from '../../context/PaginationContext';
 
 
 export const INTERVAL_TABLE_HEAD: string[] = ["Start Time", "End Time", "Days", "Action"]
-export const INTERVAL_KEY: string[] = ["startTime", "endTime", "days"];
+export const INTERVAL_KEY: string[] = ["start", "end", "days"];
 
 const Interval = () => {
 
@@ -41,7 +41,7 @@ const Interval = () => {
     const defaultDto:IntervalDto = {
         locationId: locationId,
         isActive: true,
-        componentId: 0,
+        id: 0,
         days: {
             sunday: false,
             monday: false,
@@ -51,10 +51,9 @@ const Interval = () => {
             friday: false,
             saturday: false
         },
-        daysDesc: "",
-        startTime: "",
-        endTime: "",
-        hardwareName: ''
+        daysDetail: "",
+        start: "",
+        end: "",
     }
 
 
@@ -91,7 +90,7 @@ const Interval = () => {
                 setConfirmRemove(() => async () => {
                     var data:number[] = [];
                     selectedObjects.map(async (a:IntervalDto) => {
-                        data.push(a.componentId)
+                        data.push(a.id)
                     })
                     var res = await send.post(IntervalEndpoint.DELETE_RANGE,data)
                     if(Helper.handleToastByResCode(res,IntervalToast.DELETE_RANGE,toggleToast)){
@@ -102,11 +101,11 @@ const Interval = () => {
                 setRemove(true);
                 break;
             case "create":
-                intervalDto.daysDesc = dayDescBuilder(intervalDto.days)
+                intervalDto.daysDetail = dayDescBuilder(intervalDto.days)
                 setConfirmCreate(() => async () => {
                     if (!Helper.isDayEmpty(intervalDto.days)) {
                         toggleToast("error", "Day can't be empty")
-                    } else if (!Helper.isValidTimeRange(intervalDto.startTime, intervalDto.endTime)) {
+                    } else if (!Helper.isValidTimeRange(intervalDto.start, intervalDto.end)) {
                         toggleToast("error", "Start time must lower than end time")
                     }
                     else {
@@ -124,7 +123,7 @@ const Interval = () => {
                 setConfirmUpdate(() => async () => {
                     if (!Helper.isDayEmpty(intervalDto.days)) {
                         toggleToast("error", "Day can't be empty")
-                    } else if (!Helper.isValidTimeRange(intervalDto.startTime, intervalDto.endTime)) {
+                    } else if (!Helper.isValidTimeRange(intervalDto.start, intervalDto.end)) {
                         toggleToast("error", "Start time must lower than end time")
                     }
                     else {
@@ -161,7 +160,7 @@ const Interval = () => {
 
     const handleRemove = (data: IntervalDto) => {
         setConfirmRemove(() => async () => {
-            const res = await send.delete(IntervalEndpoint.DELETE(data.componentId))
+            const res = await send.delete(IntervalEndpoint.DELETE(data.id))
             if (Helper.handleToastByResCode(res, IntervalToast.DELETE, toggleToast)) {
                 toggleRefresh();
             }
@@ -229,7 +228,7 @@ const Interval = () => {
 
                 :
                 <div className="space-y-6">
-                    <BaseTable<IntervalDto> headers={INTERVAL_TABLE_HEAD} keys={INTERVAL_KEY} data={intervalsDto} select={selectedObjects} setSelect={setSelectedObjects} onInfo={handleInfo} onEdit={handleEdit} onRemove={handleRemove} specialDisplay={[
+                    <BaseTable<IntervalDto> headers={INTERVAL_TABLE_HEAD} keys={INTERVAL_KEY} data={intervalsDto} select={selectedObjects} setSelect={setSelectedObjects} onInfo={handleInfo} onEdit={handleEdit} onRemove={handleRemove} refresh={refresh} specialDisplay={[
                         {
                             key: "days",
                             content: (d, i) => <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">

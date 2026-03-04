@@ -64,7 +64,7 @@ const CardHolder = () => {
         dateOfBirth: '',
         address: '',
         flag: 1,
-        componentId: 0,
+        driverId: 0,
         hardwareName: ''
     }
 
@@ -89,7 +89,7 @@ const CardHolder = () => {
                 setConfirmRemove(() => async () => {
                     var data: number[] = [];
                     selectedObjects.map(async (a: UserDto) => {
-                        data.push(a.componentId)
+                        data.push(a.driverId)
                     })
                     var res = await send.post(CardHolderEndpoint.DELETE_RANGE, data)
                     if (Helper.handleToastByResCode(res, CardHolderToast.DELETE_RANGE, toggleToast)) {

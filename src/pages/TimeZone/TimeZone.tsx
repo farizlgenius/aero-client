@@ -21,7 +21,7 @@ import { usePagination } from '../../context/PaginationContext';
 
 
 const TIMEZONE_TABLE_HEAD: string[] = ["Name", "Active Date", "Deactive Date","Mode","Interval", "Action"]
-const TIMEZONE_KEY: string[] = ["name", "activeTime", "deactiveTime","mode","intervals"];
+const TIMEZONE_KEY: string[] = ["name", "active", "deactive","mode","intervals"];
 
 const TimeZone = () => {
     const { locationId } = useLocation();
@@ -37,14 +37,14 @@ const TimeZone = () => {
     {/* Data */ }
     const defaultDto: TimeZoneDto = {
         locationId: locationId,
-        componentId: -1,
+        driverId: -1,
         isActive: true,
         name: "",
         mode: -1,
-        activeTime: "",
-        deactiveTime: "",
+        active: "",
+        deactive: "",
         intervals: [],
-        hardwareName: ''
+        id: 0
     }
 
     const [timeZoneDto, setTimeZoneDto] = useState<TimeZoneDto>(defaultDto);
@@ -66,7 +66,7 @@ const TimeZone = () => {
                 setConfirmRemove(() => async () => {
                     var data:number[] = [];
                     selectedObjects.map(async (a:TimeZoneDto) => {
-                        data.push(a.componentId)
+                        data.push(a.id)
                     })
                     var res = await send.post(TimeZoneEndPoint.DELETE_RANGE,data)
                     if(Helper.handleToastByResCode(res,TimeZoneToast.DELETE_RANGE,toggleToast)){
@@ -114,9 +114,9 @@ const TimeZone = () => {
     }
 
     const handleRemove = async (data: TimeZoneDto) => {
-        
+        console.log(data)
         setConfirmRemove(() => async () => {
-            const res = await send.delete(TimeZoneEndPoint.DELETE(data.componentId));
+            const res = await send.delete(TimeZoneEndPoint.DELETE(data.id));
             console.log(res)
             if (Helper.handleToastByResCode(res, TimeZoneToast.DELETE, toggleToast)) {
                 toggleRefresh();

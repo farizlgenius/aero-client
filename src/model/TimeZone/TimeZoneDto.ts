@@ -1,11 +1,12 @@
+import { BaseDto } from "../BaseDto";
 import { IntervalDto } from "../Interval/IntervalDto";
-import { NoMacBaseDto } from "../NoMacBaseDto";
 
-export interface TimeZoneDto extends NoMacBaseDto {
-    componentId:number;
+export interface TimeZoneDto extends BaseDto {
+    id:number;
+    driverId:number;
     name:string;
     mode:number;
-    activeTime:string;
-    deactiveTime:string;
+    active:string;
+    deactive:string;
     intervals:IntervalDto[];
 }
