@@ -1,7 +1,7 @@
 import { PropsWithChildren, useEffect, useState } from "react";
 import Label from "../Label";
 import { FormProp, FormType } from "../../../model/Form/FormProp";
-import { CardHolderDto } from "../../../model/CardHolder/CardHolderDto";
+import { UserDto } from "../../../model/CardHolder/UserDto";
 import Button from "../../ui/button/Button";
 import DatePicker from "../date-picker";
 import Input from "../input/InputField";
@@ -25,7 +25,7 @@ import { CardIcon } from "../../../icons";
 
 
 
-export const CredentialForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({ dto, setDto, type, handleClick }) => {
+export const CredentialForm: React.FC<PropsWithChildren<FormProp<UserDto>>> = ({ dto, setDto, type, handleClick }) => {
     const { locationId } = useLocation();
     const [addCard, setAddCard] = useState<boolean>(false);
     const [doorOption, setDoorOption] = useState<Options[]>([]);

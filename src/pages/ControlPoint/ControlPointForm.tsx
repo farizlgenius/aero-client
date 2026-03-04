@@ -41,13 +41,13 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
         break;
       case "moduleId":
         fetchOutput(value);
-        setDto((prev) => ({...prev,moduleId:Number(value),moduleDescription:moduleOption.find(a => a.value == Number(value))?.label ?? ""}))
+        setDto((prev) => ({...prev,moduleId:Number(value),moduleDetail:moduleOption.find(a => a.value == Number(value))?.label ?? ""}))
         break;
       case "relayMode":
-        setDto(prev => ({...prev,relayMode:Number(value),relayModeDescription:relayModeOption.find(a => a.value == Number(value))?.label ?? ""}))
+        setDto(prev => ({...prev,relayMode:Number(value),relayModeDetail:relayModeOption.find(a => a.value == Number(value))?.label ?? ""}))
         break;
       case "offlineMode":
-        setDto(prev => ({...prev,offlineMode:Number(value),offlineModeDescription:offlineModeOption.find(a => a.value == Number(value))?.label ?? ""}))
+        setDto(prev => ({...prev,offlineMode:Number(value),offlineModeDetail:offlineModeOption.find(a => a.value == Number(value))?.label ?? ""}))
         break;
       default:
         setDto((prev) => ({ ...prev, [e.target.name]: value }));

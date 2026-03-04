@@ -15,8 +15,8 @@ export const LocationForm: React.FC<PropsWithChildren<FormProp<LocationDto>>> = 
             <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
                 <div className='flex gap-2 mb-3 w-1/2'>
                     <div className='flex-1'>
-                        <Label htmlFor="locationName">Name</Label>
-                        <Input disabled={type == FormType.INFO} placeholder="Location Name" name="locationName" type="text" id="locationName" onChange={handleChange} value={dto.locationName} />
+                        <Label htmlFor="name">Name</Label>
+                        <Input disabled={type == FormType.INFO} placeholder="Location Name" name="name" type="text" id="locationName" onChange={handleChange} value={dto.name} />
                     </div>
 
                 </div>

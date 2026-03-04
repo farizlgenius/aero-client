@@ -7,14 +7,14 @@ import Input from "../input/InputField"
 import Radio from "../input/Radio"
 import Label from "../Label"
 import { FormProp, FormType } from "../../../model/Form/FormProp"
-import { CardHolderDto } from "../../../model/CardHolder/CardHolderDto"
+import { UserDto } from "../../../model/CardHolder/UserDto"
 import TextArea from "../input/TextArea"
 import { Gender } from "../../../enum/Sex"
 import { NativeWebcam } from "../../../pages/UiElements/NativeWebcam"
 import Modals from "../../../pages/UiElements/Modals"
 import { Avatar } from "../../../pages/UiElements/Avatar"
 
-interface PersonalInformationFormProp extends FormProp<CardHolderDto> {
+interface PersonalInformationFormProp extends FormProp<UserDto> {
     image: File | undefined
     setImage: React.Dispatch<React.SetStateAction<File | undefined>>
 }

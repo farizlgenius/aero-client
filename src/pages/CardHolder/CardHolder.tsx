@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import { AddIcon, BoxIcon, CamIcon, ToggleIcon } from '../../icons';
-import { CardHolderDto } from '../../model/CardHolder/CardHolderDto';
+import { UserDto } from '../../model/CardHolder/UserDto';
 import { CardHolderEndpoint } from '../../endpoint/CardHolderEndpoint';
 import { useToast } from '../../context/ToastContext';
 import Helper from '../../utility/Helper';
@@ -40,10 +40,10 @@ const CardHolder = () => {
     const { toggleToast } = useToast();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
-    const [cardHoldersDto, setCardHoldersDto] = useState<CardHolderDto[]>([]);
+    const [cardHoldersDto, setCardHoldersDto] = useState<UserDto[]>([]);
     const [formType, setFormType] = useState<FormType>(FormType.CREATE);
 
-    const defaultDto: CardHolderDto = {
+    const defaultDto: UserDto = {
         userId: '',
         title: '',
         firstName: '',
@@ -68,7 +68,7 @@ const CardHolder = () => {
         hardwareName: ''
     }
 
-    const [cardHolderDto, setCardHolderDto] = useState<CardHolderDto>(defaultDto)
+    const [cardHolderDto, setCardHolderDto] = useState<UserDto>(defaultDto)
     const [image, setImage] = useState<File | undefined>();
     {/* Modal */ }
     const [form, setForm] = useState<boolean>(false);
@@ -88,7 +88,7 @@ const CardHolder = () => {
                 }
                 setConfirmRemove(() => async () => {
                     var data: number[] = [];
-                    selectedObjects.map(async (a: CardHolderDto) => {
+                    selectedObjects.map(async (a: UserDto) => {
                         data.push(a.componentId)
                     })
                     var res = await send.post(CardHolderEndpoint.DELETE_RANGE, data)
@@ -171,20 +171,20 @@ const CardHolder = () => {
 
 
     {/* handle Table Action */ }
-    const handleEdit = (data: CardHolderDto) => {
+    const handleEdit = (data: UserDto) => {
         console.log(data);
         setFormType(FormType.UPDATE)
         setCardHolderDto(data)
         setForm(true);
     }
 
-    const handleInfo = (data: CardHolderDto) => {
+    const handleInfo = (data: UserDto) => {
         setFormType(FormType.INFO);
         setCardHolderDto(data)
         setForm(true);
     }
 
-    const handleRemove = (data: CardHolderDto) => {
+    const handleRemove = (data: UserDto) => {
         setConfirmRemove(() => async () => {
             const res = await send.delete(CardHolderEndpoint.DELETE(data.userId))
             if (Helper.handleToastByResCode(res, CardHolderToast.DELETE, toggleToast))
@@ -206,7 +206,7 @@ const CardHolder = () => {
 
 
     {/* checkBox */ }
-    const [selectedObjects, setSelectedObjects] = useState<CardHolderDto[]>([]);
+    const [selectedObjects, setSelectedObjects] = useState<UserDto[]>([]);
 
 
     const action: ActionButton[] = [
@@ -236,7 +236,7 @@ const CardHolder = () => {
 
                 :
 
-                <BaseTable<CardHolderDto> headers={CARDHOLDER_HEAD} keys={CARDHOLDER_KEY} data={cardHoldersDto} select={selectedObjects} setSelect={setSelectedObjects} onClick={handleClick} onRemove={handleRemove} onEdit={handleEdit} onInfo={handleInfo} permission={filterPermission(FeatureId.CARDHODLER)} action={action} fetchData={fetchData} locationId={locationId} refresh={refresh} specialDisplay={[
+                <BaseTable<UserDto> headers={CARDHOLDER_HEAD} keys={CARDHOLDER_KEY} data={cardHoldersDto} select={selectedObjects} setSelect={setSelectedObjects} onClick={handleClick} onRemove={handleRemove} onEdit={handleEdit} onInfo={handleInfo} permission={filterPermission(FeatureId.CARDHODLER)} action={action} fetchData={fetchData} locationId={locationId} refresh={refresh} specialDisplay={[
                     {
                         key: "avatar",
                         content: (d, i) => <TableCell key={i} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">

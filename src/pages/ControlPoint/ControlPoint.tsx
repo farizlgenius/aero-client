@@ -73,7 +73,7 @@ const ControlPoint = () => {
     {/* Output Data */ }
     const defaultDto: ControlPointDto = {
         name: "",
-        cpId:0,
+        driverId:0,
         moduleId: -1,
         outputNo: -1,
         relayMode: -1,
@@ -85,10 +85,10 @@ const ControlPoint = () => {
         mac: '',
         locationId: locationId,
         isActive: true,
-        relayModeDescription: '',
-        offlineModeDescription: '',
+        relayModeDetail: '',
+        offlineModeDetail: '',
         hardwareName: '',
-        moduleDescription: ''
+        moduleDetail: ''
     }
     const [controlPointDto, setControlPointDto] = useState<ControlPointDto>(defaultDto);
     const [outputsDto, setOutputsDto] = useState<ControlPointDto[]>([]);

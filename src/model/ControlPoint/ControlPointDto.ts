@@ -2,36 +2,37 @@ import { BaseDto } from "../BaseDto";
 
 export interface ControlPointDto extends BaseDto
 {
+    id:number;
+    driverId:number;
     name:string;
-    cpId:number;
     moduleId:number;
-    moduleDescription:string;
+    moduleDetail:string;
     outputNo:number;
     relayMode:number;
-    relayModeDescription:string;
+    relayModeDetail:string;
     offlineMode:number;
-    offlineModeDescription:string;
+    offlineModeDetail:string;
+    deviceId:number;
     defaultPulse:number;
 
 }
 
 export const defaultOutputDto: ControlPointDto = {
     // Base
-    componentId: -1,
-    mac: "",
-    cpId:0,
     locationId: 0,
     isActive: true,
 
     // Detail
+    id: 0,
+    driverId: 0,
     name: "",
     moduleId: 0,
-    moduleDescription:"",
+    moduleDetail: "",
     outputNo: -1,
     relayMode: -1,
     offlineMode: -1,
     defaultPulse: 1,
-    relayModeDescription: "",
-    offlineModeDescription: "",
-    hardwareName: ""
+    relayModeDetail: "",
+    offlineModeDetail: "",
+    deviceId: 0
 }

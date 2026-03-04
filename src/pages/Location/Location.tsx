@@ -21,15 +21,14 @@ import { useLocation } from "../../context/LocationContext";
 var removeTarget: number = 0;
 
 const defaultDto: LocationDto = {
-    uuid: "",
-    componentId: 0,
-    locationName: "",
+    id: 0,
+    name: "",
     description: "",
     isActive: true
 }
 
 export const LOCATION_HEADER: string[] = ["Name", "Action"]
-export const LOCATION_KEY: string[] = ["locationName"];
+export const LOCATION_KEY: string[] = ["name"];
 
 export const Location = () => {
     const {locationId} = useLocation();
@@ -47,7 +46,7 @@ export const Location = () => {
     
 
     const handleRemove = (data: LocationDto) => {
-        removeTarget = data.componentId;
+        removeTarget = data.id;
         setRemove(true);
         setConfirmRemove(() => async () => {
             const res = await api.delete(LocationEndpoint.DELETE(removeTarget));
@@ -87,7 +86,7 @@ export const Location = () => {
                     setConfirmRemove(() => async () => {
                         var data: number[] = [];
                         select.map(async (a: LocationDto) => {
-                            data.push(a.componentId)
+                            data.push(a.id)
                         })
                         var res = await send.post(LocationEndpoint.DELETE_RANGE, data)
                         if (Helper.handleToastByResCode(res, LocationToast.DELETE_RANGE, toggleToast)) {

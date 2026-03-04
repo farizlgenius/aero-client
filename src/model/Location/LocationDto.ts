@@ -1,7 +1,6 @@
 export interface LocationDto{
-    uuid:string;
-    componentId:number;
-    locationName:string;
+    id:number;
+    name:string;
     description:string;
     isActive:boolean;
 }

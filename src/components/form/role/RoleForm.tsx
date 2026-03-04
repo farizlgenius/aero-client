@@ -102,7 +102,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                         setDto(prev => ({
                                                             ...prev,
                                                             features: prev.features.map(a => (
-                                                                a.componentId == data.componentId ?
+                                                                a.id == data.id ?
                                                                     {
                                                                         ...a,
                                                                         isAllow: checked,
@@ -132,7 +132,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                                 setDto(prev => ({
                                                                     ...prev,
                                                                     features: prev.features.map(a => (
-                                                                        a.componentId == data.componentId ?
+                                                                        a.id == data.id ?
                                                                             {
                                                                                 ...a,
                                                                                 isCreate: e.target.checked
@@ -154,7 +154,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                                 setDto(prev => ({
                                                                     ...prev,
                                                                     features: prev.features.map(a => (
-                                                                        a.componentId == data.componentId ?
+                                                                        a.id == data.id ?
                                                                             {
                                                                                 ...a,
                                                                                 isModify: e.target.checked
@@ -177,7 +177,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                                 setDto(prev => ({
                                                                     ...prev,
                                                                     features: prev.features.map(a => (
-                                                                        a.componentId == data.componentId ?
+                                                                        a.id == data.id ?
                                                                             {
                                                                                 ...a,
                                                                                 isDelete: e.target.checked
@@ -198,7 +198,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                                 setDto(prev => ({
                                                                     ...prev,
                                                                     features: prev.features.map(a => (
-                                                                        a.componentId == data.componentId ?
+                                                                        a.id == data.id ?
                                                                             {
                                                                                 ...a,
                                                                                 isAction: e.target.checked

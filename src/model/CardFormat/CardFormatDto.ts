@@ -1,12 +1,13 @@
-import { NoMacBaseDto } from "../NoMacBaseDto";
+import { BaseDto } from "../BaseDto";
 
-export interface CardFormatDto extends NoMacBaseDto {
+export interface CardFormatDto extends BaseDto {
+    id:number;
+    driverId:number;
     name: string;
-    componentId: number;
-    facility: number;
-    flags:number;
+    fac: number;
     offset:number;
-    functionId:number;
+    funcId:number;
+    flags:number;
     bits: number;
     peLn: number;
     peLoc: number;

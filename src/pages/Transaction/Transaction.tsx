@@ -10,7 +10,6 @@ import DatePicker from '../../components/form/date-picker'
 import { PageProp } from '../../model/PageProp'
 import { useLocation } from '../../context/LocationContext'
 import { TableCell } from '../../components/ui/table'
-import { CalenderIcon, TimeIcon } from '../../icons'
 import { Avatar } from '../UiElements/Avatar'
 
 

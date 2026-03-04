@@ -1,6 +1,6 @@
 import { PropsWithChildren, useEffect, useState } from "react"
 import { FormProp, FormType } from "../../../model/Form/FormProp"
-import { CardHolderDto } from "../../../model/CardHolder/CardHolderDto"
+import { UserDto } from "../../../model/CardHolder/UserDto"
 import Label from "../Label"
 import Switch from "../switch/Switch"
 import Button from "../../ui/button/Button"
@@ -8,7 +8,7 @@ import { ModeDto } from "../../../model/ModeDto"
 import { send } from "../../../api/api"
 import { CredentialEndpoint } from "../../../endpoint/CredentialEndpoint"
 
-export const UserSettingForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({  setDto,type,handleClick }) => {
+export const UserSettingForm: React.FC<PropsWithChildren<FormProp<UserDto>>> = ({  setDto,type,handleClick }) => {
       const [userFlag, setUserFlag] = useState<ModeDto[]>([])
     const fetchUserFlag = async () => {
         const res = await send.get(CredentialEndpoint.GET_FLAG);

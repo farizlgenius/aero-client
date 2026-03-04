@@ -63,10 +63,11 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
         if(!getAccessToken()) return false;
         const res = await send.get(AuthEndpoint.ME);
         if(res?.status !== 200) return false;
+        console.log(res)
         console.log(res.data.user);
         setUser(res.data.user);
-        fetchLocation(res.data.user.location)
-        fetchPermission(res.data.user.role.roleNo)
+        fetchLocation(res.data.user.location) // [1]
+        fetchPermission(res.data.user.role.roleNo) // 0
         return true;
     },[])
 
@@ -79,8 +80,8 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
         let locs:LocationDto[] = res.data.data;
         setLocationList(locs)
         if(locs.length > 0){
-            setLocationName(locs[0].locationName)
-            setLocationId(locs[0].componentId)
+            setLocationName(locs[0].name)
+            setLocationId(locs[0].id)
         }
         // res.data.data.map((a:LocationDto) => {
         //     setLocationOption(prev => ([...prev,{
@@ -136,7 +137,7 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
 
     const filterPermission = useCallback((FeatureId:number) => {
         console.log(permission)
-        return permission.find(s => s.componentId == FeatureId);
+        return permission.find(s => s.id == FeatureId);
     },[fetchMe])
 
 

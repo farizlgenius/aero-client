@@ -1,6 +1,10 @@
+import { SubFeatureDto } from "./SubFeatureDto";
+
 export interface FeatureDto{
-    componentId:number;
+    id:number;
     name:string;
+    path:string;
+    subItem:SubFeatureDto[];
     isCreate:boolean;
     isAllow:boolean;
     isModify:boolean;

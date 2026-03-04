@@ -1,8 +1,8 @@
 
 export interface AccessLevelComponentDto{
-    mac:string;
+    driverId:number;
+    deviceId:number;
     doorId:number;
     acrId:number;
-    timezoneId:number;
-    alvlId:number;
+    timeZoneId:number;
 }

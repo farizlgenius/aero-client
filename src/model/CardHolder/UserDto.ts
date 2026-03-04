@@ -2,23 +2,23 @@ import { AccessLevelDto } from "../AccessGroup/AccessLevelDto";
 import { NoMacBaseDto } from "../NoMacBaseDto";
 import { CredentialDto } from "./CredentialDto";
 
-export interface CardHolderDto extends NoMacBaseDto {
+export interface UserDto extends NoMacBaseDto {
     userId:string;
-    identification:string;
     title:string;
     firstName:string;
     middleName:string;
     lastName:string;
     gender:string;
-    dateOfBirth:string;
     email:string;
     phone:string;
-    address:string;
+    companyId:number;
     company:string;
+    positionId:number;
     position:string;
+    departmentId:number;
     department:string;
+    flag:number;
     additionals:string[];
     credentials:CredentialDto[];
     accessLevels:AccessLevelDto[];
-    flag:number;
 }

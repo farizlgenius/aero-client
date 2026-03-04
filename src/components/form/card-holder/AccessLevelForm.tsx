@@ -1,6 +1,6 @@
 import { PropsWithChildren, useEffect, useState } from "react";
 import { FormProp } from "../../../model/Form/FormProp";
-import { CardHolderDto } from "../../../model/CardHolder/CardHolderDto";
+import { UserDto } from "../../../model/CardHolder/UserDto";
 import { AccessLevelDto } from "../../../model/AccessGroup/AccessLevelDto";
 import { useLocation } from "../../../context/LocationContext";
 import { send } from "../../../api/api";
@@ -8,7 +8,7 @@ import { AccessLevelEndPoint } from "../../../endpoint/AccessLevelEndpoint";
 import ListTransfer from "../list-transfer/ListTransfer";
 
 
-export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CardHolderDto>>> = ({ dto, setDto, type, handleClick }) => {
+export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<UserDto>>> = ({ dto, setDto, type, handleClick }) => {
     const { locationId } = useLocation();
     const [availableAccessLevels, setAvailableAccessLevels] = useState<AccessLevelDto[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
