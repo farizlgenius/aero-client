@@ -97,7 +97,7 @@ export const OperatorForm: React.FC<PropsWithChildren<FormProp<OperatorDto>>> = 
             res.data.data.map((a: RoleDto) => {
                 setRoles(prev => ([...prev, {
                     label: a.name,
-                    value: a.componentId,
+                    value: a.id,
                     isTaken: false
                 }]))
             })
@@ -110,8 +110,8 @@ export const OperatorForm: React.FC<PropsWithChildren<FormProp<OperatorDto>>> = 
         if (res && res.data.data) {
             res.data.data.map((a: LocationDto) => {
                 setLocations(prev => ([...prev, {
-                    label: a.locationName,
-                    value: a.componentId,
+                    label: a.name,
+                    value: a.id,
                     isTaken: false
                 }]))
             })
@@ -447,13 +447,13 @@ export const OperatorForm: React.FC<PropsWithChildren<FormProp<OperatorDto>>> = 
                             </div>
                             <div className='flex gap-2'>
                                 <div className='flex-1'>
-                                    <Label htmlFor="phone">Role</Label>
+                                    <Label htmlFor="role">Role</Label>
                                     <Select
 
                                         isString={false}
                                         options={roles}
-                                        defaultValue={dto.roleId}
-                                        onChange={e => setDto(prev => ({ ...prev, roleId: Number(e) }))}
+                                        defaultValue={dto.role}
+                                        onChange={e => setDto(prev => ({ ...prev, role: Number(e) }))}
                                         name="roleId"
                                     />
 

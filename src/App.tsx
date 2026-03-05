@@ -33,8 +33,6 @@ import { useEffect, useState } from "react";
 import Holiday from "./pages/Holiday/Holiday";
 import Interval from "./pages/Interval/Interval";
 import { useAlert } from "./context/AlertContext";
-import SignalRService from "./services/SignalRService";
-import Toast from "./pages/UiElements/Toast";
 import { useToast } from "./context/ToastContext";
 import { Led } from "./pages/Led/Led";
 import { Location } from "./pages/Location/Location";
@@ -48,9 +46,7 @@ import { Role } from "./pages/Role/Role";
 import { Operator } from "./pages/Operator/Operator";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { useAuth } from "./context/AuthContext";
-import { LocationModal } from "./components/form/location/LocationModal";
 import { useLoading } from "./context/LoadingContext";
-import { useLocation } from "./context/LocationContext";
 import { MonitorGroup } from "./pages/MonitorGroup/MonitorGroup";
 import AccessLevel from "./pages/AccessGroup/AccessLevel";
 import { Procedure } from "./pages/Procedure/Procedure";
@@ -70,7 +66,6 @@ export default function App() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
   const { create, remove, update, createModal, removeModal, updateModal,info,infoModal } = usePopup();
-  const { show, locationId } = useLocation();
   const { showAlertFlag, alertSuccessFlag, alertMessage } = useAlert();
   const { showToast, ToastContainer,toggleToast } = useToast();
   const { loading, Loading } = useLoading();
@@ -98,7 +93,6 @@ export default function App() {
     }
   }
 
-  const [message, setMessage] = useState<string>("");
   {/* License Check */ }
   const checkLicense = async () => {
     const res = await send.get(LicenseEndpoint.CHECK);
@@ -140,9 +134,6 @@ export default function App() {
         }
         {info &&
         infoModal
-        }
-        {show &&
-          <LocationModal />
         }
         {loading &&
           <Loading />

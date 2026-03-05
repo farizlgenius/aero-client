@@ -1,7 +1,6 @@
-import { LocationDto } from "../Location/LocationDto";
 
 export interface OperatorDto{
-    componentId:number;
+    id:number;
     username:string;
     password:string;
     email:string;
@@ -10,7 +9,7 @@ export interface OperatorDto{
     middleName:string;
     lastName:string;
     phone:string;
-    imagePath:string;
-    roleId:number;
+    image:string;
+    role:number;
     locationIds:number[];
 }

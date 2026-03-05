@@ -8,9 +8,10 @@ import UserDropdown from "../components/header/UserDropdown";
 import { LocationIcon } from "../icons";
 import Button from "../components/ui/button/Button";
 import { useLocation } from "../context/LocationContext";
+import Select from "../components/form/Select";
 
 const AppHeader: React.FC = () => {
-  const { locationName,setShow } = useLocation();
+  const { locationName,locationOption,setLocationId,setLocationName } = useLocation();
   const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
 
 
@@ -165,7 +166,14 @@ const AppHeader: React.FC = () => {
 
           <div className="flex items-center gap-2 2xsm:gap-3">
             {/* <!-- Location Selector --> */}
-            <Button onClick={() => setShow(true)} variant="outline" startIcon={<LocationIcon className="h-5 w-5"/>}>{locationName}</Button>
+            <div className="flex-1">
+ <Select onChange={e => {
+              setLocationId(Number(e))
+              setLocationName(locationOption.find(x => x.value == Number(e))?.label ?? "");
+            }} icon={<LocationIcon className="h-5 w-5"/>} options={locationOption} name={"location"}  />
+            </div>
+           
+            
                          
              {/* <!-- Language Toggler --> */}
             {/* <!-- Dark Mode Toggler --> */}

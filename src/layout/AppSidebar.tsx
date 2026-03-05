@@ -35,7 +35,7 @@ import { useAuth } from "../context/AuthContext";
 
 
 type NavItem = {
-  componentId?: number;
+  id?: number;
   name: string;
   icon: React.ReactNode;
   path?: string;
@@ -46,101 +46,101 @@ let filterNav:NavItem[] = [];
 const navItems: NavItem[] = [
 
   {
-    componentId: 1,
+    id: 1,
     icon: <GridIcon />,
     name: "Dashboard",
     path: "/"
   },
   {
-    componentId: 2,
+    id: 2,
     name: "Events",
     icon: <EventIcon />,
     path: "/event"
   },
   {
-    componentId: 3,
+    id: 3,
     name: "Locations",
     icon: <LocationIcon />,
     path: "/location"
   },
   {
-    componentId: 4,
+    id: 4,
     name: "Alerts",
     icon: <NotiIcon />,
     path: "/"
   },
   {
-    componentId: 5,
+    id: 5,
     name: "Operators",
     icon: <OperatorIcon />,
     subItems: [{ name: "Operator", path: "/operator" }, { name: "Role", path: "/role" }],
   },
   {
-    componentId: 6,
+    id: 6,
     name: "Devices",
     icon: <ModuleIcon />,
     subItems: [{ name: "Hardware", path: "/hardware", }, { name: "Module", path: "/module", }],
   },{
-    componentId: 16,
+    id: 16,
     name:"Control Point",
     icon:<ControlIcon />,
     path:"/control"
   },{
-    componentId:17,
+    id:17,
     name:"Monitor Point",
     icon:<MonitorIcon/>,
     path:"/monitor"
   },{ 
-    componentId:18,
+    id:18,
     name: "Monitor Point Group",
     icon:<GroupIcon/>, 
     path: "/monitorgroup", },
   {
-    componentId: 7,
+    id: 7,
     icon: <DoorIcon />,
     name: "Doors",
     path: "/door",
   }, {
-    componentId: 8,
+    id: 8,
     icon: <CardIcon />,
     name: "Card Holder",
     path: "/cardholder",
   }, {
-    componentId: 9,
+    id: 9,
     icon: <GroupIcon />,
     name: "Access Level",
     path: "/level",
   }, {
-    componentId: 10,
+    id: 10,
     icon: <AreaIcon />,
     name: "Access Area",
     path: "/area",
   },
   {
-    componentId: 11,
+    id: 11,
     icon: <CalenderIcon />,
     name: "Time",
     subItems: [{ name: "Time Zone", path: "/timezone", }, { name: "Holiday", path: "/holiday", }, { name: "Interval", path: "/interval", }],
   },
   {
-    componentId: 12,
+    id: 12,
     icon: <TriggerIcon />,
     name: "Trigger & Procedure",
     subItems: [{ name: "Trigger", path: "/trigger", }, { name: "Procedure", path: "/procedure", }],
   },{
-    componentId:15,
+    id:15,
     name:"Map",
     icon:<OnIcon/>,
     path:"/map"
   },
   {
-    componentId: 13,
+    id: 13,
     icon: <ReportIcon />,
     name: "Reports",
     subItems: [{ name: "Transaction", path: "/report", }, { name: "Audit Trail", path: "/audit", }, { name: "Time Attendance", path: "/attendance", }],
   },
   {
-    componentId: 14,
+    id: 14,
     icon: <SettingIcon />,
     name: "Settings",
     subItems: [{ name: "Card Format", path: "/cardformat", }, { name: "Reader LED", path: "/led", },{name:"Password Rule",path:"/pass"}],
@@ -238,7 +238,7 @@ const AppSidebar: React.FC = () => {
 
 
   useEffect(() => {
-    filterNav = navItems.filter(s => s.componentId && user?.role?.features?.includes(s.componentId))
+    filterNav = navItems.filter(s => s.id && user?.role?.features?.includes(s.id))
 
     let submenuMatched = false;
     ["main", "others"].forEach((menuType) => {

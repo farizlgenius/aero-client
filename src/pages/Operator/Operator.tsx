@@ -19,10 +19,8 @@ import { FormType } from "../../model/Form/FormProp";
 import { usePagination } from "../../context/PaginationContext";
 
 
-var removeTarget: number = 0;
-
 const defaultDto: OperatorDto = {
-    componentId: 0,
+    id: 0,
     username: "",
     password: "",
     email: "",
@@ -31,9 +29,9 @@ const defaultDto: OperatorDto = {
     middleName: "",
     lastName: "",
     phone: "",
-    imagePath: "",
-    roleId: -1,
-    locationIds:[],
+    image: "",
+    role: -1,
+    locationIds: [],
 }
 
 export const HEADER: string[] = ["Username", "Action"]
@@ -54,7 +52,7 @@ export const Operator = () => {
 
     const handleRemove = (data: OperatorDto) => {
         setConfirmRemove(() => async () => {
-            const res = await send.delete(OperatorEndpoint.DELETE(data.componentId))
+            const res = await send.delete(OperatorEndpoint.DELETE(data.id))
         if (Helper.handleToastByResCode(res, OperatorToast.DELETE, toggleToast)) {
             setRemove(false)
             toggleRefresh();
@@ -93,7 +91,7 @@ export const Operator = () => {
                 setConfirmRemove(() => async () => {
                     var data:number[] = [];
                     selectedObjects.map(async (a:OperatorDto) => {
-                        data.push(a.componentId)
+                        data.push(a.id)
                     })
                     var res = await send.post(OperatorEndpoint.DELETE_RANGE,data)
                     if(Helper.handleToastByResCode(res,OperatorToast.DELETE_RANGE,toggleToast)){

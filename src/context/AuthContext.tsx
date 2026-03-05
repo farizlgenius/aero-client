@@ -56,7 +56,7 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
     const [user,setUser] = useState<User>(null);
     // const [loading,setLoading] = useState<boolean>(true);
     const  {loading,setLoading} = useLoading();
-    const {setLocationId,setLocationList,setLocationName} = useLocation();
+    const {setLocationId,setLocationList,setLocationName,SetLocationOption} = useLocation();
     const {toggleToast} = useToast();
 
     const fetchMe = useCallback(async () =>{
@@ -67,7 +67,7 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
         console.log(res.data.user);
         setUser(res.data.user);
         fetchLocation(res.data.user.location) // [1]
-        fetchPermission(res.data.user.role.roleNo) // 0
+        fetchPermission(res.data.user.role.id) // 0
         return true;
     },[])
 
@@ -79,6 +79,14 @@ export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) =>
         const res = await send.post(LocationEndpoint.GET_RANGE,dto)
         let locs:LocationDto[] = res.data.data;
         setLocationList(locs)
+        locs.map(d => {
+            SetLocationOption((prev) => ([...prev,{
+                label:d.name,
+                value:d.id,
+                description:d.description,
+                isTaken:false
+            }]))
+        })
         if(locs.length > 0){
             setLocationName(locs[0].name)
             setLocationId(locs[0].id)

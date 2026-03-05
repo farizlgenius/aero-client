@@ -1,13 +1,14 @@
 import { createContext, useContext, useState } from "react";
 import { LocationDto } from "../model/Location/LocationDto";
+import { Options } from "../model/Options";
 interface LocationContextInterface {
     locationId: number;
     locationName: string;
     setLocationId: React.Dispatch<React.SetStateAction<number>>;
     setLocationName: React.Dispatch<React.SetStateAction<string>>;
-    show:boolean;
-    setShow:React.Dispatch<React.SetStateAction<boolean>>;
     locationList:LocationDto[];
+    locationOption:Options[];
+    SetLocationOption:React.Dispatch<React.SetStateAction<Options[]>>
     setLocationList:React.Dispatch<React.SetStateAction<LocationDto[]>>
 }
 
@@ -19,11 +20,12 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [locationId, setLocationId] = useState<number>(-1);
     const [locationName, setLocationName] = useState<string>("");
     const [locationList,setLocationList] = useState<LocationDto[]>([]);
+    const [locationOption,SetLocationOption] = useState<Options[]>([]);
 
     return (
         <LocationContext.Provider
             value={{
-                locationId, setLocationId, locationName, setLocationName,show,setShow,locationList,setLocationList
+                locationOption,SetLocationOption,locationId, setLocationId, locationName, setLocationName,locationList,setLocationList
             }}
         >
             {children}

@@ -19,13 +19,7 @@ import { useLocation } from "../../context/LocationContext";
 import { usePagination } from "../../context/PaginationContext";
 
 
-var removeTarget: number = 0;
 
-const defaultDto: RoleDto = {
-    componentId: 0,
-    name: "",
-    features: []
-}
 
 export const LOCATION_HEADER: string[] = ["Name", "Action"]
 export const LOCATION_KEY: string[] = ["name"];
@@ -39,19 +33,28 @@ export const Role = () => {
     const { setCreate,setConfirmCreate,setUpdate,setConfirmUpdate,setRemove,setConfirmRemove,setInfo,setMessage } = usePopup();
     const [form, setForm] = useState<boolean>(false);
     const [refresh, setRefresh] = useState<boolean>(false);
+    const defaultDto: RoleDto = {
+    driverId: 0,
+    name: "",
+    features: [],
+    id: 0,
+    locationId: locationId,
+    isActive: true
+}
+
     const [roleDto, setRoleDto] = useState<RoleDto>(defaultDto);
     const [rolesDto, setRolesDto] = useState<RoleDto[]>([]);
     const [formType,setFormType] = useState<FormType>(FormType.CREATE);
     const toggleRefresh = () => setRefresh(!refresh)
 
+
+
     const handleRemove = (data: RoleDto) => {
-        removeTarget = data.componentId;
         setConfirmRemove(() => async () => {
-            const res = await send.delete(RoleEndpoint.DELETE(removeTarget));
+            const res = await send.delete(RoleEndpoint.DELETE(data.id));
             if (Helper.handleToastByResCode(res, RoleToast.DELETE, toggleToast)) {
                 setRemove(false)
                 toggleRefresh();
-                removeTarget = 0;
             }
         })
         setRemove(true);
@@ -86,7 +89,7 @@ export const Role = () => {
                 setConfirmRemove(() => async () => {
                     var data:number[] = [];
                     selectedObjects.map(async (a:RoleDto) => {
-                        data.push(a.componentId)
+                        data.push(a.id)
                     })
                     var res = await send.post(RoleEndpoint.DELETE_RANGE,data)
                     if(Helper.handleToastByResCode(res,RoleToast.DELETE_RANGE,toggleToast)){
@@ -160,7 +163,7 @@ export const Role = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <BaseTable<RoleDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={rolesDto} select={selectedObjects} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.OPERATOR)} onInfo={handleInfo} setSelect={setSelectedObjects} fetchData={fetchData} locationId={locationId} />
+                    <BaseTable<RoleDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={rolesDto} select={selectedObjects} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} permission={filterPermission(FeatureId.OPERATOR)} onInfo={handleInfo} setSelect={setSelectedObjects} fetchData={fetchData} locationId={locationId} refresh={refresh} />
                 </div>
 
             }
