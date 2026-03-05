@@ -2,22 +2,26 @@ import { BaseDto } from "../BaseDto";
 import { ModuleDto } from "../Module/ModuleDto";
 
 export interface HardwareDto extends BaseDto {
+  id:number;
+  driverId:number;
   name: string;
   hardwareType: number;
-  hardwareTypeDescription:string;
+  hardwareTypeDetail:string;
+  mac:string;
   ip: string;
   firmware:string;
   port:string;
+  modules:ModuleDto[];
   serialNumber: string;
   isUpload: boolean; 
   isReset:boolean;
-  modules:ModuleDto[];
   portOne:boolean;
   portTwo:boolean;
   protocolOne:number;
-  protocolOneDescription:string;
+  protocolOneDetail:string;
   baudRateOne:number;
   protocolTwo:number;
-  protocolTwoDescription:string;
+  protocolTwoDetail:string;
   baudRateTwo:number;
+  lastSync:Date;
 }

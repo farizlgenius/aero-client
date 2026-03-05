@@ -34,10 +34,11 @@ import { usePopup } from "../../context/PopupContext";
 import { SetTranDto } from "../../model/Hardware/SetTranDto";
 import { usePagination } from "../../context/PaginationContext";
 import { ScpStatus } from "../../model/Hardware/ScpStatus";
+import { CreateHardwareDto } from "../../model/Hardware/CreateHardwareDto";
 
 
 const HEADER = ["Name", "Type", "Mac","Firmware", "IP","Port", "Transction", "Configuration", "Status", "Action"];
-const KEY = ["name", "hardwareTypeDescription", "mac","firmware", "ip","port", "tranStatus"];
+const KEY = ["name", "hardwareTypeDetail", "mac","firmware", "ip","port", "tranStatus"];
 // Hardware Page
 const ID_REPORT_KEY = [ "componentId",'macAddress','port','ip','serialNumber'];
 const ID_REPORT_TABLE_HEADER = ["Id", "Mac", "Port", "Ip","Serial No", "Action"];
@@ -55,10 +56,30 @@ const Hardware = () => {
 
   let ScanTableTemplate: ReactNode;
 
+  const defaultCreateDto: CreateHardwareDto = {
+    driverId: 0,
+    name: "",
+    hardwareType: 0,
+    hardwareTypeDetail: "",
+    mac: "",
+    port: "",
+    ip: "",
+    firmware: "",
+    serialNumber: "",
+    portOne: false,
+    protocolOne: 0,
+    protocolOneDetail: "",
+    baudRateOne: 0,
+    portTwo: false,
+    protocolTwo: 0,
+    protocolTwoDetail: "",
+    baudRateTwo: 0,
+    locationId: 0,
+    isActive: false
+  }
+
   const defaultDto: HardwareDto = {
     // Base
-    componentId: -1,
-    mac: "",
     locationId: locationId,
     isActive: true,
 
@@ -69,20 +90,25 @@ const Hardware = () => {
     isUpload: false,
     isReset: false,
     hardwareType: 1,
-    hardwareTypeDescription: "",
+    hardwareTypeDetail: "",
     firmware: "",
     port: "",
     modules: [],
     portOne: false,
     portTwo: false,
     protocolOne: 0,
-    protocolOneDescription: "",
+    protocolOneDetail: "",
     baudRateOne: -1,
     protocolTwo: 0,
-    protocolTwoDescription: "",
+    protocolTwoDetail: "",
     baudRateTwo: -1,
-    hardwareName: ""
+    id: 0,
+    driverId: 0,
+    mac: "",
+    lastSync: new Date()
   }
+
+  
 
 
   {/* Modal Handler */ }
@@ -101,32 +127,25 @@ const Hardware = () => {
   const [idReportList, setIdReportList] = useState<IdReport[]>([]);
   const handleAddIdReport = async (data: IdReport) => {
     setHardwareDto({
-      // Base
-      componentId: data.componentId,
-      mac: data.macAddress,
-      hardwareName:'',
-      locationId: locationId,
-      isActive: true,
-
-      // Define
-      name: "",
-      hardwareType:data.hardwareType,
-      hardwareTypeDescription: data.hardwareTypeDescription,
-      ip: data.ip,
-      firmware:data.firmware,
-      modules: [],
-      port:data.port,
-      serialNumber: data.serialNumber.toString(),
-      portOne: false,
-      portTwo: false,
-      protocolOne:0,
-      baudRateOne:-1,
-      protocolOneDescription:"",
-      protocolTwo:0,
-      protocolTwoDescription:"",
-      baudRateTwo:-1,
-      isUpload: false,
-      isReset: false
+     driverId: data.scpId,
+    name: "",
+    hardwareType: data.hardwareType,
+    hardwareTypeDetail: data.hardwareTypeDescription,
+    mac: data.macAddress,
+    port: data.port,
+    ip: data.ip,
+    firmware: data.firmware,
+    serialNumber: String(data.serialNumber),
+    portOne: false,
+    protocolOne: 0,
+    protocolOneDetail: "",
+    baudRateOne: 0,
+    portTwo: false,
+    protocolTwo: 0,
+    protocolTwoDetail: "",
+    baudRateTwo: 0,
+    locationId: locationId,
+    isActive: false
     });
     console.log(data);
     setScan(false);
@@ -184,7 +203,7 @@ const Hardware = () => {
 
 
   {/* Hardware Data */ }
-  const [hardwareDto, setHardwareDto] = useState<HardwareDto>(defaultDto)
+  const [hardwareDto,setHardwareDto] = useState<HardwareDto | CreateHardwareDto>(defaultDto);
   const [data, setData] = useState<HardwareDto[]>([]);
   const [status, setStatus] = useState<StatusDto[]>([]);
   const [tranStatus, setTranStatus] = useState<TranStatusDto[]>([]);
@@ -195,8 +214,8 @@ const Hardware = () => {
       setPagination(res.data.data.page);
       // Batch set state
       const newStatuses = res.data.data.data.map((a: HardwareDto) => ({
-        macAddress: a.mac,
-        componentId: a.componentId,
+        deviceId: a.driverId,
+        driverId: a.driverId,
         status: -1,
         tamper: -1,
         ac: -1,
@@ -204,7 +223,7 @@ const Hardware = () => {
       }));
 
       const newTranStatuses = res.data.data.data.map((a: HardwareDto) => ({
-        macAddress: a.mac,
+        driverId: a.driverId,
         capacity: 0,
         oldest: 0,
         lastReport: 0,
@@ -219,7 +238,7 @@ const Hardware = () => {
       console.log(res.data.data)
       // Fetch status for each
       res.data.data.data.forEach((a: HardwareDto) => {
-        fetchStatus(a.mac);
+        fetchStatus(a.id);
         fetchTransactionStatus(a.mac);
       });
     }
@@ -232,12 +251,12 @@ const Hardware = () => {
       toggleRefresh();
     }
   }
-  const fetchStatus = async (mac: string) => {
-    const res = await send.get(HardwareEndpoint.STATUS(mac));
+  const fetchStatus = async (id: number) => {
+    const res = await send.get(HardwareEndpoint.STATUS(id));
     console.log(res)
     if (res && res.data.data) {
       setStatus((prev) => prev.map((a) =>
-        a.macAddress == res.data.data.mac
+        a.driverId == res.data.data.driverId
           ? {
             ...a,
             status: res.data.data.status,
@@ -254,7 +273,7 @@ const Hardware = () => {
     const res = await send.get(HardwareEndpoint.TRAN(mac));
     if (res && res.data.data) {
       setTranStatus((prev) => prev.map((a: TranStatusDto) =>
-        a.macAddress == res.data.data.macAddress ? {
+        a.driverId == res.data.data.macAddress ? {
           ...a,
         } : {
           ...a
@@ -270,8 +289,8 @@ const Hardware = () => {
     }
   }
 
-  const uploadConfig = async (ScpMac: string) => {
-    const res = await send.post(HardwareEndpoint.UPLOAD(ScpMac))
+  const uploadConfig = async (id: number) => {
+    const res = await send.post(HardwareEndpoint.UPLOAD(id))
     if (Helper.handleToastByResCode(res, HardwareToast.UPLOAD, toggleToast)) {
       toggleRefresh();
     }
@@ -289,38 +308,38 @@ const Hardware = () => {
     setFormType(FormType.UPDATE)
     setHardwareDto({
       // Base
-      componentId: data.componentId,
-      hardwareName:data.hardwareName,
-      mac: data.mac,
-      locationId: data.locationId,
-      isActive: true,
-      // detail
-
+      id :data.id,
+      driverId: data.driverId,
       name: data.name,
       hardwareType: data.hardwareType,
-      hardwareTypeDescription: data.hardwareTypeDescription,
+      hardwareTypeDetail: data.hardwareTypeDetail,
+      mac: data.mac,
       ip: data.ip,
       firmware: data.firmware,
       port: data.port,
       modules: data.modules,
       serialNumber: data.serialNumber,
+      isUpload: data.isUpload,
+      isReset: data.isReset,
       portOne: data.portOne,
       portTwo: data.portTwo,
       protocolOne:data.protocolOne,
       baudRateOne:data.baudRateOne,
-      protocolOneDescription:data.protocolOneDescription,
+      protocolOneDetail:data.protocolOneDetail,
       protocolTwo:data.protocolTwo,
-      protocolTwoDescription:data.protocolTwoDescription,
+      protocolTwoDetail:data.protocolTwoDetail,
       baudRateTwo:data.baudRateTwo,
-      isUpload: data.isUpload,
-      isReset: data.isReset
+      lastSync:new Date(),
+
+      locationId: data.locationId,
+      isActive: true,
     })
     setForm(true);
   }
 
   const handleRemove = (data: HardwareDto) => {
     setConfirmRemove(() => async () => {
-      const res = await send.delete(HardwareEndpoint.DELETE(data.mac));
+      const res = await send.delete(HardwareEndpoint.DELETE(data.id));
       if(Helper.handleToastByResCode(res,HardwareToast.DELETE,toggleToast)){
         setHardwareDto(defaultDto)
         toggleRefresh();
@@ -366,7 +385,7 @@ const Hardware = () => {
           setConfirmRemove(() => async () => {
             var data: number[] = [];
             select.map(async (a: HardwareDto) => {
-              data.push(a.componentId)
+              data.push(a.id)
             })
             var res = await send.post(HardwareEndpoint.DELETE_RANGE, data)
             if (Helper.handleToastByResCode(res, HardwareToast.DELETE_RANGE, toggleToast)) {
@@ -422,7 +441,7 @@ const Hardware = () => {
       case "upload":
         if (select.length != 0) {
           select.map((a: HardwareDto) => {
-            uploadConfig(a.mac);
+            uploadConfig(a.id);
           })
 
         } else {
@@ -443,17 +462,17 @@ const Hardware = () => {
     var connection = SignalRService.getConnection();
     connection.on("SCP.STATUS", (status:ScpStatus) => {
       console.log(status);
-      fetchStatus(status.mac);
+      fetchStatus(status.id);
 
     });
 
     connection.on("SCP.TRAN", (data: TranStatusDto) => {
       console.log(data)
       setTranStatus((prev) => prev.map((a) =>
-        a.macAddress == data.macAddress
+        a.driverId == data.driverId
           ? {
             ...a,
-            macAddress: data.macAddress,
+            macAddress: data.driverId,
             capacity: data.capacity,
             oldest: data.oldest,
             lastReport: data.lastReport,
@@ -524,12 +543,12 @@ const Hardware = () => {
   const renderOptional = (data: HardwareDto, statusDto: StatusDto[],index:number) => {
     console.log(data)
     console.log(statusDto)
-    console.log(statusDto.find(b => b.macAddress == data.mac)?.status)
+    console.log(statusDto.find(b => b.driverId == data.driverId)?.status)
     return [
       <TableCell key={index} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
         <>
           {
-            data.isReset == true && statusDto.find(b => b.macAddress == data.mac)?.status == 0 ?
+            data.isReset == true && statusDto.find(b => b.driverId == data.driverId && b.deviceId == data.id)?.status == 0 ?
               <FlashLoading />
               :
               data.isReset == true ?
@@ -572,14 +591,14 @@ const Hardware = () => {
           <Badge
             size="sm"
             color={
-              statusDto.find(b => b.macAddress == data.mac)?.status == 1
+              statusDto.find(b => b.driverId == data.driverId)?.status == 1
                 ? "success"
-                : statusDto.find(b => b.macAddress == data.mac)?.status == 0
+                : statusDto.find(b => b.driverId == data.driverId)?.status == 0
                   ? "error"
                   : "warning"
             }
           >
-            {statusDto.find(b => b.macAddress == data.mac)?.status == 1 ? "Online" : statusDto.find(b => b.macAddress == data.mac)?.status == 0 ? "Offline" : statusDto.find(b => b.macAddress == data.mac)?.status}
+            {statusDto.find(b => b.driverId == data.driverId)?.status == 1 ? "Online" : statusDto.find(b => b.driverId == data.driverId)?.status == 0 ? "Offline" : statusDto.find(b => b.driverId == data.driverId)?.status}
           </Badge>
 
         }
@@ -624,12 +643,12 @@ const Hardware = () => {
           </>
 
           :
-          <BaseTable<HardwareDto> headers={HEADER} keys={KEY} data={data} onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} onClick={handleClickWithEvent} select={select} setSelect={setSelect} permission={filterPermission(FeatureId.DEVICE)} action={actionBtn} renderOptionalComponent={renderOptional} status={status} locationId={locationId} fetchData={fetchData} specialDisplay={[
+          <BaseTable<HardwareDto> refresh={refresh} headers={HEADER} keys={KEY} data={data} onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} onClick={handleClickWithEvent} select={select} setSelect={setSelect} permission={filterPermission(FeatureId.DEVICE)} action={actionBtn} renderOptionalComponent={renderOptional} status={status} locationId={locationId} fetchData={fetchData} specialDisplay={[
             {
               key: "tranStatus",
               content: (a, i) => <TableCell key={i} className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">
-                <Badge size="sm" color={tranStatus.find(x => x.macAddress == a.mac)?.disabled == 0 && tranStatus.find(x => x.macAddress == a.mac)?.status ? "success" : "error"}>
-                  {tranStatus.find(x => x.macAddress == a.mac)?.status ?? "Unknown"}
+                <Badge size="sm" color={tranStatus.find(x => x.driverId == a.driverId)?.disabled == 0 && tranStatus.find(x => x.driverId == a.driverId)?.status ? "success" : "error"}>
+                  {tranStatus.find(x => x.driverId == a.driverId)?.status ?? "Unknown"}
                 </Badge>
               </TableCell>
             }

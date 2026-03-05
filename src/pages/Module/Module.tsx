@@ -18,12 +18,12 @@ import { SioStatus } from "../../model/Module/SioStatus";
 import { usePagination } from "../../context/PaginationContext";
 
 const HEADER: string[] = [
-  "Model","Address", "Tamper", "AC", "Battery", "Status", "Action"
+  "Model","Adr", "Tamper", "AC", "Battery", "Status", "Action"
 ]
 
 // Define Keys
 const KEY: string[] = [
-   "model","address"
+   "modelDetail","address"
 ]
 
 
@@ -46,9 +46,9 @@ export default function Module() {
       setModuleDto(res.data.data.data);
       setPagination(res.data.data.page)
       const newStatuses = res.data.data.data.map((a: ModuleDto) => ({
-        macAddress: a.mac,
-        componentId: a.componentId,
-        status: 0,
+        deviceId: a.deviceId,
+        driverId: a.driverId,
+        status: "",
         tamper: "",
         ac: "",
         batt: ""
@@ -60,7 +60,7 @@ export default function Module() {
 
       // Fetch status for each
       res.data.data.data.forEach((a: ModuleDto) => {
-        fetchStatus(a.mac, a.componentId);
+        fetchStatus(a.deviceId, a.driverId);
       });
     }
 
@@ -73,8 +73,8 @@ export default function Module() {
   const closeModalToggle = () => setIsModalOpen(false);
 
   {/* Module Status */ }
-  const fetchStatus = async (ScpMac: string, SioNo: number) => {
-    await send.get(ModuleEndpoint.STATUS(ScpMac, SioNo))
+  const fetchStatus = async (deviceId: number, driverId: number) => {
+    await send.get(ModuleEndpoint.STATUS(deviceId, driverId))
     //Helper.handlePopup(res, PopUpMsg.GET_MODULE_STATUS, showPopup)
   };
 
@@ -102,9 +102,10 @@ export default function Module() {
       (
        status:SioStatus
       ) => {
+        console.log(status);
         setStatus((prev) =>
           prev.map((a) =>
-            a.macAddress == status.mac && a.componentId == status.sioNo
+            a.driverId == status.driverId 
               ? {
                 ...a,
                 status: status.status,
@@ -133,56 +134,56 @@ export default function Module() {
           <Badge
             size="sm"
             color={
-              statusDto.find(b => b.componentId == data.componentId)?.tamper == "Active"
+              statusDto.find(b => b.deviceId == data.deviceId)?.tamper == "Active"
                 ? "success"
-                : statusDto.find(b => b.componentId == data.componentId)?.tamper == "Inactive"
+                : statusDto.find(b => b.deviceId == data.deviceId)?.tamper == "Inactive"
                   ? "error"
                   : "warning"
             }
           >
-            {statusDto.find(b => b.componentId == data.componentId)?.tamper == "" ? "Error" : statusDto.find(b => b.componentId == data.componentId)?.tamper}
+            {statusDto.find(b => b.deviceId == data.deviceId)?.tamper == "" ? "Error" : statusDto.find(b => b.deviceId == data.deviceId)?.tamper}
           </Badge>
         </TableCell>
         <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
           <Badge
             size="sm"
             color={
-              statusDto.find(b => b.componentId == data.componentId)?.ac == "Active"
+              statusDto.find(b => b.deviceId == data.deviceId)?.ac == "Active"
                 ? "success"
-                : statusDto.find(b => b.componentId == data.componentId)?.ac == "Inactive"
+                : statusDto.find(b => b.deviceId == data.deviceId)?.ac == "Inactive"
                   ? "error"
                   : "warning"
             }
           >
-            {statusDto.find(b => b.componentId == data.componentId)?.ac == "" ? "Error" : statusDto.find(b => b.componentId == data.componentId)?.ac}
+            {statusDto.find(b => b.deviceId == data.deviceId)?.ac == "" ? "Error" : statusDto.find(b => b.deviceId == data.deviceId)?.ac}
           </Badge>
         </TableCell>
         <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
           <Badge
             size="sm"
             color={
-              statusDto.find(b => b.componentId == data.componentId)?.batt == "Active"
+              statusDto.find(b => b.deviceId == data.deviceId)?.batt == "Active"
                 ? "success"
-                : statusDto.find(b => b.componentId == data.componentId)?.batt == "Inactive"
+                : statusDto.find(b => b.deviceId == data.deviceId)?.batt == "Inactive"
                   ? "error"
                   : "warning"
             }
           >
-            {statusDto.find(b => b.componentId == data.componentId)?.batt == "" ? "Error" : statusDto.find(b => b.componentId == data.componentId)?.batt}
+            {statusDto.find(b => b.deviceId == data.deviceId)?.batt == "" ? "Error" : statusDto.find(b => b.deviceId == data.deviceId)?.batt}
           </Badge>
         </TableCell>
         <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
           <Badge
             size="sm"
             color={
-              statusDto.find(b => b.componentId == data.componentId)?.status == "Online" || statusDto.find(b => b.componentId == data.componentId)?.status == "Active"
+              statusDto.find(b => b.deviceId == data.deviceId)?.status == "Online" || statusDto.find(b => b.deviceId == data.deviceId)?.status == "Active"
                 ? "success"
-                : statusDto.find(b => b.componentId == data.componentId)?.status == "Offline"
+                : statusDto.find(b => b.deviceId == data.deviceId)?.status == "Offline"
                   ? "error"
                   : "warning"
             }
           >
-            {statusDto.find(b => b.componentId == data.componentId)?.status == "" ? "Offline" : statusDto.find(b => b.componentId == data.componentId)?.status}
+            {statusDto.find(b => b.deviceId == data.deviceId)?.status == "" ? "Offline" : statusDto.find(b => b.deviceId == data.deviceId)?.status}
           </Badge>
         </TableCell>
       </>

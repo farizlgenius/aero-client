@@ -361,7 +361,7 @@ const Door = () => {
             (status: AcrStatus) => {
                 setStatus((prev) =>
                     prev.map((a) =>
-                        a.macAddress == status.mac && a.componentId == status.number ? {
+                        a.driverId == status.mac && a.deviceId == status.number ? {
                             ...a,
                             status: status.status == "" ? a.status : status.status,
                             tamper: status.mode == "" ? a.tamper : status.mode
@@ -419,17 +419,17 @@ const Door = () => {
             <>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                     <>
-                        <Badge size="sm" color="dark">{statusDto.find(b => b.componentId == data.componentId)?.tamper}</Badge>
+                        <Badge size="sm" color="dark">{statusDto.find(b => b.deviceId == data.componentId)?.tamper}</Badge>
                     </>
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                     <>
-                        {statusDto.find(b => b.componentId == data.componentId)?.status === "Secure" ? (
-                            <Badge size="sm" color="success">{statusDto.find(b => b.componentId == data.componentId)?.status}</Badge>
-                        ) : statusDto.find(b => b.componentId == data.componentId)?.status === "Forced Open" || statusDto.find(b => b.componentId == data.componentId)?.status === "Locked" ? (
-                            <Badge size="sm" color="error">{statusDto.find(b => b.componentId == data.componentId)?.status}</Badge>
+                        {statusDto.find(b => b.deviceId == data.componentId)?.status === "Secure" ? (
+                            <Badge size="sm" color="success">{statusDto.find(b => b.deviceId == data.componentId)?.status}</Badge>
+                        ) : statusDto.find(b => b.deviceId == data.componentId)?.status === "Forced Open" || statusDto.find(b => b.deviceId == data.componentId)?.status === "Locked" ? (
+                            <Badge size="sm" color="error">{statusDto.find(b => b.deviceId == data.componentId)?.status}</Badge>
                         ) : (
-                            <Badge size="sm" color="warning">{statusDto.find(b => b.componentId == data.componentId)?.status === 0 ? "Error" : statusDto.find(b => b.componentId == data.componentId)?.status}</Badge>
+                            <Badge size="sm" color="warning">{statusDto.find(b => b.deviceId == data.componentId)?.status === 0 ? "Error" : statusDto.find(b => b.deviceId == data.componentId)?.status}</Badge>
                         )}
                     </>
                 </TableCell>

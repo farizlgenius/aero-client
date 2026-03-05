@@ -11,6 +11,7 @@ import { HardwareEndpoint } from "../../../endpoint/HardwareEndpoint.ts";
 import { ModeDto } from "../../../model/ModeDto.ts";
 import Switch from "../switch/Switch.tsx";
 import { ModuleEndpoint } from "../../../endpoint/ModuleEndpoint.ts";
+import { CreateHardwareDto } from "../../../model/Hardware/CreateHardwareDto.ts";
 
 
 
@@ -18,7 +19,7 @@ import { ModuleEndpoint } from "../../../endpoint/ModuleEndpoint.ts";
 
 
 
-const HardwareForm: React.FC<PropsWithChildren<FormProp<HardwareDto>>> = ({ dto, type, handleClick, setDto }) => {
+const HardwareForm: React.FC<PropsWithChildren<FormProp<HardwareDto | CreateHardwareDto>>> = ({ dto, type, handleClick, setDto }) => {
   const [device, setDevice] = useState<number>(-1);
   const [deviceOptions, setDeviceOptions] = useState<Options[]>([])
   const [protocol, setProtocol] = useState<Options[]>([]);
@@ -86,24 +87,24 @@ const HardwareForm: React.FC<PropsWithChildren<FormProp<HardwareDto>>> = ({ dto,
               <Input disabled={type == FormType.INFO} name="name" value={dto.name} type="text" id="name" onChange={handleChange} />
             </div>
             <div>
-              <Label htmlFor="componentId">Component Id</Label>
-              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="componentId" value={dto.componentId} type="text" id="componentId" onChange={handleChange} isReadOnly={true} />
+              <Label htmlFor="componentId">Scp Id</Label>
+              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="driverId" value={dto.driverId} type="text" id="driverId" onChange={handleChange} isReadOnly={true} />
             </div>
             <div>
-              <Label htmlFor="macAddress">Mac</Label>
-              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="macAddress" value={dto.mac} type="text" id="macAddress" onChange={handleChange} isReadOnly={true} />
+              <Label htmlFor="mac">Mac</Label>
+              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="mac" value={dto.mac} type="text" id="mac" onChange={handleChange} isReadOnly={true} />
             </div>
             <div>
               <Label htmlFor="ipAddress">Ip</Label>
               <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="ip" value={dto.ip} type="text" id="ipAddress" onChange={handleChange} isReadOnly={true} />
             </div>
             <div>
-              <Label htmlFor="ipAddress">Firmware</Label>
-              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="ip" value={dto.firmware} type="text" id="ipAddress" onChange={handleChange} isReadOnly={true} />
+              <Label htmlFor="firmware">Firmware</Label>
+              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="ip" value={dto.firmware} type="text" id="firmware" onChange={handleChange} isReadOnly={true} />
             </div>
             <div>
-              <Label htmlFor="ipAddress">Port</Label>
-              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="ip" value={dto.port} type="text" id="ipAddress" onChange={handleChange} isReadOnly={true} />
+              <Label htmlFor="port">Port</Label>
+              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="ip" value={dto.port} type="text" id="port" onChange={handleChange} isReadOnly={true} />
             </div>
             <div>
               <Label htmlFor="serialnumber">Serial Number</Label>
@@ -111,7 +112,7 @@ const HardwareForm: React.FC<PropsWithChildren<FormProp<HardwareDto>>> = ({ dto,
             </div>
             <div >
               <Label htmlFor="model">Type</Label>
-              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="model" value={dto.hardwareTypeDescription} type="text" id="model" onChange={handleChange} isReadOnly={true} />
+              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="model" value={dto.hardwareTypeDetail} type="text" id="model" onChange={handleChange} isReadOnly={true} />
             </div>
           </div>
         </div>
@@ -124,7 +125,7 @@ const HardwareForm: React.FC<PropsWithChildren<FormProp<HardwareDto>>> = ({ dto,
                 if(check){
                   setDto(prev => ({ ...prev, portOne: check }))
                 }else{
-                  setDto(prev => ({ ...prev, portOne: check,protocolOne:0,protocolOneDescription:"",baudRateOne:-1 }))
+                  setDto(prev => ({ ...prev, portOne: check,protocolOne:0,protocolOneDetail:"",baudRateOne:-1 }))
                 }
               }} defaultChecked={dto.portOne} label="PORT 1" />
             </div>
@@ -139,7 +140,7 @@ const HardwareForm: React.FC<PropsWithChildren<FormProp<HardwareDto>>> = ({ dto,
                   options={protocol} 
                   isString={false} 
                   defaultValue={dto.protocolOne} 
-                  onChange={(e) => setDto(prev => ({...prev,protocolOne:Number(e),protocolOneDescription: protocol.find(x => x.value == Number(e))?.description ?? "" }))} />
+                  onChange={(e) => setDto(prev => ({...prev,protocolOne:Number(e),protocolOneDetail: protocol.find(x => x.value == Number(e))?.description ?? "" }))} />
 
                 </div>
                 <div>
@@ -161,7 +162,7 @@ const HardwareForm: React.FC<PropsWithChildren<FormProp<HardwareDto>>> = ({ dto,
                 if(check){
                   setDto(prev => ({ ...prev, portTwo: check }))
                 }else{
-                  setDto(prev => ({ ...prev, portTwo: check,protocolTwo:0,protocolTwoDescription:"",baudRateTwo:-1 }))
+                  setDto(prev => ({ ...prev, portTwo: check,protocolTwo:0,protocolTwoDetail:"",baudRateTwo:-1 }))
                 }
               }} defaultChecked={dto.portTwo} label="PORT 2" />
             </div>
@@ -176,7 +177,7 @@ const HardwareForm: React.FC<PropsWithChildren<FormProp<HardwareDto>>> = ({ dto,
                   options={protocol} 
                   isString={false} 
                   defaultValue={dto.protocolTwo}
-                  onChange={(e) => setDto(prev => ({...prev,protocolTwo:Number(e),protocolTwoDescription: protocol.find(x => x.value == Number(e))?.description ?? "" }))}
+                  onChange={(e) => setDto(prev => ({...prev,protocolTwo:Number(e),protocolTwoDetail: protocol.find(x => x.value == Number(e))?.description ?? "" }))}
                   />
                 </div>
 

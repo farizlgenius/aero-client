@@ -43,7 +43,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<FormProp<MonitorPointDto>>> =
         const res1 = await send.get(ModuleEndpoint.GET_MAC(value))
         if (res1?.data.data) {
           res1.data.data.map((a: ModuleDto) => {
-            setModuleOption((prev) => [...prev, { label: `${a.modelDescription} ( ${a.address} )`, value: a.componentId }])
+            setModuleOption((prev) => [...prev, { label: `${a.modelDetail} ( ${a.address} )`, value: a.componentId }])
           })
         }
         break;

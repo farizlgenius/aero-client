@@ -1,6 +1,6 @@
 export interface IdReport {
-  componentId: number;
-  serialNumber: number;
+  scpId: number;
+  serialNumber: string;
   macAddress: string;
   firmware:string;
   ip: string;

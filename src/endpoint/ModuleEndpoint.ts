@@ -7,7 +7,7 @@ export const ModuleEndpoint = {
     CREATE:`/api/${CONTROLLER}`,
     GET_ID:(id:number) => `/api/${CONTROLLER}/${id}`,
     GET_MAC:(mac:string) => `/api/${CONTROLLER}/${mac}`,
-    STATUS:(mac:string,ModuleId:number) => `/api/${CONTROLLER}/status/${mac}/${ModuleId}`,
+    STATUS:(deviceId:number,driverId:number) => `/api/${CONTROLLER}/status/${deviceId}/${driverId}`,
     BAUDRATE: `/api/${CONTROLLER}/baudrate`,
     PROTOCOL : `/api/${CONTROLLER}/protocol`
 

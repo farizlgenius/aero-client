@@ -4,6 +4,6 @@ export interface TranStatusDto {
     lastReport:number;
     lastLog:number;
     disabled:number;
-    macAddress:string;
+    driverId:number;
     status:string;
 }

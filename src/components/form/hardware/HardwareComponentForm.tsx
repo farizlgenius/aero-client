@@ -8,9 +8,10 @@ import { send } from "../../../api/api";
 import { VerifyHardwareDeviceConfigDto } from "../../../model/Hardware/VerifyHardwareDeviceConfigDto";
 import { HardwareDto } from "../../../model/Hardware/HardwareDto";
 import { ScpConfiguration } from "../../../model/Hardware/ScpConfiguraion";
+import { CreateHardwareDto } from "../../../model/Hardware/CreateHardwareDto";
 
 interface HardwareComponentFormInterface {
-    data: HardwareDto;
+    data: HardwareDto | CreateHardwareDto;
 }
 
 export const HardwareComponentForm:React.FC<PropsWithChildren<HardwareComponentFormInterface>> = ({data}) => {

@@ -1,4 +1,4 @@
 export interface ScpStatus{
-      mac:string;
+      id:number;
       status:number;
 }

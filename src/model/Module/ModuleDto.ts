@@ -8,27 +8,30 @@ import { StrikeDto } from "../Strike/StrikeDto";
 
 export interface ModuleDto extends BaseDto
 {
-    model:string;
-    modelDescription:string;
+    id:number,
+    deviceId:number;
+    driverId:number;
+    model:number;
+    modelDetail:string;
     revision:string;
     serialNumber:string;
     nHardwareId:number;
-    nHardwareIdDescription:string;
+    nHardwareIdDetail:string;
     nHardwareRev:number;
     nProductId:number;
     nProductVer:number;
     nEncConfig:number;
-    nEncConfigDescription:string;
+    nEncConfigDetail:string;
     nEncKeyStatus:number;
-    nEncKeyStatusDescription:string;
+    nEncKeyStatusDetail:string;
     readers:ReaderDto[];
     sensors:SensorDto[];
     strikes:StrikeDto[];
     requestExits:RequestExitDto[];
     monitorPoints:MonitorPointDto[];
     controlPointd:ControlPointDto[];
-
     address:number;
+    addressDetail:string;
     port:number;
     nInput:number;
     nOutput:number;

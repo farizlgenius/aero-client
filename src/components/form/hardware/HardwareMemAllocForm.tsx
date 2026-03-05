@@ -8,9 +8,10 @@ import { HardwareEndpoint } from "../../../endpoint/HardwareEndpoint"
 import { useToast } from "../../../context/ToastContext"
 import { HardwareDto } from "../../../model/Hardware/HardwareDto"
 import { MemoryAllocateDto } from "../../../model/Hardware/MemoryAllocateDto"
+import { CreateHardwareDto } from "../../../model/Hardware/CreateHardwareDto"
 
 interface HardwareMemAllocFormInterface {
-    data:HardwareDto;
+    data:HardwareDto | CreateHardwareDto;
 }
 
 export const HardwareMemAllocForm:React.FC<PropsWithChildren<HardwareMemAllocFormInterface>> = ({data}) => {

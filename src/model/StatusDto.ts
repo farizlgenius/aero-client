@@ -1,6 +1,6 @@
 export interface StatusDto {
-  macAddress: string;
-  componentId: number;
+  driverId: number;
+  deviceId: number;
   status: number | string;
   tamper: number | string;
   ac: number | string;
