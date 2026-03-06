@@ -34,8 +34,7 @@ export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<UserDto>>> = (
     }, [])
 
     return (
-        <div className="flex gap-5 justify-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-            <div className='flex flex-col w-3/4'>
+        <div className='flex flex-col w-3/4'>
 
                 <div className="flex items-center justify-between mb-2">
                     <h3 className="flex items-center gap-3 text-base font-medium text-gray-800 dark:text-white/90">
@@ -57,7 +56,6 @@ export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<UserDto>>> = (
                 )}
 
             </div>
-        </div>
 
     )
 

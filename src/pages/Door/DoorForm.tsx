@@ -42,10 +42,16 @@ enum FormTab {
   General, Inside, Outside, Strike, Antipassback, Monitor, Advance, Mode
 }
 
-
-
-const active = "inline-flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200 ease-in-out sm:p-3 text-brand-500 dark:bg-brand-400/20 dark:text-brand-400 bg-brand-50 text-brand-500 dark:bg-brand-400/20 dark:text-brand-400 bg-brand-50";
-const inactive = "inline-flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200 ease-in-out sm:p-3 bg-transparent text-gray-500 border-transparent hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+const formSteps = [
+  { tab: FormTab.General, title: 'General', detail: 'Basic door configuration' },
+  { tab: FormTab.Outside, title: 'In', detail: 'Inside reader setup' },
+  { tab: FormTab.Inside, title: 'Out', detail: 'Outside reader or REX setup' },
+  { tab: FormTab.Monitor, title: 'Monitor', detail: 'Door sensor input setup' },
+  { tab: FormTab.Strike, title: 'Strike', detail: 'Relay and strike behavior' },
+  { tab: FormTab.Antipassback, title: 'Anti-passback', detail: 'Area transition policies' },
+  { tab: FormTab.Mode, title: 'Door Mode', detail: 'Offline and default mode' },
+  { tab: FormTab.Advance, title: 'Advance Setting', detail: 'Flags and advanced options' }
+];
 
 const DoorForm: React.FC<PropsWithChildren<FormProp<DoorDto>>> = ({ handleClick,  dto, setDto ,type}) => {
   {/* In */ }
@@ -55,8 +61,6 @@ const DoorForm: React.FC<PropsWithChildren<FormProp<DoorDto>>> = ({ handleClick,
   const {locationId} = useLocation();
   var defaultRequestExit: RequestExitDto = {
     // base 
-    componentId: -1,
-    mac: "",
     locationId: locationId,
     isActive: true,
 
@@ -67,12 +71,9 @@ const DoorForm: React.FC<PropsWithChildren<FormProp<DoorDto>>> = ({ handleClick,
     debounce: 0,
     holdTime: 0,
     maskTimeZone: -1,
-    hardwareName: ''
   }
 var defaultReader: ReaderDto = {
   // base 
-  componentId: -1,
-  mac: "",
   locationId: locationId,
   isActive: true,
 
@@ -88,7 +89,6 @@ var defaultReader: ReaderDto = {
   osdpTracing: 0x00,
   osdpBaudrate: 0x00,
   osdpSecureChannel: 0x00,
-  hardwareName: ''
 }
   const handleInsideDeviceType = (value: string) => {
     setInsideType(value);
@@ -128,7 +128,7 @@ var defaultReader: ReaderDto = {
     }
   }
 
-  const [activeTab, setActiveTab] = useState<number>(0);
+  const [activeTab, setActiveTab] = useState<number>(FormTab.General);
   const [osdpBaudRateOption, setOsdpBaudRateOption] = useState<Options[]>([])
 
 
@@ -139,11 +139,16 @@ var defaultReader: ReaderDto = {
   const [spareFlag, setSpareFlag] = useState<ModeDto[]>([]);
   const [accessFlag, setAccessFlag] = useState<ModeDto[]>([]);
 
+  const currentStepIndex = formSteps.findIndex((step) => step.tab === activeTab);
+  const progress = ((currentStepIndex + 1) / formSteps.length) * 100;
+  const currentStep = formSteps[currentStepIndex];
+  const isFirstStep = currentStepIndex === 0;
+  const isLastStep = currentStepIndex === formSteps.length - 1;
 
-  const handleOnTabClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setActiveTab(Number(e.currentTarget.value));
+  const goToStep = (stepIndex: number) => {
+    if (stepIndex < 0 || stepIndex >= formSteps.length) return;
+    setActiveTab(formSteps[stepIndex].tab);
   }
-
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDto(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -159,7 +164,7 @@ var defaultReader: ReaderDto = {
       res.data.data.map((a: ModuleDto) => {
         setModuleOption((prev) => [...prev, {
           label: `${a.model} ( ${a.address} )`,
-          value: a.componentId,
+          value: a.driverId,
           isTaken: false
         }]);
       });
@@ -497,45 +502,44 @@ var defaultReader: ReaderDto = {
 
   return (
 
-    <div className="flex flex-col gap-5 justify-center items-center p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-      <div className="flex flex-col gap-6 sm:flex-row sm:gap-8 w-3/4">
-        <div className="flex-1 overflow-x-auto pb-2 sm:w-[200px]">
-          <nav className="flex w-full flex-row sm:flex-col sm:space-y-2">
-            <button value={FormTab.General} className={activeTab === FormTab.General ? active : inactive} onClick={handleOnTabClick}>
-              General
-            </button>
-
-            <button value={FormTab.Outside} className={activeTab === FormTab.Outside ? active : inactive} onClick={handleOnTabClick}>
-              In
-            </button>
-            <button value={FormTab.Inside} className={activeTab === FormTab.Inside ? active : inactive} onClick={handleOnTabClick}>
-              Out
-            </button>
-            <button value={FormTab.Monitor} className={activeTab === FormTab.Monitor ? active : inactive} onClick={handleOnTabClick}>
-              Monitor
-            </button>
-            <button value={FormTab.Strike} className={activeTab === FormTab.Strike ? active : inactive} onClick={handleOnTabClick}>
-              Strike
-            </button>
-            <button value={FormTab.Antipassback} className={activeTab === FormTab.Antipassback ? active : inactive} onClick={handleOnTabClick}>
-              Anti-passback
-            </button>
-            <button value={FormTab.Mode} className={activeTab === FormTab.Mode ? active : inactive} onClick={handleOnTabClick}>
-              Door Mode
-            </button>
-            <button value={FormTab.Advance} className={activeTab === FormTab.Advance ? active : inactive} onClick={handleOnTabClick}>
-              Advance Setting
-            </button>
-            <div className='flex gap-3'>
-              <Button disabled={type == FormType.INFO} onClickWithEvent={handleClick} name={type == FormType.UPDATE ? "update" : "create" } className="w-50" size="sm">{type == FormType.UPDATE ? "Update" : "Create" }</Button>
-              <Button variant='danger' onClickWithEvent={handleClick} name='close' className="w-50" size="sm">Cancel </Button>
-            </div>
-
-          </nav>
+    <div className="flex flex-col gap-5 p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+      <div className="w-full">
+        <div className="mb-2 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+          <span>Step {currentStepIndex + 1} of {formSteps.length}</span>
+          <span>{Math.round(progress)}%</span>
         </div>
-        <div className='flex-2'>
-          <div className="space-y-6 flex justify-center">
-            <div className='w-[60%]'>
+        <div className="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-800">
+          <div className="h-2 rounded-full bg-brand-500 transition-all duration-300" style={{ width: `${progress}%` }} />
+        </div>
+      </div>
+
+      <div className="overflow-x-auto pb-2">
+        <div className="flex min-w-max gap-2">
+          {formSteps.map((step, index) => (
+            <button
+              key={step.tab}
+              type="button"
+              onClick={() => goToStep(index)}
+              className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition-colors ${
+                activeTab === step.tab
+                  ? 'border-brand-500 bg-brand-50 text-brand-600 dark:border-brand-400 dark:bg-brand-400/20 dark:text-brand-300'
+                  : 'border-gray-200 text-gray-600 hover:border-brand-300 hover:text-brand-600 dark:border-gray-700 dark:text-gray-300'
+              }`}
+            >
+              <span>{index + 1}.</span>
+              <span>{step.title}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-gray-200 p-4 dark:border-gray-800 lg:p-6">
+        <div className="mb-4">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{currentStep?.title}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">{currentStep?.detail}</p>
+        </div>
+        <div className="space-y-6 flex justify-center">
+          <div className='w-full lg:w-[60%]'>
               {activeTab == FormTab.General &&
                 <div className='flex flex-col gap-1'>
                   <Label htmlFor="name">Door Name</Label>
@@ -1244,10 +1248,40 @@ var defaultReader: ReaderDto = {
 
               }
             </div>
+            <div className="flex w-full items-center justify-between gap-3 pt-3 lg:w-[60%]">
+              <div>
+                {!isFirstStep && (
+                  <Button
+                    variant="outline"
+                    onClick={() => goToStep(currentStepIndex - 1)}
+                    className="min-w-[120px]"
+                    size="sm"
+                  >
+                    Back
+                  </Button>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <Button variant='danger' onClickWithEvent={handleClick} name='close' className="min-w-[120px]" size="sm">Cancel</Button>
+                {isLastStep ? (
+                  <Button
+                    disabled={type == FormType.INFO}
+                    onClickWithEvent={handleClick}
+                    name={type == FormType.UPDATE ? "update" : "create"}
+                    className="min-w-[120px]"
+                    size="sm"
+                  >
+                    {type == FormType.UPDATE ? "Update" : "Create"}
+                  </Button>
+                ) : (
+                  <Button onClick={() => goToStep(currentStepIndex + 1)} className="min-w-[120px]" size="sm">
+                    Next
+                  </Button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-
     </div>
 
 

@@ -16,7 +16,7 @@ import { Avatar } from '../UiElements/Avatar'
 
 // Define header Table 
 const headers: string[] = [
-  "Date", "Source", "Device", "Actor", "Decsription", "More Detail", "Remark"
+  "Date", "Source", "Device", "Actor", "Description", "More Detail", "Remark"
 ]
 
 // Define kwy Table 

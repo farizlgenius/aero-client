@@ -1,17 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import { useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import { AddIcon, BoxIcon, CamIcon, ToggleIcon } from '../../icons';
+import { AddIcon, UserIcon } from '../../icons';
 import { UserDto } from '../../model/CardHolder/UserDto';
 import { CardHolderEndpoint } from '../../endpoint/CardHolderEndpoint';
 import { useToast } from '../../context/ToastContext';
 import Helper from '../../utility/Helper';
 import { CardHolderToast } from '../../model/ToastMessage';
-import { FormContent } from '../../model/Form/FormContent';
-import { PersonalInformationForm } from '../../components/form/card-holder/PersonalInformationForm';
-import { AccessLevelForm } from '../../components/form/card-holder/AccessLevelForm';
-import { CredentialForm } from '../../components/form/card-holder/CredentialForm';
-import { UserSettingForm } from '../../components/form/card-holder/UserSettingForm';
-import { BaseForm } from '../UiElements/BaseForm';
 import { send } from '../../api/api';
 import { useLocation } from '../../context/LocationContext';
 import { BaseTable } from '../UiElements/BaseTable';
@@ -24,6 +18,9 @@ import { usePagination } from '../../context/PaginationContext';
 import { TableCell } from '../../components/ui/table';
 import { Avatar } from '../UiElements/Avatar';
 import Switch from '../../components/form/switch/Switch';
+import UserForm from './UserForm';
+import { FormContent } from '../../model/Form/FormContent';
+import { BaseForm } from '../UiElements/BaseForm';
 
 
 
@@ -60,12 +57,12 @@ const CardHolder = () => {
         accessLevels: [],
         locationId: locationId,
         isActive: true,
-        identification: '',
-        dateOfBirth: '',
-        address: '',
         flag: 1,
         driverId: 0,
-        hardwareName: ''
+        hardwareName: '',
+        companyId: 0,
+        positionId: 0,
+        departmentId: 0
     }
 
     const [cardHolderDto, setCardHolderDto] = useState<UserDto>(defaultDto)
@@ -146,30 +143,6 @@ const CardHolder = () => {
         }
     }
 
-    {/* Form */ }
-    const tabContent: FormContent[] = [
-        {
-            icon: <CamIcon />,
-            label: "Personal Information",
-            content: <PersonalInformationForm type={formType} dto={cardHolderDto} setDto={setCardHolderDto} handleClick={handleClick} image={image} setImage={setImage} />
-        }, {
-            icon: <BoxIcon />,
-            label: "Level & Credential",
-            content: <AccessLevelForm type={formType} handleClick={handleClick} dto={cardHolderDto} setDto={setCardHolderDto} />
-        },
-        {
-            icon: <BoxIcon />,
-            label: "Credentials",
-            content: <CredentialForm type={formType} handleClick={handleClick} dto={cardHolderDto} setDto={setCardHolderDto} />
-        },
-        {
-            icon: <BoxIcon />,
-            label: "Settings",
-            content: <UserSettingForm type={formType} handleClick={handleClick} dto={cardHolderDto} setDto={setCardHolderDto} />
-        }
-    ];
-
-
     {/* handle Table Action */ }
     const handleEdit = (data: UserDto) => {
         console.log(data);
@@ -208,6 +181,21 @@ const CardHolder = () => {
     {/* checkBox */ }
     const [selectedObjects, setSelectedObjects] = useState<UserDto[]>([]);
 
+    const content:FormContent[] = [
+        {
+            label: "Users",
+            content: <UserForm
+                    type={formType}
+                    dto={cardHolderDto}
+                    setDto={setCardHolderDto}
+                    handleClick={handleClick}
+                    image={image}
+                    setImage={setImage}
+                />,
+            icon: <UserIcon />
+        }
+    ]
+
 
     const action: ActionButton[] = [
         {
@@ -232,7 +220,8 @@ const CardHolder = () => {
             <PageBreadcrumb pageTitle="Card Holders" />
             {form ?
 
-                <BaseForm tabContent={tabContent} />
+                
+                <BaseForm tabContent={content} />
 
                 :
 

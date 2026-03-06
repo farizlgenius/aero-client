@@ -3,12 +3,11 @@ import { FormProp, FormType } from "../../../model/Form/FormProp"
 import { UserDto } from "../../../model/CardHolder/UserDto"
 import Label from "../Label"
 import Switch from "../switch/Switch"
-import Button from "../../ui/button/Button"
 import { ModeDto } from "../../../model/ModeDto"
 import { send } from "../../../api/api"
 import { CredentialEndpoint } from "../../../endpoint/CredentialEndpoint"
 
-export const UserSettingForm: React.FC<PropsWithChildren<FormProp<UserDto>>> = ({  setDto,type,handleClick }) => {
+export const UserSettingForm: React.FC<PropsWithChildren<FormProp<UserDto>>> = ({  setDto,type }) => {
       const [userFlag, setUserFlag] = useState<ModeDto[]>([])
     const fetchUserFlag = async () => {
         const res = await send.get(CredentialEndpoint.GET_FLAG);
@@ -33,10 +32,6 @@ export const UserSettingForm: React.FC<PropsWithChildren<FormProp<UserDto>>> = (
                         onChange={(checked: boolean) => setDto(prev => ({ ...prev, flag: checked ? prev.flag | d.value : prev.flag & (~d.value) }))}
                     />
                 </div>)}
-            </div>
-            <div className='flex m-5 gap-5 justify-center items-center'>
-                <Button  disabled={type == FormType.INFO} name={type == FormType.CREATE ? "create" : "update"} onClickWithEvent={handleClick} className="w-50" size="sm">{type == FormType.CREATE ? "Create" : "Update"}</Button>
-                <Button name='cancle' onClickWithEvent={handleClick} className="w-50" size="sm" variant='danger'>Cancle</Button>
             </div>
         </>
     )

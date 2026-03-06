@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
+import { ThemeColorToggleButton } from "../components/common/ThemeColorToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
 import { LocationIcon } from "../icons";
@@ -180,6 +181,7 @@ const AppHeader: React.FC = () => {
              {/* <!-- Language Toggler --> */}
             {/* <!-- Dark Mode Toggler --> */}
             <ThemeToggleButton />
+            <ThemeColorToggleButton />
             {/* <!-- Dark Mode Toggler --> */}
             <NotificationDropdown />
             {/* <!-- Notification Menu Area --> */}

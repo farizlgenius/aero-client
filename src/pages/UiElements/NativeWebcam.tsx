@@ -7,61 +7,66 @@ interface NativeWebcamProp {
     handleClick:(e: React.MouseEvent<HTMLButtonElement>) => void
     image:File | undefined,
     setImage:React.Dispatch<React.SetStateAction<File | undefined>>,
-    newImage:File | undefined,
     setNewImage:React.Dispatch<React.SetStateAction<File | undefined>>
 }
 
-export const NativeWebcam: React.FC<PropsWithChildren<NativeWebcamProp>> = ({ handleClick,modelStatus,image,setImage,newImage,setNewImage }) => {
+export const NativeWebcam: React.FC<PropsWithChildren<NativeWebcamProp>> = ({ handleClick,modelStatus,image,setImage,setNewImage }) => {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [stream, setStream] = useState<MediaStream | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [imgUrl, setImgUrl] = useState<string | null>(null);
 
-    useEffect(() => {
-        // request webcam access
-        let active = true;
-
-        const start = async () => {
-            setError(null)
-            try {
-                const s = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720, facingMode: "user" }, audio: false });
-                if (!active) {
-                    s.getTracks()
-                        .forEach(t => t.stop());
-                    return;
-                }
-                setStream(s);
-                if (videoRef.current) videoRef.current.srcObject = s;
-            } catch (err: any) {
-                console.error(err)
-                setError(err?.message ?? "Failed to access camera")
-            }
+    const stopStream = (targetStream?: MediaStream | null) => {
+        const activeStream = targetStream ?? stream ?? (videoRef.current?.srcObject as MediaStream | null);
+        if (activeStream) {
+            activeStream.getTracks().forEach((track) => track.stop());
         }
-
-        start()
-
-        return () => {
-            active = false;
-            if (stream) {
-                stream.getTracks().forEach((t) => t.stop());
-            }
-        }
-    }, [])
-
-    useEffect(() => {
-        if (!modelStatus) closeCamera()
-    }, [modelStatus])
-
-    const closeCamera = () => {
-        if (!stream) return;
-        stream.getTracks().forEach(track => track.stop());
-        setStream(null);
-
         if (videoRef.current) {
             videoRef.current.srcObject = null;
         }
-    }
+        setStream(null);
+    };
+
+    useEffect(() => {
+        let isActive = true;
+        let localStream: MediaStream | null = null;
+
+        const startCamera = async () => {
+            setError(null);
+            try {
+                const s = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 1920, height: 1080, facingMode: "user" },
+                    audio: false
+                });
+
+                // If modal closed before camera permission resolved, stop immediately.
+                if (!isActive) {
+                    s.getTracks().forEach((track) => track.stop());
+                    return;
+                }
+
+                localStream = s;
+                setStream(s);
+                if (videoRef.current) videoRef.current.srcObject = s;
+            } catch (err: any) {
+                if (!isActive) return;
+                console.error(err);
+                setError(err?.message ?? "Failed to access camera");
+            }
+        };
+
+        startCamera();
+
+        return () => {
+            isActive = false;
+            stopStream(localStream);
+        };
+    }, [])
+
+    useEffect(() => {
+        if (!modelStatus) stopStream()
+    }, [modelStatus])
 
     const capture = () => {
         const video = videoRef.current;
@@ -89,69 +94,53 @@ export const NativeWebcam: React.FC<PropsWithChildren<NativeWebcamProp>> = ({ ha
             setNewImage(file); 
             const url = URL.createObjectURL(blob);
             setImgUrl(url);
-            // setImageFileDto(prev => ({...prev,fileData:url}))
+            stopStream();
         }, "image/png");
     }
 
     useEffect(() => {
-        closeCamera()
+        stopStream()
     },[image])
     return (
-        <ComponentCard title="Capture Zone">
-             <div className="transition border border-gray-300 border-dashed cursor-pointer dark:hover:border-brand-500 dark:border-gray-700 rounded-xl hover:border-brand-500">
-            <section className="p-4 mb-6">
-            <div className="flex gap-5">
-                {
-                    imgUrl == "" || imgUrl == null ? 
-                    <div className="flex-1">
-                    {error ? (
-                        <div className="text-red-500">Error: {error}</div>
+        <ComponentCard title="Image Session" desc="Align face in the frame, then capture a clear photo.">
+            <section className="space-y-4">
+                <div className="rounded-2xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-900/30">
+                    {imgUrl ? (
+                        <div className="overflow-hidden rounded-xl border border-gray-200 bg-black dark:border-gray-700">
+                            <img src={imgUrl} alt="Captured preview" className="h-[420px] w-full object-cover lg:h-[520px]" />
+                        </div>
+                    ) : error ? (
+                        <div className="flex h-[420px] items-center justify-center rounded-xl border border-red-200 bg-red-50 p-4 text-center text-red-600 lg:h-[520px]">
+                            Error: {error}
+                        </div>
                     ) : (
-                        <>
-                            <video ref={videoRef} playsInline autoPlay muted className="rounded shadow" style={{ width: "100%", height: "auto" }} />
-                        </>
+                        <div className="overflow-hidden rounded-xl border border-gray-200 bg-black shadow-sm dark:border-gray-700">
+                            <video
+                                ref={videoRef}
+                                playsInline
+                                autoPlay
+                                muted
+                                className="h-[420px] w-full object-cover lg:h-[520px]"
+                            />
+                        </div>
                     )}
                 </div>
-                    :
-                    <div className="flex-1">
-                    <p className="text-sm text-gray-600">Preview</p>
-                    <div className="mt-2 p-2 min-h-[180px] flex items-center justify-center">
-                        {imgUrl ? (
-                            <img src={imgUrl} alt="capture" className="max-w-full max-h-64" />
-                        ) : (
-                            <span className="text-gray-400">No capture yet</span>
-                        )}
-                    </div>
+
+                <div className="flex justify-center gap-3">
+                    {imgUrl ? (
+                        <Button onClick={handleClick} name="close" variant="primary" className="min-w-[140px]">
+                            Use This Photo
+                        </Button>
+                    ) : (
+                        <Button onClick={capture} variant="green" className="min-w-[140px]">
+                            Capture
+                        </Button>
+                    )}
                 </div>
-
-                }
-                
-
-
-                
-            </div>
-            <div className="mt-2 flex gap-2 justify-center">
-                {
-                     imgUrl == "" || imgUrl == null ?
-                     <>
-                      <Button onClick={capture} className="px-3 py-1 rounded bg-green-500 text-white">Capture</Button>
-                        {/* <Button onClick={closeCamera} className="px-3 py-1 rounded bg-indigo-500 text-white">Stop</Button> */}
-                     </>   
-                     :
-                     <Button onClick={handleClick} name="close" className="px-3 py-1 rounded bg-indigo-500 text-white">OK</Button>
-                }
-                
-                
-                
-            </div>
-
-
-            {/* hidden canvas used for capture */}
-            <canvas ref={canvasRef} style={{ display: "none" }} />
-        </section>
-
-             </div>
+                {/* hidden canvas used for capture */}
+                <canvas ref={canvasRef} style={{ display: "none" }} />
+            </section>
         </ComponentCard>
-        
+
     );
 }
