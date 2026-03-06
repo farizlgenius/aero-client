@@ -510,7 +510,7 @@ const Hardware = () => {
     return () => {
       //SignalRService.stopConnection()
     };
-  }, [refresh]);
+  }, [refresh,locationId]);
 
 
   const actionBtn: ActionButton[] = [

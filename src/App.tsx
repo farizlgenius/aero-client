@@ -60,6 +60,7 @@ import { Map } from "./pages/Map/Map";
 import { Reports } from "./pages/Report/Report";
 import { Command } from "./pages/Diagnostic/Command";
 import { CommandStatus } from "./pages/Diagnostic/CommandStatus";
+import { useLocation } from "./context/LocationContext";
 
 
 export default function App() {
@@ -69,6 +70,7 @@ export default function App() {
   const { showAlertFlag, alertSuccessFlag, alertMessage } = useAlert();
   const { showToast, ToastContainer,toggleToast } = useToast();
   const { loading, Loading } = useLoading();
+  const {locationId} = useLocation();
 
   const [license, setLicense] = useState<boolean>(true);
   const [loginDto, setLoginDto] = useState<LoginDto>({
@@ -119,6 +121,10 @@ export default function App() {
     }
 
   }, [])
+
+  useEffect(() => {
+
+  },[locationId]);
 
   return (
     <>
