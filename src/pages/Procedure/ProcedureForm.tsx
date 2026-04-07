@@ -230,7 +230,7 @@ export const ProcedureForm: React.FC<PropsWithChildren<FormProp<ProcedureDto>>> 
             res.data.data.map((a: TimeZoneDto) => {
                 setTz(prev => ([...prev, {
                     label: a.name,
-                    value: a.driverId,
+                    value: a.timezoneId,
                     description: ""
                 }]))
             })

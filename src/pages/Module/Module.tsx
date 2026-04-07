@@ -105,7 +105,7 @@ export default function Module() {
         console.log(status);
         setStatus((prev) =>
           prev.map((a) =>
-            a.driverId == status.driverId 
+            a.scpId == status.driverId 
               ? {
                 ...a,
                 status: status.status,
@@ -134,56 +134,56 @@ export default function Module() {
           <Badge
             size="sm"
             color={
-              statusDto.find(b => b.deviceId == data.deviceId)?.tamper == "Active"
+              statusDto.find(b => b.driverId == data.deviceId)?.tamper == "Active"
                 ? "success"
-                : statusDto.find(b => b.deviceId == data.deviceId)?.tamper == "Inactive"
+                : statusDto.find(b => b.driverId == data.deviceId)?.tamper == "Inactive"
                   ? "error"
                   : "warning"
             }
           >
-            {statusDto.find(b => b.deviceId == data.deviceId)?.tamper == "" ? "Error" : statusDto.find(b => b.deviceId == data.deviceId)?.tamper}
+            {statusDto.find(b => b.driverId == data.deviceId)?.tamper == "" ? "Error" : statusDto.find(b => b.driverId == data.deviceId)?.tamper}
           </Badge>
         </TableCell>
         <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
           <Badge
             size="sm"
             color={
-              statusDto.find(b => b.deviceId == data.deviceId)?.ac == "Active"
+              statusDto.find(b => b.driverId == data.deviceId)?.ac == "Active"
                 ? "success"
-                : statusDto.find(b => b.deviceId == data.deviceId)?.ac == "Inactive"
+                : statusDto.find(b => b.driverId == data.deviceId)?.ac == "Inactive"
                   ? "error"
                   : "warning"
             }
           >
-            {statusDto.find(b => b.deviceId == data.deviceId)?.ac == "" ? "Error" : statusDto.find(b => b.deviceId == data.deviceId)?.ac}
+            {statusDto.find(b => b.driverId == data.deviceId)?.ac == "" ? "Error" : statusDto.find(b => b.driverId == data.deviceId)?.ac}
           </Badge>
         </TableCell>
         <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
           <Badge
             size="sm"
             color={
-              statusDto.find(b => b.deviceId == data.deviceId)?.batt == "Active"
+              statusDto.find(b => b.driverId == data.deviceId)?.batt == "Active"
                 ? "success"
-                : statusDto.find(b => b.deviceId == data.deviceId)?.batt == "Inactive"
+                : statusDto.find(b => b.driverId == data.deviceId)?.batt == "Inactive"
                   ? "error"
                   : "warning"
             }
           >
-            {statusDto.find(b => b.deviceId == data.deviceId)?.batt == "" ? "Error" : statusDto.find(b => b.deviceId == data.deviceId)?.batt}
+            {statusDto.find(b => b.driverId == data.deviceId)?.batt == "" ? "Error" : statusDto.find(b => b.driverId == data.deviceId)?.batt}
           </Badge>
         </TableCell>
         <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
           <Badge
             size="sm"
             color={
-              statusDto.find(b => b.deviceId == data.deviceId)?.status == "Online" || statusDto.find(b => b.deviceId == data.deviceId)?.status == "Active"
+              statusDto.find(b => b.driverId == data.deviceId)?.status == "Online" || statusDto.find(b => b.driverId == data.deviceId)?.status == "Active"
                 ? "success"
-                : statusDto.find(b => b.deviceId == data.deviceId)?.status == "Offline"
+                : statusDto.find(b => b.driverId == data.deviceId)?.status == "Offline"
                   ? "error"
                   : "warning"
             }
           >
-            {statusDto.find(b => b.deviceId == data.deviceId)?.status == "" ? "Offline" : statusDto.find(b => b.deviceId == data.deviceId)?.status}
+            {statusDto.find(b => b.driverId == data.deviceId)?.status == "" ? "Offline" : statusDto.find(b => b.driverId == data.deviceId)?.status}
           </Badge>
         </TableCell>
       </>

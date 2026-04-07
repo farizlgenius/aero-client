@@ -12,7 +12,8 @@ export enum APIToast {
 }
 
 export enum SettingToast {
-    UPDATE_PASSWORD = "Update Password Rule"
+    UPDATE_PASSWORD = "Update Password Rule",
+    UDPATE_LED = "Update Led Setting"
 }
 
 export enum OperatorToast {
@@ -95,6 +96,27 @@ export enum LocationToast {
     DELETE_RANGE = "Delete Range Location"
 }
 
+export enum CompanyToast {
+    CREATE = "Create Company",
+    DELETE = "Delete Company",
+    UPDATE = "Update Company",
+    DELETE_RANGE = "Delete Range Company"
+}
+
+export enum DepartmentToast {
+    CREATE = "Create Department",
+    DELETE = "Delete Department",
+    UPDATE = "Update Department",
+    DELETE_RANGE = "Delete Range Department"
+}
+
+export enum PositionToast {
+    CREATE = "Create Position",
+    DELETE = "Delete Position",
+    UPDATE = "Update Position",
+    DELETE_RANGE = "Delete Range Position"
+}
+
 export enum AccessAreaToast {
     CREATE = "Create Area",
     DELETE = "Delete Area",
@@ -163,9 +185,10 @@ export enum ControlPointToast {
     TOGGLE = "Toggle"
 }
 
-export enum CardHolderToast {
+export enum UserToast {
     CREATE = "Create Card Holder",
     UPDATE = "Update Card Holder",
     DELETE = "Delete Card Holder",
     DELETE_RANGE = "Delete Card Holders"
 }
+

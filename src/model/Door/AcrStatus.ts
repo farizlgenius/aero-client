@@ -1,5 +1,5 @@
 export interface AcrStatus {
-      mac:string;
+      scpId:number;
       number:number;
       mode:string;
       status:string;

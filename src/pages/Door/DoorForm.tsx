@@ -23,7 +23,6 @@ import { ReaderType } from '../../enum/ReaderType';
 import { RequestExitDto } from '../../model/RequestExit/RequestExitDto';
 import { MultiselectOption } from '../../model/MultiselectOption';
 import { CardFormatDto } from '../../model/CardFormat/CardFormatDto';
-import { HttpMethod } from '../../enum/HttpMethod';
 import { ModuleEndpoint } from '../../endpoint/ModuleEndpoint';
 import { HardwareEndpoint } from '../../endpoint/HardwareEndpoint';
 import { DoorEndpoint } from '../../endpoint/DoorEndpoint';
@@ -34,6 +33,8 @@ import { CardFormatEndpoint } from '../../endpoint/CardFormatEndpoint';
 import { useLocation } from '../../context/LocationContext';
 import { send } from '../../api/api';
 import { FormProp, FormType } from '../../model/Form/FormProp';
+import { DoorDirection } from '../../enum/DoorDirection';
+import { DoorType } from '../../enum/DoorType';
 
 
 
@@ -66,11 +67,13 @@ const DoorForm: React.FC<PropsWithChildren<FormProp<DoorDto>>> = ({ handleClick,
 
     // Detail
     moduleId: -1,
+    moduleDriverId: -1,
     inputNo: -1,
     inputMode: -1,
     debounce: 0,
     holdTime: 0,
     maskTimeZone: -1,
+    scpId: 0
   }
 var defaultReader: ReaderDto = {
   // base 
@@ -79,16 +82,18 @@ var defaultReader: ReaderDto = {
 
   // Detail
   moduleId: -1,
+  moduleDriverId: -1,
   readerNo: -1,
   dataFormat: -1,
   keypadMode: -1,
-  ledDriveMode: -1,
+  ledDriveMode: 1,
   osdpFlag: false,
   osdpAddress: 0x00,
   osdpDiscover: 0x00,
   osdpTracing: 0x00,
   osdpBaudrate: 0x00,
   osdpSecureChannel: 0x00,
+  scpId: 0
 }
   const handleInsideDeviceType = (value: string) => {
     setInsideType(value);
@@ -138,7 +143,7 @@ var defaultReader: ReaderDto = {
   {/* Advance */ }
   const [spareFlag, setSpareFlag] = useState<ModeDto[]>([]);
   const [accessFlag, setAccessFlag] = useState<ModeDto[]>([]);
-
+  const [osdpAddress,setOsdpAddress] = useState<Options[]>([]);
   const currentStepIndex = formSteps.findIndex((step) => step.tab === activeTab);
   const progress = ((currentStepIndex + 1) / formSteps.length) * 100;
   const currentStep = formSteps[currentStepIndex];
@@ -150,6 +155,11 @@ var defaultReader: ReaderDto = {
     setActiveTab(formSteps[stepIndex].tab);
   }
 
+  const formatFlagDescription = (description?: string) => {
+    if (!description) return '';
+    return description.replace(/\s*🔹/g, '\n🔹').trim();
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setDto(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
@@ -158,31 +168,30 @@ var defaultReader: ReaderDto = {
 
   {/* Reader Module */ }
   const [moduleOption, setModuleOption] = useState<Options[]>([]);
-  const fetchModule = async (value: string) => {
-    const res = await send.get(ModuleEndpoint.GET_MAC(value));
+  const fetchModule = async (value: number) => {
+    const res = await send.get(ModuleEndpoint.GET_BY_DEVICE_ID(value));
     if (res && res.data.data) {
       res.data.data.map((a: ModuleDto) => {
         setModuleOption((prev) => [...prev, {
-          label: `${a.model} ( ${a.address} )`,
+          label: `${a.modelDetail} ( ${a.address} )`,
           value: a.driverId,
+          additionalInfo: a.id,
           isTaken: false
         }]);
       });
     }
   }
   {/* SCP Data */ }
-  const [controller, setController] = useState<HardwareDto[]>([]);
   const [controllerOption, setControllerOption] = useState<Options[]>([]);
 
   const fetchScp = async () => {
     const res = await send.get(HardwareEndpoint.GET(locationId));
     Logger.info(res)
     if (res && res.data.data) {
-      setController(res.data.data);
       res.data.data.map((a: HardwareDto) => {
         setControllerOption(prev => [...prev, {
           label: a.name,
-          value: a.mac,
+          value: a.scpId,
           isTaken: false
         }])
       });
@@ -206,12 +215,12 @@ var defaultReader: ReaderDto = {
     }
   }
   {/* Pair Reader */ }
-  const fetchDoorByMac = async (ScpMac: string) => {
-    const res: AxiosResponse<ResponseDto<DoorDto[]>, any> | null | undefined = await send.get(DoorEndpoint.GET_ACR_BY_MAC(ScpMac));
+  const fetchDoorByDeviceId = async (deviceId: number) => {
+    const res: AxiosResponse<ResponseDto<DoorDto[]>, any> | null | undefined = await send.get(DoorEndpoint.GET_ACR_BY_DEVICE_ID(deviceId));
     res?.data.data.map((a: DoorDto) => {
       setDoorOption(prev => [...prev, {
         label: a.name,
-        value: a.componentId,
+        value: a.acrId,
         description: '',
         isTaken: false
       }])
@@ -222,9 +231,9 @@ var defaultReader: ReaderDto = {
   const [doorOption, setDoorOption] = useState<Options[]>([]);
   const [readerOutOption, setReaderOutOption] = useState<Options[]>([]);
   const [readerOutConfigurationOption, setReaderOutConfigurationOption] = useState<Options[]>([]);
-  const fetchReaderIn = async (mac: string, sio: number) => {
+  const fetchReaderIn = async (module: number) => {
     if (readerInOption.length !== 0) return;
-    const res = await send.get(DoorEndpoint.GET_ACR_READER(mac,sio));
+    const res = await send.get(DoorEndpoint.GET_ACR_READER(module));
     Logger.info(res)
     if (res && res.data.data) {
       res.data.data.map((a: number) => {
@@ -237,13 +246,13 @@ var defaultReader: ReaderDto = {
 
     }
   }
-  const fetchReaderOut = async (mac: string, sio: number) => {
+  const fetchReaderOut = async (module: number) => {
     if (readerOutOption.length !== 0) return;
-    if (dto.readers[0].moduleId == sio) {
+    if (dto.readers[0].moduleId == module) {
       setReaderOutOption(readerInOption.filter((a) => a.isTaken === false))
       return;
     }
-    const res = await send.get(DoorEndpoint.GET_ACR_READER(mac,sio));
+    const res = await send.get(DoorEndpoint.GET_ACR_READER(module));
     Logger.info(res)
     if (res && res.data.data) {
       res.data.data.map((a: number) => {
@@ -261,9 +270,9 @@ var defaultReader: ReaderDto = {
   const [inputRex1Option, setInputRex1Option] = useState<Options[]>([])
   const [inputSensorOption, setInputSensorOption] = useState<Options[]>([])
   const [inputModeOption, setInputModeOption] = useState<Options[]>([])
-  const fetchInputRex0 = async (mac: string, sio: number) => {
+  const fetchInputRex0 = async (sio: number) => {
     if (inputRex0Option.length !== 0) return;
-    const res = await send.get(MonitorPointEndpoint.IP_LIST(mac,sio));
+    const res = await send.get(MonitorPointEndpoint.IP_LIST(sio));
     if (res && res.data.data) {
       res.data.data.map((a: number) => {
         setInputRex0Option(prev => [...prev, {
@@ -275,13 +284,13 @@ var defaultReader: ReaderDto = {
     }
 
   }
-  const fetchInputRex1 = async (mac: string, sio: number) => {
+  const fetchInputRex1 = async (sio: number) => {
     if (inputRex1Option.length !== 0) return;
     if (dto.requestExits[0].moduleId === sio) {
       setInputRex1Option(inputRex0Option.filter((a) => a.isTaken === false));
       return;
     }
-   const res = await send.get(MonitorPointEndpoint.IP_LIST(mac,sio));
+   const res = await send.get(MonitorPointEndpoint.IP_LIST(sio));
     if (res && res.data.data) {
       res.data.data.map((a: number) => {
         setInputRex1Option(prev => [...prev, {
@@ -292,7 +301,7 @@ var defaultReader: ReaderDto = {
       })
     }
   }
-  const fetchInputSensor = async (mac: string, sio: number) => {
+  const fetchInputSensor = async (sio: number) => {
     if (inputSensorOption.length !== 0) return;
     if (dto.requestExits[1].moduleId == sio && inputRex1Option.length !== 0) {
       setInputSensorOption(inputRex1Option.filter(a => a.isTaken == false));
@@ -301,7 +310,7 @@ var defaultReader: ReaderDto = {
       setInputSensorOption(inputRex0Option.filter(a => a.isTaken == false));
       return;
     }
-    const res = await send.get(MonitorPointEndpoint.IP_LIST(mac,sio));
+    const res = await send.get(MonitorPointEndpoint.IP_LIST(sio));
     if (res && res.data.data) {
       res.data.data.map((a: number) => {
         setInputSensorOption(prev => [...prev, {
@@ -329,9 +338,9 @@ var defaultReader: ReaderDto = {
   const [outputOption, setOutputOption] = useState<Options[]>([])
   const [relayMode, setRelayMode] = useState<Options[]>([])
   const [strikeModeOption, setStrikeModeOption] = useState<Options[]>([])
-  const fetchOutput = async (mac: string, sio: number) => {
+  const fetchOutput = async (module: number) => {
     if (outputOption.length !== 0) return;
-    const res = await send.get(ControlPointEndpoint.OUTPUT(mac,sio))
+    const res = await send.get(ControlPointEndpoint.OUTPUT(module))
     if (res && res.data.data) {
       res.data.data.map((a: number) => {
         setOutputOption(prev => [...prev, {
@@ -378,7 +387,7 @@ var defaultReader: ReaderDto = {
       res.data.data.map((a: TimeZoneDto) => {
         setTimeZoneOption(prev => [...prev, {
           label: a.name,
-          value: a.driverId,
+          value: a.timezoneId,
           isTaken: false
         }])
       })
@@ -452,7 +461,7 @@ var defaultReader: ReaderDto = {
       res.data.data.map((a: CardFormatDto) => {
         setFormatsOption(prev => [...prev, {
           selected: false,
-          value: String(a.componentId),
+          value: String(a.cfmtId),
           text: String(a.name)
         }])
       })
@@ -483,10 +492,36 @@ var defaultReader: ReaderDto = {
       })
     }
   }
+  const fetchDoorTypeAsync = async () => {
+    const res = await send.get(DoorEndpoint.GET_DOOR_TYPE)
+    if (res && res.data.data) {
+      res.data.data.map((a: ModeDto) => {
+        setAccessReaderConfigOption(prev => [...prev, {
+          description: a.description,
+          isTaken:false,
+          value: a.value,
+          label: a.name
+        }])
+      })
+    }
+  }
+  const fetchOsdpAddress = async (module:number) => {
+    const res = await send.get(DoorEndpoint.GET_OSDP_ADDRESS_BY_MODULE(module))
+    if(res && res.data.data){
+      console.log(res.data.data)
+      res.data.data.map((a:number) => {
+          setOsdpAddress(prev => ([...prev,{
+            label:"Address " + a,
+            value:a,
+            isTaken:false
+          }]))
+      })
+    }
+  }
   {/* UseEffect */ }
   useEffect(() => {
     fetchScp();
-    fetchAccessReaderMode();
+    //fetchAccessReaderMode();
     fetchTimeZone()
     fetchStrikeMode()
     fetchApbMode();
@@ -498,6 +533,7 @@ var defaultReader: ReaderDto = {
     fetchCardFormat();
     fetchSpareMode();
     fetchAccessControlMode();
+    fetchDoorTypeAsync();
   }, [])
 
   return (
@@ -538,8 +574,8 @@ var defaultReader: ReaderDto = {
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{currentStep?.title}</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">{currentStep?.detail}</p>
         </div>
-        <div className="space-y-6 flex justify-center">
-          <div className='w-full lg:w-[60%]'>
+        <div className="flex justify-center">
+          <div className={`w-full ${activeTab === FormTab.Advance ? '' : 'lg:w-[60%]'}`}>
               {activeTab == FormTab.General &&
                 <div className='flex flex-col gap-1'>
                   <Label htmlFor="name">Door Name</Label>
@@ -548,24 +584,32 @@ var defaultReader: ReaderDto = {
                       setDto(prev => ({ ...prev, name: e.target.value }))
                   } />
                   <div>
-                    <Label htmlFor='macAddress'>Controller</Label>
+                    <Label htmlFor='scpId'>Controller</Label>
                     <Select
                       disabled={type == FormType.INFO}
-                      isString={true}
-                      id='macAddress'
-                      name="macAddress"
+                      isString={false}
+                      id='scpId'
+                      name="scpId"
                       options={controllerOption}
                       onChange={(value: string) => {
-                        setDto(prev => ({ ...prev, mac: value }))
-                        fetchModule(value);
-                        fetchDoorByMac(value);
+                        setDto(prev => (
+                          { 
+                            ...prev, 
+                            scpId: Number(value),
+                            sensor:{...prev.sensor,scpId:Number(value)} ,
+                            strk: {...prev.strk,scpId:Number(value)},
+                            // requestExits:prev.requestExits.map(x => ({...x,scpId:Number(value)})),
+                            // readers:prev.readers.map(x => ({...x,scpId:Number(value)}))
+                          }))
+                        fetchModule(Number(value));
+                        fetchDoorByDeviceId(Number(value));
                       }}
                       className="dark:bg-dark-900"
-                      defaultValue={dto.mac}
+                      defaultValue={dto.scpId}
                     />
                   </div>
                   <div>
-                    <Label htmlFor="accessConfig">Access Config</Label>
+                    <Label htmlFor="accessConfig">Door Type</Label>
                     <Select
                       disabled={type == FormType.INFO}
                       id='accessConfig'
@@ -585,7 +629,7 @@ var defaultReader: ReaderDto = {
                       defaultValue={dto.accessConfig}
                     />
                   </div>
-
+{/* 
                   {isPairUse &&
                     <>
                       <Label htmlFor="pairDoorNo">Paired Reader</Label>
@@ -604,7 +648,7 @@ var defaultReader: ReaderDto = {
                       }
 
                     </>
-                  }
+                  } */}
                   <div>
                     <MultiSelect
                       disabled={type == FormType.INFO}
@@ -625,7 +669,6 @@ var defaultReader: ReaderDto = {
                 <div className='flex flex-col gap-5'>
                   <div className='gap-3'>
                     <div className='flex flex-col gap-1'>
-                      <Label htmlFor='mode' >Type</Label>
                       <div className="flex justify-around gap-3 pb-3">
                         <div className="flex flex-col flex-wrap gap-8">
                           <Radio
@@ -643,6 +686,7 @@ var defaultReader: ReaderDto = {
                             id="insideType2"
                             name="insideType2"
                             value="Reader"
+                            disabled={dto.accessConfig == Number(DoorType.Single) && readerOutFlag}
                             checked={insideType === DeviceType.Reader}
                             onChange={handleInsideDeviceType}
                             label="Reader"
@@ -674,9 +718,9 @@ var defaultReader: ReaderDto = {
                               placeholder="Select Option"
                               onChange={(value: string) => {
                                 if (value == ReaderType.Wiegand) {
-                                  setDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 0 ? { ...r, osdpFlag: false, osdpAddress: 0x00, altOsdpBaudRate: 0x00, osdpDiscover: 0x00, osdpSecureChannel: 0x00, osdpTracing: 0x00 } : r) }))
+                                  setDto(prev => ({ ...prev,direction:DoorDirection.OUT, readers: prev.readers.map((r, i) => i === 0 ? { ...r, osdpFlag: false,ledDriveMode:1, osdpAddress: 0x00, altOsdpBaudRate: 0x00, osdpDiscover: 0x00, osdpSecureChannel: 0x00, osdpTracing: 0x00 } : r) }))
                                 } else {
-                                  setDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 0 ? { ...r, osdpFlag: true } : r) }))
+                                  setDto(prev => ({ ...prev,direction:DoorDirection.OUT, readers: prev.readers.map((r, i) => i === 0 ? { ...r, osdpFlag: true,ledDriveMode:7 } : r) }))
                                 }
                                 setReaderInType(value)
                               }}
@@ -693,8 +737,9 @@ var defaultReader: ReaderDto = {
                               placeholder="Select Option"
                               onChange={(value: string) => {
                                 console.log(">>>>>>>>>>>>>>> " + value);
-                                setDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 0 ? { ...r, mac: prev.mac, moduleId: Number(value) } : r) }))
-                                fetchReaderIn(dto.mac, Number(value));
+                                setDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 0 ? { ...r,scpId:prev.scpId, moduleId: Number(value),moduleDriverId: moduleOption.find(x => x.value == Number(value))?.additionalInfo } : r) }))
+                                fetchReaderIn(Number(value));
+                                if(dto.readers[0].osdpFlag == true) fetchOsdpAddress(Number(value))
                               }}
                               className="dark:bg-dark-900"
                               defaultValue={dto.readers[0].moduleId}
@@ -720,6 +765,18 @@ var defaultReader: ReaderDto = {
                             <>
                               <Label htmlFor='readerIn.osdpAddress'>Reader Address</Label>
                               <Input disabled={type == FormType.INFO} value={dto.readers[0].osdpAddress} name="readerIn.osdpAddress" type="number" id="osdpAddress" onChange={handleChange} />
+                        <Select
+                          disabled={type == FormType.INFO}
+                          name="readerIn.osdpAddress"
+                          options={osdpAddress}
+                          placeholder="Select Option"
+                          onChange={(value: string) => {
+                            setDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 0 ? { ...r, osdpAddress: Number(value) } : r) }));
+                            Helper.updateOptionByValue(osdpAddress, Number(value), true);
+                          }}
+                          className="dark:bg-dark-900"
+                          defaultValue={dto.readers[0].osdpAddress}
+                        />
                               <Label htmlFor='readerNumber'>Reader Baud Rate</Label>
                               <Select
                                 disabled={type == FormType.INFO}
@@ -737,7 +794,7 @@ var defaultReader: ReaderDto = {
                                   disabled={type == FormType.INFO}
                                   label="Auto Discover"
                                   defaultChecked={true}
-                                  onChange={(checked: boolean) => setDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 0 ? { ...r, osdpDiscover: checked ? 0x00 : 0x80 } : r) }))}
+                                  onChange={(checked: boolean) => setDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 0 ? { ...r, osdpDiscover: checked ? 0x00 : 0x08 } : r) }))}
                                 />
                               </div>
                               <div className='mt-3'>
@@ -769,8 +826,8 @@ var defaultReader: ReaderDto = {
               }
 
               {activeTab === FormTab.Inside &&
+                
                 <div className='flex flex-col gap-1'>
-                  <Label htmlFor='mode' >Type</Label>
                   <div className="flex justify-around gap-3 pb-3">
                     <div className="flex flex-col flex-wrap gap-8">
                       <Radio
@@ -788,6 +845,7 @@ var defaultReader: ReaderDto = {
                         id="outsideType2"
                         name="outsideType2"
                         value={DeviceType.Reader}
+                        disabled={dto.accessConfig == Number(DoorType.Single) && readerInFlag}
                         checked={outsideType === DeviceType.Reader}
                         onChange={handleOutsideDeviceType}
                         label={DeviceType.Reader}
@@ -828,9 +886,9 @@ var defaultReader: ReaderDto = {
                           placeholder="Select Option"
                           onChange={(value: string) => {
                             if (value == ReaderType.Wiegand) {
-                              setDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 1 ? { ...r, osdpFlag: false, osdpAddress: 0x00, altOsdpBaudRate: 0x00, osdpDiscover: 0x00, osdpSecureChannel: 0x00, osdpTracing: 0x00 } : r) }))
+                              setDto(prev => ({ ...prev, direction:DoorDirection.IN ,readers: prev.readers.map((r, i) => i === 1 ? { ...r, osdpFlag: false,ledDriveMode:1, osdpAddress: 0x00, altOsdpBaudRate: 0x00, osdpDiscover: 0x00, osdpSecureChannel: 0x00, osdpTracing: 0x00 } : r) }))
                             } else {
-                              setDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 1 ? { ...r, osdpFlag: true } : r) }))
+                              setDto(prev => ({ ...prev,direction:DoorDirection.IN, readers: prev.readers.map((r, i) => i === 1 ? { ...r,ledDriveMode:7, osdpFlag: true } : r) }))
                             }
                             setReaderOutType(value)
                           }}
@@ -846,8 +904,9 @@ var defaultReader: ReaderDto = {
                           options={moduleOption}
                           placeholder="Select Option"
                           onChangeWithEvent={(value: string) => {
-                            setDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 1 ? { ...r, mac: prev.mac, moduleId: Number(value) } : r) }))
-                            fetchReaderOut(dto.mac, Number(value));
+                            setDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 1 ? { ...r,scpId:prev.scpId, moduleId: Number(value),moduleDriverId: moduleOption.find(x => x.value == Number(value))?.additionalInfo } : r) }))
+                            fetchReaderOut(Number(value));
+                            if(dto.readers[0].moduleId != Number(value) && dto.readers[1].osdpFlag == true) fetchOsdpAddress(Number(value))
                           }}
                           className="dark:bg-dark-900"
                           defaultValue={dto.readers[1].moduleId}
@@ -885,7 +944,19 @@ var defaultReader: ReaderDto = {
                       {dto.readers[1].osdpFlag &&
                         <>
                           <Label htmlFor='readerOut.osdpAddress'>Reader Address</Label>
-                          <Input disabled={type == FormType.INFO} value={dto.readers[1].osdpAddress} name="readerOut.osdpAddress" type="number" id="alternateOsdpAddress" onChange={handleChange} />
+                          {/* <Input disabled={type == FormType.INFO} value={dto.readers[1].osdpAddress} name="readerOut.osdpAddress" type="number" id="alternateOsdpAddress" onChange={handleChange} /> */}
+                          <Select
+                            disabled={type == FormType.INFO}
+                            name="readerOut.osdpAddress"
+                            options={osdpAddress}
+                            placeholder="Select Option"
+                            onChange={(value: string) => {
+                              setDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 1 ? { ...r, osdpAddress: Number(value) } : r) }));
+                              Helper.updateOptionByValue(osdpAddress,Number(value),true);
+                            }}
+                            className="dark:bg-dark-900"
+                            defaultValue={dto.readers[1].osdpAddress}
+                          />
                           <Label htmlFor='readerOut.osdpBaudrate'>Reader Baud Rate</Label>
                           <Select
                             disabled={type == FormType.INFO}
@@ -903,7 +974,7 @@ var defaultReader: ReaderDto = {
                             disabled={type == FormType.INFO}
                               label="Auto Discover"
                               defaultChecked={true}
-                              onChange={(checked: boolean) => setDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 1 ? { ...r, osdpDiscover: checked ? 0x00 : 0x80 } : r) }))}
+                              onChange={(checked: boolean) => setDto(prev => ({ ...prev, readers: prev.readers.map((r, i) => i === 1 ? { ...r, osdpDiscover: checked ? 0x00 : 0x08 } : r) }))}
                             />
                           </div>
                           <div className='mt-3'>
@@ -937,8 +1008,8 @@ var defaultReader: ReaderDto = {
                         name="rex0.moduleId"
                         options={moduleOption}
                         onChange={(value: string) => {
-                          fetchInputRex0(dto.mac, Number(value));
-                          setDto(prev => ({ ...prev, requestExits: prev.requestExits.map((r, i) => i === 0 ? { ...r, mac: prev.mac, moduleId: Number(value) } : r) }))
+                          fetchInputRex0( Number(value));
+                          setDto(prev => ({ ...prev, requestExits: prev.requestExits.map((r, i) => i === 0 ? { ...r,scpId:prev.scpId, moduleId: Number(value),moduleDriverId: Number(moduleOption.find(x => x.additionalInfo == Number(value))?.value) ?? -1 } : r) }))
                         }}
                         className="dark:bg-dark-900"
                         defaultValue={dto.requestExits[0].moduleId}
@@ -986,8 +1057,8 @@ var defaultReader: ReaderDto = {
                             name="rex1.moduleId"
                             options={moduleOption}
                             onChange={(value: string) => {
-                              fetchInputRex1(dto.mac, Number(value));
-                              setDto(prev => ({ ...prev, requestExits: prev.requestExits.map((r, i) => i === 1 ? { ...r, mac: prev.mac, moduleId: Number(value) } : r) }))
+                              fetchInputRex1(Number(value));
+                              setDto(prev => ({ ...prev, requestExits: prev.requestExits.map((r, i) => i === 1 ? { ...r,scpId:prev.scpId,  moduleId: Number(value),moduleDriverId: Number(moduleOption.find(x => x.additionalInfo == Number(value))?.value) ?? -1 } : r) }))
                             }}
                             className="dark:bg-dark-900"
                             defaultValue={dto.requestExits[1].moduleId}
@@ -1034,6 +1105,7 @@ var defaultReader: ReaderDto = {
 
                 </div>
 
+
               }
 
 
@@ -1046,8 +1118,8 @@ var defaultReader: ReaderDto = {
                     name="strk.moduleId"
                     options={moduleOption}
                     onChange={(value: string) => {
-                      fetchOutput(dto.mac, Number(value))
-                      setDto(prev => ({ ...prev, strk: { ...prev.strk, mac: prev.mac, moduleId: Number(value) } }))
+                      fetchOutput(Number(value))
+                      setDto(prev => ({ ...prev, strk: { ...prev.strk, moduleId: Number(value),moduleDriverId:moduleOption.find(x => x.value == Number(value))?.additionalInfo } }))
                     }}
                     className="dark:bg-dark-900"
                     defaultValue={dto.strk.moduleId}
@@ -1106,8 +1178,8 @@ var defaultReader: ReaderDto = {
                     name="sensor.moduleId"
                     options={moduleOption}
                     onChange={(value: string) => {
-                      fetchInputSensor(dto.mac, Number(value));
-                      setDto(prev => ({ ...prev, sensor: { ...prev.sensor, mac: prev.mac, moduleId: Number(value) } }))
+                      fetchInputSensor(Number(value));
+                      setDto(prev => ({ ...prev, sensor: { ...prev.sensor, moduleId: Number(value),moduleDriverId: Number(moduleOption.find(x => x.additionalInfo == Number(value))?.value) ?? -1 } }))
                     }}
                     className="dark:bg-dark-900"
                     defaultValue={dto.sensor.moduleId}
@@ -1118,8 +1190,8 @@ var defaultReader: ReaderDto = {
                     name="sensor.inputNo"
                     options={inputSensorOption}
                     onChange={(value: string) => {
-                      fetchInputSensor(dto.mac, Number(value));
-                      setDto(prev => ({ ...prev, sensor: { ...prev.sensor, inputNo: Number(value) } }))
+                      fetchInputSensor(Number(value));
+                      setDto(prev => ({ ...prev, sensor: { ...prev.sensor, inputNo: Number(value),moduleDriverId: Number(moduleOption.find(x => x.additionalInfo == Number(value))?.value) ?? -1 } }))
                     }}
                     className="dark:bg-dark-900"
                     defaultValue={dto.sensor.inputNo}
@@ -1130,8 +1202,8 @@ var defaultReader: ReaderDto = {
                     name="sensor.inputMode"
                     options={inputModeOption}
                     onChange={(value: string) => {
-                      fetchInputSensor(dto.mac, Number(value));
-                      setDto(prev => ({ ...prev, sensor: { ...prev.sensor, inputMode: Number(value) } }))
+                      fetchInputSensor(Number(value));
+                      setDto(prev => ({ ...prev, sensor: { ...prev.sensor, inputMode: Number(value),moduleDriverId: Number(moduleOption.find(x => x.additionalInfo == Number(value))?.value) ?? -1 } }))
                     }}
                     className="dark:bg-dark-900"
                     defaultValue={dto.sensor.inputMode}
@@ -1160,10 +1232,10 @@ var defaultReader: ReaderDto = {
                     name="antiPassBackIn"
                     options={areaOption}
                     onChange={(value: string) => {
-                      setDto(prev => ({ ...prev, antiPassBackIn: Number(value) }))
+                      setDto(prev => ({ ...prev, areaInId: Number(value) }))
                     }}
                     className="dark:bg-dark-900"
-                    defaultValue={dto.antiPassBackIn}
+                    defaultValue={dto.areaInId}
                   />
                   <Label htmlFor="antiPassBackOut">Area To</Label>
                   <Select
@@ -1172,10 +1244,10 @@ var defaultReader: ReaderDto = {
                     name="antiPassBackOut"
                     options={areaOption}
                     onChange={(value: string) => {
-                      setDto(prev => ({ ...prev, antiPassBackOut: Number(value) }))
+                      setDto(prev => ({ ...prev, areaOutId: Number(value) }))
                     }}
                     className="dark:bg-dark-900"
-                    defaultValue={dto.antiPassBackOut}
+                    defaultValue={dto.areaOutId}
                   />
 
                 </div>
@@ -1190,7 +1262,7 @@ var defaultReader: ReaderDto = {
                     name="offlineMode"
                     options={doorModeOption}
                     onChange={(value: string) => {
-                      setDto(prev => ({ ...prev, offlineMode: Number(value) }))
+                      setDto(prev => ({ ...prev, offlineMode: Number(value),offlineModeDesc:doorModeOption.find(x => x.value == Number(value))?.label ?? "" }))
                     }}
                     className="dark:bg-dark-900"
                     defaultValue={dto.offlineMode}
@@ -1202,7 +1274,7 @@ var defaultReader: ReaderDto = {
                     name="defaultMode"
                     options={doorModeOption}
                     onChange={(value: string) => {
-                      setDto(prev => ({ ...prev, defaultMode: Number(value) }))
+                      setDto(prev => ({ ...prev,mode:Number(value),modeDesc:doorModeOption.find(x => x.value == Number(value))?.label ?? "", defaultMode: Number(value),defaultModeDesc:doorModeOption.find(x => x.value == Number(value))?.label ?? "" }))
                     }}
                     className="dark:bg-dark-900"
                     defaultValue={dto.defaultMode}
@@ -1212,73 +1284,86 @@ var defaultReader: ReaderDto = {
               }
 
               {activeTab == FormTab.Advance &&
-                <>
-                  <Label>Door Setting</Label>
-                  <div className="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
-                    <div className='flex gap-1'>
-                      <div className='flex-1'>
-                        <Label htmlFor="defaultMode">Access Control Mode</Label>
-                        {accessFlag.map((d, i) => <div className='m-3'>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-5 dark:border-gray-800 dark:bg-white/[0.02]">
+                    <h4 className="text-base font-semibold text-gray-900 dark:text-white">Access Control Flags</h4>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Enable only the behaviors this door should enforce during normal operation.</p>
+                    <div className="mt-4 grid grid-cols-1 gap-3">
+                      {accessFlag.map((d, i) => (
+                        <div key={i} className="rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-900">
                           <Switch
-                          disabled={type == FormType.INFO}
-                            key={i}
+                            disabled={type == FormType.INFO}
                             label={d.name}
                             defaultChecked={false}
                             onChange={(checked: boolean) => setDto(prev => ({ ...prev, accessControlFlags: checked ? prev.accessControlFlags | d.value : prev.accessControlFlags & (~d.value) }))}
                           />
+                          {d.description && (
+                            <p className="mt-1 whitespace-pre-line text-xs text-gray-500 dark:text-gray-400">
+                              {formatFlagDescription(d.description)}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
 
-                        </div>)}
-                      </div>
-                      <div className='flex-1'>
-                        <Label htmlFor="defaultMode">Advance Mode</Label>
-                        {spareFlag.map((d, i) => <div className='m-3'>
+                  <div className="rounded-2xl border border-gray-200 bg-gray-50/80 p-5 dark:border-gray-800 dark:bg-white/[0.02]">
+                    <h4 className="text-base font-semibold text-gray-900 dark:text-white">Advanced Flags</h4>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Additional low-level options. Keep these disabled unless your scenario requires them.</p>
+                    <div className="mt-4 grid grid-cols-1 gap-3">
+                      {spareFlag.map((d, i) => (
+                        <div key={i} className="rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-900">
                           <Switch
-                          disabled={type == FormType.INFO}
-                            key={i}
+                            disabled={type == FormType.INFO}
                             label={d.name}
                             defaultChecked={false}
                             onChange={(checked: boolean) => setDto(prev => ({ ...prev, spareTags: checked ? prev.spareTags | d.value : prev.spareTags & (~d.value) }))}
                           />
-                        </div>)}
-                      </div>
-
+                          {d.description && (
+                            <p className="mt-1 whitespace-pre-line text-xs text-gray-500 dark:text-gray-400">
+                              {formatFlagDescription(d.description)}
+                            </p>
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </>
+                </div>
 
               }
             </div>
-            <div className="flex w-full items-center justify-between gap-3 pt-3 lg:w-[60%]">
-              <div>
-                {!isFirstStep && (
-                  <Button
-                    variant="outline"
-                    onClick={() => goToStep(currentStepIndex - 1)}
-                    className="min-w-[120px]"
-                    size="sm"
-                  >
-                    Back
-                  </Button>
-                )}
-              </div>
-              <div className="flex gap-3">
-                <Button variant='danger' onClickWithEvent={handleClick} name='close' className="min-w-[120px]" size="sm">Cancel</Button>
-                {isLastStep ? (
-                  <Button
-                    disabled={type == FormType.INFO}
-                    onClickWithEvent={handleClick}
-                    name={type == FormType.UPDATE ? "update" : "create"}
-                    className="min-w-[120px]"
-                    size="sm"
-                  >
-                    {type == FormType.UPDATE ? "Update" : "Create"}
-                  </Button>
-                ) : (
-                  <Button onClick={() => goToStep(currentStepIndex + 1)} className="min-w-[120px]" size="sm">
-                    Next
-                  </Button>
-                )}
-              </div>
+          </div>
+
+          <div className="mt-6 flex w-full items-center justify-between gap-3">
+            <div>
+              {!isFirstStep && (
+                <Button
+                  variant="outline"
+                  onClick={() => goToStep(currentStepIndex - 1)}
+                  className="min-w-[120px]"
+                  size="sm"
+                >
+                  Back
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <Button variant='danger' onClickWithEvent={handleClick} name='close' className="min-w-[120px]" size="sm">Cancel</Button>
+              {isLastStep ? (
+                <Button
+                  disabled={type == FormType.INFO}
+                  onClickWithEvent={handleClick}
+                  name={type == FormType.UPDATE ? "update" : "create"}
+                  className="min-w-[120px]"
+                  size="sm"
+                >
+                  {type == FormType.UPDATE ? "Update" : "Create"}
+                </Button>
+              ) : (
+                <Button onClick={() => goToStep(currentStepIndex + 1)} className="min-w-[120px]" size="sm">
+                  Next
+                </Button>
+              )}
             </div>
           </div>
         </div>

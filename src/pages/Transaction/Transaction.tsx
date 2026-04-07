@@ -41,22 +41,22 @@ const Transaction = () => {
     totalPage: 0
   });
   const handleClickFirst = () => {
-    fetchData(1, 10, search, startDate);
+    fetchData(1, 10, search, startDate, endDate);
   }
 
   const handleClickPrevious = () => {
 
-    fetchData(pagination.pageNumber - 1, pageSize, search, startDate);
+    fetchData(pagination.pageNumber - 1, pageSize, search, startDate, endDate);
   }
 
   const handleClickNext = () => {
 
-    fetchData(pagination.pageNumber + 1, pageSize, search, startDate);
+    fetchData(pagination.pageNumber + 1, pageSize, search, startDate, endDate);
   }
 
   const handleClickLast = () => {
 
-    fetchData(pagination.totalPage, pageSize, search, startDate);
+    fetchData(pagination.totalPage, pageSize, search, startDate, endDate);
   }
 
   const handlePageSizeSelect = (data: string) => {
@@ -86,8 +86,8 @@ const Transaction = () => {
   }, []);
 
   useEffect(() => {
-    fetchData(1, pageSize, search, startDate)
-  }, [pageSize, search, startDate])
+    fetchData(1, pageSize, search, startDate, endDate)
+  }, [pageSize, search, startDate, endDate])
 
   // const toLocalISOWithOffset = (date: Date) => {
   //       const pad = (n: number) => String(n).padStart(2, "0");
@@ -107,14 +107,6 @@ const Transaction = () => {
   //       );
   //   }
 
-  const toLocalDateWithOffset = (date: Date): Date => {
-    const offsetMs = date.getTimezoneOffset() * 60 * 1000;
-    return new Date(date.getTime() - offsetMs);
-  };
-
-
-
-
   return (
     <>
       <PageBreadcrumb pageTitle="Events" />
@@ -123,36 +115,54 @@ const Transaction = () => {
           <div className="max-w-full overflow-x-auto">
             {/* Header */}
             <div className="flex flex-col gap-2 px-4 py-4 border border-b-0 border-gray-100 dark:border-white/[0.05] rounded-t-xl sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
-                <div className="inline-flex items-center shadow-theme-xs">
+              <div className="flex flex-wrap items-end gap-3 rounded-xl border border-gray-200 bg-gray-50/80 p-3 dark:border-gray-700 dark:bg-white/[0.02]">
+                <div className="min-w-[220px]">
+                  <p className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">From</p>
                   <DatePicker
                     id="startDate"
-                    placeholder="Start date"
-                    // value={credentialDto.activeDate}
-                    onChange={(dates, currentDateString) => {
-                      // Handle your logic
-                      console.log({ dates, currentDateString });
-                      // setCredentialDto(prev => ({ ...prev, activeDate: toLocalISOWithOffset(dates[0]) }));
-                      const date = new Date(dates[0]);
-                      const iso = date.toISOString(); // ✅ UTC, ISO
-                      setStartDate(iso);
-
+                    placeholder="Select start date"
+                    onChange={(dates) => {
+                      if (!dates?.[0]) {
+                        setStartDate(undefined);
+                        return;
+                      }
+                      setStartDate(new Date(dates[0]).toISOString());
                     }}
                   />
                 </div>
-                <div className="inline-flex items-center shadow-theme-xs">
+                <div className="mb-2 text-gray-400 dark:text-gray-500">
+                  <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4.16699 10H15.8337M15.8337 10L11.667 5.83337M15.8337 10L11.667 14.1667" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </div>
+                <div className="min-w-[220px]">
+                  <p className="mb-1 text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">To</p>
                   <DatePicker
                     id="endDate"
-                    placeholder="End date"
-                    // value={credentialDto.activeDate}
-                    onChange={(dates, currentDateString) => {
-                      // Handle your logic
-                      console.log({ dates, currentDateString });
-                      // setCredentialDto(prev => ({ ...prev, activeDate: toLocalISOWithOffset(dates[0]) }));
-
+                    placeholder="Select end date"
+                    onChange={(dates) => {
+                      if (!dates?.[0]) {
+                        setEndDate(undefined);
+                        return;
+                      }
+                      setEndDate(new Date(dates[0]).toISOString());
                     }}
                   />
                 </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStartDate(undefined);
+                    setEndDate(undefined);
+                    const startInput = document.getElementById("startDate") as HTMLInputElement | null;
+                    const endInput = document.getElementById("endDate") as HTMLInputElement | null;
+                    if (startInput) startInput.value = "";
+                    if (endInput) endInput.value = "";
+                  }}
+                  className="h-11 rounded-lg border border-gray-300 bg-white px-3.5 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-white/[0.03]"
+                >
+                  Clear
+                </button>
               </div>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <div className="relative">
@@ -219,3 +229,4 @@ const Transaction = () => {
 }
 
 export default Transaction
+

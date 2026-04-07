@@ -60,17 +60,17 @@ export const DoorTable: React.FC<PropsWithChildren<TableContent>> = ({ selectedO
                                 <>
                                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                                         <>
-                                            <Badge size="sm" color="dark">{statusDto.find(b => b.deviceId == data.componentId)?.tamper}</Badge>
+                                            <Badge size="sm" color="dark">{statusDto.find(b => b.driverId == data.componentId)?.tamper}</Badge>
                                         </>
                                     </TableCell>
                                     <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                                         <>
-                                            {statusDto.find(b => b.deviceId == data.componentId)?.status === "Secure" ? (
-                                                <Badge size="sm" color="success">{statusDto.find(b => b.deviceId == data.componentId)?.status}</Badge>
-                                            ) : statusDto.find(b => b.deviceId == data.componentId)?.status === "Forced Open" || statusDto.find(b => b.deviceId == data.componentId)?.status === "Locked" ? (
-                                                <Badge size="sm" color="error">{statusDto.find(b => b.deviceId == data.componentId)?.status}</Badge>
+                                            {statusDto.find(b => b.driverId == data.componentId)?.status === "Secure" ? (
+                                                <Badge size="sm" color="success">{statusDto.find(b => b.driverId == data.componentId)?.status}</Badge>
+                                            ) : statusDto.find(b => b.driverId == data.componentId)?.status === "Forced Open" || statusDto.find(b => b.driverId == data.componentId)?.status === "Locked" ? (
+                                                <Badge size="sm" color="error">{statusDto.find(b => b.driverId == data.componentId)?.status}</Badge>
                                             ) : (
-                                                <Badge size="sm" color="warning">{statusDto.find(b => b.deviceId == data.componentId)?.status === 0 ? "Error" : statusDto.find(b => b.deviceId == data.componentId)?.status}</Badge>
+                                                <Badge size="sm" color="warning">{statusDto.find(b => b.driverId == data.componentId)?.status === 0 ? "Error" : statusDto.find(b => b.driverId == data.componentId)?.status}</Badge>
                                             )}
                                         </>
                                     </TableCell>

@@ -1,5 +1,5 @@
 export interface MpStatus {
-      mac:string;
+      deviceId:number;
       first:number;
       status:string;
 }

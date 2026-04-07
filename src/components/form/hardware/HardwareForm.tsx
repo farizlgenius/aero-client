@@ -88,7 +88,7 @@ const HardwareForm: React.FC<PropsWithChildren<FormProp<HardwareDto | CreateHard
             </div>
             <div>
               <Label htmlFor="componentId">Scp Id</Label>
-              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="driverId" value={dto.driverId} type="text" id="driverId" onChange={handleChange} isReadOnly={true} />
+              <Input disabled={type == FormType.INFO || type == FormType.UPDATE} name="driverId" value={dto.scpId} type="text" id="driverId" onChange={handleChange} isReadOnly={true} />
             </div>
             <div>
               <Label htmlFor="mac">Mac</Label>

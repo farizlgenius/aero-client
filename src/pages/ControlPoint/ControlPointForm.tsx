@@ -35,13 +35,13 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
 
   const handleSelect = async (value: string, e: React.ChangeEvent<HTMLSelectElement>) => {
     switch (e.target.name) {
-      case "macAddress":
-        fetchModuleByMac(value)
-        setDto((prev) => ({...prev,mac:value,hardwareName:controllerOption.find(a => a.value == value)?.label ?? ""}))
+      case "driverId":
+        fetchModuleByDeviceId(Number(value))
+        setDto((prev) => ({...prev,scpId:Number(value),hardwareName:controllerOption.find(a => a.value == value)?.label ?? ""}))
         break;
       case "moduleId":
-        fetchOutput(value);
-        setDto((prev) => ({...prev,moduleId:Number(value),moduleDetail:moduleOption.find(a => a.value == Number(value))?.label ?? ""}))
+        fetchOutput(Number(value));
+        setDto((prev) => ({...prev,moduleId:Number(value),moduleDriverId:moduleOption.find(a => a.value == Number(value))?.additionalInfo ?? -1,moduleDetail:moduleOption.find(a => a.value == Number(value))?.label ?? ""}))
         break;
       case "relayMode":
         setDto(prev => ({...prev,relayMode:Number(value),relayModeDetail:relayModeOption.find(a => a.value == Number(value))?.label ?? ""}))
@@ -62,7 +62,7 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
       res.data.data.map((a: HardwareDto) => {
         setControllerOption(prev => [...prev, {
           label: a.name,
-          value: a.mac
+          value: a.scpId
         }])
       })
     }
@@ -92,20 +92,21 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
 
   }
 
-  const fetchModuleByMac = async (value: string) => {
-    const res = await send.get(ModuleEndpoint.GET_MAC(value));
+  const fetchModuleByDeviceId = async (value: number) => {
+    const res = await send.get(ModuleEndpoint.GET_BY_DEVICE_ID(value));
     if (res) {
       res.data.data.map((a: ModuleDto) => {
         setModuleOption((prev) => [...prev, {
-          label: `${a.model} ( ${a.address} )`,
-          value: a.componentId
+          label: `${a.modelDetail} ( ${a.address} )`,
+          value: a.id,
+          additionalInfo:a.driverId,
         }])
       })
     }
   }
 
-  const fetchOutput = async (value: string) => {
-    var res = await send.get(ControlPointEndpoint.OUTPUT(dto.mac,Number(value)));
+  const fetchOutput = async (value: number) => {
+    var res = await send.get(ControlPointEndpoint.OUTPUT(dto.scpId,value));
     if (res) {
       res.data.data.map((a: number) => {
         setRelayOption((prev) => [...prev, {
@@ -121,8 +122,8 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
     fetchController();
     fetchRelayMode();
     if(type == FormType.INFO || type == FormType.UPDATE){
-      fetchModuleByMac(dto.mac);
-      fetchOutput(String(dto.moduleId));
+      fetchModuleByDeviceId(dto.cpId);
+      fetchOutput(dto.moduleId);
     }
   }, []);
 
@@ -136,13 +137,13 @@ const ControlPointForm: React.FC<PropsWithChildren<FormProp<ControlPointDto>>> =
         <div>
           <Label>Controller</Label>
           <Select
-            isString={true}
-            name="macAddress"
+            isString={false}
+            name="driverId"
             options={controllerOption}
             placeholder="Select Option"
             onChangeWithEvent={handleSelect}
             className="dark:bg-dark-900"
-            defaultValue={dto.mac}
+            defaultValue={dto.scpId}
             disabled={type == FormType.INFO}
           />
         </div>

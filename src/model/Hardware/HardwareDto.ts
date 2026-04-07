@@ -3,7 +3,7 @@ import { ModuleDto } from "../Module/ModuleDto";
 
 export interface HardwareDto extends BaseDto {
   id:number;
-  driverId:number;
+  scpId:number;
   name: string;
   hardwareType: number;
   hardwareTypeDetail:string;

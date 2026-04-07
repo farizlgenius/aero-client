@@ -95,6 +95,8 @@ import {ReactComponent as MonitorIcon} from "./monitorpoint.svg?react";
 import {ReactComponent as TimezonIcon} from "./timezone.svg?react";
 import {ReactComponent as TransferIcon} from "./transfer.svg?react";
 import {ReactComponent as ToggleTranIcon} from "./toggletran.svg?react";
+import {ReactComponent as DoorInIcon} from "./in.svg?react";
+import {ReactComponent as DoorOutIcon} from "./out.svg?react";
 
 export {
   ErrorHexaIcon,
@@ -191,5 +193,7 @@ export {
   MonitorIcon,
   TimezonIcon,
   TransferIcon,
-  ToggleTranIcon
+  ToggleTranIcon,
+  DoorInIcon,
+  DoorOutIcon
 };

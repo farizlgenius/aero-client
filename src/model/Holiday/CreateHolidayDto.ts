@@ -2,7 +2,7 @@ import { BaseDto } from "../BaseDto";
 
 
 export interface CreateHolidayDto extends BaseDto {
-  driverId:number;
+  holId:number;
   name:string;
   year:number;
   month:number;

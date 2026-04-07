@@ -7,7 +7,6 @@ import { CardFormatDto } from '../../model/CardFormat/CardFormatDto';
 import { Card } from '../UiElements/Card';
 import { CardComponent } from '../../model/CardFormat/CardComponent';
 import { FormProp, FormType } from '../../model/Form/FormProp';
-import { useLocation } from '../../context/LocationContext';
 
 
 // Global Variable
@@ -19,33 +18,6 @@ const CardFormatForm: React.FC<PropsWithChildren<FormProp<CardFormatDto>>> = ({ 
   const [cards, setCards] = useState<CardComponent[]>([])
   const [refresh, setRefresh] = useState<boolean>(false);
   const toggleRefresh = () => setRefresh(!refresh);
-  const { locationId } = useLocation();
-
-  const defaultDto: CardFormatDto = {
-  name: '',
-  componentId: 0,
-  facility: -1,
-  offset: 0,
-  functionId: 1,
-  flags: 0,
-  bits: 0,
-  peLn: 0,
-  peLoc: 0,
-  poLn: 0,
-  poLoc: 0,
-  fcLn: 0,
-  fcLoc: 0,
-  chLn: 0,
-  chLoc: 0,
-  icLn: 0,
-  icLoc: 0,
-  uuid: '',
-  locationId: locationId,
-  isActive: false
-}
-
-
-
 
   const handleAdvanceCardClick = (event: React.MouseEvent<HTMLDivElement>, data: CardComponent, index: number) => {
     //setSelectObject(prev => prev.map(d => d.num == dto.num) ? selectObject.filter(a => a.num !== dto.num) : [...prev, data]);
@@ -107,7 +79,7 @@ const CardFormatForm: React.FC<PropsWithChildren<FormProp<CardFormatDto>>> = ({ 
         setSelectObject([])
         break;
       case "reset":
-        setDto(defaultDto);
+        setDto(dto);
         toggleRefresh()
         break;
       default:
@@ -157,7 +129,7 @@ const CardFormatForm: React.FC<PropsWithChildren<FormProp<CardFormatDto>>> = ({ 
         </div>
         <div className='flex flex-col gap-1'>
           <Label htmlFor="facility">Facility</Label>
-          <Input disabled={type == FormType.INFO} name="facility" type="text" id="cardFormatName" onChange={handleChange} value={dto.facility} />
+          <Input disabled={type == FormType.INFO} name="facility" type="text" id="cardFormatName" onChange={handleChange} value={dto.fac} />
         </div>
         <div className='flex flex-col gap-1'>
           <Label htmlFor="bits">Bits</Label>

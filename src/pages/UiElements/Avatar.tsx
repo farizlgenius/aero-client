@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { send } from "../../api/api";
-import { CardHolderEndpoint } from "../../endpoint/CardHolderEndpoint";
+import { UserEndpoint } from "../../endpoint/UserEndpoint";
 
 export const Avatar: React.FC<{ userId: string,newImage?:File,image?:File }> = ({ userId,newImage,image }) => {
       const [src, setSrc] = useState("/images/user/default.jpg");
@@ -15,7 +15,7 @@ export const Avatar: React.FC<{ userId: string,newImage?:File,image?:File }> = (
             }else{
                    console.log("using old image");
                   if (userId == null || userId === '') return;
-                  var res = await send.getImage(CardHolderEndpoint.IMAGE(userId));
+                  var res = await send.getImage(UserEndpoint.IMAGE(userId));
                   console.log(res);
                   if (res.status === 200 && res.data != null) {
                         console.log("image found, using default.");

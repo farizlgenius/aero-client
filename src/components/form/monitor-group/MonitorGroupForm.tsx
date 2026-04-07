@@ -104,7 +104,7 @@ export const MonitorGroupForm: React.FC<PropsWithChildren<FormProp<MonitorGroupD
     }
 
     const fetchDoor = async (mac: string) => {
-        const res = await send.get(DoorEndpoint.GET_ACR_BY_MAC(mac))
+        const res = await send.get(DoorEndpoint.GET_ACR_BY_DEVICE_ID(mac))
         if (res && res.data.data) {
             res.data.data.map((a: DoorDto) => {
                 setNumberOptions(prev => ([...prev, {

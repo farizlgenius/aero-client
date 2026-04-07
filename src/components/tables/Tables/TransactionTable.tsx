@@ -74,8 +74,13 @@ const TransactionTable: React.FC<PropsWithChildren<TableContents>> = ({ tableHea
                     className="group inline-flex items-center gap-1.5 transition-colors hover:text-brand-500"
                   >
                     <span>{head}</span>
-                    <span className={`text-[10px] tracking-wide ${isActive ? "text-brand-500" : "text-gray-400 group-hover:text-brand-500"}`}>
-                      {isActive ? (sortDirection === "asc" ? "ASC" : "DESC") : "SORT"}
+                    <span className={`inline-flex flex-col leading-none ${isActive ? "text-brand-500" : "text-gray-400 group-hover:text-brand-500"}`}>
+                      <svg className={`h-2 w-2 ${isActive && sortDirection === "asc" ? "opacity-100" : "opacity-40"}`} viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 2L8 6H2L5 2Z" fill="currentColor" />
+                      </svg>
+                      <svg className={`h-2 w-2 ${isActive && sortDirection === "desc" ? "opacity-100" : "opacity-40"}`} viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5 8L2 4H8L5 8Z" fill="currentColor" />
+                      </svg>
                     </span>
                   </button>
                 </TableCell>

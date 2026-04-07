@@ -1,7 +1,7 @@
 import { BaseDto } from "../BaseDto";
 
 export interface CreateHardwareDto extends BaseDto {
-    driverId:number;
+    scpId:number;
     name:string;
     hardwareType:number;
     hardwareTypeDetail:string;

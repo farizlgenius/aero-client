@@ -36,7 +36,7 @@ export const Role = () => {
     const defaultDto: RoleDto = {
     driverId: 0,
     name: "",
-    features: [],
+    permissions: [],
     id: 0,
     locationId: locationId,
     isActive: true

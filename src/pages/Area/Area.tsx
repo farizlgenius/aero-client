@@ -1,18 +1,13 @@
 import { useEffect, useState } from "react";
 import { useToast } from "../../context/ToastContext";
 import { AreaDto } from "../../model/Area/AreaDto";
-import HttpRequest from "../../utility/HttpRequest";
 import Helper from "../../utility/Helper";
-import RemoveModal from "../UiElements/RemoveModal";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
-import Button from "../../components/ui/button/Button";
 import { AddIcon, AreaIcon } from "../../icons";
-import { HttpMethod } from "../../enum/HttpMethod";
 import { BaseForm } from "../UiElements/BaseForm";
 import { FormContent } from "../../model/Form/FormContent";
 import { AreaForm } from "../../components/form/area/AreaForm";
 import { BaseTable } from "../UiElements/BaseTable";
-import { OccupancyForm } from "../../components/form/area/OccupancyForm";
 import { send } from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import { FeatureId } from "../../enum/FeatureId";
@@ -23,22 +18,7 @@ import { usePopup } from "../../context/PopupContext";
 import { AccessAreaToast } from "../../model/ToastMessage";
 import { AreaEndpoint } from "../../endpoint/AreaEndpoint";
 
-var removeTarget: number;
-var defaultDto: AreaDto = {
-    // base
-    name: "",
-    multiOccupancy: -1,
-    accessControl: -1,
-    occControl: 0,
-    occSet: 0,
-    occMax: 0,
-    occUp: 0,
-    occDown: 0,
-    areaFlag: 0x00,
-    componentId: 0,
-    locationId: 1,
-    isActive: true
-}
+
 const AREA_HEADERS = ["Name", "Action"]
 const AREA_KEY = ["name"]
 
@@ -50,6 +30,23 @@ export const Area = () => {
     const { filterPermission } = useAuth();
     const [refresh, setRefresh] = useState(false);
     const toggleRefresh = () => setRefresh(!refresh);
+    var defaultDto: AreaDto = {
+    // base
+    name: "",
+    multiOccupancy: -1,
+    accessControl: -1,
+    occControl: -1,
+    occSet: 0,
+    occMax: 0,
+    occUp: 0,
+    occDown: 0,
+    areaFlag: 0x00,
+    locationId: locationId,
+    isActive: true,
+    scpId: 0,
+    areaId: 0,
+    id: 0
+}
     const [areaDto, setAreaDto] = useState<AreaDto>(defaultDto);
     {/* Modal */ }
     const [form,setForm] = useState<boolean>(false);
@@ -70,7 +67,7 @@ export const Area = () => {
                 setConfirmRemove(() => async () => {
                     var data:number[] = [];
                     selectedObjects.map(async (a:AreaDto) => {
-                        data.push(a.componentId)
+                        data.push(a.id)
                     })
                     var res = await send.post(AreaEndpoint.DELETE_RANGE,data)
                     if(Helper.handleToastByResCode(res,AccessAreaToast.DELETE_RANGE,toggleToast)){
@@ -113,13 +110,11 @@ export const Area = () => {
     }
 
     const handleRemove = (data: AreaDto) => {
-        removeTarget = data.componentId;
         setConfirmRemove(() => async () => {
-            const res = await send.delete(AreaEndpoint.DELETE(removeTarget))
+            const res = await send.delete(AreaEndpoint.DELETE(data.id))
         if (Helper.handleToastByResCode(res, AccessAreaToast.DELETE, toggleToast)) {
             setRemove(false)
             toggleRefresh();
-            removeTarget = 0;
         }
         })
         setRemove(true);
@@ -163,10 +158,6 @@ export const Area = () => {
             icon: <AreaIcon />,
             label: "Area",
             content: <AreaForm dto={areaDto} setDto={setAreaDto} handleClick={handleClick} type={formType} />
-        }, {
-            icon: <AreaIcon />,
-            label: "Occupancy",
-            content: <OccupancyForm dto={areaDto} setDto={setAreaDto} handleClick={handleClick} type={formType} />
         }
     ];
 

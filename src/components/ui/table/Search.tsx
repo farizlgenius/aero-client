@@ -1,6 +1,6 @@
 import React, { PropsWithChildren, useEffect, useRef, useState } from 'react'
 import { AddIcon, MoreDotIcon, TrashBinIcon } from '../../../icons'
-import { FeatureDto } from '../../../model/Role/FeatureDto';
+import { PermissionDto } from '../../../model/Role/PermissionDto';
 import { ActionButton } from '../../../model/ActionButton';
 import { usePagination } from '../../../context/PaginationContext';
 import { createPortal } from 'react-dom';
@@ -8,7 +8,7 @@ import { createPortal } from 'react-dom';
 interface SearchProp {
     
     onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-    permission?: FeatureDto;
+    permission?: PermissionDto;
     action?: ActionButton[];
 }
 

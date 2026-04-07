@@ -81,7 +81,7 @@ const AccessLevelForm: React.FC<PropsWithChildren<FormProp<CreateUpdateAccessLev
     if (res && res.data.data) {
       res.data.data.map((a: TimeZoneDto) => {
         setTimeZoneOption(prev => ([...prev, {
-          value: a.driverId,
+          value: a.timezoneId,
           label: a.name,
           isTaken: false
         }]))

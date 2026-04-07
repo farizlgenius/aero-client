@@ -1,6 +1,6 @@
 import { PropsWithChildren, useEffect, useState } from "react"
 import { FormProp, FormType } from "../../../model/Form/FormProp"
-import { UserDto } from "../../../model/CardHolder/UserDto"
+import { UserDto } from "../../../model/User/UserDto"
 import Label from "../Label"
 import Switch from "../switch/Switch"
 import { ModeDto } from "../../../model/ModeDto"

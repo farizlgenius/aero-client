@@ -2,9 +2,12 @@ import { BaseDto } from "../BaseDto";
 
 export interface MonitorPointDto extends BaseDto
 {
-    name:string;
+    id:number;
+    scpId:number;
     mpId:number;
+        name:string;
     moduleId:number;
+    moduleDriverId:number;
     moduleDescription:string;
     inputNo:number;
     inputMode:number;

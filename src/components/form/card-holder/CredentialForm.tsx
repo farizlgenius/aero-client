@@ -1,24 +1,24 @@
 import { PropsWithChildren, useEffect, useState } from "react";
 import Label from "../Label";
 import { FormProp, FormType } from "../../../model/Form/FormProp";
-import { UserDto } from "../../../model/CardHolder/UserDto";
+import { UserDto } from "../../../model/User/UserDto";
 import Button from "../../ui/button/Button";
 import DatePicker from "../date-picker";
 import Input from "../input/InputField";
 import Select from "../Select";
 import Spinner from "../../../pages/UiElements/Spinner";
-import { CredentialDto } from "../../../model/CardHolder/CredentialDto";
+import { CredentialDto } from "../../../model/User/CredentialDto";
 import { useLocation } from "../../../context/LocationContext";
 import { Options } from "../../../model/Options";
 import SignalRService from "../../../services/SignalRService";
-import { ScanCardStatus } from "../../../model/CardHolder/ScanCardStatus";
+import { ScanCardStatus } from "../../../model/User/ScanCardStatus";
 import { CredentialEndpoint } from "../../../endpoint/CredentialEndpoint";
 import { send } from "../../../api/api";
 import { HardwareEndpoint } from "../../../endpoint/HardwareEndpoint";
 import { HardwareDto } from "../../../model/Hardware/HardwareDto";
 import { DoorEndpoint } from "../../../endpoint/DoorEndpoint";
 import { DoorDto } from "../../../model/Door/DoorDto";
-import { ScanCardDto } from "../../../model/CardHolder/ScanCard";
+import { ScanCardDto } from "../../../model/User/ScanCard";
 import { CardIcon } from "../../../icons";
 
 
@@ -33,7 +33,7 @@ export const CredentialForm: React.FC<PropsWithChildren<FormProp<UserDto>>> = ({
     const [spinner, setSpinner] = useState<boolean>(false);
     const [scanForm, setScanForm] = useState<boolean>(false);
     const [scanData, setScanData] = useState<ScanCardDto>({
-        mac: "",
+        scpId: -1,
         doorId: -1
     })
     const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -113,10 +113,10 @@ export const CredentialForm: React.FC<PropsWithChildren<FormProp<UserDto>>> = ({
     const handleSelectChange = (value: string, e: React.ChangeEvent<HTMLSelectElement>) => {
         console.log(e.currentTarget.name)
         switch (e.currentTarget.name) {
-            case "macAddress":
+            case "scpId":
                 console.log(value);
-                setScanData(prev => ({ ...prev, mac: e.target.value }));
-                fetchDoor(value)
+                setScanData(prev => ({ ...prev, scpId: Number(e.target.value) }));
+                fetchDoor(Number(value))
                 break;
             case "doorId":
                 setScanData(prev => ({ ...prev, doorId: Number(e.target.value) }));
@@ -173,12 +173,12 @@ export const CredentialForm: React.FC<PropsWithChildren<FormProp<UserDto>>> = ({
         }
     }
 
-    const fetchDoor = async (macAddress: string) => {
-        const res = await send.get(DoorEndpoint.GET_ACR_BY_MAC(macAddress))
+    const fetchDoor = async (id: number) => {
+        const res = await send.get(DoorEndpoint.GET_ACR_BY_DEVICE_ID(id))
         if (res && res.data.data) {
             res.data.data.map((a: DoorDto) => {
                 setDoorOption(prev => ([...prev, {
-                    value: a.componentId,
+                    value: a.id,
                     label: a.name,
                     isTaken: false
                 }]))
@@ -286,12 +286,12 @@ export const CredentialForm: React.FC<PropsWithChildren<FormProp<UserDto>>> = ({
                                     <Select
                                     disabled={type == FormType.INFO}
                                         isString={true}
-                                        name="macAddress"
+                                        name="scpId"
                                         options={controllerOption}
                                         placeholder="Select Option"
                                         onChangeWithEvent={handleSelectChange}
                                         className="dark:bg-dark-900"
-                                        defaultValue={scanData.mac}
+                                        defaultValue={scanData.scpId}
                                     />
                                 </div>
                                 <div>

@@ -34,7 +34,7 @@ const Holiday = () => {
     const defaultDto: HolidayDto = {
         locationId: locationId,
         isActive: true,
-        driverId: -1,
+        holId: -1,
         year: 0,
         month: 0,
         day: 0,
@@ -62,7 +62,7 @@ const Holiday = () => {
                 setConfirmRemove(() => async () => {
                     var data:number[] = [];
                     selectedObjects.map(async (a:HolidayDto) => {
-                        data.push(a.driverId)
+                        data.push(a.holId)
                     })
                     var res = await send.post(HolidayEndpoint.DELETE_RANGE,data)
                     if(Helper.handleToastByResCode(res,HolidayToast.DELETE_RANGE,toggleToast)){

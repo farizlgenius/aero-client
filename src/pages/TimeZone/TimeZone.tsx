@@ -37,7 +37,7 @@ const TimeZone = () => {
     {/* Data */ }
     const defaultDto: TimeZoneDto = {
         locationId: locationId,
-        driverId: -1,
+        timezoneId: -1,
         isActive: true,
         name: "",
         mode: -1,

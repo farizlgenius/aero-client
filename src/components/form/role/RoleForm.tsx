@@ -7,7 +7,7 @@ import Input from "../input/InputField";
 import { RoleEndpoint } from "../../../endpoint/RoleEndpoint";
 import Switch from "../switch/Switch";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../ui/table";
-import { FeatureDto } from "../../../model/Role/FeatureDto";
+import { PermissionDto } from "../../../model/Role/PermissionDto";
 import Checkbox from "../input/Checkbox";
 import api from "../../../api/api";
 
@@ -21,7 +21,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
         if (res && res.data.data) {
             // setList(res.data.data)
             if (type == FormType.CREATE) {
-                setDto(prev => ({ ...prev, features: res.data.data }))
+                setDto(prev => ({ ...prev, permissions: res.data.data }))
             }
         }
     }
@@ -52,7 +52,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                 <Switch disabled={type==FormType.INFO} label={""} onChange={(checked) => {
                                                     setDto(prev => ({
                                                         ...prev,
-                                                        features: prev.features.map(a => ({
+                                                        permissions: prev.permissions.map(a => ({
                                                             ...a,
                                                             isAllow: checked
                                                         }))
@@ -91,7 +91,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
-                                    {dto.features.map((data: FeatureDto, i: number) => (
+                                    {dto.permissions.map((data: PermissionDto, i: number) => (
                                         <TableRow key={i}>
                                             {/* <TableCell className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
                                                 <input name={String(data.value)} type="checkbox" />
@@ -101,8 +101,8 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                     <Switch disabled={type==FormType.INFO} defaultChecked={data.isAllow} label={""} onChange={(checked) => {
                                                         setDto(prev => ({
                                                             ...prev,
-                                                            features: prev.features.map(a => (
-                                                                a.id == data.id ?
+                                                            permissions: prev.permissions.map(a => (
+                                                                a.sourceId == data.sourceId ?
                                                                     {
                                                                         ...a,
                                                                         isAllow: checked,
@@ -131,8 +131,8 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                             <Checkbox disabled={type==FormType.INFO} name="isCreate" checked={data.isCreate} onChange={(e) => {
                                                                 setDto(prev => ({
                                                                     ...prev,
-                                                                    features: prev.features.map(a => (
-                                                                        a.id == data.id ?
+                                                                    permissions: prev.permissions.map(a => (
+                                                                        a.sourceId == data.sourceId ?
                                                                             {
                                                                                 ...a,
                                                                                 isCreate: e.target.checked
@@ -153,8 +153,8 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                             <Checkbox disabled={type==FormType.INFO} name="isModify" checked={data.isModify} onChange={(e) => {
                                                                 setDto(prev => ({
                                                                     ...prev,
-                                                                    features: prev.features.map(a => (
-                                                                        a.id == data.id ?
+                                                                    permissions: prev.permissions.map(a => (
+                                                                        a.sourceId == data.sourceId ?
                                                                             {
                                                                                 ...a,
                                                                                 isModify: e.target.checked
@@ -176,8 +176,8 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                             <Checkbox disabled={type==FormType.INFO} name="isDelete" checked={data.isDelete} onChange={(e) => {
                                                                 setDto(prev => ({
                                                                     ...prev,
-                                                                    features: prev.features.map(a => (
-                                                                        a.id == data.id ?
+                                                                    permissions: prev.permissions.map(a => (
+                                                                        a.sourceId == data.sourceId ?
                                                                             {
                                                                                 ...a,
                                                                                 isDelete: e.target.checked
@@ -197,8 +197,8 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                             <Checkbox disabled={type==FormType.INFO} name="isAction" checked={data.isAction} onChange={(e) => {
                                                                 setDto(prev => ({
                                                                     ...prev,
-                                                                    features: prev.features.map(a => (
-                                                                        a.id == data.id ?
+                                                                    permissions: prev.permissions.map(a => (
+                                                                        a.sourceId == data.sourceId ?
                                                                             {
                                                                                 ...a,
                                                                                 isAction: e.target.checked

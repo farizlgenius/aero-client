@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
-import {  ControlIcon, DisableIcon, DoorIcon,  LockIcon, MomentIcon, UnlockIcon } from '../../icons';
+import {  ControlIcon, DisableIcon, DoorIcon,   DoorInIcon,  DoorOutIcon,  LockIcon, MomentIcon, UnlockIcon } from '../../icons';
 import Logger from '../../utility/Logger';
 import DoorForm from './DoorForm';
 import Helper from '../../utility/Helper';
@@ -24,12 +24,13 @@ import { usePagination } from '../../context/PaginationContext';
 import { FormType } from '../../model/Form/FormProp';
 import { usePopup } from '../../context/PopupContext';
 import { AcrStatus as AcrStatus } from '../../model/Door/AcrStatus';
+import { DoorDirection } from '../../enum/DoorDirection';
 
 
 
 // ACR Page
-export const DOOR_TABLE_HEADER: string[] = ["Name", "Mode", "Status", "Action"]
-export const DOOR_KEY: string[] = ["name"];
+export const DOOR_TABLE_HEADER: string[] = ["Name","Type", "Mode", "Status", "Action"]
+export const DOOR_KEY: string[] = ["name","direction"];
 
 const Door = () => {
     const { filterPermission } = useAuth();
@@ -39,120 +40,117 @@ const Door = () => {
     const { setRemove, setConfirmRemove,setConfirmCreate ,setCreate,setUpdate,setConfirmUpdate,setInfo,setMessage} = usePopup();
     const defaultDto: DoorDto = {
         name: '',
-        acrId:-1,
+        acrId: -1,
         accessConfig: -1,
         pairDoorNo: -1,
         readers: [
             {
                 // base 
-                componentId: -1,
-                mac: "",
                 locationId: locationId,
                 isActive: true,
 
                 // Detail
                 moduleId: -1,
+                moduleDriverId: -1,
                 readerNo: -1,
                 dataFormat: 1,
                 keypadMode: 0,
-                ledDriveMode: -1,
+                ledDriveMode: 1,
                 osdpFlag: false,
                 osdpAddress: 0x00,
                 osdpDiscover: 0x00,
                 osdpTracing: 0x00,
                 osdpBaudrate: 0x00,
                 osdpSecureChannel: 0x00,
-                hardwareName: ''
+                scpId: 0
             },
             {
                 // base 
-                componentId: -1,
-                mac: "",
                 locationId: locationId,
                 isActive: true,
 
                 // Detail
                 moduleId: -1,
+                moduleDriverId: -1,
                 readerNo: -1,
-                dataFormat: -1,
-                keypadMode: -1,
-                ledDriveMode: -1,
+                dataFormat: 1,
+                keypadMode: 0,
+                ledDriveMode: 1,
                 osdpFlag: false,
                 osdpAddress: 0x00,
                 osdpDiscover: 0x00,
                 osdpTracing: 0x00,
                 osdpBaudrate: 0x00,
                 osdpSecureChannel: 0x00,
-                hardwareName: ''
+                scpId: 0
             }
         ],
         strk: {
+            scpId: 0,
             moduleId: -1,
             outputNo: -1,
             relayMode: -1,
             offlineMode: -1,
 
             // base
-            componentId: -1,
-            mac: '',
             locationId: locationId,
             isActive: true,
             strkMax: 5,
             strkMin: 1,
             strkMode: -1,
-            hardwareName: ''
+            moduleDriverId: -1
         },
         sensor: {
+            scpId: 0,
             moduleId: -1,
+            moduleDriverId: -1,
             inputNo: -1,
             inputMode: -1,
             holdTime: 0,
 
             // base
-            componentId: -1,
-            mac: '',
             locationId: locationId,
             isActive: true,
             debounce: 0,
             dcHeld: 0,
-            hardwareName: ''
         },
-        requestExits: [{
-            // base 
-            componentId: -1,
-            mac: "",
-            locationId: locationId,
-            isActive: true,
+        requestExits: [
+            {
+                // base 
+                locationId: locationId,
+                isActive: true,
 
-            // Detail
-            moduleId: -1,
-            inputNo: -1,
-            inputMode: -1,
-            debounce: 0,
-            holdTime: 0,
-            maskTimeZone: -1,
-            hardwareName: ''
-        }, {
-            // base 
-            componentId: -1,
-            mac: "",
-            locationId: locationId,
-            isActive: true,
+                // Detail
+                scpId: 0,
+                moduleId: -1,
+                moduleDriverId: -1,
+                inputNo: -1,
+                inputMode: -1,
+                debounce: 0,
+                holdTime: 0,
+                maskTimeZone: -1,
+            },
+            {
+                // base 
+                locationId: locationId,
+                isActive: true,
 
-            // Detail
-            moduleId: -1,
-            inputNo: -1,
-            inputMode: -1,
-            debounce: 0,
-            holdTime: 0,
-            maskTimeZone: -1,
-            hardwareName: ''
-        }],
+                // Detail
+                scpId: 0,
+                moduleId: -1,
+                moduleDriverId: -1,
+                inputNo: -1,
+                inputMode: -1,
+                debounce: 0,
+                holdTime: 0,
+                maskTimeZone: -1,
+            }
+        ],
         readerOutConfiguration: 1,
         // Notused
         cardFormat: 255,
-        antiPassBackIn: -1,
-        antiPassBackOut: -1,
+        areaInId: -1,
+        areaOutId: 1,
         spareTags: -1,
         accessControlFlags: -1,
         mode: -1,
@@ -179,13 +177,11 @@ const Door = () => {
         maskForceOpen: false,
         maskHeldOpen: false,
         // base
-        componentId: -1,
-        mac: '',
         locationId: locationId,
         isActive: true,
-        strkComponentId: 0,
-        sensorComponentId: 0,
-        hardwareName: ''
+        id: 0,
+        scpId: -1,
+        direction: DoorDirection.IN
     }
     const [doorDto, setDoorDto] = useState<DoorDto>(defaultDto)
     const [refresh, setRefresh] = useState(false);
@@ -210,7 +206,7 @@ const Door = () => {
                 setConfirmRemove(() => async () => {
                     var data:number[] = [];
                     selectedObjects.map(async (a:DoorDto) => {
-                        data.push(a.componentId)
+                        data.push(a.id)
                     })
                     var res = await send.post(DoorEndpoint.DELETE_RANGE,data)
                     if(Helper.handleToastByResCode(res,DoorToast.DELETE_RANGE,toggleToast)){
@@ -249,28 +245,28 @@ const Door = () => {
                 break;
            case "unlock":
                 selectedObjects.map(a => {
-                    changeDoorMode(a.mac, a.componentId, 2,a.acrId);
+                    changeDoorMode(a.id,a.scpId,a.acrId,2);
                 })
                 break;
             case "lock":
                 selectedObjects.map(a => {
-                    changeDoorMode(a.mac, a.componentId, 3,a.acrId);
+                    changeDoorMode(a.id,a.scpId,a.acrId,3);
                 })
                 break;
             case "moment":
                 selectedObjects.map(a => {
-                    unlockDoor(a.mac, a.componentId);
+                    unlockDoor(a.id);
                 })
                 break;
             case "secure":
                 selectedObjects.map(a => {
                     console.log(a)
-                    changeDoorMode(a.mac, a.componentId, a.defaultMode,a.acrId);
+                    changeDoorMode(a.id,a.scpId,a.acrId,a.defaultMode);
                 })
                 break;
             case "disable":
                 selectedObjects.map(a => {
-                    changeDoorMode(a.mac, a.componentId, 1,a.acrId);
+                    changeDoorMode(a.id,a.scpId,a.acrId,1);
                 })
                 break;
             default:
@@ -282,7 +278,7 @@ const Door = () => {
 
      const handleRemove = (data: DoorDto) => {
         setConfirmRemove(() => async () => {
-            const res = await send.delete(DoorEndpoint.DELETE(data.componentId))
+            const res = await send.delete(DoorEndpoint.DELETE(data.id))
         if (Helper.handleToastByResCode(res, DoorToast.DELETE, toggleToast)) {
             setRemove(false)
             toggleRefresh();
@@ -318,8 +314,8 @@ const Door = () => {
 
             // Batch set state
             const newStatuses = res.data.data.data.map((a: DoorDto) => ({
-                macAddress: a.mac,
-                componentId: a.componentId,
+                scpId: a.scpId,
+                driverId: a.acrId,
                 status: 0,
                 tamper: a.modeDesc,
                 ac: 0,
@@ -332,25 +328,25 @@ const Door = () => {
 
             // Fetch status for each
             res.data.data.data.forEach((a: DoorDto) => {
-                fetchStatus(a.mac, a.componentId);
+                fetchStatus(a.id);
             });
         }
 
     };
-    const fetchStatus = async (scpMac: string, acrNo: number) => {
-        const res = await send.get(DoorEndpoint.GET_ACR_STATUS(scpMac, acrNo));
+    const fetchStatus = async (id:number) => {
+        const res = await send.get(DoorEndpoint.GET_ACR_STATUS(id));
         Logger.info(res)
     }
 
-    const changeDoorMode = async (mac: string, componentId: number, mode: number,acrId:number) => {
+    const changeDoorMode = async (id:number,scpId: number,acrId:number,mode: number) => {
         const data = {
-            mac, componentId, mode,acrId
+            id,scpId,acrId,mode
         }
         const res = await send.post(DoorEndpoint.POST_ACR_CHANGE_MODE, data)
         Logger.info(res)
     }
-    const unlockDoor = async (ScpMac: string, AcrNo: number) => {
-        const res = await send.post(DoorEndpoint.POST_ACR_UNLOCK(ScpMac, AcrNo))
+    const unlockDoor = async (id:number) => {
+        const res = await send.post(DoorEndpoint.POST_ACR_UNLOCK(id))
         Logger.info(res)
     }
     {/* UseEffect */ }
@@ -361,7 +357,7 @@ const Door = () => {
             (status: AcrStatus) => {
                 setStatus((prev) =>
                     prev.map((a) =>
-                        a.driverId == status.mac && a.deviceId == status.number ? {
+                        a.scpId == status.scpId && a.driverId == status.number ? {
                             ...a,
                             status: status.status == "" ? a.status : status.status,
                             tamper: status.mode == "" ? a.tamper : status.mode
@@ -419,17 +415,17 @@ const Door = () => {
             <>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                     <>
-                        <Badge size="sm" color="dark">{statusDto.find(b => b.deviceId == data.componentId)?.tamper}</Badge>
+                        <Badge size="sm" color="dark">{statusDto.find(b => b.scpId == data.scpId)?.tamper}</Badge>
                     </>
                 </TableCell>
                 <TableCell className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
                     <>
-                        {statusDto.find(b => b.deviceId == data.componentId)?.status === "Secure" ? (
-                            <Badge size="sm" color="success">{statusDto.find(b => b.deviceId == data.componentId)?.status}</Badge>
-                        ) : statusDto.find(b => b.deviceId == data.componentId)?.status === "Forced Open" || statusDto.find(b => b.deviceId == data.componentId)?.status === "Locked" ? (
-                            <Badge size="sm" color="error">{statusDto.find(b => b.deviceId == data.componentId)?.status}</Badge>
+                        {statusDto.find(b => b.scpId == data.scpId)?.status === "Secure" ? (
+                            <Badge size="sm" color="success">{statusDto.find(b => b.scpId == data.scpId)?.status}</Badge>
+                        ) : statusDto.find(b => b.scpId == data.scpId)?.status === "Forced Open" || statusDto.find(b => b.scpId == data.scpId)?.status === "Locked" ? (
+                            <Badge size="sm" color="error">{statusDto.find(b => b.scpId == data.scpId)?.status}</Badge>
                         ) : (
-                            <Badge size="sm" color="warning">{statusDto.find(b => b.deviceId == data.componentId)?.status === 0 ? "Error" : statusDto.find(b => b.deviceId == data.componentId)?.status}</Badge>
+                            <Badge size="sm" color="warning">{statusDto.find(b => b.scpId == data.scpId)?.status === 0 ? "Error" : statusDto.find(b => b.scpId == data.scpId)?.status}</Badge>
                         )}
                     </>
                 </TableCell>
@@ -444,7 +440,32 @@ const Door = () => {
                 <BaseForm tabContent={content} />
 
                 :
-                <BaseTable<DoorDto> headers={DOOR_TABLE_HEADER} keys={DOOR_KEY} select={selectedObjects} setSelect={setSelectedObjects} onInfo={handleInfo} onClick={handleClick} onEdit={handleEdit} onRemove={handleRemove} data={doorsDto} status={status} action={action} permission={filterPermission(FeatureId.DOOR)} renderOptionalComponent={filterComponet} fetchData={fetchData} locationId={locationId} refresh={refresh}/>
+                <BaseTable<DoorDto> headers={DOOR_TABLE_HEADER} keys={DOOR_KEY} select={selectedObjects} setSelect={setSelectedObjects} onInfo={handleInfo} onClick={handleClick} onEdit={handleEdit} onRemove={handleRemove} data={doorsDto} status={status} action={action} permission={filterPermission(FeatureId.DOOR)} renderOptionalComponent={filterComponet} fetchData={fetchData} locationId={locationId} refresh={refresh} specialDisplay={[
+                    {
+                        key:"direction",
+                        content:(d) => (
+                            <TableCell className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
+                                {d.accessConfig == 1 || d.accessConfig == 2 ?
+                                <div className='flex items-center gap-2'>
+                                    <DoorInIcon fontSize={20}/>
+                                    <DoorOutIcon fontSize={20}/>
+                                </div>
+                                :
+                                d.direction == DoorDirection.IN ?
+                                <div className='flex items-center gap-5'>
+                                    <DoorInIcon fontSize={20}/>
+                                </div>
+                                :
+                                
+                                 <div className='flex items-center gap-5'>
+                                    <DoorOutIcon fontSize={20}/>
+                                </div>
+
+                                 }
+                            </TableCell>
+                        )
+                    }
+                ]}/>
 
             }
 

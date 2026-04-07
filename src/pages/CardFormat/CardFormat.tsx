@@ -24,7 +24,7 @@ export const CARDFORMAT_TABLE_HEAD: string[] = [
     "Name", "Bits", "Facility", "Action"
 ]
 export const CARDFORMAT_KEY: string[] = [
-    "name", "bits", "facility",
+    "name", "bits", "fac",
 ];
 
 const CardFormat = () => {
@@ -37,24 +37,25 @@ const CardFormat = () => {
     const toggleRefresh = () => setRefresh(!refresh);
     const defaultDto: CardFormatDto = {
         name: '',
-        componentId: 0,
-        facility: -1,
+        fac: -1,
         flags: 0,
         offset: 0,
-        functionId: 1,
         bits: 0,
         peLn: 0,
-        peLoc: 0,
+        peLoc: -1,
         poLn: 0,
-        poLoc: 0,
+        poLoc: -1,
         fcLn: 0,
-        fcLoc: 0,
+        fcLoc: -1,
         chLn: 0,
-        chLoc: 0,
+        chLoc: -1,
         icLn: 0,
-        icLoc: 0,
+        icLoc: -1,
         locationId: locationId,
-        isActive: false
+        isActive: false,
+        id: 0,
+        cfmtId: 0,
+        funcId: 0
     }
 
     const [formType,setFormType] = useState<FormType>(FormType.CREATE);
@@ -77,7 +78,7 @@ const CardFormat = () => {
                 setConfirmRemove(() => async () => {
                     var data:number[] = [];
                     selectedObjects.map(async (a:CardFormatDto) => {
-                        data.push(a.componentId)
+                        data.push(a.id)
                     })
                     var res = await send.post(CardFormatEndpoint.DELETE_RANGE,data)
                     if(Helper.handleToastByResCode(res,CardFormatToast.DELETE_RANGE,toggleToast)){
@@ -134,7 +135,7 @@ const CardFormat = () => {
 
     const handleRemove = (data: CardFormatDto) => {
        setConfirmRemove(() => async () => {
-            const res = await send.delete(CardFormatEndpoint.DELETE(data.componentId))
+            const res = await send.delete(CardFormatEndpoint.DELETE(data.id))
             if (Helper.handleToastByResCode(res, CardFormatToast.DELETE, toggleToast))
                 toggleRefresh();
         })

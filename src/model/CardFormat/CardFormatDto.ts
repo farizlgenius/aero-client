@@ -2,7 +2,7 @@ import { BaseDto } from "../BaseDto";
 
 export interface CardFormatDto extends BaseDto {
     id:number;
-    driverId:number;
+    cfmtId:number;
     name: string;
     fac: number;
     offset:number;

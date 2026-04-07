@@ -1,5 +1,5 @@
 export interface OutputTrigger {
-  mac:string;
-  componentId:number;
+  deviceId:number;
+  driverId:number;
   command:number;
 }

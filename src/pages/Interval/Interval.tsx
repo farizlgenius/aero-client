@@ -54,6 +54,7 @@ const Interval = () => {
         daysDetail: "",
         start: "",
         end: "",
+        name: ''
     }
 
 

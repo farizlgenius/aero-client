@@ -42,7 +42,7 @@ type NavItem = {
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
 
-let filterNav:NavItem[] = [];
+
 const navItems: NavItem[] = [
 
   {
@@ -61,7 +61,7 @@ const navItems: NavItem[] = [
     id: 3,
     name: "Locations",
     icon: <LocationIcon />,
-    path: "/location"
+    subItems: [{ name: "Location", path: "/location", }, { name: "Company", path: "/company", },{ name: "Department", path: "/department", },{ name: "Position", path: "/position", }],
   },
   {
     id: 4,
@@ -79,7 +79,7 @@ const navItems: NavItem[] = [
     id: 6,
     name: "Devices",
     icon: <ModuleIcon />,
-    subItems: [{ name: "Hardware", path: "/hardware", }, { name: "Module", path: "/module", }],
+    subItems: [{ name: "Controller", path: "/hardware", }, { name: "Module", path: "/module", },{ name: "Lift Controller", path: "/lift", },{ name: "Face Reader", path: "/face", }],
   },{
     id: 16,
     name:"Control Point",
@@ -98,12 +98,12 @@ const navItems: NavItem[] = [
   {
     id: 7,
     icon: <DoorIcon />,
-    name: "Doors",
-    path: "/door",
+    name: "ACR",
+    subItems: [{ name: "Door", path: "/door", }, { name: "Lift", path: "/lift", },{ name: "HL", path: "/hl", },{name:"Time Attendance",path:"/ta"},{name:"Guard Tour",path:"/guard"}],
   }, {
     id: 8,
     icon: <CardIcon />,
-    name: "Card Holder",
+    name: "Users",
     path: "/cardholder",
   }, {
     id: 9,
@@ -218,7 +218,7 @@ const othersItems: NavItem[] = [
 const AppSidebar: React.FC = () => {
   const { isExpanded, isMobileOpen, isHovered, setIsHovered } = useSidebar();
   const location = useLocation();
-  const { user } = useAuth();
+  const {isAllowedPermission} = useAuth();
 
   const [openSubmenu, setOpenSubmenu] = useState<{
     type: "main" | "others";
@@ -238,11 +238,10 @@ const AppSidebar: React.FC = () => {
 
 
   useEffect(() => {
-    filterNav = navItems.filter(s => s.id && user?.role?.features?.includes(s.id))
 
     let submenuMatched = false;
     ["main", "others"].forEach((menuType) => {
-      const items = menuType === "main" ? filterNav : othersItems;
+      const items = menuType === "main" ? navItems : othersItems;
       items.forEach((nav, index) => {
         if (nav.subItems) {
           nav.subItems.forEach((subItem) => {
@@ -293,56 +292,128 @@ const AppSidebar: React.FC = () => {
       {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
+            // <button
+            //   onClick={() => handleSubmenuToggle(index, menuType)}
+            //   className={`menu-item group ${openSubmenu?.type === menuType && openSubmenu?.index === index
+            //       ? "menu-item-active"
+            //       : "menu-item-inactive"
+            //     } cursor-pointer ${!isExpanded && !isHovered
+            //       ? "lg:justify-center"
+            //       : "lg:justify-start"
+            //     }`}
+            // >
+            //   <span
+            //     className={`menu-item-icon-size  ${openSubmenu?.type === menuType && openSubmenu?.index === index
+            //         ? "menu-item-icon-active"
+            //         : "menu-item-icon-inactive"
+            //       }`}
+            //   >
+            //     {nav.icon}
+            //   </span>
+            //   {(isExpanded || isHovered || isMobileOpen) && (
+            //     <span className="menu-item-text">{nav.name}</span>
+            //   )}
+            //   {(isExpanded || isHovered || isMobileOpen) && (
+            //     <ChevronDownIcon
+            //       className={`ml-auto w-5 h-5 transition-transform duration-200 ${openSubmenu?.type === menuType &&
+            //           openSubmenu?.index === index
+            //           ? "rotate-180 text-brand-500"
+            //           : ""
+            //         }`}
+            //     />
+            //   )}
+            // </button>
             <button
-              onClick={() => handleSubmenuToggle(index, menuType)}
-              className={`menu-item group ${openSubmenu?.type === menuType && openSubmenu?.index === index
-                  ? "menu-item-active"
-                  : "menu-item-inactive"
-                } cursor-pointer ${!isExpanded && !isHovered
-                  ? "lg:justify-center"
-                  : "lg:justify-start"
+              onClick={() => {
+                if (isAllowedPermission(nav.id ?? 0)) return;
+                handleSubmenuToggle(index, menuType);
+              }}
+              disabled={isAllowedPermission(nav.id ?? 0)}
+              className={`menu-item group flex items-center gap-2 ${isAllowedPermission(nav.id ?? 0)
+                  ? "opacity-50 cursor-not-allowed"
+                  : openSubmenu?.type === menuType && openSubmenu?.index === index
+                    ? "menu-item-active text-gray-900 dark:text-white"
+                    : "menu-item-inactive text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 cursor-pointer"
+                } ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"
                 }`}
             >
               <span
-                className={`menu-item-icon-size  ${openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? "menu-item-icon-active"
-                    : "menu-item-icon-inactive"
+                className={`menu-item-icon-size ${isAllowedPermission(nav.id ?? 0)
+                    ? "text-gray-400 dark:text-gray-500"
+                    : openSubmenu?.type === menuType && openSubmenu?.index === index
+                      ? "menu-item-icon-active text-blue-600 dark:text-blue-400"
+                      : "menu-item-icon-inactive text-gray-600 dark:text-gray-300"
                   }`}
               >
                 {nav.icon}
               </span>
+
               {(isExpanded || isHovered || isMobileOpen) && (
-                <span className="menu-item-text">{nav.name}</span>
+                <span className="menu-item-text text-gray-800 dark:text-gray-200">
+                  {nav.name}
+                </span>
               )}
+
               {(isExpanded || isHovered || isMobileOpen) && (
                 <ChevronDownIcon
-                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${openSubmenu?.type === menuType &&
-                      openSubmenu?.index === index
-                      ? "rotate-180 text-brand-500"
-                      : ""
+                  className={`ml-auto w-5 h-5 transition-transform duration-200 ${isAllowedPermission(nav.id ?? 0)
+                      ? "text-gray-400 dark:text-gray-500"
+                      : openSubmenu?.type === menuType &&
+                        openSubmenu?.index === index
+                        ? "rotate-180 text-blue-600 dark:text-blue-400"
+                        : "text-gray-500 dark:text-gray-400"
                     }`}
                 />
               )}
             </button>
           ) : (
             nav.path && (
-              <Link
-                to={nav.path}
-                className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
-                  }`}
-              >
-                <span
-                  className={`menu-item-icon-size ${isActive(nav.path)
-                      ? "menu-item-icon-active"
-                      : "menu-item-icon-inactive"
+              // <Link
+              //   to={nav.path}
+              //   className={`menu-item group ${isActive(nav.path) ? "menu-item-active" : "menu-item-inactive"
+              //     }`}
+              // >
+              //   <span
+              //     className={`menu-item-icon-size ${isActive(nav.path)
+              //         ? "menu-item-icon-active"
+              //         : "menu-item-icon-inactive"
+              //       }`}
+              //   >
+              //     {nav.icon}
+              //   </span>
+              //   {(isExpanded || isHovered || isMobileOpen) && (
+              //     <span className="menu-item-text">{nav.name}</span>
+              //   )}
+              // </Link>
+                <Link
+                  to={isAllowedPermission(nav.id ?? 0) ? "#" : nav.path ?? ""}
+                  onClick={(e) => {
+                    if (isAllowedPermission(nav.id ?? 0)) e.preventDefault();
+                  }}
+                  className={`menu-item group flex items-center gap-2 ${isAllowedPermission(nav.id ?? 0)
+                      ? "opacity-50 cursor-not-allowed pointer-events-none"
+                      : isActive(nav.path ?? "")
+                        ? "menu-item-active text-gray-900 dark:text-white"
+                        : "menu-item-inactive text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400"
                     }`}
                 >
-                  {nav.icon}
-                </span>
-                {(isExpanded || isHovered || isMobileOpen) && (
-                  <span className="menu-item-text">{nav.name}</span>
-                )}
-              </Link>
+                  <span
+                    className={`menu-item-icon-size ${isAllowedPermission(nav.id ?? 0)
+                        ? "text-gray-400 dark:text-gray-500"
+                        : isActive(nav.path ?? "")
+                          ? "menu-item-icon-active text-blue-600 dark:text-blue-400"
+                          : "menu-item-icon-inactive text-gray-600 dark:text-gray-300"
+                      }`}
+                  >
+                    {nav.icon}
+                  </span>
+
+                  {(isExpanded || isHovered || isMobileOpen) && (
+                    <span className="menu-item-text text-gray-800 dark:text-gray-200">
+                      {nav.name}
+                    </span>
+                  )}
+                </Link>
             )
           )}
           {nav.subItems && (isExpanded || isHovered || isMobileOpen) && (
@@ -442,7 +513,7 @@ const AppSidebar: React.FC = () => {
                   <HorizontaLDots className="size-6" />
                 )}
               </h2>
-              {renderMenuItems(filterNav, "main")}
+              {renderMenuItems(navItems, "main")}
             </div>
             <div className="">
               <h2

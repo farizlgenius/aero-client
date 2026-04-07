@@ -30,8 +30,8 @@ import { usePagination } from '../../context/PaginationContext';
 
 
 
-export const OUTPUT_TABLE_HEADER: string[] = ["Name", "Main Controller", "Module", "Mode","Offline","Pulse Time", "Status", "Action"]
-export const OUTPUT_KEY: string[] = ["name", "hardwareName", "moduleDescription", "relayModeDescription","offlineModeDescription","defaultPulse"];
+export const OUTPUT_TABLE_HEADER: string[] = ["Name", "Module", "Mode","Offline","Pulse Time", "Status", "Action"]
+export const OUTPUT_KEY: string[] = ["name", "moduleDetail", "relayModeDetail","offlineModeDetail","defaultPulse"];
 
 const ControlPoint = () => {
     const { toggleToast } = useToast();
@@ -61,7 +61,7 @@ const ControlPoint = () => {
 
     const handleRemove = (data: ControlPointDto) => {
         setConfirmRemove(() => async () => {
-            const res = await send.delete(ControlPointEndpoint.DELETE(data.componentId))
+            const res = await send.delete(ControlPointEndpoint.DELETE(data.id))
             if(Helper.handleToastByResCode(res,ControlPointToast.DELETE,toggleToast)){
                 toggleRefresh();
             }
@@ -71,26 +71,27 @@ const ControlPoint = () => {
 
 
     {/* Output Data */ }
-    const defaultDto: ControlPointDto = {
-        name: "",
-        driverId:0,
-        moduleId: -1,
-        outputNo: -1,
-        relayMode: -1,
-        offlineMode: -1,
-        defaultPulse: 1,
+    const defaultOutputDto: ControlPointDto = {
+    // Base
+    locationId: locationId,
+    isActive: true,
 
-        // base
-        componentId: -1,
-        mac: '',
-        locationId: locationId,
-        isActive: true,
-        relayModeDetail: '',
-        offlineModeDetail: '',
-        hardwareName: '',
-        moduleDetail: ''
-    }
-    const [controlPointDto, setControlPointDto] = useState<ControlPointDto>(defaultDto);
+    // Detail
+    id: 0,
+    cpId: 0,
+    name: "",
+    moduleId: -1,
+    moduleDriverId:-1,
+    moduleDetail: "",
+    outputNo: -1,
+    relayMode: -1,
+    offlineMode: -1,
+    defaultPulse: 1,
+    relayModeDetail: "",
+    offlineModeDetail: "",
+    scpId: -1
+}
+    const [controlPointDto, setControlPointDto] = useState<ControlPointDto>(defaultOutputDto);
     const [outputsDto, setOutputsDto] = useState<ControlPointDto[]>([]);
     const [status, setStatus] = useState<StatusDto[]>([]);
     const fetchData = async (pageNumber: number, pageSize: number,locationId?:number,search?: string, startDate?: string, endDate?: string) => {
@@ -102,8 +103,8 @@ const ControlPoint = () => {
 
             // Batch set state
             const newStatuses = res.data.data.data.map((a: ControlPointDto) => ({
-                macAddress: a.mac,
-                componentId: a.componentId,
+                deviceId:a.scpId,
+                driverId: a.cpId,
                 status: 0
             }));
 
@@ -113,14 +114,14 @@ const ControlPoint = () => {
 
             // Fetch status for each
             res.data.data.data.forEach((a: ControlPointDto) => {
-                fetchStatus(a.mac, a.componentId);
+                fetchStatus(a.scpId, a.cpId);
             });
 
         }
     };
 
-    const fetchStatus = async (scpMac: string, cpNo: number) => {
-        const res = send.get(ControlPointEndpoint.STATUS(scpMac,cpNo));
+    const fetchStatus = async (deviceId: number, driverId: number) => {
+        const res = send.get(ControlPointEndpoint.STATUS(deviceId,driverId));
         Logger.info(res);
     };
 
@@ -137,7 +138,7 @@ const ControlPoint = () => {
                 console.log(">>>>>>>>>>>>>>>> " + status.first);
                 setStatus((prev) =>
                     prev.map((a) =>
-                        a.driverId == status.mac && a.deviceId == status.first
+                        a.driverId == status.deviceId && a.scpId == status.first
                             ? {
                                 ...a,
                                 status: status.status,
@@ -178,7 +179,7 @@ const ControlPoint = () => {
                 setConfirmRemove(() => async () => {
                     var data:number[] = [];
                     selectedObjects.map(async (a:ControlPointDto) => {
-                        data.push(a.componentId)
+                        data.push(a.id)
                     })
                     var res = await send.post(ControlPointEndpoint.DELETE_RANGE,data)
                     if(Helper.handleToastByResCode(res,ControlPointToast.DELETE_RANGE,toggleToast)){
@@ -210,7 +211,7 @@ const ControlPoint = () => {
                 break;
             case "cancel":
             case "close":
-                setControlPointDto(defaultDto)
+                setControlPointDto(defaultOutputDto)
                 setForm(false);
                 break;
             case "on":
@@ -218,8 +219,8 @@ const ControlPoint = () => {
                 if (selectedObjects.length > 0) {
                     selectedObjects.map(async (a: ControlPointDto) => {
                         let data: OutputTrigger = {
-                            mac: a.mac,
-                            componentId: a.componentId,
+                            deviceId: a.scpId,
+                            driverId: a.cpId,
                             command: 2
                         }
                         const res = await send.post(ControlPointEndpoint.TRIGGER, data);
@@ -232,8 +233,8 @@ const ControlPoint = () => {
                 if (selectedObjects.length > 0) {
                     selectedObjects.map(async (a: ControlPointDto) => {
                         let data: OutputTrigger = {
-                            mac: a.mac,
-                            componentId: a.componentId,
+                            deviceId: a.scpId,
+                            driverId: a.cpId,
                             command: 1
                         }
                         const res = await send.post(ControlPointEndpoint.TRIGGER, data);
@@ -245,8 +246,8 @@ const ControlPoint = () => {
                 if (selectedObjects.length > 0) {
                     selectedObjects.map(async (a: ControlPointDto) => {
                         let data: OutputTrigger = {
-                            mac: a.mac,
-                            componentId: a.componentId,
+                            deviceId: a.scpId,
+                            driverId: a.cpId,
                             command: 3
                         }
                         const res = await send.post(ControlPointEndpoint.TRIGGER, data);
@@ -286,14 +287,14 @@ const ControlPoint = () => {
                 <Badge
                     size="sm"
                     color={
-                        statusDto.find(b => b.deviceId == data.componentId)?.status == "Active"
+                        statusDto.find(b => b.driverId == data.deviceId)?.status == "Active"
                             ? "success"
-                            : statusDto.find(b => b.deviceId == data.componentId)?.status == "Inactive"
+                            : statusDto.find(b => b.driverId == data.deviceId)?.status == "Inactive"
                                 ? "error"
                                 : "warning"
                     }
                 >
-                    {statusDto.find(b => b.deviceId == data.componentId)?.status == "" ? "Error" : statusDto.find(b => b.deviceId == data.componentId)?.status}
+                    {statusDto.find(b => b.driverId == data.deviceId)?.status == "" ? "Error" : statusDto.find(b => b.driverId == data.deviceId)?.status}
                 </Badge>
             </TableCell>
         ];

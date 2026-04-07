@@ -1,7 +1,7 @@
 
 export interface AccessLevelComponentDto{
-    driverId:number;
-    deviceId:number;
+    alvlId:number;
+    scpId:number;
     doorId:number;
     acrId:number;
     timeZoneId:number;

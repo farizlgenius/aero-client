@@ -1,4 +1,4 @@
 export interface ScanCardDto {
-    mac:string;
+    scpId:number;
     doorId:number;
 }

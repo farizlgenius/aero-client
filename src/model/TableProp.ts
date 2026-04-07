@@ -1,12 +1,12 @@
 import React, { JSX } from "react";
 import { TableSpecialDisplay } from "./TableSpecialDisplay";
-import { FeatureDto } from "./Role/FeatureDto";
+import { PermissionDto } from "./Role/PermissionDto";
 import { ActionButton } from "./ActionButton";
 import { StatusDto } from "./StatusDto";
 
 export interface TableProp<T> {
-    headers?:string[];
-    keys?:string[];
+    headers:string[];
+    keys:string[];
     data: T[]
     onInfo:(data:T) => void;
     onEdit: (data: T) => void
@@ -16,7 +16,7 @@ export interface TableProp<T> {
     setSelect:React.Dispatch<React.SetStateAction<T[]>>
     renderOptionalComponent?:(data: any, statusDto: StatusDto[],index:number) => JSX.Element[];
     specialDisplay?:TableSpecialDisplay<T>[];
-    permission?:FeatureDto;
+    permission?:PermissionDto;
     status?:StatusDto[];
     action?:ActionButton[];
     subTable?:(index:number) => JSX.Element;

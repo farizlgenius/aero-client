@@ -7,8 +7,8 @@ export const ControlPointEndpoint = {
     TRIGGER : `/api/${CONTROLLER}/trigger`,
     CREATE : `/api/${CONTROLLER}/control`,
     UPDATE : `/api/${CONTROLLER}`,
-    STATUS :(mac:string,cpNo:number)=> `/api/${CONTROLLER}/status/${mac}/${cpNo}`,
-    OUTPUT : (mac:string,component:number) => `/api/${CONTROLLER}/op/${mac}/${component}`,
+    STATUS :(deviceId:number,drivevrId:number)=> `/api/${CONTROLLER}/status/${deviceId}/${drivevrId}`,
+    OUTPUT : (module:number) => `/api/${CONTROLLER}/op/${module}`,
     GET_OFFLINE_OP_MODE : `/api/${CONTROLLER}/mode/offline`,
     GET_RELAY_OP_MODE : `/api/${CONTROLLER}/mode/relay`,
     DELETE_RANGE: `/api/${CONTROLLER}/delete/range`

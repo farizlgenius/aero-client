@@ -25,7 +25,7 @@ import MonitorPoint from "./pages/MonitorPoint/MonitorPoint";
 import Hardware from "./pages/Hardware/Hardware";
 import PopupExample from "./pages/UiElements/PopupExample";
 import Door from "./pages/Door/Door";
-import CardHolder from "./pages/CardHolder/CardHolder";
+import User from "./pages/User/User";
 import TimeZone from "./pages/TimeZone/TimeZone";
 import CardFormat from "./pages/CardFormat/CardFormat";
 import Alert from "./components/ui/alert/Alert";
@@ -61,6 +61,9 @@ import { Reports } from "./pages/Report/Report";
 import { Command } from "./pages/Diagnostic/Command";
 import { CommandStatus } from "./pages/Diagnostic/CommandStatus";
 import { useLocation } from "./context/LocationContext";
+import { Company } from "./pages/Company/Company";
+import { Department } from "./pages/Department/Department";
+import { Position } from "./pages/Position/Position";
 
 
 export default function App() {
@@ -184,6 +187,9 @@ export default function App() {
             <Route index path="/" element={<Home />} />
             {/* ACS */}
             <Route path="/location" element={<Location />} />
+             <Route path="/company" element={<Company />} />
+              <Route path="/department" element={<Department />} />
+               <Route path="/position" element={<Position />} />
             <Route path="/hardware" element={<Hardware />} />
             <Route path="/module" element={<Module />} />
             <Route path="/event" element={<Transaction />} />
@@ -194,7 +200,7 @@ export default function App() {
             <Route path="/level" element={<AccessLevel />} />
             <Route path="/area" element={<Area />} />
             <Route path="/timezone" element={<TimeZone />} />
-            <Route path="/cardholder" element={<CardHolder />} />
+            <Route path="/cardholder" element={<User />} />
             <Route path="/cardformat" element={<CardFormat />} />
             <Route path="/led" element={<Led />} />
             <Route path="/holiday" element={<Holiday />} />

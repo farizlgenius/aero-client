@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { AuthEndpoint } from "../endpoint/AuthEndpoint";
 import { useLoading } from "./LoadingContext";
 import { useToast } from "./ToastContext";
@@ -7,166 +7,155 @@ import { clearAccessToken, getAccessToken, send, setAccessToken } from "../api/a
 import Helper from "../utility/Helper";
 import { useLocation } from "./LocationContext";
 import { LocationDto } from "../model/Location/LocationDto";
-import { FeatureDto } from "../model/Role/FeatureDto";
-import { FeatureEndpoint } from "../endpoint/FeatureEndpoint";
+import { PermissionDto as PermissionDto } from "../model/Role/PermissionDto";
 import { AuthToast } from "../model/ToastMessage";
 
-type User = { id: string; name?: string; info?: Info; location?: number[];role?:Role  } | null;
-type Info = { title?:string; firstname?:string; middlename?:string; lastname?:string; }
-type Role = { roleNo?:number; roleName?:string; features?:number[]}
 
 interface AuthContextType {
-  user: User;
-  isAuthenticated: boolean;
-  loading: boolean;
-  signIn: (username: string, password: string) => Promise<boolean>;
-  signOut: () => Promise<void>;
-  filterPermission:(FeatureId:number) => FeatureDto | undefined;
+    isAuthenticated: boolean;
+    loading: boolean;
+    signIn: (username: string, password: string) => Promise<boolean>;
+    signOut: () => Promise<boolean>;
+    filterPermission: (FeatureId: number) => PermissionDto | undefined;
+    isAllowedPermission: (FeatureId: number) => boolean;
 };
 
-const AuthContext = createContext<AuthContextType|undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 
 let isRefreshing = false;
 let refreshPromise: Promise<boolean> | null = null;
+// let permissions: PermissionDto[] = [];
 
 
 const doRefresh = async () => {
-    if(isRefreshing && refreshPromise) return refreshPromise;
+    if (isRefreshing && refreshPromise) return refreshPromise;
     isRefreshing = true;
     refreshPromise = (async () => {
-        try{
+        try {
             const res = await send.post(AuthEndpoint.REFRESH)
-            if(res?.status !== 200) return false;
+            if (res?.status !== 200) return false;
             setAccessToken(res.data.data.accessToken)
             return true;
-        }catch{
-             return false;
-        }finally{
+        } catch {
+            return false;
+        } finally {
             isRefreshing = false;
             refreshPromise = null;
         }
     })();
     return refreshPromise;
-} 
+}
 
-export const AuthProvider:React.FC<{children:React.ReactNode}> = ({children}) => {
-    // const [permission,setPermission] = useState<FeatureDto[]>([]);
-    let permission:FeatureDto[] = [];
-    const [user,setUser] = useState<User>(null);
-    // const [loading,setLoading] = useState<boolean>(true);
-    const  {loading,setLoading} = useLoading();
-    const {setLocationId,setLocationList,setLocationName,SetLocationOption} = useLocation();
-    const {toggleToast} = useToast();
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
-    const fetchMe = useCallback(async () =>{
-        if(!getAccessToken()) return false;
+    const { loading, setLoading } = useLoading();
+    const { setLocationId, setLocationList, setLocationName, SetLocationOption } = useLocation();
+    const { toggleToast } = useToast();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+const [permissions, setPermission] = useState<PermissionDto[]>([]);
+
+
+    const fetchMe = useCallback(async () => {
+        if (!getAccessToken()) return false;
         const res = await send.get(AuthEndpoint.ME);
-        if(res?.status !== 200) return false;
+        if (res?.status !== 200) return false;
         console.log(res)
-        console.log(res.data.user);
-        setUser(res.data.user);
-        fetchLocation(res.data.user.location) // [1]
-        fetchPermission(res.data.user.role.id) // 0
+        console.log(res.data);
+        fetchLocation(res.data.locations) // [1]
+        setPermission(res.data.permissions)
+        setIsAuthenticated(res.data.auth);
+        console.log(res.data.auth)
         return true;
-    },[])
+    }, [])
 
-    const fetchLocation = useCallback(async (locationIds:number[]) => {
-        if(!getAccessToken()) return false;
+    const fetchLocation = useCallback(async (locationIds: number[]) => {
+        if (!getAccessToken()) return false;
         var dto = {
-            locationIds:locationIds
+            locationIds: locationIds
         }
-        const res = await send.post(LocationEndpoint.GET_RANGE,dto)
-        let locs:LocationDto[] = res.data.data;
+        const res = await send.post(LocationEndpoint.GET_RANGE, dto)
+        let locs: LocationDto[] = res.data.data;
         setLocationList(locs)
-        locs.map(d => {
-            SetLocationOption((prev) => ([...prev,{
-                label:d.name,
-                value:d.id,
-                description:d.description,
-                isTaken:false
-            }]))
-        })
-        if(locs.length > 0){
+        SetLocationOption(locs.map(d => ({
+    label: d.name,
+    value: d.id,
+    description: d.description,
+    isTaken: false
+})));
+        if (locs.length > 0) {
             setLocationName(locs[0].name)
             setLocationId(locs[0].id)
         }
-        // res.data.data.map((a:LocationDto) => {
-        //     setLocationOption(prev => ([...prev,{
-        //         label:a.locationName,
-        //         value:a.componentId,
-        //         isTaken:false,
-        //         description:a.description
-        //     }]))
-        // })
-    },[])
 
-    const fetchPermission = useCallback(async (RoleId:number) => {
-        if(!getAccessToken()) return false;
-        const res = await send.get(FeatureEndpoint.GET_BY_ROLE(RoleId))
-        console.log(res)
-        if(res && res.data.data){
-            permission = res.data.data
-        }
-    },[])
-
+    }, [])
 
     useEffect(() => {
         (async () => {
             const ok = await doRefresh();
             console.log(ok)
-            if(ok){
+            if (ok) {
                 await fetchMe();
-            }else{
-                setUser(null)
+            } else {
+                console.log(1);
+                setIsAuthenticated(false);
             }
             setLoading(false);
         })();
-    },[fetchMe])
+    }, [fetchMe])
 
-    const signIn = useCallback(async (username:string,password:string) => {
+    const signIn = useCallback(async (username: string, password: string) => {
         setLoading(true);
-        const res = await send.post(AuthEndpoint.LOGIN,{username,password})
+        const body = new FormData();
+        body.append("username", username);
+        body.append("password", password);
+        const res = await send.post(AuthEndpoint.LOGIN, body)
         setLoading(false);
-        if(!Helper.handleToastByResCode(res,AuthToast.LOGIN,toggleToast)){
+        if (!Helper.handleToastByResCode(res, AuthToast.LOGIN, toggleToast)) {
             return false;
         }
         setAccessToken(res.data.data.accessToken)
         await fetchMe();
         return true
-    },[fetchMe])
+    }, [fetchMe])
 
     const signOut = useCallback(async () => {
-        const res = await send.post(AuthEndpoint.LOGOUT) 
-        console.log(res)
-        clearAccessToken()
-        setUser(null);
-    },[])
+        const res = await send.post(AuthEndpoint.LOGOUT)
+        console.log(res.data.data)
+        if (res.data.data) {
+            clearAccessToken()
+            setIsAuthenticated(false);
+        }
+        return res.data.data;
+    }, [])
 
-    const filterPermission = useCallback((FeatureId:number) => {
-        console.log(permission)
-        return permission.find(s => s.id == FeatureId);
-    },[fetchMe])
+    const filterPermission = useCallback((FeatureId: number) => {
+        return permissions.find(s => s.sourceId == FeatureId);
+    }, [permissions])
 
+
+    const isAllowedPermission = useCallback((featureId:number) => {
+    return !(permissions.find(p => p.sourceId === featureId)?.isAllow ?? false);
+}, [permissions]);
 
     return (
         <AuthContext.Provider
-        value={{
-            user,
-            isAuthenticated: !!user,
-            loading,
-            signIn,
-            signOut,
-            filterPermission
-        }}
+            value={{
+                isAuthenticated,
+                isAllowedPermission,
+        loading,
+        signIn,
+        signOut,
+        filterPermission
+            }}
         >
             {children}
         </AuthContext.Provider>
     )
 };
 
-export function useAuth(){
+export function useAuth() {
     const ctx = useContext(AuthContext);
-    if(!ctx) throw new Error("useAuth must be used inside AuthProvider");
+    if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
     return ctx;
 }

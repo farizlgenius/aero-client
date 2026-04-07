@@ -165,7 +165,7 @@ export const Operator = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <BaseTable<OperatorDto> headers={HEADER} keys={KEY} data={operatorsDto} select={selectedObjects} onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} onClick={handleClick} permission={filterPermission(FeatureId.OPERATOR)} setSelect={setSelectedObjects} fetchData={fetchData} locationId={locationId}  />
+                    <BaseTable<OperatorDto> refresh={refresh} headers={HEADER} keys={KEY} data={operatorsDto} select={selectedObjects} onEdit={handleEdit} onRemove={handleRemove} onInfo={handleInfo} onClick={handleClick} permission={filterPermission(FeatureId.OPERATOR)} setSelect={setSelectedObjects} fetchData={fetchData} locationId={locationId}  />
                 </div>
 
             }

@@ -57,7 +57,7 @@ const Hardware = () => {
   let ScanTableTemplate: ReactNode;
 
   const defaultCreateDto: CreateHardwareDto = {
-    driverId: 0,
+    scpId: 0,
     name: "",
     hardwareType: 0,
     hardwareTypeDetail: "",
@@ -103,7 +103,7 @@ const Hardware = () => {
     protocolTwoDetail: "",
     baudRateTwo: -1,
     id: 0,
-    driverId: 0,
+    scpId: 0,
     mac: "",
     lastSync: new Date()
   }
@@ -127,7 +127,7 @@ const Hardware = () => {
   const [idReportList, setIdReportList] = useState<IdReport[]>([]);
   const handleAddIdReport = async (data: IdReport) => {
     setHardwareDto({
-     driverId: data.scpId,
+     scpId: data.scpId,
     name: "",
     hardwareType: data.hardwareType,
     hardwareTypeDetail: data.hardwareTypeDescription,
@@ -214,8 +214,8 @@ const Hardware = () => {
       setPagination(res.data.data.page);
       // Batch set state
       const newStatuses = res.data.data.data.map((a: HardwareDto) => ({
-        deviceId: a.driverId,
-        driverId: a.driverId,
+        scpId: a.scpId,
+        driverId: a.scpId,
         status: -1,
         tamper: -1,
         ac: -1,
@@ -223,7 +223,7 @@ const Hardware = () => {
       }));
 
       const newTranStatuses = res.data.data.data.map((a: HardwareDto) => ({
-        driverId: a.driverId,
+        scpId: a.scpId,
         capacity: 0,
         oldest: 0,
         lastReport: 0,
@@ -256,7 +256,7 @@ const Hardware = () => {
     console.log(res)
     if (res && res.data.data) {
       setStatus((prev) => prev.map((a) =>
-        a.driverId == res.data.data.driverId
+        a.scpId == res.data.data.scpId
           ? {
             ...a,
             status: res.data.data.status,
@@ -273,7 +273,7 @@ const Hardware = () => {
     const res = await send.get(HardwareEndpoint.TRAN(mac));
     if (res && res.data.data) {
       setTranStatus((prev) => prev.map((a: TranStatusDto) =>
-        a.driverId == res.data.data.macAddress ? {
+        a.scpId == res.data.data.scpId ? {
           ...a,
         } : {
           ...a
@@ -309,7 +309,7 @@ const Hardware = () => {
     setHardwareDto({
       // Base
       id :data.id,
-      driverId: data.driverId,
+      scpId: data.scpId,
       name: data.name,
       hardwareType: data.hardwareType,
       hardwareTypeDetail: data.hardwareTypeDetail,
@@ -469,10 +469,10 @@ const Hardware = () => {
     connection.on("SCP.TRAN", (data: TranStatusDto) => {
       console.log(data)
       setTranStatus((prev) => prev.map((a) =>
-        a.driverId == data.driverId
+        a.scpId == data.scpId
           ? {
             ...a,
-            macAddress: data.driverId,
+            macAddress: data.scpId,
             capacity: data.capacity,
             oldest: data.oldest,
             lastReport: data.lastReport,
@@ -543,12 +543,12 @@ const Hardware = () => {
   const renderOptional = (data: HardwareDto, statusDto: StatusDto[],index:number) => {
     console.log(data)
     console.log(statusDto)
-    console.log(statusDto.find(b => b.driverId == data.driverId)?.status)
+    console.log(statusDto.find(b => b.scpId == data.scpId)?.status)
     return [
       <TableCell key={index} className="px-4 py-3 text-gray-500 text-start text-theme-sm dark:text-gray-400">
         <>
           {
-            data.isReset == true && statusDto.find(b => b.driverId == data.driverId && b.deviceId == data.id)?.status == 0 ?
+            data.isReset == true && statusDto.find(b => b.scpId == data.scpId && b.driverId == data.id)?.status == 0 ?
               <FlashLoading />
               :
               data.isReset == true ?
@@ -591,14 +591,14 @@ const Hardware = () => {
           <Badge
             size="sm"
             color={
-              statusDto.find(b => b.driverId == data.driverId)?.status == 1
+              statusDto.find(b => b.scpId == data.scpId)?.status == 1
                 ? "success"
-                : statusDto.find(b => b.driverId == data.driverId)?.status == 0
+                : statusDto.find(b => b.scpId == data.scpId)?.status == 0
                   ? "error"
                   : "warning"
             }
           >
-            {statusDto.find(b => b.driverId == data.driverId)?.status == 1 ? "Online" : statusDto.find(b => b.driverId == data.driverId)?.status == 0 ? "Offline" : statusDto.find(b => b.driverId == data.driverId)?.status}
+            {statusDto.find(b => b.scpId == data.scpId)?.status == 1 ? "Online" : statusDto.find(b => b.scpId == data.scpId)?.status == 0 ? "Offline" : statusDto.find(b => b.scpId == data.scpId)?.status}
           </Badge>
 
         }
@@ -647,8 +647,8 @@ const Hardware = () => {
             {
               key: "tranStatus",
               content: (a, i) => <TableCell key={i} className="px-4 py-3 text-gray-500 text-center text-theme-sm dark:text-gray-400">
-                <Badge size="sm" color={tranStatus.find(x => x.driverId == a.driverId)?.disabled == 0 && tranStatus.find(x => x.driverId == a.driverId)?.status ? "success" : "error"}>
-                  {tranStatus.find(x => x.driverId == a.driverId)?.status ?? "Unknown"}
+                <Badge size="sm" color={tranStatus.find(x => x.scpId == a.scpId)?.disabled == 0 && tranStatus.find(x => x.scpId == a.scpId)?.status ? "success" : "error"}>
+                  {tranStatus.find(x => x.scpId == a.scpId)?.status ?? "Unknown"}
                 </Badge>
               </TableCell>
             }

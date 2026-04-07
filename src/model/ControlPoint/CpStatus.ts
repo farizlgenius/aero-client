@@ -1,3 +1,3 @@
 export interface CpStatus {
-      mac: string, first: number, status: string
+      deviceId: number, first: number, status: string
 }

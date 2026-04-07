@@ -1,6 +1,6 @@
 import { PropsWithChildren, useEffect, useState } from "react";
 import { FormProp } from "../../../model/Form/FormProp";
-import { UserDto } from "../../../model/CardHolder/UserDto";
+import { UserDto } from "../../../model/User/UserDto";
 import { AccessLevelDto } from "../../../model/AccessGroup/AccessLevelDto";
 import { useLocation } from "../../../context/LocationContext";
 import { send } from "../../../api/api";
@@ -24,7 +24,7 @@ export const AccessLevelForm: React.FC<PropsWithChildren<FormProp<UserDto>>> = (
         const res = await send.get(AccessLevelEndPoint.GET(locationId))
         console.log(res.data.data);
         if (res && res.data.data) {
-            setAvailableAccessLevels(res.data.data.filter((al: AccessLevelDto) => !dto.accessLevels.some(selected => selected.componentId === al.componentId)));
+            setAvailableAccessLevels(res.data.data.filter((al: AccessLevelDto) => !dto.accessLevels.some(selected => selected.id === al.id)));
             setLoading(false);
         }
     }

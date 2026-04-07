@@ -1,7 +1,6 @@
 import React, { JSX, useEffect, useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb'
 import { AddIcon, MaskIcon, MonitorIcon, UnmaskIcon } from '../../icons'
-import HttpRequest from '../../utility/HttpRequest';
 import Logger from '../../utility/Logger';
 import MonitorPointForm from './MonitorPointForm';
 import { MonitorPointDto } from '../../model/MonitorPoint/MonitorPointDto';
@@ -9,7 +8,6 @@ import { StatusDto } from '../../model/StatusDto';
 import { MonitorPointToast } from '../../model/ToastMessage';
 import { useToast } from '../../context/ToastContext';
 import Helper from '../../utility/Helper';
-import { HttpMethod } from '../../enum/HttpMethod';
 import { MonitorPointEndpoint } from '../../endpoint/MonitorPointEndpoint';
 import { useLocation } from '../../context/LocationContext';
 import { send } from '../../api/api';
@@ -58,7 +56,7 @@ const MonitorPoint = () => {
 
     const handleRemove = (data: MonitorPointDto) => {
         setConfirmRemove(() => async () => {
-            const res = await send.delete(MonitorPointEndpoint.DELETE(data.componentId));
+            const res = await send.delete(MonitorPointEndpoint.DELETE(data.id));
             if (Helper.handleToastByResCode(res, MonitorPointToast.DELETE, toggleToast)) {
                 toggleRefresh();
             }
@@ -81,7 +79,7 @@ const MonitorPoint = () => {
                 setConfirmRemove(() => async () => {
                     var data:number[] = [];
                     selectedObjects.map(async (a:MonitorPointDto) => {
-                        data.push(a.componentId)
+                        data.push(a.id)
                     })
                     var res = await send.post(MonitorPointEndpoint.DELETE_RANGE,data)
                     if(Helper.handleToastByResCode(res,MonitorPointToast.DELETE_RANGE,toggleToast)){
@@ -141,7 +139,7 @@ const MonitorPoint = () => {
     {/* input Data */ }
     const defaultDto: MonitorPointDto = {
         name: '',
-        mpId:0,
+        mpId: -1,
         moduleId: -1,
         inputNo: -1,
         inputMode: -1,
@@ -152,15 +150,15 @@ const MonitorPoint = () => {
         delayEntry: 0,
         delayExit: 0,
         isMask: false,
-        componentId: -1,
-        mac: '',
         locationId: locationId,
         isActive: false,
-        hardwareName: '',
         inputModeDescription: '',
         logFunctionDescription: '',
         monitorPointModeDescription: '',
-        moduleDescription: ''
+        moduleDescription: '',
+        id: 0,
+        scpId: -1,
+        moduleDriverId: -1
     }
     const [monitorPointsDto, setMonitorPointsDto] = useState<MonitorPointDto[]>([]);
     const [monitorPointDto, setMonitorPointDto] = useState<MonitorPointDto>(defaultDto);
@@ -174,8 +172,8 @@ const MonitorPoint = () => {
 
             // Batch set state
             const newStatuses = res.data.data.data.map((a: MonitorPointDto) => ({
-                macAddress: a.mac,
-                componentId: a.componentId,
+                driverId: a.mpId,
+                deviceId: a.scpId,
                 status: 0
             }));
 
@@ -185,7 +183,7 @@ const MonitorPoint = () => {
 
             // Fetch status for each
             res.data.data.data.forEach((a: MonitorPointDto) => {
-                fetchStatus(a.componentId);
+                fetchStatus(a.id);
             });
         }
 
@@ -208,7 +206,7 @@ const MonitorPoint = () => {
             (status:MpStatus) => {
                 setStatus((prev) =>
                     prev.map((a) =>
-                        a.driverId == status.mac && a.deviceId == status.first
+                        a.driverId == status.deviceId && a.scpId == status.first
                             ? {
                                 ...a,
                                 status: status.status,
@@ -236,14 +234,14 @@ const MonitorPoint = () => {
                 <Badge
                     size="sm"
                     color={
-                        statusDto.find(b => b.deviceId == data.componentId)?.status == "Active"
+                        statusDto.find(b => b.driverId == data.deviceId)?.status == "Active"
                             ? "success"
-                            : statusDto.find(b => b.deviceId == data.componentId)?.status == "Inactive"
+                            : statusDto.find(b => b.driverId == data.deviceId)?.status == "Inactive"
                                 ? "error"
                                 : "warning"
                     }
                 >
-                    {statusDto.find(b => b.deviceId == data.componentId)?.status == "" ? "Error" : statusDto.find(b => b.deviceId == data.componentId)?.status}
+                    {statusDto.find(b => b.driverId == data.deviceId)?.status == "" ? "Error" : statusDto.find(b => b.driverId == data.deviceId)?.status}
                 </Badge>
             </TableCell>
         ]

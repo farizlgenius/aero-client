@@ -38,18 +38,22 @@ const MonitorPointForm: React.FC<PropsWithChildren<FormProp<MonitorPointDto>>> =
   const handleSelectChange = async (value: string, e: React.ChangeEvent<HTMLSelectElement>) => {
    
     switch (e.target.name) {
-      case "macAddress":
-        setDto(prev => ({...prev,mac:value,hardwareName:controllerOption.find(x => x.value == value)?.label ?? ""}))
-        const res1 = await send.get(ModuleEndpoint.GET_MAC(value))
+      case "deviceId":
+        setDto(prev => ({...prev,scpId:Number(value)}))
+        const res1 = await send.get(ModuleEndpoint.GET_BY_DEVICE_ID(Number(value)))
         if (res1?.data.data) {
           res1.data.data.map((a: ModuleDto) => {
-            setModuleOption((prev) => [...prev, { label: `${a.modelDetail} ( ${a.address} )`, value: a.componentId }])
+            setModuleOption((prev) => [...prev, { label: `${a.modelDetail} ( ${a.address} )`, value: a.id,additionalInfo:a.driverId }])
           })
         }
         break;
       case "moduleId":
-        setDto(prev => ({...prev,moduleId:Number(value)}))
-        const res2 = await send.get(MonitorPointEndpoint.IP_LIST(dto.mac,Number(value)))
+        setDto(prev => ({...prev,
+          moduleId:Number(value),
+          moduleDescription: moduleOption.find(x => x.value == Number(value))?.label ?? "",
+          moduleDriverId : moduleOption.find(x => x.value == Number(value))?.additionalInfo ?? -1,
+        }))
+        const res2 = await send.get(MonitorPointEndpoint.IP_LIST(Number(value)))
         if (res2?.data.data) {
           res2.data.data.map((a: number) => {
             setInputOption((prev) => [...prev, {
@@ -82,7 +86,7 @@ const MonitorPointForm: React.FC<PropsWithChildren<FormProp<MonitorPointDto>>> =
     let res = await send.get(HardwareEndpoint.GET(locationId))
     if (res?.data.data) {
       res.data.data.map((a: HardwareDto) => {
-        setControllerOption((prev) => [...prev, { label: a.name, value: a.mac }])
+        setControllerOption((prev) => [...prev, { label: a.name, value: a.scpId }])
       })
     }
   }
@@ -139,13 +143,13 @@ const MonitorPointForm: React.FC<PropsWithChildren<FormProp<MonitorPointDto>>> =
           <Label>Controller</Label>
           <Select
           disabled={type==FormType.INFO}
-            isString={true}
-            name="macAddress"
+            isString={false}
+            name="deviceId"
             options={controllerOption}
             placeholder="Select Option"
             onChangeWithEvent={handleSelectChange}
             className="dark:bg-dark-900"
-            defaultValue={dto.mac}
+            defaultValue={dto.scpId}
           />
         </div>
         <div>

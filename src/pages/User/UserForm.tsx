@@ -4,7 +4,7 @@ import { AccessLevelForm } from '../../components/form/card-holder/AccessLevelFo
 import { CredentialForm } from '../../components/form/card-holder/CredentialForm';
 import { PersonalInformationForm } from '../../components/form/card-holder/PersonalInformationForm';
 import { UserSettingForm } from '../../components/form/card-holder/UserSettingForm';
-import { UserDto } from '../../model/CardHolder/UserDto';
+import { UserDto } from '../../model/User/UserDto';
 import { FormProp, FormType } from '../../model/Form/FormProp';
 
 interface UserFormProps extends FormProp<UserDto> {

@@ -1,3 +1,4 @@
+import { DoorDirection } from "../../enum/DoorDirection";
 import { BaseDto } from "../BaseDto";
 import { CardFormatDto } from "../CardFormat/CardFormatDto";
 import { ReaderDto } from "../Reader/ReaderDto";
@@ -6,9 +7,12 @@ import { SensorDto } from "../Sensor/SensorDto";
 import { StrikeDto } from "../Strike/StrikeDto";
 
 export interface DoorDto extends BaseDto {
+  id:number;
+  scpId:number;
   name: string;
   accessConfig: number;
   pairDoorNo: number;
+  direction:DoorDirection;
   acrId:number;
 
   // Reader setting for Reader In
@@ -16,11 +20,9 @@ export interface DoorDto extends BaseDto {
   readerOutConfiguration:number;
 
   // Output setting for strike
-  strkComponentId:number;
   strk:StrikeDto;
 
   // Input setting for sensor
-  sensorComponentId:number;
   sensor:SensorDto ;
 
   // Input setting for rex0
@@ -28,8 +30,8 @@ export interface DoorDto extends BaseDto {
 
   cardFormat:number;
   antiPassbackMode: number;
-  antiPassBackIn: number;
-  antiPassBackOut: number;
+  areaInId: number;
+  areaOutId: number;
   spareTags: number;
   accessControlFlags: number;
   mode:number;

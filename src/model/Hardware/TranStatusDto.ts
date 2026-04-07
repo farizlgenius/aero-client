@@ -4,6 +4,6 @@ export interface TranStatusDto {
     lastReport:number;
     lastLog:number;
     disabled:number;
-    driverId:number;
+    scpId:number;
     status:string;
 }

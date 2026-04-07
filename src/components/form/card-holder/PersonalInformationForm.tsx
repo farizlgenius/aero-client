@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { CamIcon, EnvelopeIcon, FileIcon } from "../../../icons"
 import Button from "../../ui/button/Button"
 import DatePicker from "../date-picker"
@@ -7,12 +7,22 @@ import Input from "../input/InputField"
 import Radio from "../input/Radio"
 import Label from "../Label"
 import { FormProp, FormType } from "../../../model/Form/FormProp"
-import { UserDto } from "../../../model/CardHolder/UserDto"
+import { UserDto } from "../../../model/User/UserDto"
 import TextArea from "../input/TextArea"
-import { Gender } from "../../../enum/Sex"
 import { NativeWebcam } from "../../../pages/UiElements/NativeWebcam"
 import Modals from "../../../pages/UiElements/Modals"
 import { Avatar } from "../../../pages/UiElements/Avatar"
+import { Gender } from "../../../enum/Gender"
+import { send } from "../../../api/api"
+import { CompanyEndpoint } from "../../../endpoint/CompanyEndpoint"
+import { useLocation } from "../../../context/LocationContext"
+import { CompanyDto } from "../../../model/Company/CompanyDto"
+import { Options } from "../../../model/Options"
+import { DepartmentEndpoint } from "../../../endpoint/DepartmentEndpoint"
+import { DepartmentDto } from "../../../model/Department/DepartmentDto"
+import { PositionEndpoint } from "../../../endpoint/PositionEndpoint"
+import { PositionDto } from "../../../model/Position/PositionDto"
+import Select from "../Select"
 
 interface PersonalInformationFormProp extends FormProp<UserDto> {
     image: File | undefined
@@ -22,10 +32,14 @@ interface PersonalInformationFormProp extends FormProp<UserDto> {
 
 
 export const PersonalInformationForm: React.FC<PersonalInformationFormProp> = ({ dto, setDto, type, handleClick, image, setImage, section = "all" }) => {
+    const {locationId} = useLocation();
     const [newImage, setNewImage] = useState<File | undefined>();
     const [file, setFile] = useState<boolean>(false);
     const [cam, setCam] = useState<boolean>(false);
-    const [selectedValue, setSelectedValue] = useState<string>(Gender.M);
+    const [selectedValue, setSelectedValue] = useState<Gender | string>(Gender.Male.toString());
+    const [com,setCom] = useState<Options[]>([]);
+    const [dep,setDep] = useState<Options[]>([]);
+    const [pos,setPos] = useState<Options[]>([]);
     const showImageSection = section === "all" || section === "image";
     const showPersonalSection = section === "all" || section === "personal";
 
@@ -41,7 +55,7 @@ export const PersonalInformationForm: React.FC<PersonalInformationFormProp> = ({
 
     const handleRadioChange = (value: string) => {
         setSelectedValue(value);
-        setDto(prev => ({ ...prev, sex: value }))
+        setDto(prev => ({ ...prev, gender: value }))
     }
 
     const handleClickInternal = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -62,6 +76,55 @@ export const PersonalInformationForm: React.FC<PersonalInformationFormProp> = ({
                 break;
         }
     }
+
+    const fetchCompany = async () => {
+        const res = await send.get(CompanyEndpoint.GET_BY_LOCATION(locationId));
+        if(res.data.data != null){
+            res.data.data.data.map((a:CompanyDto) => {
+                setCom(prev => ([...prev,{
+                    label:a.name,
+                    value:a.id,
+                    description:a.description,
+                    isTaken:false
+                }]))
+            })
+        }
+    }
+
+    const fetchDepartment = async () => {
+        const res = await send.get(DepartmentEndpoint.GET_BY_LOCATION(locationId));
+        console.log(res);
+        if(res.data.data != null){
+            res.data.data.data.map((a:DepartmentDto) => {
+                setDep(prev => ([...prev,{
+                    label:a.name,
+                    value:a.id,
+                    description:a.description,
+                    isTaken:false
+                }]))
+            })
+        }
+    }
+
+    const fetchPosition = async () => {
+        const res = await send.get(PositionEndpoint.GET_BY_LOCATION(locationId));
+        if(res.data.data != null){
+            res.data.data.data.map((a:PositionDto) => {
+                setPos(prev => ([...prev,{
+                    label:a.name,
+                    value:a.id,
+                    description:a.description,
+                    isTaken:false
+                }]))
+            })
+        }
+    }
+
+    useEffect(() => {
+        fetchCompany();
+        fetchDepartment();
+        fetchPosition();
+    },[]);
 
     return (
         <div className='flex justify-center items-center flex-col gap-4'>
@@ -141,8 +204,8 @@ export const PersonalInformationForm: React.FC<PersonalInformationFormProp> = ({
                                                 <Radio
                                                     id="gender1"
                                                     name="gender"
-                                                    value="Male"
-                                                    checked={selectedValue === "Male"}
+                                                    value={Gender.Male.toString()}
+                                                    checked={selectedValue === Gender.Male.toString()}
                                                     onChange={handleRadioChange}
                                                     label="Male"
                                                 />
@@ -152,10 +215,20 @@ export const PersonalInformationForm: React.FC<PersonalInformationFormProp> = ({
                                                 <Radio
                                                     id="gender2"
                                                     name="gender"
-                                                    value="Female"
-                                                    checked={selectedValue === "Female"}
+                                                     value={Gender.Female.toString()}
+                                                    checked={selectedValue === Gender.Female.toString()}
                                                     onChange={handleRadioChange}
                                                     label="Female"
+                                                />
+                                            </div>
+                                            <div className="flex flex-col flex-wrap gap-8">
+                                                <Radio
+                                                    id="gender3"
+                                                    name="gender"
+                                                     value={Gender.Other.toString()}
+                                                    checked={selectedValue === Gender.Other.toString()}
+                                                    onChange={handleRadioChange}
+                                                    label="Other"
                                                 />
                                             </div>
                                         </div>
@@ -169,6 +242,7 @@ export const PersonalInformationForm: React.FC<PersonalInformationFormProp> = ({
                                             label="Date of birth"
                                             placeholder="Select a date"
                                             onChange={(date) => setDto((prev) => ({ ...prev, dateOfBirth: date[0].toISOString() }))}
+                                            value={dto.dateOfBirth}
                                         />
                                     </div>
                                 </div>
@@ -215,41 +289,52 @@ export const PersonalInformationForm: React.FC<PersonalInformationFormProp> = ({
                                 <div className='flex gap-2 mb-3'>
                                     <div className='flex-1'>
                                         <Label>Company</Label>
-                                        <Input
+                                        {/* <Input
                                             disabled={type == FormType.INFO}
                                             onChange={handleChange}
                                             value={dto.company}
                                             name="company"
                                             placeholder="Company Co.,Ltd."
-                                        />
+                                        /> */}
+                                        <Select name={"Company"} 
+                                        onChange={e => setDto(prev => ({...prev,companyId:Number(e),company:com.find(x => x.value == Number(e))?.label ?? ""}))} 
+                                        defaultValue={dto.companyId} 
+                                        options={com}/>
                                     </div>
 
                                 </div>
-                                <div className='flex gap-2 mb-3'>
-                                    <div className='flex-1'>
-                                        <Label>Position</Label>
-                                        <Input
-                                            disabled={type == FormType.INFO}
-                                            onChange={handleChange}
-                                            value={dto.position}
-                                            name="position"
-                                            placeholder="Engineer"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className='flex gap-2 mb-3'>
+                                 <div className='flex gap-2 mb-3'>
                                     <div className='flex-1'>
                                         <Label>Department</Label>
-                                        <Input
+                                        {/* <Input
                                             disabled={type == FormType.INFO}
                                             onChange={handleChange}
                                             value={dto.department}
                                             name="department"
                                             placeholder="Engineering Department"
-                                        />
+                                        /> */}
+                                        <Select name={"Department"} defaultValue={dto.departmentId}
+                                         onChange={e => setDto(prev => ({...prev,departmentId:Number(e),department:dep.find(x => x.value == Number(e))?.label ?? ""}))} 
+                                         options={dep}/>
                                     </div>
                                 </div>
+                                <div className='flex gap-2 mb-3'>
+                                    <div className='flex-1'>
+                                        <Label>Position</Label>
+                                        {/* <Input
+                                            disabled={type == FormType.INFO}
+                                            onChange={handleChange}
+                                            value={dto.position}
+                                            name="position"
+                                            placeholder="Engineer"
+                                        /> */}
+                                        <Select name={"Position"} 
+                                        onChange={e => setDto(prev => ({...prev,positionId:Number(e),position:pos.find(x => x.value == Number(e))?.label ?? ""}))} 
+                                        defaultValue={dto.positionId} options={pos}/>
+                                    </div>
+                                </div>
+
+                               
                             </div>
                             <div className="flex justify-between mt-5">
                                 <Label>Additionals Field</Label>

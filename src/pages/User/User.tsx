@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import PageBreadcrumb from '../../components/common/PageBreadCrumb';
 import { AddIcon, UserIcon } from '../../icons';
-import { UserDto } from '../../model/CardHolder/UserDto';
-import { CardHolderEndpoint } from '../../endpoint/CardHolderEndpoint';
+import { UserDto } from '../../model/User/UserDto';
+import { UserEndpoint } from '../../endpoint/UserEndpoint';
 import { useToast } from '../../context/ToastContext';
 import Helper from '../../utility/Helper';
-import { CardHolderToast } from '../../model/ToastMessage';
+import { UserToast as UserToast } from '../../model/ToastMessage';
 import { send } from '../../api/api';
 import { useLocation } from '../../context/LocationContext';
 import { BaseTable } from '../UiElements/BaseTable';
@@ -21,14 +21,15 @@ import Switch from '../../components/form/switch/Switch';
 import UserForm from './UserForm';
 import { FormContent } from '../../model/Form/FormContent';
 import { BaseForm } from '../UiElements/BaseForm';
+import { Gender } from '../../enum/Gender';
 
 
 
-const CARDHOLDER_HEAD: string[] = ["", "Id", "Name", "Company", "Department", "Postion", "Status", "Action"];
+const CARDHOLDER_HEAD: string[] = ["Image", "Id", "Name", "Company", "Department", "Postion", "Status", "Action"];
 const CARDHOLDER_KEY: string[] = ["avatar", "userId", "name", "company", "department", "position", "isActive"];
 
 
-const CardHolder = () => {
+const User = () => {
 
     const { locationId } = useLocation();
     const { setPagination } = usePagination();
@@ -46,7 +47,7 @@ const CardHolder = () => {
         firstName: '',
         middleName: '',
         lastName: '',
-        gender: '',
+        gender: Gender.Male.toString(),
         email: '',
         phone: '',
         company: '',
@@ -58,11 +59,15 @@ const CardHolder = () => {
         locationId: locationId,
         isActive: true,
         flag: 1,
-        driverId: 0,
-        hardwareName: '',
-        companyId: 0,
-        positionId: 0,
-        departmentId: 0
+        companyId: -1,
+        positionId: -1,
+        departmentId: -1,
+        identification: '',
+        dateOfBirth: '',
+        address: '',
+        id: 0,
+        name: '',
+        image: ''
     }
 
     const [cardHolderDto, setCardHolderDto] = useState<UserDto>(defaultDto)
@@ -86,10 +91,10 @@ const CardHolder = () => {
                 setConfirmRemove(() => async () => {
                     var data: number[] = [];
                     selectedObjects.map(async (a: UserDto) => {
-                        data.push(a.driverId)
+                        data.push(a.id)
                     })
-                    var res = await send.post(CardHolderEndpoint.DELETE_RANGE, data)
-                    if (Helper.handleToastByResCode(res, CardHolderToast.DELETE_RANGE, toggleToast)) {
+                    var res = await send.post(UserEndpoint.DELETE_RANGE, data)
+                    if (Helper.handleToastByResCode(res, UserToast.DELETE_RANGE, toggleToast)) {
                         setSelectedObjects([])
                         toggleRefresh();
                     }
@@ -99,13 +104,13 @@ const CardHolder = () => {
             case "create":
 
                 setConfirmCreate(() => async () => {
-                    const res1 = await send.post(CardHolderEndpoint.CREATE, cardHolderDto);
-                    if (Helper.handleToastByResCode(res1, CardHolderToast.CREATE, toggleToast)) {
+                    const res1 = await send.post(UserEndpoint.CREATE, cardHolderDto);
+                    if (Helper.handleToastByResCode(res1, UserToast.CREATE, toggleToast)) {
                         if (image != undefined) {
                             const payload = new FormData();
                             payload.append("image", image);
-                            const res2 = await send.postForm(CardHolderEndpoint.UPLOAD(cardHolderDto.userId), payload);
-                            if (Helper.handleToastByResCode(res2, CardHolderToast.CREATE, toggleToast)) {
+                            const res2 = await send.postForm(UserEndpoint.UPLOAD(cardHolderDto.userId), payload);
+                            if (Helper.handleToastByResCode(res2, UserToast.CREATE, toggleToast)) {
                                 setCardHolderDto(defaultDto);
                                 setForm(false);
                                 toggleRefresh();
@@ -124,8 +129,8 @@ const CardHolder = () => {
                 break;
             case "update":
                 setConfirmUpdate(() => async () => {
-                    const res = await send.put(CardHolderEndpoint.UPDATE, cardHolderDto);
-                    if (Helper.handleToastByResCode(res, CardHolderToast.UPDATE, toggleToast)) {
+                    const res = await send.put(UserEndpoint.UPDATE, cardHolderDto);
+                    if (Helper.handleToastByResCode(res, UserToast.UPDATE, toggleToast)) {
                         setCardHolderDto(defaultDto)
                         setForm(false);
                         toggleRefresh();
@@ -159,14 +164,14 @@ const CardHolder = () => {
 
     const handleRemove = (data: UserDto) => {
         setConfirmRemove(() => async () => {
-            const res = await send.delete(CardHolderEndpoint.DELETE(data.userId))
-            if (Helper.handleToastByResCode(res, CardHolderToast.DELETE, toggleToast))
+            const res = await send.delete(UserEndpoint.DELETE(data.userId))
+            if (Helper.handleToastByResCode(res, UserToast.DELETE, toggleToast))
                 toggleRefresh();
         })
         setRemove(true);
     }
     const fetchData = async (pageNumber: number, pageSize: number, locationId?: number, search?: string, startDate?: string, endDate?: string) => {
-        const res = await send.get(CardHolderEndpoint.PAGINATION(pageNumber, pageSize, locationId, search, startDate, endDate));
+        const res = await send.get(UserEndpoint.PAGINATION(pageNumber, pageSize, locationId, search, startDate, endDate));
         console.log(res?.data.data)
         if (res && res.data.data) {
             console.log(res.data.data)
@@ -256,4 +261,4 @@ const CardHolder = () => {
     )
 }
 
-export default CardHolder
+export default User

@@ -29,9 +29,10 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <AppWrapper>
         <SocketProvider>
-          <LoadingProvider>
+          <LocationProvider>
+             <LoadingProvider>
             <ToastProvider>
-              <LocationProvider>
+              
                 <AuthProvider>
                   <NotificationProvider>
                     <PopupProvider>
@@ -45,9 +46,10 @@ createRoot(document.getElementById("root")!).render(
                     </PopupProvider>
                   </NotificationProvider>
                 </AuthProvider>
-              </LocationProvider>
             </ToastProvider>
           </LoadingProvider>
+          </LocationProvider>
+         
         </SocketProvider>
 
       </AppWrapper>

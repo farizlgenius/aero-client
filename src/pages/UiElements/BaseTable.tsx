@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import Pagination from "../../components/ui/table/Pagination";
 import { usePagination } from "../../context/PaginationContext";
 import React from "react";
-import { useLocation } from "../../context/LocationContext";
 
 
 
@@ -15,6 +14,7 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
     const [show, setShow] = useState<number>(-1)
     const [sortKey, setSortKey] = useState<string>(keys?.[0] ?? "");
     const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+
 
     const toSortableValue = (value: unknown): number | string => {
         if (value === null || value === undefined) return "";
@@ -134,8 +134,13 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
                                                 className="group inline-flex items-center gap-1.5 transition-colors hover:text-brand-500"
                                             >
                                                 <span>{head}</span>
-                                                <span className={`text-[10px] tracking-wide ${isActive ? "text-brand-500" : "text-gray-400 group-hover:text-brand-500"}`}>
-                                                    {isActive ? (sortDirection === "asc" ? "ASC" : "DESC") : "SORT"}
+                                                <span className={`inline-flex flex-col leading-none ${isActive ? "text-brand-500" : "text-gray-400 group-hover:text-brand-500"}`}>
+                                                    <svg className={`h-2 w-2 ${isActive && sortDirection === "asc" ? "opacity-100" : "opacity-40"}`} viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M5 2L8 6H2L5 2Z" fill="currentColor" />
+                                                    </svg>
+                                                    <svg className={`h-2 w-2 ${isActive && sortDirection === "desc" ? "opacity-100" : "opacity-40"}`} viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M5 8L2 4H8L5 8Z" fill="currentColor" />
+                                                    </svg>
                                                 </span>
                                             </button>
                                         </TableCell>
@@ -143,6 +148,16 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
                                 </TableRow>
                             </TableHeader>
                             <TableBody className="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                                {sortedData.length === 0 && (
+                                    <TableRow>
+                                        <TableCell
+                                            colspan={headers.length + 2}
+                                            className="px-4 py-8 text-center text-gray-500 text-theme-sm dark:text-gray-400"
+                                        >
+                                            No record
+                                        </TableCell>
+                                    </TableRow>
+                                )}
                                 {sortedData && sortedData.map((data: T, i: number) => (
                                     <React.Fragment key={i}>
                                         <TableRow key={i} className="cursor-pointer hover:bg-gray-900 active:bg-gray-800" onClickWithEvent={() => {
