@@ -6,18 +6,23 @@ interface BreadcrumbProps {
 
 const PageBreadcrumb: React.FC<BreadcrumbProps> = ({ pageTitle }) => {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-      <h2
-        className="text-xl font-semibold text-gray-800 dark:text-white/90"
-        x-text="pageName"
-      >
-        {pageTitle}
-      </h2>
+    <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--app-panel-border)] bg-[var(--app-panel-bg)] px-5 py-4 shadow-theme-sm">
+      <div>
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-gray-500">
+          Console
+        </p>
+        <h2
+          className="text-xl font-semibold text-gray-800 dark:text-white/90"
+          x-text="pageName"
+        >
+          {pageTitle}
+        </h2>
+      </div>
       <nav>
         <ol className="flex items-center gap-1.5">
           <li>
             <Link
-              className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400"
+              className="inline-flex items-center gap-1.5 text-sm text-gray-500 transition hover:text-brand-500 dark:text-gray-400"
               to="/"
             >
               Home

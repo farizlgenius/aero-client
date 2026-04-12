@@ -14,7 +14,7 @@ type ThemeContextType = {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const DEFAULT_ACCENT_COLOR = "#465fff";
+const DEFAULT_ACCENT_COLOR = "#ec7211";
 
 const normalizeHexColor = (color: string): string => {
   const value = color.trim();

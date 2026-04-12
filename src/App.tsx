@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useNavigate,
+} from "react-router";
 import { SignIn } from "./pages/AuthPages/SignIn";
 import NotFound from "./pages/OtherPage/NotFound";
 import UserProfiles from "./pages/UserProfiles";
@@ -65,30 +70,37 @@ import { Company } from "./pages/Company/Company";
 import { Department } from "./pages/Department/Department";
 import { Position } from "./pages/Position/Position";
 
-
 export default function App() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
-  const { create, remove, update, createModal, removeModal, updateModal,info,infoModal } = usePopup();
+  const {
+    create,
+    remove,
+    update,
+    createModal,
+    removeModal,
+    updateModal,
+    info,
+    infoModal,
+  } = usePopup();
   const { showAlertFlag, alertSuccessFlag, alertMessage } = useAlert();
-  const { showToast, ToastContainer,toggleToast } = useToast();
+  const { showToast, ToastContainer, toggleToast } = useToast();
   const { loading, Loading } = useLoading();
-  const {locationId} = useLocation();
+  const { locationId } = useLocation();
 
   const [license, setLicense] = useState<boolean>(true);
   const [loginDto, setLoginDto] = useState<LoginDto>({
     username: "",
-    password: ""
-  })
-
+    password: "",
+  });
 
   const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
     switch (e.currentTarget.name) {
       case "login":
         const res = await signIn(loginDto.username, loginDto.password);
-        console.log(res)
+        console.log(res);
         if (res) {
-          navigate("/")
+          navigate("/");
         }
         break;
       case "license":
@@ -96,57 +108,47 @@ export default function App() {
       default:
         break;
     }
-  }
+  };
 
-  {/* License Check */ }
+  {
+    /* License Check */
+  }
   const checkLicense = async () => {
     const res = await send.get(LicenseEndpoint.CHECK);
-    if (Helper.handleToastByResCode(res,LicenseToast.CHECK,toggleToast)) {
-      console.log(res.data.data)
+    if (Helper.handleToastByResCode(res, LicenseToast.CHECK, toggleToast)) {
+      console.log(res.data.data);
       setLicense(true);
     }
-  }
+  };
 
-  {/* License */ }
+  {
+    /* License */
+  }
   const addLicense = async () => {
-    const res = await HttpRequest.send(HttpMethod.POST, LicenseEndpoint.CREATE,)
+    const res = await HttpRequest.send(HttpMethod.POST, LicenseEndpoint.CREATE);
     if (res && res.data.data) {
-      console.log(res.data.data)
+      console.log(res.data.data);
       //setLicense(true);
     }
-  }
-
+  };
 
   useEffect(() => {
     checkLicense();
     if (!license) {
-      navigate("/license")
+      navigate("/license");
     }
+  }, []);
 
-  }, [])
-
-  useEffect(() => {
-
-  },[locationId]);
+  useEffect(() => {}, [locationId]);
 
   return (
     <>
       <div>
-        {create &&
-          createModal
-        }
-        {remove &&
-          removeModal
-        }
-        {update &&
-          updateModal
-        }
-        {info &&
-        infoModal
-        }
-        {loading &&
-          <Loading />
-        }
+        {create && createModal}
+        {remove && removeModal}
+        {update && updateModal}
+        {info && infoModal}
+        {loading && <Loading />}
         {showToast && (
           <>
             {/* <Toast
@@ -157,10 +159,9 @@ export default function App() {
             /> */}
             <ToastContainer />
           </>
-
         )}
 
-        {showAlertFlag &&
+        {showAlertFlag && (
           <div className="transition-opacity duration-500 opacity-100 hover:opacity-0">
             <Alert
               isFixed={true}
@@ -169,27 +170,26 @@ export default function App() {
               message={alertMessage ? alertMessage : ""}
               showLink={false}
             />
-
           </div>
-
-        }
-
+        )}
 
         <ScrollToTop />
         <Routes>
           {/* Dashboard Layout */}
-          <Route element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
+          <Route
+            element={
+              // <ProtectedRoute>
 
-          }>
+              // </ProtectedRoute>
+              <AppLayout />
+            }
+          >
             <Route index path="/" element={<Home />} />
             {/* ACS */}
             <Route path="/location" element={<Location />} />
-             <Route path="/company" element={<Company />} />
-              <Route path="/department" element={<Department />} />
-               <Route path="/position" element={<Position />} />
+            <Route path="/company" element={<Company />} />
+            <Route path="/department" element={<Department />} />
+            <Route path="/position" element={<Position />} />
             <Route path="/hardware" element={<Hardware />} />
             <Route path="/module" element={<Module />} />
             <Route path="/event" element={<Transaction />} />
@@ -210,11 +210,11 @@ export default function App() {
             <Route path="/operator" element={<Operator />} />
             <Route path="/procedure" element={<Procedure />} />
             <Route path="/trigger" element={<Trigger />} />
-            <Route path="/pass" element={<PasswordRule />}/>
-            <Route path="/map" element={<Map/>}/>
+            <Route path="/pass" element={<PasswordRule />} />
+            <Route path="/map" element={<Map />} />
             <Route path="/report" element={<Reports />} />
-            <Route path="/command" element={<Command/>} />
-            <Route path="/status" element={<CommandStatus/>} />
+            <Route path="/command" element={<Command />} />
+            <Route path="/status" element={<CommandStatus />} />
 
             {/* Others Page */}
             <Route path="/profile" element={<UserProfiles />} />
@@ -239,14 +239,15 @@ export default function App() {
             <Route path="/bar-chart" element={<BarChart />} />
           </Route>
 
-
           {/* Auth Layout */}
-          <Route path="/login" element={<SignIn handleClick={handleClick} setDto={setLoginDto} />} />
+          <Route
+            path="/login"
+            element={<SignIn handleClick={handleClick} setDto={setLoginDto} />}
+          />
           <Route path="/License" element={<License />} />
           {/* Fallback Route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-
       </div>
     </>
   );

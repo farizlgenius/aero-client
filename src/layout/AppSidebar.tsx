@@ -288,7 +288,7 @@ const AppSidebar: React.FC = () => {
   };
 
   const renderMenuItems = (items: NavItem[], menuType: "main" | "others") => (
-    <ul className="flex flex-col gap-4">
+    <ul className="flex flex-col gap-2">
       {items.map((nav, index) => (
         <li key={nav.name}>
           {nav.subItems ? (
@@ -332,8 +332,8 @@ const AppSidebar: React.FC = () => {
               className={`menu-item group flex items-center gap-2 ${isAllowedPermission(nav.id ?? 0)
                   ? "opacity-50 cursor-not-allowed"
                   : openSubmenu?.type === menuType && openSubmenu?.index === index
-                    ? "menu-item-active text-gray-900 dark:text-white"
-                    : "menu-item-inactive text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400 cursor-pointer"
+                    ? "menu-item-active"
+                    : "menu-item-inactive cursor-pointer hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
                 } ${!isExpanded && !isHovered ? "lg:justify-center" : "lg:justify-start"
                 }`}
             >
@@ -341,15 +341,15 @@ const AppSidebar: React.FC = () => {
                 className={`menu-item-icon-size ${isAllowedPermission(nav.id ?? 0)
                     ? "text-gray-400 dark:text-gray-500"
                     : openSubmenu?.type === menuType && openSubmenu?.index === index
-                      ? "menu-item-icon-active text-blue-600 dark:text-blue-400"
-                      : "menu-item-icon-inactive text-gray-600 dark:text-gray-300"
+                      ? "menu-item-icon-active"
+                      : "menu-item-icon-inactive"
                   }`}
               >
                 {nav.icon}
               </span>
 
               {(isExpanded || isHovered || isMobileOpen) && (
-                <span className="menu-item-text text-gray-800 dark:text-gray-200">
+                <span className="menu-item-text text-[var(--app-sidebar-text)]">
                   {nav.name}
                 </span>
               )}
@@ -360,8 +360,8 @@ const AppSidebar: React.FC = () => {
                       ? "text-gray-400 dark:text-gray-500"
                       : openSubmenu?.type === menuType &&
                         openSubmenu?.index === index
-                        ? "rotate-180 text-blue-600 dark:text-blue-400"
-                        : "text-gray-500 dark:text-gray-400"
+                        ? "rotate-180 text-[var(--app-sidebar-active-text)]"
+                        : "text-[var(--app-sidebar-muted)]"
                     }`}
                 />
               )}
@@ -393,23 +393,23 @@ const AppSidebar: React.FC = () => {
                   className={`menu-item group flex items-center gap-2 ${isAllowedPermission(nav.id ?? 0)
                       ? "opacity-50 cursor-not-allowed pointer-events-none"
                       : isActive(nav.path ?? "")
-                        ? "menu-item-active text-gray-900 dark:text-white"
-                        : "menu-item-inactive text-gray-700 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-400"
+                        ? "menu-item-active"
+                        : "menu-item-inactive hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]"
                     }`}
                 >
                   <span
                     className={`menu-item-icon-size ${isAllowedPermission(nav.id ?? 0)
                         ? "text-gray-400 dark:text-gray-500"
                         : isActive(nav.path ?? "")
-                          ? "menu-item-icon-active text-blue-600 dark:text-blue-400"
-                          : "menu-item-icon-inactive text-gray-600 dark:text-gray-300"
+                          ? "menu-item-icon-active"
+                          : "menu-item-icon-inactive"
                       }`}
                   >
                     {nav.icon}
                   </span>
 
                   {(isExpanded || isHovered || isMobileOpen) && (
-                    <span className="menu-item-text text-gray-800 dark:text-gray-200">
+                    <span className="menu-item-text text-[var(--app-sidebar-text)]">
                       {nav.name}
                     </span>
                   )}
@@ -429,7 +429,7 @@ const AppSidebar: React.FC = () => {
                     : "0px",
               }}
             >
-              <ul className="mt-2 space-y-1 ml-9">
+              <ul className="ml-8 mt-2 space-y-1 border-l border-[var(--app-sidebar-border)] pl-4">
                 {nav.subItems.map((subItem) => (
                   <li key={subItem.name}>
                     <Link
@@ -437,7 +437,7 @@ const AppSidebar: React.FC = () => {
                       className={`menu-dropdown-item ${isActive(subItem.path)
                           ? "menu-dropdown-item-active"
                           : "menu-dropdown-item-inactive"
-                        }`}
+                        } hover:bg-[var(--app-sidebar-hover)] hover:text-[var(--app-sidebar-hover-text)]`}
                     >
                       {subItem.name}
                     </Link>
@@ -453,7 +453,7 @@ const AppSidebar: React.FC = () => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200 
+      className={`fixed left-0 top-0 z-50 mt-16 flex h-screen flex-col border-r border-[var(--app-sidebar-border)] bg-[var(--app-sidebar-bg)] px-4 text-[var(--app-sidebar-text)] shadow-theme-lg backdrop-blur-xl transition-all duration-300 ease-in-out lg:mt-0
         ${isExpanded || isMobileOpen
           ? "w-[290px]"
           : isHovered
@@ -466,64 +466,59 @@ const AppSidebar: React.FC = () => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className={`py-8 flex ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
+        className={`flex py-6 ${!isExpanded && !isHovered ? "lg:justify-center" : "justify-start"
           }`}
       >
-        <Link to="/">
-          {isExpanded || isHovered || isMobileOpen ? (
-            <>
+        <div className={`w-full rounded-2xl border border-[var(--app-sidebar-border)] bg-[var(--app-sidebar-surface)] p-3 shadow-theme-sm ${!isExpanded && !isHovered ? "lg:w-auto lg:rounded-xl lg:p-2.5" : ""}`}>
+          <Link to="/" className={`flex items-center gap-3 ${!isExpanded && !isHovered ? "lg:justify-center" : ""}`}>
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-500/12 text-brand-500 shadow-theme-xs">
               <img
-                className="dark:hidden"
-                src="/images/logo/logo.svg"
+                src="/images/logo/logo-icon.svg"
                 alt="Logo"
-                width={150}
-                height={40}
+                width={22}
+                height={22}
               />
-              <img
-                className="hidden dark:block"
-                src="/images/logo/logo-dark.svg"
-                alt="Logo"
-                width={150}
-                height={40}
-              />
-            </>
-          ) : (
-            <img
-              src="/images/logo/logo-icon.svg"
-              alt="Logo"
-              width={32}
-              height={32}
-            />
-          )}
-        </Link>
+            </span>
+            {(isExpanded || isHovered || isMobileOpen) && (
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-semibold tracking-[0.01em] text-[var(--app-sidebar-text)]">
+                  Aero Console
+                </span>
+                <span className="block truncate text-[11px] uppercase tracking-[0.14em] text-[var(--app-sidebar-muted)]">
+                  Cloud Management
+                </span>
+              </span>
+            )}
+          </Link>
+        </div>
       </div>
       <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
         <nav className="mb-6">
-          <div className="flex flex-col gap-4">
-            <div>
+          <div className="flex flex-col gap-5">
+            <div className="rounded-2xl border border-[var(--app-sidebar-border)] bg-[var(--app-sidebar-section-bg)] p-3">
               <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${!isExpanded && !isHovered
+                className={`mb-4 flex text-[11px] font-semibold uppercase leading-[20px] tracking-[0.14em] text-[var(--app-sidebar-muted)] ${!isExpanded && !isHovered
                     ? "lg:justify-center"
                     : "justify-start"
                   }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Menu"
+                  "Services"
                 ) : (
                   <HorizontaLDots className="size-6" />
                 )}
               </h2>
               {renderMenuItems(navItems, "main")}
             </div>
-            <div className="">
+            <div className="rounded-2xl border border-[var(--app-sidebar-border)] bg-[var(--app-sidebar-section-bg)] p-3">
               <h2
-                className={`mb-4 text-xs uppercase flex leading-[20px] text-gray-400 ${!isExpanded && !isHovered
+                className={`mb-4 flex text-[11px] font-semibold uppercase leading-[20px] tracking-[0.14em] text-[var(--app-sidebar-muted)] ${!isExpanded && !isHovered
                     ? "lg:justify-center"
                     : "justify-start"
                   }`}
               >
                 {isExpanded || isHovered || isMobileOpen ? (
-                  "Others"
+                  "Tools"
                 ) : (
                   <HorizontaLDots />
                 )}
