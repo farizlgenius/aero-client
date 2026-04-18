@@ -1,5 +1,5 @@
 
-const CONTROLLER = 'Auth'
+const CONTROLLER = 'identity/auth'
 
 export const AuthEndpoint = {
     LOGIN:`/api/${CONTROLLER}/login`,

@@ -2,7 +2,7 @@
 import axios, { AxiosInstance } from "axios";
 import Logger from "../utility/Logger";
 
-const PORT = import.meta.env.PORT || 5031;
+const PORT = import.meta.env.VITE_PORT || 8000;
 const API_BASE = import.meta.env.VITE_SERVER_IP || `${location.protocol}//${location.hostname}:${PORT}`;
 let accessToken: string | null = null;
 

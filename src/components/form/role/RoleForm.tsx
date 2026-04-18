@@ -102,7 +102,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                         setDto(prev => ({
                                                             ...prev,
                                                             permissions: prev.permissions.map(a => (
-                                                                a.sourceId == data.sourceId ?
+                                                                a.featureId == data.featureId ?
                                                                     {
                                                                         ...a,
                                                                         isAllow: checked,
@@ -122,7 +122,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                 </div>
                                             </TableCell>
                                             <TableCell className="px-5 py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400">
-                                                {data.name}
+                                                {data.featureName}
                                             </TableCell>
                                             {data.isAllow &&
                                                 <>
@@ -132,7 +132,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                                 setDto(prev => ({
                                                                     ...prev,
                                                                     permissions: prev.permissions.map(a => (
-                                                                        a.sourceId == data.sourceId ?
+                                                                        a.featureId == data.featureId ?
                                                                             {
                                                                                 ...a,
                                                                                 isCreate: e.target.checked
@@ -154,7 +154,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                                 setDto(prev => ({
                                                                     ...prev,
                                                                     permissions: prev.permissions.map(a => (
-                                                                        a.sourceId == data.sourceId ?
+                                                                        a.featureId == data.featureId ?
                                                                             {
                                                                                 ...a,
                                                                                 isModify: e.target.checked
@@ -177,7 +177,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                                 setDto(prev => ({
                                                                     ...prev,
                                                                     permissions: prev.permissions.map(a => (
-                                                                        a.sourceId == data.sourceId ?
+                                                                        a.featureId == data.featureId ?
                                                                             {
                                                                                 ...a,
                                                                                 isDelete: e.target.checked
@@ -198,7 +198,7 @@ export const RoleForm: React.FC<PropsWithChildren<FormProp<RoleDto>>> = ({ type,
                                                                 setDto(prev => ({
                                                                     ...prev,
                                                                     permissions: prev.permissions.map(a => (
-                                                                        a.sourceId == data.sourceId ?
+                                                                        a.featureId == data.featureId ?
                                                                             {
                                                                                 ...a,
                                                                                 isAction: e.target.checked

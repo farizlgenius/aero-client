@@ -98,7 +98,6 @@ export default function App() {
     switch (e.currentTarget.name) {
       case "login":
         const res = await signIn(loginDto.username, loginDto.password);
-        console.log(res);
         if (res) {
           navigate("/");
         }
@@ -116,7 +115,6 @@ export default function App() {
   const checkLicense = async () => {
     const res = await send.get(LicenseEndpoint.CHECK);
     if (Helper.handleToastByResCode(res, LicenseToast.CHECK, toggleToast)) {
-      console.log(res.data.data);
       setLicense(true);
     }
   };
@@ -178,10 +176,10 @@ export default function App() {
           {/* Dashboard Layout */}
           <Route
             element={
-              // <ProtectedRoute>
-
-              // </ProtectedRoute>
-              <AppLayout />
+              <ProtectedRoute>
+                  <AppLayout />
+              </ProtectedRoute>
+              
             }
           >
             <Route index path="/" element={<Home />} />

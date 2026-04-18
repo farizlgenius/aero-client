@@ -33,9 +33,11 @@ const doRefresh = async () => {
     isRefreshing = true;
     refreshPromise = (async () => {
         try {
-            const res = await send.post(AuthEndpoint.REFRESH)
+            const res = await send.post(AuthEndpoint.REFRESH,{
+                refresh:""
+            })
             if (res?.status !== 200) return false;
-            setAccessToken(res.data.data.accessToken)
+            setAccessToken(res.data.accessToken)
             return true;
         } catch {
             return false;
@@ -64,7 +66,7 @@ const [permissions, setPermission] = useState<PermissionDto[]>([]);
         console.log(res.data);
         fetchLocation(res.data.locations) // [1]
         setPermission(res.data.permissions)
-        setIsAuthenticated(res.data.auth);
+        setIsAuthenticated(true);
         console.log(res.data.auth)
         return true;
     }, [])
@@ -72,10 +74,11 @@ const [permissions, setPermission] = useState<PermissionDto[]>([]);
     const fetchLocation = useCallback(async (locationIds: number[]) => {
         if (!getAccessToken()) return false;
         var dto = {
-            locationIds: locationIds
+            Ids: locationIds
         }
         const res = await send.post(LocationEndpoint.GET_RANGE, dto)
-        let locs: LocationDto[] = res.data.data;
+        console.log(res)
+        let locs: LocationDto[] = res.data;
         setLocationList(locs)
         SetLocationOption(locs.map(d => ({
     label: d.name,
@@ -114,28 +117,30 @@ const [permissions, setPermission] = useState<PermissionDto[]>([]);
         if (!Helper.handleToastByResCode(res, AuthToast.LOGIN, toggleToast)) {
             return false;
         }
-        setAccessToken(res.data.data.accessToken)
+        setAccessToken(res.data.accessToken)
         await fetchMe();
         return true
     }, [fetchMe])
 
     const signOut = useCallback(async () => {
-        const res = await send.post(AuthEndpoint.LOGOUT)
-        console.log(res.data.data)
-        if (res.data.data) {
+        const res = await send.post(AuthEndpoint.LOGOUT,{
+            "refresh":""
+        })
+        console.log(res.data)
+        if (res.data) {
             clearAccessToken()
             setIsAuthenticated(false);
         }
-        return res.data.data;
+        return res.data;
     }, [])
 
     const filterPermission = useCallback((FeatureId: number) => {
-        return permissions.find(s => s.sourceId == FeatureId);
+        return permissions.find(s => s.featureId == FeatureId);
     }, [permissions])
 
 
     const isAllowedPermission = useCallback((featureId:number) => {
-    return !(permissions.find(p => p.sourceId === featureId)?.isAllow ?? false);
+    return !(permissions.find(p => p.featureId === featureId)?.isEnabled ?? false);
 }, [permissions]);
 
     return (

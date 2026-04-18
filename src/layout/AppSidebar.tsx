@@ -81,101 +81,69 @@ const navItems: NavItem[] = [
     icon: <ModuleIcon />,
     subItems: [{ name: "Controller", path: "/hardware", }, { name: "Module", path: "/module", },{ name: "Lift Controller", path: "/lift", },{ name: "Face Reader", path: "/face", }],
   },{
-    id: 16,
+    id: 7,
     name:"Control Point",
     icon:<ControlIcon />,
     path:"/control"
   },{
-    id:17,
+    id:8,
     name:"Monitor Point",
     icon:<MonitorIcon/>,
     path:"/monitor"
   },{ 
-    id:18,
+    id:9,
     name: "Monitor Point Group",
     icon:<GroupIcon/>, 
     path: "/monitorgroup", },
   {
-    id: 7,
+    id: 10,
     icon: <DoorIcon />,
     name: "ACR",
     subItems: [{ name: "Door", path: "/door", }, { name: "Lift", path: "/lift", },{ name: "HL", path: "/hl", },{name:"Time Attendance",path:"/ta"},{name:"Guard Tour",path:"/guard"}],
   }, {
-    id: 8,
+    id: 11,
     icon: <CardIcon />,
     name: "Users",
     path: "/cardholder",
   }, {
-    id: 9,
+    id: 12,
     icon: <GroupIcon />,
     name: "Access Level",
     path: "/level",
   }, {
-    id: 10,
+    id: 13,
     icon: <AreaIcon />,
     name: "Access Area",
     path: "/area",
   },
   {
-    id: 11,
+    id: 14,
     icon: <CalenderIcon />,
     name: "Time",
     subItems: [{ name: "Time Zone", path: "/timezone", }, { name: "Holiday", path: "/holiday", }, { name: "Interval", path: "/interval", }],
   },
   {
-    id: 12,
+    id: 15,
     icon: <TriggerIcon />,
     name: "Trigger & Procedure",
     subItems: [{ name: "Trigger", path: "/trigger", }, { name: "Procedure", path: "/procedure", }],
   },{
-    id:15,
+    id:16,
     name:"Map",
     icon:<OnIcon/>,
     path:"/map"
   },
   {
-    id: 13,
+    id: 17,
     icon: <ReportIcon />,
     name: "Reports",
     subItems: [{ name: "Transaction", path: "/report", }, { name: "Audit Trail", path: "/audit", }, { name: "Time Attendance", path: "/attendance", }],
   },
   {
-    id: 14,
+    id: 18,
     icon: <SettingIcon />,
     name: "Settings",
-    subItems: [{ name: "Card Format", path: "/cardformat", }, { name: "Reader LED", path: "/led", },{name:"Password Rule",path:"/pass"}],
-  }, {
-    icon: <SettingIcon />,
-    name: "Diagnostics",
-    subItems: [{ name: "Send Command", path: "/command", }, { name: "Status", path: "/status", }],
-  },
-  {
-    icon: <CalenderIcon />,
-    name: "Calendar",
-    path: "/calendar",
-  },
-  {
-    icon: <UserCircleIcon />,
-    name: "User Profile",
-    path: "/profile",
-  },
-  {
-    name: "Forms",
-    icon: <ListIcon />,
-    subItems: [{ name: "Form Elements", path: "/form-elements", }],
-  },
-  {
-    name: "Tables",
-    icon: <TableIcon />,
-    subItems: [{ name: "Basic Tables", path: "/basic-tables", }],
-  },
-  {
-    name: "Pages",
-    icon: <PageIcon />,
-    subItems: [
-      { name: "Blank Page", path: "/blank", },
-      { name: "404 Error", path: "/error-404", },
-    ],
+    subItems: [{ name: "Card Format", path: "/cardformat", }, { name: "Reader LED", path: "/led", },{name:"Password Rule",path:"/pass"},{ name: "Send Command", path: "/command", }, { name: "Status", path: "/status", }],
   }
 ];
 
@@ -207,10 +175,6 @@ const othersItems: NavItem[] = [
       { name: "Sign In", path: "/signin", },
       { name: "Sign Up", path: "/signup", },
     ],
-  },{
-    icon: <SettingIcon />,
-    name: "Diagnostics",
-    subItems: [{ name: "Send Command", path: "/command", }, { name: "Status", path: "/status", }],
   }
 ];
 

@@ -47,7 +47,7 @@ class SignalRService {
       console.error("[SignalR] Connection start failed:", error);
       console.log(server)
       // Retry after delay if initial connect fails
-      setTimeout(() => this.startConnection(), 5000);
+      // setTimeout(() => this.startConnection(), 5000);
     }
 
   }

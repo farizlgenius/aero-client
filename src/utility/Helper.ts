@@ -22,23 +22,48 @@ class Helper {
                     return false;
                 case HttpCode.INTERNAL_ERROR:
                     showPopup(false, [res.data.detail, res.data.message])
+                    console.log(res.data)
                     return false;
                 default:
                     return false;
             }
         } else {
             showPopup(false, [APIToast.API_ERROR]);
+            console.log("####")
             return false;
         }
     }
 
     static handleToastByResCode(res: AxiosResponse<any, any> | null | undefined, message: string, toggleToast: (toastType: ToastType, toastMessage: string) => void): boolean {
+        console.log(res)
         if (res) {
-            if(axios.isAxiosError(res)){
-                toggleToast("error",res.message)
-                return false;
+            if (axios.isAxiosError(res)) {
+                switch (res.status) {
+                    case HttpCode.UNAUTHORIZED:
+                        toggleToast("error", res.response?.data.message || "Unauthorized")
+                        return false;
+                    case HttpCode.BAD_REQUEST:
+                        toggleToast("error", res.response?.data.message || "Bad Request")
+                        return false;
+                    case HttpCode.NOT_FOUND:
+                        toggleToast("error", res.response?.data.message || "Not Found")
+                        return false;
+                    case HttpCode.INTERNAL_ERROR:
+                        toggleToast("error", res.response?.data.message || "Internal Server Error")
+                        console.log("####1")
+                        console.log(res.response?.data)
+                        //showPopup(false,[res.data.detail,res.data.message])
+                        return false;
+                    case HttpCode.NOT_ACCEPT:
+                        toggleToast("error", res.response?.data.message || "Not Acceptable")
+                        return false;
+                    default:
+                        toggleToast("error", res.message)
+                        return false;
+                }
+
             }
-            switch (res.data.code) {
+            switch (res.status) {
                 case HttpCode.OK:
                     toggleToast("success", message)
                     return true;
@@ -46,7 +71,7 @@ class Helper {
                     toggleToast("success", message)
                     return true;
                 case HttpCode.UNAUTHORIZED:
-                    toggleToast("error",res.data.message)
+                    toggleToast("error", res.data.message)
                     return false;
                 case HttpCode.BAD_REQUEST:
                     toggleToast("error", res.data.message)
@@ -56,18 +81,21 @@ class Helper {
                     return false;
                 case HttpCode.INTERNAL_ERROR:
                     toggleToast("error", res.data.message)
+                    console.log("####1")
+                    console.log(res.data)
                     //showPopup(false,[res.data.detail,res.data.message])
                     return false;
                 case HttpCode.NOT_ACCEPT:
-                    toggleToast("error",res.data.message)
+                    toggleToast("error", res.data.message)
                     return false;
                 default:
                     toggleToast("error", "error with code : " + res.data.code)
+                    console.log("####1")
                     return false;
             }
         } else {
-            OperatorToast
             toggleToast("error", APIToast.API_ERROR)
+            console.log("####2")
             return false;
         }
     }

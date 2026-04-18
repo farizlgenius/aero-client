@@ -1,4 +1,4 @@
-const CONTROLLER = `Location`;
+const CONTROLLER = `identity/location`;
 
 
 export const LocationEndpoint = {
