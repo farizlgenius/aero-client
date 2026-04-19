@@ -38,10 +38,10 @@ export const Reports = () => {
       const [endDate, setEndDate] = useState<string | undefined>();
       const [pageSize, setPageSize] = useState<number>(10);
       const [pagination, setPagination] = useState<PageProp>({
-            pageNumber: 0,
+            page: 0,
             pageSize: 0,
-            totalCount: 0,
-            totalPage: 0
+            totalItems: 0,
+            totalPages: 0
       });
       const handleClickFirst = () => {
             fetchData(1, 10, search, startDate);
@@ -49,17 +49,17 @@ export const Reports = () => {
 
       const handleClickPrevious = () => {
 
-            fetchData(pagination.pageNumber - 1, pageSize, search, startDate);
+            fetchData(pagination.page - 1, pageSize, search, startDate);
       }
 
       const handleClickNext = () => {
 
-            fetchData(pagination.pageNumber + 1, pageSize, search, startDate);
+            fetchData(pagination.page + 1, pageSize, search, startDate);
       }
 
       const handleClickLast = () => {
 
-            fetchData(pagination.totalPage, pageSize, search, startDate);
+            fetchData(pagination.totalPages, pageSize, search, startDate);
       }
 
       const handlePageSizeSelect = (data: string) => {
@@ -328,7 +328,7 @@ export const Reports = () => {
                                                 )
                                           }
 
-                                          <Pagination onSelectPageSize={handlePageSizeSelect} pageNumber={pagination.pageNumber} pageSize={pagination.pageSize} totalCount={pagination.totalCount} totalPage={pagination.totalPage} onClickFirst={handleClickFirst} onClickPrevious={handleClickPrevious} onClickLast={handleClickLast} onClickNext={handleClickNext} />
+                                          <Pagination onSelectPageSize={handlePageSizeSelect} pageNumber={pagination.page} pageSize={pagination.pageSize} totalCount={pagination.totalItems} totalPage={pagination.totalPages} onClickFirst={handleClickFirst} onClickPrevious={handleClickPrevious} onClickLast={handleClickLast} onClickNext={handleClickNext} />
                                     </div>
                               </div>
 

@@ -24,10 +24,10 @@ export const PaginationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const [endDate, setEndDate] = useState<string | undefined>();
       const [pageSize, setPageSize] = useState<number>(10);
       const [pagination, setPagination] = useState<PageProp>({
-            pageNumber: 0,
+            page: 0,
             pageSize: 0,
-            totalCount: 0,
-            totalPage: 0
+            totalItems: 0,
+            totalPages: 0
       });
 
 

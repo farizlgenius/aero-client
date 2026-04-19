@@ -440,7 +440,7 @@ const Door = () => {
                 <BaseForm tabContent={content} />
 
                 :
-                <BaseTable<DoorDto> headers={DOOR_TABLE_HEADER} keys={DOOR_KEY} select={selectedObjects} setSelect={setSelectedObjects} onInfo={handleInfo} onClick={handleClick} onEdit={handleEdit} onRemove={handleRemove} data={doorsDto} status={status} action={action} permission={filterPermission(FeatureId.DOOR)} renderOptionalComponent={filterComponet} fetchData={fetchData} locationId={locationId} refresh={refresh} specialDisplay={[
+                <BaseTable<DoorDto> headers={DOOR_TABLE_HEADER} keys={DOOR_KEY} select={selectedObjects} setSelect={setSelectedObjects} onInfo={handleInfo} onClick={handleClick} onEdit={handleEdit} onRemove={handleRemove} data={doorsDto} status={status} action={action} permission={filterPermission(FeatureId.acr)} renderOptionalComponent={filterComponet} fetchData={fetchData} locationId={locationId} refresh={refresh} specialDisplay={[
                     {
                         key:"direction",
                         content:(d) => (

@@ -63,17 +63,17 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
       }
 
       const handleClickPrevious = () => {
-            fetchData(pagination.pageNumber - 1, pageSize,locationId,search, startDate,endDate);
+            fetchData(pagination.page - 1, pageSize,locationId,search, startDate,endDate);
       }
 
       const handleClickNext = () => {
 
-            fetchData(pagination.pageNumber + 1, pageSize,locationId,search, startDate,endDate);
+            fetchData(pagination.page + 1, pageSize,locationId,search, startDate,endDate);
       }
 
       const handleClickLast = () => {
 
-            fetchData(pagination.totalPage, pageSize,locationId,search, startDate,endDate);
+            fetchData(pagination.totalPages, pageSize,locationId,search, startDate,endDate);
       }
 
       const handlePageSizeSelect = (data: string) => {
@@ -102,7 +102,10 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
     }
 
      useEffect(() => {
-        fetchData(1, pageSize, locationId,search, startDate)
+        if(locationId != -1){
+            fetchData(1, pageSize, locationId,search, startDate)
+        }
+        console.log(permission);
     }, [refresh,pageSize,search,startDate,locationId])
 
 
@@ -110,7 +113,7 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
         <>
             <div className="overflow-visible rounded-xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.03]">
                 <div className="max-w-full overflow-x-auto">
-                    <Search action={action} onClick={handleClick} permission={permission} />
+                    <Search action={action} onClick={handleClick} permission={permission} locationId={locationId} />
                     <div className="max-h-[70vh] overflow-y-auto hidden-scroll">
                         <Table>
                             {/* Table Header */}
@@ -189,14 +192,14 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
                                                     <a id="detail" onClick={() => onInfo(data)} className="cursor-pointer font-medium text-blue-600 dark:text-blue-500 hover:underline">
                                                         <Info2Icon className="w-10 h-5" />
                                                     </a>
-                                                    {permission?.isModify  &&
+                                                    {permission?.isUpdated  &&
                                                         <a id="edit" onClick={() => onEdit(data)} className="cursor-pointer font-medium text-blue-600 dark:text-blue-500 hover:underline">
                                                             <EditIcon className="w-10 h-5" />
 
                                                         </a>
                                                     }
                                                     {
-                                                        permission?.isDelete  &&
+                                                        permission?.isDeleted &&
 
                                                         <a id="remove" onClick={() => onRemove(data)} className="cursor-pointer font-medium text-red-600 dark:text-red-500 hover:underline"><TrashBinIcon className="w-10 h-5" /></a>
                                                     }
@@ -213,7 +216,7 @@ export const BaseTable = <T extends Record<string, any>>({ headers, keys, data, 
                             </TableBody>
                         </Table>
                     </div>
-                    <Pagination onSelectPageSize={handlePageSizeSelect} pageNumber={pagination.pageNumber} pageSize={pagination.pageSize} totalCount={pagination.totalCount} totalPage={pagination.totalPage} onClickFirst={handleClickFirst} onClickPrevious={handleClickPrevious} onClickLast={handleClickLast} onClickNext={handleClickNext} />
+                    <Pagination onSelectPageSize={handlePageSizeSelect} pageNumber={pagination.page} pageSize={pagination.pageSize} totalCount={pagination.totalItems} totalPage={pagination.totalPages} onClickFirst={handleClickFirst} onClickPrevious={handleClickPrevious} onClickLast={handleClickLast} onClickNext={handleClickNext} />
                     {/* <PaginationNew /> */}
                 </div>
             </div>

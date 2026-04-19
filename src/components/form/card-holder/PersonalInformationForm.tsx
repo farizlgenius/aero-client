@@ -92,7 +92,7 @@ export const PersonalInformationForm: React.FC<PersonalInformationFormProp> = ({
     }
 
     const fetchDepartment = async () => {
-        const res = await send.get(DepartmentEndpoint.GET_BY_LOCATION(locationId));
+        const res = await send.get(DepartmentEndpoint.GET_BY_COMPANY(locationId));
         console.log(res);
         if(res.data.data != null){
             res.data.data.data.map((a:DepartmentDto) => {

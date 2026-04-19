@@ -10,16 +10,17 @@ interface SearchProp {
     onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     permission?: PermissionDto;
     action?: ActionButton[];
+    locationId?: number;
 }
 
-const Search: React.FC<PropsWithChildren<SearchProp>> = ({  onClick, permission, action }) => {
+const Search: React.FC<PropsWithChildren<SearchProp>> = ({  onClick, permission, action,locationId }) => {
     const {setSearch} = usePagination();
     const [isMoreOpen, setIsMoreOpen] = useState(false);
     const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
     const moreBtnRef = useRef<HTMLButtonElement | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
 
-    const hasMoreActions = Boolean((permission?.isAction && action?.length) || permission?.isAllow);
+    const hasMoreActions = Boolean((permission?.isEnabled && action?.length) || permission?.isEnabled);
 
     const updateMenuPosition = () => {
         if (!moreBtnRef.current) return;
@@ -66,7 +67,7 @@ const Search: React.FC<PropsWithChildren<SearchProp>> = ({  onClick, permission,
         <div className="flex flex-col gap-2 px-4 py-4 border border-b-0 border-gray-100 dark:border-white/[0.05] rounded-t-xl sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
                 <div className="inline-flex items-center gap-2">
-                    {permission?.isCreate &&
+                    {permission?.isCreated && locationId != -1 &&
                         <button onClick={onClick} name='add' type="button" className="inline-flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600">
                             <AddIcon />
                             Add
@@ -75,7 +76,7 @@ const Search: React.FC<PropsWithChildren<SearchProp>> = ({  onClick, permission,
                     }
 
                     {
-                        permission?.isDelete &&
+                        permission?.isDeleted &&
                         <button onClick={onClick} name='delete' type="button" className="inline-flex items-center gap-2 rounded-lg bg-error-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs transition hover:bg-error-600">
                             <TrashBinIcon />
                             Delete
@@ -100,7 +101,7 @@ const Search: React.FC<PropsWithChildren<SearchProp>> = ({  onClick, permission,
                                     style={{ top: menuPosition.top, left: menuPosition.left }}
                                     className="fixed z-[100001] w-56 rounded-xl border border-gray-200 bg-white p-2 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark"
                                 >
-                                    {permission?.isAction && action?.map((a, i) => (
+                                    {permission?.isEnabled && action?.map((a, i) => (
                                         <button
                                             key={i}
                                             onClick={handleMoreClick}
@@ -112,7 +113,7 @@ const Search: React.FC<PropsWithChildren<SearchProp>> = ({  onClick, permission,
                                             {a.buttonName}
                                         </button>
                                     ))}
-                                    {permission?.isAllow && (
+                                    {permission?.isEnabled && (
                                         <button
                                             onClick={handleMoreClick}
                                             name="download"

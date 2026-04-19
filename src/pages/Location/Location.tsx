@@ -24,7 +24,8 @@ const defaultDto: LocationDto = {
     id: 0,
     name: "",
     description: "",
-    isActive: true
+    countryId: -1,
+    country: ""
 }
 
 export const LOCATION_HEADER: string[] = ["Name", "Action"]
@@ -34,7 +35,7 @@ export const Location = () => {
     const {locationId} = useLocation();
     const { toggleToast } = useToast();
     const {setPagination} = usePagination();
-    const {  filterPermission } = useAuth();
+    const {  filterPermission,fetchMeTrigger } = useAuth();
     const { setRemove, setConfirmRemove, setConfirmCreate, setInfo, setMessage, setCreate, setUpdate, setConfirmUpdate } = usePopup();
     const [form, setForm] = useState<boolean>(false);
      const [refresh, setRefresh] = useState<boolean>(false);
@@ -51,6 +52,7 @@ export const Location = () => {
         setConfirmRemove(() => async () => {
             const res = await api.delete(LocationEndpoint.DELETE(removeTarget));
             if (Helper.handleToastByResCode(res, LocationToast.DELETE, toggleToast)) {
+                fetchMeTrigger();
                 toggleRefresh();
                 removeTarget = 0;
             }
@@ -88,8 +90,11 @@ export const Location = () => {
                         select.map(async (a: LocationDto) => {
                             data.push(a.id)
                         })
-                        var res = await send.post(LocationEndpoint.DELETE_RANGE, data)
+                        var res = await send.post(LocationEndpoint.DELETE_RANGE, {
+                            ids:data
+                        })
                         if (Helper.handleToastByResCode(res, LocationToast.DELETE_RANGE, toggleToast)) {
+                            fetchMeTrigger();
                             setRemove(false);
                             toggleRefresh();
                         }
@@ -102,6 +107,7 @@ export const Location = () => {
                 setConfirmCreate(() => async () => {
                     const res = await send.post(LocationEndpoint.CREATE, locationDto);
                     if (Helper.handleToastByResCode(res, LocationToast.CREATE, toggleToast)) {
+                        fetchMeTrigger();
                         setForm(false)
                         toggleRefresh();
                         setLocationDto(defaultDto)
@@ -133,11 +139,11 @@ export const Location = () => {
 
     const fetchData = async (pageNumber: number, pageSize: number,locationId?:number, search?: string, startDate?: string, endDate?: string) => {
         const res = await send.get(LocationEndpoint.PAGINATION(pageNumber, pageSize,locationId,search, startDate, endDate));
-        console.log(res?.data.data)
-        if (res && res.data.data) {
+        console.log(res?.data)
+        if (res && res.data) {
             console.log(res.data.data)
-            setLocationsDto(res.data.data.data);
-            setPagination(res.data.data.page);
+            setLocationsDto(res.data.items);
+            setPagination(res.data);
         }
     }
 
@@ -147,7 +153,7 @@ export const Location = () => {
     const tabContent: FormContent[] = [
         {
             icon: <LocationIcon />,
-            label: "Intevals",
+            label: "Locations",
             content: <LocationForm type={formType} dto={locationDto} setDto={setLocationDto} handleClick={handleClickWithEvent} />
         }
     ];
@@ -167,7 +173,7 @@ export const Location = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <BaseTable<LocationDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={locationsDto} select={select} setSelect={setSelect} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClickWithEvent} permission={filterPermission(FeatureId.LOCATION)} onInfo={handleInfo} fetchData={fetchData} refresh={refresh} locationId={locationId} />
+                    <BaseTable<LocationDto> headers={LOCATION_HEADER} keys={LOCATION_KEY} data={locationsDto} select={select} setSelect={setSelect} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClickWithEvent} permission={filterPermission(FeatureId.location)} onInfo={handleInfo} fetchData={fetchData} refresh={refresh} locationId={locationId} />
                 </div>
 
             }

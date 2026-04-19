@@ -1,6 +1,6 @@
 export interface PageProp {
-  pageNumber: number;
+  page: number;
   pageSize: number;
-  totalCount: number;
-  totalPage: number;
+  totalItems: number;
+  totalPages: number;
 }

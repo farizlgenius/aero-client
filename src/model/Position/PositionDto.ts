@@ -1,5 +1,9 @@
-import { BaseDto } from "../BaseDto";
 
-export interface PositionDto extends BaseDto {
+
+export interface PositionDto {
+    id:number;
+    name:string;
     description: string;
+    departmentId: number;
+    departmentName: string;
 }

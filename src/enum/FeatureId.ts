@@ -1,3 +1,22 @@
 export enum FeatureId {
-    DASHBOARD=1,EVENT,LOCATION,ALERT,OPERATOR,DEVICE,DOOR,CARDHODLER,ACCESSLEVEL,ACCESSAREA,TIME,TRIGGER,REPORT,SETTING,MAP,CONTROL,MONITOR,MONITORGROUP
+    
+    dashboard=1,
+    event,
+    location,
+    alert,
+    operator,
+    device,
+    control,
+    monitor,
+    monitorgroup,
+    acr,
+    user,
+    group,
+    area,
+    time,
+    trigger,
+    map,
+    report,
+    setting,
+    tools
 }

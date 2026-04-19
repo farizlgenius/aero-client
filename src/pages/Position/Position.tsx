@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { BaseForm } from "../UiElements/BaseForm";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { FormContent } from "../../model/Form/FormContent";
@@ -17,6 +17,13 @@ import { useLocation } from "../../context/LocationContext";
 import { PositionDto } from "../../model/Position/PositionDto";
 import { PositionEndpoint } from "../../endpoint/PositionEndpoint";
 import { PositionForm } from "./PositionForm";
+import Label from "../../components/form/Label";
+import Select from "../../components/form/Select";
+import { Options } from "../../model/Options";
+import { DepartmentEndpoint } from "../../endpoint/DepartmentEndpoint";
+import { CompanyDto } from "../../model/Company/CompanyDto";
+import { CompanyEndpoint } from "../../endpoint/CompanyEndpoint";
+import { DepartmentDto } from "../../model/Department/DepartmentDto";
 
 var removeTarget: number = 0;
 
@@ -26,14 +33,18 @@ export const HEADER: string[] = ["Name", "Action"]
 export const KEY: string[] = ["name"];
 
 export const Position = () => {
-    const { locationId } = useLocation();
-    const defaultDto: PositionDto = {
-    id: 0,
-    name: "",
-    description: "",
-    isActive: true,
-    locationId: locationId
-}
+        const [selectedDepartment,setSelectedDepartment] = useState<number>(-1);
+    const [departmentOptions,setDepartmentOptions] = useState<Options[]>([]);
+    const [selectedCompany,setSelectedCompany] = useState<number>(-1);
+    const [companyOptions,setCompanyOptions] = useState<Options[]>([]);
+        const defaultDto: PositionDto = {
+        id: 0,
+        name: "",
+        description: "",
+        departmentId: selectedDepartment,
+        departmentName: ""
+    }
+
     const { toggleToast } = useToast();
     const { setPagination } = usePagination();
     const { filterPermission } = useAuth();
@@ -45,6 +56,9 @@ export const Position = () => {
     const [positionsDto, setPositionsDto] = useState<PositionDto[]>([]);
     const [select, setSelect] = useState<PositionDto[]>([])
     const [formType, setFormType] = useState<FormType>(FormType.CREATE);
+
+
+
 
     const handleRemove = (data: PositionDto) => {
         removeTarget = data.id;
@@ -86,7 +100,9 @@ export const Position = () => {
                         select.map(async (a: PositionDto) => {
                             data.push(a.id)
                         })
-                        var res = await send.post(PositionEndpoint.DELETE_RANGE, data)
+                        var res = await send.post(PositionEndpoint.DELETE_RANGE, {
+                            ids:data
+                        })
                         if (Helper.handleToastByResCode(res, PositionToast.DELETE_RANGE, toggleToast)) {
                             setRemove(false);
                             toggleRefresh();
@@ -128,9 +144,9 @@ export const Position = () => {
 
     const fetchData = async (pageNumber: number, pageSize: number, locationId?: number, search?: string, startDate?: string, endDate?: string) => {
         const res = await send.get(PositionEndpoint.PAGINATION(pageNumber, pageSize, locationId, search, startDate, endDate));
-        if (res && res.data.data) {
-            setPositionsDto(res.data.data.data);
-            setPagination(res.data.data.page);
+        if (res && res.data) {
+            setPositionsDto(res.data.items);
+            setPagination(res.data);
         }
     }
 
@@ -142,6 +158,34 @@ export const Position = () => {
         }
     ];
 
+    const fetchCompany = async () => {
+            var res = await send.get(CompanyEndpoint.GET);
+            res.data.map((a:CompanyDto) => {
+                setCompanyOptions((prev) => ([...prev,{
+                    label:a.name,
+                    value:a.id,
+                    description:a.description
+                }]))
+            })
+        }
+
+    const fetchDepartments = async (company:number) => {
+        const res = await send.get(DepartmentEndpoint.GET_BY_COMPANY(company));
+        if (res && res.data) {
+            res.data.map((a:DepartmentDto) => {
+                 setDepartmentOptions((prev) => ([...prev,{
+                    label:a.name,
+                    value:a.id,
+                    description:a.description
+                }]))
+            })
+        }
+    }
+
+    useEffect(() => {
+        fetchCompany();
+    },[])
+
     return (
         <>
             <PageBreadcrumb pageTitle="Positions" />
@@ -149,7 +193,21 @@ export const Position = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <BaseTable<PositionDto> headers={HEADER} keys={KEY} data={positionsDto} select={select} setSelect={setSelect} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClickWithEvent} permission={filterPermission(FeatureId.LOCATION)} onInfo={handleInfo} fetchData={fetchData} refresh={refresh} locationId={locationId}  />
+                     <div className="rounded-xl border border-gray-200 p-6 dark:border-gray-800 border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] " >
+                              <div className="flex gap-10"> 
+                                    <Label>Company Selector</Label>
+                                    <Select options={companyOptions} name="Company" defaultValue={selectedCompany} onChange={e => {
+                                        setSelectedCompany(Number(e));
+                                        fetchDepartments(Number(e));
+                                    } }/>
+                                    <Label>Department Selector</Label>
+                                    <Select options={departmentOptions} name="Department" defaultValue={selectedDepartment} onChange={e => {
+                                        setSelectedDepartment(Number(e));
+                                        setPositionDto(prev => ({ ...prev, departmentId: Number(e) }))
+                                    } }/>
+                              </div>
+                        </div>
+                    <BaseTable<PositionDto> headers={HEADER} keys={KEY} data={positionsDto} select={select} setSelect={setSelect} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClickWithEvent} permission={filterPermission(FeatureId.location)} onInfo={handleInfo} fetchData={fetchData} refresh={refresh} locationId={selectedDepartment}  />
                 </div>
             }
         </>

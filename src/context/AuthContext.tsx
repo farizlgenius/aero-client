@@ -18,6 +18,7 @@ interface AuthContextType {
     signOut: () => Promise<boolean>;
     filterPermission: (FeatureId: number) => PermissionDto | undefined;
     isAllowedPermission: (FeatureId: number) => boolean;
+    fetchMeTrigger:() => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,10 +53,13 @@ const doRefresh = async () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     const { loading, setLoading } = useLoading();
+    const [fetch,setFetch] = useState<boolean>(false);
     const { setLocationId, setLocationList, setLocationName, SetLocationOption } = useLocation();
     const { toggleToast } = useToast();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 const [permissions, setPermission] = useState<PermissionDto[]>([]);
+
+const fetchMeTrigger = () => setFetch(!fetch);
 
 
     const fetchMe = useCallback(async () => {
@@ -69,7 +73,7 @@ const [permissions, setPermission] = useState<PermissionDto[]>([]);
         setIsAuthenticated(true);
         console.log(res.data.auth)
         return true;
-    }, [])
+    }, [fetch])
 
     const fetchLocation = useCallback(async (locationIds: number[]) => {
         if (!getAccessToken()) return false;
@@ -151,7 +155,8 @@ const [permissions, setPermission] = useState<PermissionDto[]>([]);
         loading,
         signIn,
         signOut,
-        filterPermission
+        filterPermission,
+        fetchMeTrigger
             }}
         >
             {children}

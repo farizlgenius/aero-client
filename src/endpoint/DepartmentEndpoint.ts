@@ -1,10 +1,10 @@
-const CONTROLLER = `department`;
+const CONTROLLER = `identity/department`;
 
 export const DepartmentEndpoint = {
     GET: `/api/${CONTROLLER}`,
-    GET_BY_LOCATION:(location:number) => `/api/${location}/${CONTROLLER}`,
+    GET_BY_COMPANY:(company:number) => `/api/${CONTROLLER}/company/${company}`,
     CREATE: `/api/${CONTROLLER}`,
-    PAGINATION: (pageNumber: number, pageSize: number, locationId?: number | undefined, search?: string | undefined, startDate?: string | undefined, endDate?: string | undefined) => `/api${locationId == 0 || locationId == undefined ? "" : `/${locationId}`}/${CONTROLLER}?PageNumber=${pageNumber}&PageSize=${pageSize}${search == undefined || search == "" ? "" : `&search=${search}`}${startDate == undefined ? "" : `&startDate=${startDate}`}${endDate == undefined ? "" : `&startDate=${endDate}`}`,
+    PAGINATION: (pageNumber: number, pageSize: number, locationId?: number | undefined, search?: string | undefined, startDate?: string | undefined, endDate?: string | undefined) => `/api/${CONTROLLER}/pagination?${locationId == 0 || locationId == undefined ? "" : `CompanyId=${locationId}`}&Page=${pageNumber}&PageSize=${pageSize}${search == undefined || search == "" ? "" : `&Search=${search}`}${startDate == undefined ? "" : `&startDate=${startDate}`}${endDate == undefined ? "" : `&startDate=${endDate}`}`,
     UPDATE: `/api/${CONTROLLER}`,
     DELETE: (component: number) => `/api/${CONTROLLER}/${component}`,
     GET_RANGE: `/api/${CONTROLLER}/range`,

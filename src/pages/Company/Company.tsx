@@ -22,8 +22,8 @@ import { CompanyForm } from "./CompanyForm";
 var removeTarget: number = 0;
 
 
-export const HEADER: string[] = ["Name", "Action"]
-export const KEY: string[] = ["name"];
+export const HEADER: string[] = ["Name","Address", "Action"]
+export const KEY: string[] = ["name","address"];
 
 export const Company = () => {
     const { locationId } = useLocation();
@@ -38,8 +38,7 @@ export const Company = () => {
         id: 0,
         name: "",
         description: "",
-        isActive: true,
-        locationId: locationId
+        address: ""
     }
 
     const [dto, setDto] = useState<CompanyDto>(defaultDto);
@@ -88,10 +87,12 @@ export const Company = () => {
                 } else {
                     setConfirmRemove(() => async () => {
                         var data: number[] = [];
-                        select.map(async (a: LocationDto) => {
+                        select.map(async (a: CompanyDto) => {
                             data.push(a.id)
                         })
-                        var res = await send.post(CompanyEndpoint.DELETE_RANGE, data)
+                        var res = await send.post(CompanyEndpoint.DELETE_RANGE, {
+                            ids:data
+                        })
                         if (Helper.handleToastByResCode(res, CompanyToast.DELETE_RANGE, toggleToast)) {
                             setRemove(false);
                             toggleRefresh();
@@ -136,11 +137,11 @@ export const Company = () => {
 
     const fetchData = async (pageNumber: number, pageSize: number, locationId?: number, search?: string, startDate?: string, endDate?: string) => {
         const res = await send.get(CompanyEndpoint.PAGINATION(pageNumber, pageSize, locationId, search, startDate, endDate));
-        console.log(res?.data.data)
-        if (res && res.data.data) {
+        console.log(res?.data)
+        if (res && res.data) {
             console.log(res.data.data)
-            setDtos(res.data.data.data);
-            setPagination(res.data.data.page);
+            setDtos(res.data.items);
+            setPagination(res.data);
         }
     }
 
@@ -170,7 +171,7 @@ export const Company = () => {
                 <BaseForm tabContent={tabContent} />
                 :
                 <div className="space-y-6">
-                    <BaseTable<CompanyDto> headers={HEADER} keys={KEY} data={dtos} select={select} setSelect={setSelect} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClickWithEvent} permission={filterPermission(FeatureId.LOCATION)} onInfo={handleInfo} fetchData={fetchData} refresh={refresh} locationId={locationId} />
+                    <BaseTable<CompanyDto> headers={HEADER} keys={KEY} data={dtos} select={select} setSelect={setSelect} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClickWithEvent} permission={filterPermission(FeatureId.location)} onInfo={handleInfo} fetchData={fetchData} refresh={refresh} locationId={locationId} />
                 </div>
 
             }

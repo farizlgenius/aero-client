@@ -20,12 +20,19 @@ export const CompanyForm: React.FC<PropsWithChildren<FormProp<CompanyDto>>> = ({
                     </div>
 
                 </div>
-                <div className='flex gap-2 mb-3 w-1/2'>
+                                 <div className='flex gap-2 mb-1 w-1/2'>
+                    <div className='flex-1'>
+                        <Label htmlFor="description">Address</Label>
+                        <TextArea disabled={type == FormType.INFO} placeholder="Company Address" onChange={(e: string) => setDto(prev => ({ ...prev, address: e }))} value={dto.address} />
+                    </div>
+                </div>
+                <div className='flex gap-2 mb-1 w-1/2'>
                     <div className='flex-1'>
                         <Label htmlFor="description">Description</Label>
                         <TextArea disabled={type == FormType.INFO} placeholder="Company Description" onChange={(e: string) => setDto(prev => ({ ...prev, description: e }))} value={dto.description} />
                     </div>
                 </div>
+
                                     <div className='mt-3 flex gap-2'>
                     <Button disabled={type == FormType.INFO} onClickWithEvent={handleClickWithEvent} name={type == FormType.UPDATE ? "update" : "create"} size='sm'>{type == FormType.UPDATE ? "Update" : "Create"}</Button>
                     <Button variant='danger' onClickWithEvent={handleClickWithEvent} name='cancel' size='sm'>Cancel</Button>

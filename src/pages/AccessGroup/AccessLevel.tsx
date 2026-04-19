@@ -165,7 +165,7 @@ const AccessLevel = () => {
             {form ?
                 <BaseForm tabContent={tabContent} />
                 :
-                <BaseTable<AccessLevelDto> headers={HEADER} keys={KEY} data={accessLevelDtos} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} select={selectedObjects} setSelect={setSelectedObjects} permission={filterPermission(FeatureId.ACCESSLEVEL)} onInfo={handleInfo} fetchData={fetchData} locationId={locationId} refresh={refresh} />
+                <BaseTable<AccessLevelDto> headers={HEADER} keys={KEY} data={accessLevelDtos} onEdit={handleEdit} onRemove={handleRemove} onClick={handleClick} select={selectedObjects} setSelect={setSelectedObjects} permission={filterPermission(FeatureId.group)} onInfo={handleInfo} fetchData={fetchData} locationId={locationId} refresh={refresh} />
             }
 
         </>

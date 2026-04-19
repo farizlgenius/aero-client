@@ -35,10 +35,10 @@ const Transaction = () => {
   const [endDate, setEndDate] = useState<string | undefined>();
   const [pageSize, setPageSize] = useState<number>(10);
   const [pagination, setPagination] = useState<PageProp>({
-    pageNumber: 0,
+    page: 0,
     pageSize: 0,
-    totalCount: 0,
-    totalPage: 0
+    totalItems: 0,
+    totalPages: 0
   });
   const handleClickFirst = () => {
     fetchData(1, 10, search, startDate, endDate);
@@ -46,17 +46,17 @@ const Transaction = () => {
 
   const handleClickPrevious = () => {
 
-    fetchData(pagination.pageNumber - 1, pageSize, search, startDate, endDate);
+    fetchData(pagination.page - 1, pageSize, search, startDate, endDate);
   }
 
   const handleClickNext = () => {
 
-    fetchData(pagination.pageNumber + 1, pageSize, search, startDate, endDate);
+    fetchData(pagination.page + 1, pageSize, search, startDate, endDate);
   }
 
   const handleClickLast = () => {
 
-    fetchData(pagination.totalPage, pageSize, search, startDate, endDate);
+    fetchData(pagination.totalPages, pageSize, search, startDate, endDate);
   }
 
   const handlePageSizeSelect = (data: string) => {
@@ -218,7 +218,7 @@ const Transaction = () => {
                 </TableCell>
               }
             ]} />
-            <Pagination onSelectPageSize={handlePageSizeSelect} pageNumber={pagination.pageNumber} pageSize={pagination.pageSize} totalCount={pagination.totalCount} totalPage={pagination.totalPage} onClickFirst={handleClickFirst} onClickPrevious={handleClickPrevious} onClickLast={handleClickLast} onClickNext={handleClickNext} />
+            <Pagination onSelectPageSize={handlePageSizeSelect} pageNumber={pagination.page} pageSize={pagination.pageSize} totalCount={pagination.totalItems} totalPage={pagination.totalPages} onClickFirst={handleClickFirst} onClickPrevious={handleClickPrevious} onClickLast={handleClickLast} onClickNext={handleClickNext} />
           </div>
         </div>
 
