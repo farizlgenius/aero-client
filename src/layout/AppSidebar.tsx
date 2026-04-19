@@ -313,7 +313,7 @@ const AppSidebar: React.FC = () => {
               </span>
 
               {(isExpanded || isHovered || isMobileOpen) && (
-                <span className="menu-item-text text-[var(--app-sidebar-text)]">
+                <span className="menu-item-text text-inherit">
                   {nav.name}
                 </span>
               )}
@@ -373,7 +373,7 @@ const AppSidebar: React.FC = () => {
                   </span>
 
                   {(isExpanded || isHovered || isMobileOpen) && (
-                    <span className="menu-item-text text-[var(--app-sidebar-text)]">
+                    <span className="menu-item-text text-inherit">
                       {nav.name}
                     </span>
                   )}

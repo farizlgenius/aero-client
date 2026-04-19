@@ -13,7 +13,6 @@ import { usePopup } from "../../context/PopupContext";
 import { FeatureId } from "../../enum/FeatureId";
 import { FormType } from "../../model/Form/FormProp";
 import { usePagination } from "../../context/PaginationContext";
-import { useLocation } from "../../context/LocationContext";
 import { PositionDto } from "../../model/Position/PositionDto";
 import { PositionEndpoint } from "../../endpoint/PositionEndpoint";
 import { PositionForm } from "./PositionForm";
@@ -45,7 +44,7 @@ export const Position = () => {
         departmentName: ""
     }
 
-    const { toggleToast } = useToast();
+    const { toggleToast, updateToast } = useToast();
     const { setPagination } = usePagination();
     const { filterPermission } = useAuth();
     const { setRemove, setConfirmRemove, setConfirmCreate, setInfo, setMessage, setCreate, setUpdate, setConfirmUpdate } = usePopup();
@@ -60,12 +59,21 @@ export const Position = () => {
 
 
 
+    const createPendingToast = (message: string) => toggleToast("pending", message);
+
+    const resolveRequestToast = (
+        toastId: string,
+        res: any,
+        successMessage: string
+    ) => Helper.handleToastByResCode(res, successMessage, toggleToast, updateToast, toastId);
+
     const handleRemove = (data: PositionDto) => {
         removeTarget = data.id;
         setRemove(true);
         setConfirmRemove(() => async () => {
+            const toastId = createPendingToast("Removing position...");
             const res = await api.delete(PositionEndpoint.DELETE(removeTarget));
-            if (Helper.handleToastByResCode(res, PositionToast.DELETE, toggleToast)) {
+            if (resolveRequestToast(toastId, res, PositionToast.DELETE)) {
                 toggleRefresh();
                 removeTarget = 0;
             }
@@ -96,6 +104,7 @@ export const Position = () => {
                     setInfo(true);
                 } else {
                     setConfirmRemove(() => async () => {
+                        const toastId = createPendingToast("Removing selected positions...");
                         var data: number[] = [];
                         select.map(async (a: PositionDto) => {
                             data.push(a.id)
@@ -103,7 +112,7 @@ export const Position = () => {
                         var res = await send.post(PositionEndpoint.DELETE_RANGE, {
                             ids:data
                         })
-                        if (Helper.handleToastByResCode(res, PositionToast.DELETE_RANGE, toggleToast)) {
+                        if (resolveRequestToast(toastId, res, PositionToast.DELETE_RANGE)) {
                             setRemove(false);
                             toggleRefresh();
                         }
@@ -113,8 +122,9 @@ export const Position = () => {
                 break;
             case "create":
                 setConfirmCreate(() => async () => {
+                    const toastId = createPendingToast("Creating position...");
                     const res = await send.post(PositionEndpoint.CREATE, positionDto);
-                    if (Helper.handleToastByResCode(res, PositionToast.CREATE, toggleToast)) {
+                    if (resolveRequestToast(toastId, res, PositionToast.CREATE)) {
                         setForm(false)
                         toggleRefresh();
                         setPositionDto(defaultDto)
@@ -124,8 +134,9 @@ export const Position = () => {
                 break;
             case "update":
                 setConfirmUpdate(() => async () => {
+                    const toastId = createPendingToast("Updating position...");
                     const res = await api.put(PositionEndpoint.UPDATE, positionDto);
-                    if (Helper.handleToastByResCode(res, PositionToast.UPDATE, toggleToast)) {
+                    if (resolveRequestToast(toastId, res, PositionToast.UPDATE)) {
                         setForm(false)
                         toggleRefresh();
                     }

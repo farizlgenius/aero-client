@@ -2,9 +2,18 @@ import axios, { AxiosResponse } from "axios";
 import { DaysInWeekDto } from "../model/Interval/DaysInWeekDto";
 import { Options } from "../model/Options";
 import { HttpCode } from "../enum/Httpcode";
-import { APIToast, OperatorToast } from "../model/ToastMessage";
+import { APIToast } from "../model/ToastMessage";
 
-type ToastType = "success" | "error" | 'warning';
+type ToastType = "success" | "error" | "warning" | "pending";
+type ToastFn = (toastType: ToastType, toastMessage: string, options?: { duration?: number }) => string;
+type UpdateToastFn = (
+    id: string,
+    updates: {
+        type?: ToastType;
+        message?: string;
+        duration?: number;
+    }
+) => void;
 
 class Helper {
 
@@ -34,67 +43,86 @@ class Helper {
         }
     }
 
-    static handleToastByResCode(res: AxiosResponse<any, any> | null | undefined, message: string, toggleToast: (toastType: ToastType, toastMessage: string) => void): boolean {
+    static handleToastByResCode(
+        res: AxiosResponse<any, any> | null | undefined,
+        message: string,
+        toggleToast: ToastFn,
+        updateToast?: UpdateToastFn,
+        toastId?: string
+    ): boolean {
         console.log(res)
+        const notify = (type: ToastType, toastMessage: string, duration = type === "success" ? 2600 : 4000) => {
+            if (toastId && updateToast) {
+                updateToast(toastId, {
+                    type,
+                    message: toastMessage,
+                    duration
+                });
+                return;
+            }
+
+            toggleToast(type, toastMessage, { duration });
+        };
+
         if (res) {
             if (axios.isAxiosError(res)) {
                 switch (res.status) {
                     case HttpCode.UNAUTHORIZED:
-                        toggleToast("error", res.response?.data.message || "Unauthorized")
+                        notify("error", res.response?.data.message || "Unauthorized")
                         return false;
                     case HttpCode.BAD_REQUEST:
-                        toggleToast("error", res.response?.data.message || "Bad Request")
+                        notify("error", res.response?.data.message || "Bad Request")
                         return false;
                     case HttpCode.NOT_FOUND:
-                        toggleToast("error", res.response?.data.message || "Not Found")
+                        notify("error", res.response?.data.message || "Not Found")
                         return false;
                     case HttpCode.INTERNAL_ERROR:
-                        toggleToast("error", res.response?.data.message || "Internal Server Error")
+                        notify("error", res.response?.data.message || "Internal Server Error")
                         console.log("####1")
                         console.log(res.response?.data)
                         //showPopup(false,[res.data.detail,res.data.message])
                         return false;
                     case HttpCode.NOT_ACCEPT:
-                        toggleToast("error", res.response?.data.message || "Not Acceptable")
+                        notify("error", res.response?.data.message || "Not Acceptable")
                         return false;
                     default:
-                        toggleToast("error", res.message)
+                        notify("error", res.message)
                         return false;
                 }
 
             }
             switch (res.status) {
                 case HttpCode.OK:
-                    toggleToast("success", message)
+                    notify("success", message)
                     return true;
                 case HttpCode.CREATED:
-                    toggleToast("success", message)
+                    notify("success", message)
                     return true;
                 case HttpCode.UNAUTHORIZED:
-                    toggleToast("error", res.data.message)
+                    notify("error", res.data.message)
                     return false;
                 case HttpCode.BAD_REQUEST:
-                    toggleToast("error", res.data.message)
+                    notify("error", res.data.message)
                     return false;
                 case HttpCode.NOT_FOUND:
-                    toggleToast("error", res.data.message)
+                    notify("error", res.data.message)
                     return false;
                 case HttpCode.INTERNAL_ERROR:
-                    toggleToast("error", res.data.message)
+                    notify("error", res.data.message)
                     console.log("####1")
                     console.log(res.data)
                     //showPopup(false,[res.data.detail,res.data.message])
                     return false;
                 case HttpCode.NOT_ACCEPT:
-                    toggleToast("error", res.data.message)
+                    notify("error", res.data.message)
                     return false;
                 default:
-                    toggleToast("error", "error with code : " + res.data.code)
+                    notify("error", "error with code : " + res.data.code)
                     console.log("####1")
                     return false;
             }
         } else {
-            toggleToast("error", APIToast.API_ERROR)
+            notify("error", APIToast.API_ERROR)
             console.log("####2")
             return false;
         }

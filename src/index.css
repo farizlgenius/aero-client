@@ -196,11 +196,11 @@
   --app-sidebar-border: rgba(135, 147, 162, 0.22);
   --app-sidebar-text: #16191f;
   --app-sidebar-muted: #5f6b7a;
-  --app-sidebar-hover: rgba(236, 114, 17, 0.08);
-  --app-sidebar-hover-text: #ad4f07;
-  --app-sidebar-active: linear-gradient(90deg, rgba(236, 114, 17, 0.18) 0%, rgba(236, 114, 17, 0.08) 100%);
-  --app-sidebar-active-border: #ec7211;
-  --app-sidebar-active-text: #8b410c;
+  --app-sidebar-hover: color-mix(in srgb, var(--color-brand-500) 10%, transparent);
+  --app-sidebar-hover-text: var(--color-brand-700);
+  --app-sidebar-active: linear-gradient(90deg, color-mix(in srgb, var(--color-brand-500) 20%, transparent) 0%, color-mix(in srgb, var(--color-brand-500) 8%, transparent) 100%);
+  --app-sidebar-active-border: var(--color-brand-500);
+  --app-sidebar-active-text: var(--color-brand-700);
   --app-sidebar-section-bg: rgba(255, 255, 255, 0.66);
 }
 
@@ -216,11 +216,11 @@
   --app-sidebar-border: rgba(255, 255, 255, 0.07);
   --app-sidebar-text: #f2f4f7;
   --app-sidebar-muted: #a7b1be;
-  --app-sidebar-hover: rgba(255, 255, 255, 0.08);
-  --app-sidebar-hover-text: #ffffff;
-  --app-sidebar-active: linear-gradient(90deg, rgba(236, 114, 17, 0.26) 0%, rgba(236, 114, 17, 0.12) 100%);
-  --app-sidebar-active-border: rgba(255, 153, 0, 0.82);
-  --app-sidebar-active-text: #ffffff;
+  --app-sidebar-hover: color-mix(in srgb, var(--color-brand-400) 14%, transparent);
+  --app-sidebar-hover-text: var(--color-brand-100);
+  --app-sidebar-active: linear-gradient(90deg, color-mix(in srgb, var(--color-brand-500) 26%, transparent) 0%, color-mix(in srgb, var(--color-brand-500) 12%, transparent) 100%);
+  --app-sidebar-active-border: var(--color-brand-400);
+  --app-sidebar-active-text: var(--color-brand-100);
   --app-sidebar-section-bg: rgba(255, 255, 255, 0.03);
 }
 
@@ -1175,4 +1175,13 @@ span.flatpickr-weekday,
 
 .dark .scrollbar-transparent {
   scrollbar-color: rgba(255,255,255,0.3) transparent;
+}
+
+@keyframes toast-progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
 }
